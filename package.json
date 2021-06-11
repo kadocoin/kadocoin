@@ -1,0 +1,43 @@
+{
+  "name": "kadocoin",
+  "version": "1.0.0",
+  "description": "Kadocoin is a decentralized censure-resistant peer-to-peer digital money",
+  "main": "server.js",
+  "scripts": {
+    "start": "tsc && node build/server.js",
+    "dev": "nodemon build/server.js",
+    "prod": "build/server.js",
+    "watch-ts": "tsc -w"
+  },
+  "keywords": [
+    "kadocoin"
+  ],
+  "author": "Adamu Muhammad Dankore",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-swagger-generator": "^1.1.15",
+    "joi": "^17.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.3",
+    "nodemon": "^2.0.7",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/body-parser": "^1.19.0",
+    "@types/cors": "^2.8.10",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.12",
+    "@types/joi": "^17.2.3",
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/mocha": "^8.2.2",
+    "@types/mongoose": "^5.11.97",
+    "@types/nodemon": "^1.19.0",
+    "@types/typescript": "^2.0.0"
+  }
+}
