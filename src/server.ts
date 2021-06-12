@@ -9,7 +9,8 @@ import { LoginRouter } from './routes/loginRouter.router';
 // import { JWTMiddleWare } from "./middleware/jwt.middleware";
 import { MiddleWare } from './middleware/middleware';
 import { DBConfig } from './config/DBConfig';
-import { TransactRouter } from './routes/transactRouter.router';
+import { TransactionRouter } from './routes/transactionRouter.router';
+import { BlockRouter } from './routes/block.router';
 
 let options = {
   swaggerDefinition: {
@@ -40,7 +41,8 @@ expressSwagger(options);
 
 let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   new UserRoute(app);
-  new TransactRouter(app);
+  new TransactionRouter(app);
+  new BlockRouter(app);
   next();
 };
 
