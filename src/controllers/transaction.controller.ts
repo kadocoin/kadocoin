@@ -62,7 +62,10 @@ export class TransactionController {
   mine = (_: Request, res: Response) => {
     try {
       const transactionMiner = new TransactionMiner({ blockchain: this.blockchain, transactionPool: this.transactionPool, wallet: this.wallet, pubsub: this.pubsub });
+
       transactionMiner.mineTransactions();
+
+      res.redirect('/api/blocks');
 
       // TODO - COINS IN CIRCULATION
     } catch (error) {
