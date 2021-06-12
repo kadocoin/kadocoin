@@ -3,7 +3,7 @@ import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import { verifySignature } from '../util/index';
 
 type TInput = {
-  timestamp: Date;
+  timestamp: number;
   amount: number;
   address: string;
   signature: string;
@@ -12,7 +12,7 @@ interface ITransactionProps {
   senderWallet?: {
     publicKey: string;
     balance: number;
-    address: string;
+    address?: string;
     sign: (outputMap: any) => void;
   };
   recipient?: string;
@@ -34,10 +34,7 @@ interface IOutputMap {
 }
 
 class Transaction {
-  id: string;
-  outputMap: any;
-  input: any;
-
+  [x: string]: any;
   constructor({ senderWallet, recipient, amount, outputMap, input }: ITransactionProps) {
     this.id = uuid.v1();
     this.outputMap = outputMap || this.createOutputMap({ senderWallet, recipient, amount });

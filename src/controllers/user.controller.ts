@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/user.service";
-import { IModel } from "../models/model";
-import joi from "joi";
 import {
   SUCCESS,
   DELETED,

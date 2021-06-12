@@ -3,3 +3,4 @@ dist
 yarn.lock
 build
 .env
+yarn-error.log

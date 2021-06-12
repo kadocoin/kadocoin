@@ -22,6 +22,7 @@
     "elliptic": "^6.5.4",
     "express": "^4.17.1",
     "express-swagger-generator": "^1.1.15",
+    "hex-to-binary": "^1.0.1",
     "joi": "^17.4.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.8.3",
