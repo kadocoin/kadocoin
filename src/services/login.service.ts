@@ -1,8 +1,6 @@
-import { IModel } from "../models/model";
-import mongoose, { Model } from "mongoose";
+import { Model } from "mongoose";
 import { UserModel } from "../models/user";
 import { userSchema } from "../schemas/user.schemas";
-import { USER } from "../schemas/schemaConst";
 import { LoginInterface } from "./common/login.interface";
 
 export class LoginService implements LoginInterface<UserModel> {

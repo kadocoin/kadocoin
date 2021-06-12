@@ -10,6 +10,7 @@ import {
   INTERNAL_SERVER_ERROR
 } from "../statusCode/statusCode";
 import { registerValidation } from "../validation/user.validation";
+
 export class UserController {
   private userService: UserService;
 
