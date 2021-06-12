@@ -6,8 +6,7 @@ export const registerValidation = (user: UserModel) => {
     firstName: joi.string().min(3).required(),
     lastName: joi.string().min(3).required(),
     email: joi.string().required(),
-    password: joi.string().min(3).required(),
-    userImageUrl: joi.string().required(),
+    password: joi.string().min(3).required()
   });
 
   return userSchema.validate(user);

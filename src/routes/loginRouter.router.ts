@@ -14,7 +14,7 @@ export class LoginRouter implements BaseRouter {
   }
 
   initRoute(): void {
-    this.app.post("/v1/register", this.loginController.register);
+    this.app.post("/register", this.loginController.register);
 
     /**
      * @typedef Login
@@ -39,6 +39,6 @@ export class LoginRouter implements BaseRouter {
      * @returns {Login.model}  default - Unexpected error
      */
 
-    this.app.post("/v1/login", this.loginController.login);
+    this.app.post("/login", this.loginController.login);
   }
 }

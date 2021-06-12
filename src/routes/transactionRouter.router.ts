@@ -17,5 +17,6 @@ export class TransactionRouter implements BaseRouter {
     this.app.post('/api/transact', this.transactionController.make);
     this.app.get('/api/transaction-pool-map', this.transactionController.poolMap);
     this.app.get('/api/mine-transactions', this.transactionController.mine)
+    this.app.get('/api/blocks', this.transactionController.getBlocks);
   }
 }
