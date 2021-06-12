@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import { verifySignature } from '../util/index';
 
@@ -36,7 +36,7 @@ interface IOutputMap {
 class Transaction {
   [x: string]: any;
   constructor({ senderWallet, recipient, amount, outputMap, input }: ITransactionProps) {
-    this.id = uuid.v1();
+    this.id = uuidv1();
     this.outputMap = outputMap || this.createOutputMap({ senderWallet, recipient, amount });
     this.input = input || this.createInput({ senderWallet, outputMap: this.outputMap });
   }

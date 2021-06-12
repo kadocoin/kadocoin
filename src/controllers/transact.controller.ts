@@ -1,23 +1,14 @@
-import { LoginService } from '../services/login.service';
 import { Request, Response } from 'express';
 import { transactValidation } from '../validation/transaction.validation';
 import { INTERNAL_SERVER_ERROR, CREATED, NOT_FOUND } from '../statusCode/statusCode';
-import { UserService } from '../services/user.service';
 import TransactionPool from '../wallet/transaction-pool';
 import Wallet from '../wallet';
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
 
 export class TransactController {
-  private loginService: LoginService;
-  private userService: UserService;
-
-  constructor() {
-    this.loginService = new LoginService();
-    this.userService = new UserService();
-  }
-
   make = async (req: Request, res: Response) => {
+    console.log(req.body);
     const { error } = transactValidation(req.body);
     const { amount, recipient } = req.body;
 
@@ -38,8 +29,10 @@ export class TransactController {
       } else {
         transaction = wallet.createTransaction({ recipient, amount, chain: blockchain.chain });
       }
-    } catch (error: any) {
-      return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+      }
     }
 
     transactionPool.setTransaction(transaction);
