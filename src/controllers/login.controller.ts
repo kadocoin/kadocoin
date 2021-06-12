@@ -1,4 +1,3 @@
-import { IModel } from "../models/model";
 import { LoginService } from "../services/login.service";
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";

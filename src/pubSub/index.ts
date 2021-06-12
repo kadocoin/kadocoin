@@ -67,4 +67,4 @@ class PubSub {
   // END CLASS
 }
 
-module.exports = PubSub;
+export default PubSub;
