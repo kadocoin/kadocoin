@@ -42,7 +42,7 @@ expressSwagger(options);
 let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   new UserRoute(app);
   new TransactionRouter(app);
-  new BlockRouter(app);
+  // new BlockRouter(app);
   next();
 };
 

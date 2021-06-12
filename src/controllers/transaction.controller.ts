@@ -65,9 +65,19 @@ export class TransactionController {
 
       transactionMiner.mineTransactions();
 
-      res.redirect('/api/blocks');
+      res.status(SUCCESS).json({ type: 'success', message: 'Success' });
 
       // TODO - COINS IN CIRCULATION
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+    }
+  };
+
+  getBlocks = (_: Request, res: Response) => {
+    try {
+      return res.status(SUCCESS).json(this.blockchain.chain);
     } catch (error) {
       if (error instanceof Error) {
         res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
