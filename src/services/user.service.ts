@@ -18,9 +18,11 @@ export class UserService implements BaseInterface<UserModel> {
       .then(() => true)
       .catch(() => false);
   }
+
   async save(model: UserModel): Promise<UserModel> {
     return await new this.user(model).save();
   }
+
   async update(id: string, model: UserModel): Promise<UserModel | null> {
     return await this.user.findByIdAndUpdate(id, model, {
       new: true
@@ -30,6 +32,7 @@ export class UserService implements BaseInterface<UserModel> {
   async findById(id: string): Promise<UserModel | null> {
     return await this.user.findById(id);
   }
+  
   async findAll(): Promise<UserModel[]> {
     return await this.user.find();
   }

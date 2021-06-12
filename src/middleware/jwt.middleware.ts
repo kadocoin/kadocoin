@@ -24,7 +24,9 @@ export class JWTMiddleWare {
       token = token.split(" ")[1];
 
       const verified: any = await jwt.verify(token, TOKEN_SECRET);
+
       req.body.userId = verified._id;
+      
     } catch (err) {
       res.status(TOKEN_INVALID).json({
         message: "Token Invalid"
