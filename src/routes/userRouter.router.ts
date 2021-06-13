@@ -16,7 +16,7 @@ export class UserRouter implements BaseRouter {
 
   initRoute(): void {
     this.app.get('/', (req: Request, res: Response) => {
-      console.log(req);
+      
       res.send(DEFAULT_MESSAGE);
     });
 
