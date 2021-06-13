@@ -1,8 +1,13 @@
-import { Document } from "mongoose";
-export interface UserModel extends Document {
-  firstName: string;
-  lastName: string;
+export interface IUserModel {
+  _id?: string;
+  emailVerified?: boolean;
+  profilePicture?: null;
+  userCreationDate?: string;
   email?: string;
   password?: string;
-  userImageUrl?: string;
+  name?: string;
+  bio?: string;
+  scope?: string[];
+  registrationMethod?: string;
+  hashedPassword?: string;
 }

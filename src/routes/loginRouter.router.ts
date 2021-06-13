@@ -39,6 +39,6 @@ export class LoginRouter implements BaseRouter {
      * @returns {Login.model}  default - Unexpected error
      */
 
-    this.app.post("/login", this.loginController.login);
+    // this.app.post("/login", this.loginController.login);
   }
 }

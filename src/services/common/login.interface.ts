@@ -1,3 +1,5 @@
+import { Db } from "mongodb";
+
 export interface LoginInterface<T> {
-  findByEmail(email: string): Promise<T | null>;
+  findByEmail(db: Db, email: string): Promise<T | null>;
 }

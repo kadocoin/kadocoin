@@ -1,16 +1,19 @@
-import { Model } from "mongoose";
-import { UserModel } from "../models/user";
-import { userSchema } from "../schemas/user.schemas";
-import { LoginInterface } from "./common/login.interface";
+import { Db } from 'mongodb';
+import { IUserModel } from '../models/user';
+import { LoginInterface } from './common/login.interface';
 
-export class LoginService implements LoginInterface<UserModel> {
-  private user: Model<UserModel>;
+export class LoginService implements LoginInterface<IUserModel> {
 
-  constructor() {
-    this.user = userSchema;
-  }
-
-  findByEmail = async (email: string): Promise<UserModel | null> => {
-    return await this.user.findOne({ email: email });
+  findByEmail = async (db: Db, email: string) => {
+    try {
+      return db
+        .collection('users')
+        .findOne({
+          email,
+        })
+        .then(user => user || null);
+    } catch (error) {
+      console.log('findUserByEmail', error);
+    }
   };
 }

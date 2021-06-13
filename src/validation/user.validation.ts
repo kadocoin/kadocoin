@@ -1,10 +1,8 @@
 import joi from "joi";
-import { UserModel } from "../models/user";
+import { IUserModel } from "../models/user";
 
-export const registerValidation = (user: UserModel) => {
+export const registerValidation = (user: IUserModel) => {
   const userSchema = joi.object({
-    firstName: joi.string().min(3).required(),
-    lastName: joi.string().min(3).required(),
     email: joi.string().required(),
     password: joi.string().min(3).required()
   });
@@ -12,7 +10,7 @@ export const registerValidation = (user: UserModel) => {
   return userSchema.validate(user);
 };
 
-export const loginValidation = (user: UserModel) => {
+export const loginValidation = (user: IUserModel) => {
   const loginSchema = joi.object({
     email: joi.string().required(),
     password: joi.string().min(3).required(),

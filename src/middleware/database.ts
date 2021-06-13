@@ -5,7 +5,7 @@ declare global {
   namespace Express {
     interface Request {
       dbClient: any;
-      db?: Db;
+      db: Db;
     }
   }
 }
