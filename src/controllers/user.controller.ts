@@ -1,17 +1,17 @@
-import { LoginService } from '../services/login.service';
+import { CommonModel } from '../models/common.model';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { loginValidation, registerValidation } from '../validation/user.validation';
 import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
-import { UserService } from '../services/user.service';
+import { UserModel } from '../models/user.model';
 
 export class UserController {
-  private loginService: LoginService;
-  private userService: UserService;
+  private loginService: CommonModel;
+  private userService: UserModel;
 
   constructor() {
-    this.loginService = new LoginService();
-    this.userService = new UserService();
+    this.loginService = new CommonModel();
+    this.userService = new UserModel();
   }
 
   register = async (req: Request, res: Response) => {
