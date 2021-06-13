@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import { loginValidation, registerValidation } from '../validation/user.validation';
 import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
 import { UserModel } from '../models/user.model';
+import passportEmailPassword from '../middleware/passportEmailPassword';
+import { NextFunction } from 'express-serve-static-core';
 
 export class UserController {
   private loginService: CommonModel;
@@ -18,8 +20,6 @@ export class UserController {
     const { email, password, userCreationDate } = req.body;
 
     const { error } = registerValidation(req.body);
-
-    console.log('register', req.body);
 
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
@@ -37,8 +37,11 @@ export class UserController {
       hashedPassword,
     });
 
-    return res.status(CREATED).json({
-      user: user,
+    req.login(user, function (err) {
+      if (err) throw err;
+      return res.status(CREATED).json({
+        user: user,
+      });
     });
   };
 

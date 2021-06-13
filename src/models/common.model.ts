@@ -12,7 +12,20 @@ export class CommonModel implements CommonInterface<IUserModel> {
         })
         .then(user => user || null);
     } catch (error) {
-      console.log('findUserByEmail', error);
+      console.log('findByEmail', error);
+    }
+  };
+
+  findById = async (db: Db, id: string) => {
+    try {
+      return db
+        .collection('users')
+        .findOne({
+          _id: id,
+        })
+        .then(user => user || null);
+    } catch (error) {
+      console.log('findById', error);
     }
   };
 }
