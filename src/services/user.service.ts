@@ -1,6 +1,4 @@
-import { IUserModel } from '../models/user';
-import { BaseInterface } from './common/base.interface';
-import { Model } from 'mongoose';
+import { IUserModel } from '../types';
 import { nanoid } from 'nanoid';
 import { Db } from 'mongodb';
 

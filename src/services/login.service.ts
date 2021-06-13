@@ -1,9 +1,8 @@
 import { Db } from 'mongodb';
-import { IUserModel } from '../models/user';
+import { IUserModel } from '../types';
 import { LoginInterface } from './common/login.interface';
 
 export class LoginService implements LoginInterface<IUserModel> {
-
   findByEmail = async (db: Db, email: string) => {
     try {
       return db
