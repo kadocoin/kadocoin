@@ -1,15 +1,13 @@
 import app from './app';
 const expressSwagger = require('express-swagger-generator')(app);
-
 import { PORT } from './config/constants';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
-import { UserRoute } from './routes/userRouter.router';
-import { LoginRouter } from './routes/loginRouter.router';
-// import { JWTMiddleWare } from "./middleware/jwt.middleware";
+import { UserRouter } from './routes/userRouter.router';
 import { MiddleWare } from './middleware/middleware';
-import { DBConfig } from './config/DBConfig';
 import { TransactionRouter } from './routes/transactionRouter.router';
+import { Database } from './middleware/database';
+import { Session } from './middleware/session';
 
 let options = {
   swaggerDefinition: {
@@ -19,7 +17,7 @@ let options = {
       version: '1.0.0',
     },
     host: 'localhost:3000',
-    basePath: '/v1',
+    basePath: '',
     produces: ['application/json', 'application/xml'],
     schemes: ['http', 'https'],
     securityDefinitions: {
@@ -39,16 +37,15 @@ let options = {
 expressSwagger(options);
 
 let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
-  new UserRoute(app);
+  new UserRouter(app);
   new TransactionRouter(app);
   next();
 };
 
 let initializeMiddleWare = (_: Request, __: Response, next: NextFunction) => {
   new MiddleWare(app);
-  new LoginRouter(app);
-  // new JWTMiddleWare(app);
-  new DBConfig();
+  new Database(app);
+  new Session(app);
   next();
 };
 

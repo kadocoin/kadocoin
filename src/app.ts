@@ -1,17 +1,9 @@
-import express, { Application, Request, Response } from "express";
-import { DEFAULT_MESSAGE } from "./config/constants";
+import express, { Application } from 'express';
 class App {
   public app: Application;
 
   constructor() {
     this.app = express();
-    this.bootstrap();
-  }
-
-  bootstrap() {
-    this.app.get("/", (_: Request, res: Response) => {
-      res.send(DEFAULT_MESSAGE);
-    });
   }
 }
 
