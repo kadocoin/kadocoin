@@ -1,4 +1,5 @@
 import { Application } from 'express';
+import { DEFAULT_MESSAGE } from '../config/constants';
 import { UserController } from '../controllers/user.controller';
 import { BaseRouter } from './common/baseRouter.router';
 
@@ -14,6 +15,9 @@ export class UserRouter implements BaseRouter {
   }
 
   initRoute(): void {
+    this.app.use('/', (req, res) => {
+      res.send(DEFAULT_MESSAGE);
+    });
     this.app.post('/register', this.UserController.register);
 
     /**
