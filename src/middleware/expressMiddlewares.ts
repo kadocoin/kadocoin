@@ -1,7 +1,7 @@
 import express, { Application } from "express";
 import cors from "cors";
 
-export class MiddleWare {
+export class ExpressMiddleWares {
   private app: Application;
 
   constructor(app: Application) {

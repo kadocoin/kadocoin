@@ -1,4 +1,4 @@
-import { Application } from 'express';
+import { Application, Request, Response } from 'express';
 import { DEFAULT_MESSAGE } from '../config/constants';
 import { UserController } from '../controllers/user.controller';
 import { BaseRouter } from './common/baseRouter.router';
@@ -15,9 +15,11 @@ export class UserRouter implements BaseRouter {
   }
 
   initRoute(): void {
-    this.app.use('/', (req, res) => {
+    this.app.get('/', (req: Request, res: Response) => {
+      
       res.send(DEFAULT_MESSAGE);
     });
+
     this.app.post('/register', this.UserController.register);
 
     /**
