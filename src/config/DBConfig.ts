@@ -15,6 +15,6 @@ export class DBConfig {
         console.log(`Oops something went wrong ${err}`);
       });
 
-    console.log(`Success`);
+    console.log(`Success mongoose`);
   };
 }

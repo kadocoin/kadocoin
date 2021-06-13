@@ -1,9 +1,14 @@
-import { Application } from "express";
-import { UserController } from "../controllers/user.controller";
-import { BaseRouter } from "./common/baseRouter.router";
+import { Application } from 'express';
+import { DEFAULT_MESSAGE } from '../config/constants';
+import { UserController } from '../controllers/user.controller';
+import { BaseRouter } from './common/baseRouter.router';
 
 export class UserRoute implements BaseRouter {
   initRoute() {
+    this.app.get('/', (req, res) => {
+      // console.log(req.db);
+      res.send(DEFAULT_MESSAGE);
+    });
     /**
      * This function comment is parsed by doctrine
      * @route GET /users
@@ -11,7 +16,7 @@ export class UserRoute implements BaseRouter {
      * @returns {object} 200 - An array of user info
      * @returns {Error}  default - Unexpected error
      */
-    this.app.get("/v1/users", this.userController.findAll);
+    this.app.get('/v1/users', this.userController.findAll);
     /**
      * This function comment is parsed by doctrine
      * @route GET /users/{id}
@@ -20,7 +25,7 @@ export class UserRoute implements BaseRouter {
      * @returns {object} 200 - An array of user info
      * @returns {Error}  default - Unexpected error
      */
-    this.app.get("/v1/users/:id", this.userController.findById);
+    this.app.get('/v1/users/:id', this.userController.findById);
 
     /**
      * @typedef User
@@ -51,7 +56,7 @@ export class UserRoute implements BaseRouter {
      * @returns {Response.model} 201 - An array of user info
      * @returns {User.model}  default - Unexpected error
      */
-    this.app.post("/v1/users", this.userController.save);
+    this.app.post('/v1/users', this.userController.save);
     /**
      * This function comment is parsed by doctrine
      * @route PUT /users/{id}
@@ -64,7 +69,7 @@ export class UserRoute implements BaseRouter {
      * @returns {Response.model} 201 - An array of user info
      * @returns {User.model}  default - Unexpected error
      */
-    this.app.put("/v1/users/:id", this.userController.update);
+    this.app.put('/v1/users/:id', this.userController.update);
 
     /**
      * This function comment is parsed by doctrine
@@ -74,7 +79,7 @@ export class UserRoute implements BaseRouter {
      * @returns {object} 204 - An array of user info
      * @returns {Error}  default - Unexpected error
      */
-    this.app.delete("/v1/users/:id", this.userController.delete);
+    this.app.delete('/v1/users/:id', this.userController.delete);
   }
 
   private app: Application;

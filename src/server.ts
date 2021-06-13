@@ -10,6 +10,8 @@ import { LoginRouter } from './routes/loginRouter.router';
 import { MiddleWare } from './middleware/middleware';
 import { DBConfig } from './config/DBConfig';
 import { TransactionRouter } from './routes/transactionRouter.router';
+import { Database } from './middleware/database';
+import { Session } from './middleware/session';
 
 let options = {
   swaggerDefinition: {
@@ -46,9 +48,11 @@ let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
 
 let initializeMiddleWare = (_: Request, __: Response, next: NextFunction) => {
   new MiddleWare(app);
+  new Database(app);
+  new Session(app);
   new LoginRouter(app);
   // new JWTMiddleWare(app);
-  new DBConfig();
+  // new DBConfig();
   next();
 };
 
