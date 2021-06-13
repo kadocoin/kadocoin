@@ -16,11 +16,12 @@ export class UserRouter implements BaseRouter {
 
   initRoute(): void {
     this.app.get('/', (req: Request, res: Response) => {
-      
       res.send(DEFAULT_MESSAGE);
     });
 
-    this.app.post('/register', this.UserController.register);
+    this.app.post('/api/doesEmailExists', this.UserController.doesEmailExists);
+
+    this.app.post('/api/register', this.UserController.register);
 
     /**
      * @typedef Login

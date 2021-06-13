@@ -1,18 +1,18 @@
 import { CommonModel } from '../models/common.model';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { loginValidation, registerValidation } from '../validation/user.validation';
+import { emailValidation, registerValidation } from '../validation/user.validation';
 import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
 import { UserModel } from '../models/user.model';
 import passportEmailPassword from '../middleware/passportEmailPassword';
 import { NextFunction } from 'express-serve-static-core';
 
 export class UserController {
-  private loginService: CommonModel;
+  private commonModel: CommonModel;
   private userService: UserModel;
 
   constructor() {
-    this.loginService = new CommonModel();
+    this.commonModel = new CommonModel();
     this.userService = new UserModel();
   }
 
@@ -23,7 +23,7 @@ export class UserController {
 
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
-    let emailExist = await this.loginService.findByEmail(req.db, email);
+    let emailExist = await this.commonModel.findByEmail(req.db, email);
 
     if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
 
@@ -45,6 +45,20 @@ export class UserController {
     });
   };
 
+  doesEmailExists = async (req: Request, res: Response) => {
+    const { email } = req.body;
+    console.log(email);
+
+    const { error } = emailValidation(email);
+    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+    const emailExist = await this.commonModel.findByEmail(req.db, email);
+
+    if (emailExist) return res.status(SUCCESS).json({ message: 'email exists' });
+
+    res.status(SUCCESS).json({ message: 'unique email' });
+  };
+
   // login = async (req: Request, res: Response) => {
   //   const { error } = loginValidation(req.body);
   //   if (error) {
@@ -53,7 +67,7 @@ export class UserController {
   //     });
   //   }
 
-  //   let user = await this.loginService.findByEmail(req.body.email);
+  //   let user = await this.commonModel.findByEmail(req.body.email);
   //   if (!user)
   //     res.status(NOT_FOUND).json({
   //       message: "Email or password doesn't exits",
