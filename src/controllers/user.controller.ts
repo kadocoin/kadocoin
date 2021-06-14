@@ -47,7 +47,6 @@ export class UserController {
 
   doesEmailExists = async (req: Request, res: Response) => {
     const { email } = req.body;
-    console.log(email);
 
     const { error } = emailValidation(email);
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
