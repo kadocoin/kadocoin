@@ -1,6 +1,6 @@
 import app from './app';
 const expressSwagger = require('express-swagger-generator')(app);
-import { PORT } from './config/constants';
+import { ENVIRONMENT, PORT } from './util/secret';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import { UserRouter } from './routes/userRouter.router';
@@ -55,7 +55,6 @@ let initializeMiddleWare = (_: Request, __: Response, next: NextFunction) => {
 app.use(initializeMiddleWare);
 app.use(initializeRoute);
 
-
-app.listen(process.env.PORT || PORT, () => {
-  console.log(`Application is running on ${process.env.PORT || PORT}`);
+app.listen(PORT, () => {
+  console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
 });

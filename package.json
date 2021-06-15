@@ -6,6 +6,7 @@
   "scripts": {
     "start": "tsc && node build/server.js",
     "dev": "nodemon build/server.js",
+    "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon build/server.js",
     "prod": "build/server.js",
     "watch-ts": "tsc -w"
   },
@@ -18,8 +19,9 @@
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^4.4.1",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
-    "dotenv": "^8.2.0",
+    "dotenv": "^10.0.0",
     "elliptic": "^6.5.4",
     "express": "^4.17.1",
     "express-session": "^1.17.2",

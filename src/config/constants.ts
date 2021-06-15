@@ -1,6 +1,5 @@
 const INITIAL_DIFFICULTY = 3;
 export const MINE_RATE = 1000;
-export const PORT: number = 5000 || process.env.PORT;
 export const DEFAULT_MESSAGE: string = 'Welcome to node js';
 export const GENESIS_DATA = {
   timestamp: Date.now(),
