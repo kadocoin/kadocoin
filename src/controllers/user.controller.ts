@@ -4,8 +4,11 @@ import bcrypt from 'bcryptjs';
 import { emailValidation, registerValidation } from '../validation/user.validation';
 import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
 import { UserModel } from '../models/user.model';
+import jwt from 'jsonwebtoken';
 import passportEmailPassword from '../middleware/passportEmailPassword';
-import { NextFunction } from 'express-serve-static-core';
+import { JWTSECRET } from '../util/secret';
+
+const tokenLasts = '30d';
 
 export class UserController {
   private commonModel: CommonModel;
@@ -17,7 +20,7 @@ export class UserController {
   }
 
   register = async (req: Request, res: Response) => {
-    const { email, password, userCreationDate } = req.body;
+    const { email, password } = req.body;
 
     const { error } = registerValidation(req.body);
 
@@ -33,15 +36,24 @@ export class UserController {
 
     const user = await this.userService.save(req.db, {
       email,
-      userCreationDate,
       hashedPassword,
     });
 
-    req.login(user, function (err) {
-      if (err) throw err;
-      return res.status(CREATED).json({
-        user: user,
-      });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        userCreationDate: user.userCreationDate,
+      },
+      JWTSECRET!,
+      {
+        expiresIn: tokenLasts,
+      }
+    );
+
+    return res.status(CREATED).json({
+      token,
+      user,
     });
   };
 

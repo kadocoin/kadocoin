@@ -22,15 +22,15 @@ if (process.env.GENERATE_PEER_PORT === 'true') PEER_PORT = DEFAULT_PORT + Math.c
 
 export const PORT = PEER_PORT || DEFAULT_PORT;
 
-console.log(process.env.GENERATE_PEER_PORT === 'true', { PORT, PEER_PORT });
+export const JWTSECRET = process.env['JWTSECRET']
 
 /**
  * MONGODB
  */
-if (!MONGODB_URI) {
-  if (prod) {
-    console.error('No mongo connection string. Set MONGODB_URI environment variable.');
-  } else {
-    console.error('No mongo connection string. Set MONGODB_URI_LOCAL environment variable.');
-  }
-}
+// if (!MONGODB_URI) {
+//   if (prod) {
+//     console.error('No mongo connection string. Set MONGODB_URI environment variable.');
+//   } else {
+//     console.error('No mongo connection string. Set MONGODB_URI_LOCAL environment variable.');
+//   }
+// }
