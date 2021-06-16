@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Db } from 'mongodb';
 
 export class UserModel {
-  async save(db: Db, { email, hashedPassword }: IUserModel) {
+  async save(db: Db, { email, hashedPassword, userCreationDate }: IUserModel) {
     try {
       return db
         .collection('users')
@@ -11,7 +11,7 @@ export class UserModel {
           _id: nanoid(12),
           emailVerified: false,
           profilePicture: '',
-          userCreationDate: new Date(),
+          userCreationDate,
           email,
           password: hashedPassword,
           name: '',

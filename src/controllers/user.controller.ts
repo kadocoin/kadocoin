@@ -20,7 +20,7 @@ export class UserController {
   }
 
   register = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password, userCreationDate } = req.body;
 
     const { error } = registerValidation(req.body);
 
@@ -34,25 +34,26 @@ export class UserController {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await this.userService.save(req.db, {
+    let user = await this.userService.save(req.db, {
       email,
       hashedPassword,
+      userCreationDate,
     });
 
-    const token = jwt.sign(
+    // ADD SIGNED TOKEN TO USER OBJECT
+    user.token = jwt.sign(
       {
         id: user._id,
         email: user.email,
         userCreationDate: user.userCreationDate,
       },
-      JWTSECRET!,
+      JWTSECRET,
       {
         expiresIn: tokenLasts,
       }
     );
 
-    return res.status(CREATED).json({
-      token,
+    res.status(CREATED).json({
       user,
     });
   };

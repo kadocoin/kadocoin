@@ -22,7 +22,7 @@ if (process.env.GENERATE_PEER_PORT === 'true') PEER_PORT = DEFAULT_PORT + Math.c
 
 export const PORT = PEER_PORT || DEFAULT_PORT;
 
-export const JWTSECRET = process.env['JWTSECRET']
+export const JWTSECRET = process.env['JWTSECRET'] as string
 
 /**
  * MONGODB

@@ -4,7 +4,8 @@ import { IUserModel } from '../types';
 export const registerValidation = (user: IUserModel) => {
   const userSchema = joi.object({
     email: joi.string().required(),
-    password: joi.string().min(3).required(),
+    password: joi.string().min(6).required(),
+    userCreationDate: joi.string(),
   });
 
   return userSchema.validate(user);
