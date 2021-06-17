@@ -7,7 +7,6 @@ import { UserRouter } from './routes/userRouter.router';
 import { ExpressMiddleWares } from './middleware/expressMiddlewares';
 import { TransactionRouter } from './routes/transactionRouter.router';
 import { Database } from './middleware/database';
-// import { Session } from './middleware/session'; x
 
 let options = {
   swaggerDefinition: {
@@ -42,7 +41,7 @@ let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   next();
 };
 
-let initializeMiddleWare = (_: Request, __: Response, next: NextFunction) => {
+let initializeMiddleWare = (req: Request, res: Response, next: NextFunction) => {
   new ExpressMiddleWares(app);
   new Database(app);
   next();
