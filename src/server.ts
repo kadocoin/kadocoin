@@ -7,6 +7,18 @@ import { UserRouter } from './routes/userRouter.router';
 import { ExpressMiddleWares } from './middleware/expressMiddlewares';
 import { TransactionRouter } from './routes/transactionRouter.router';
 import { Database } from './middleware/database';
+import Blockchain from './blockchain';
+import TransactionPool from './wallet/transaction-pool';
+import PubSub from './pubSub';
+import TransactionMiner from './transactionMiner';
+
+/**
+ * APP GLOBAL VARIABLES RELATED TO BLOCKCHAIN
+ */
+
+const blockchain = new Blockchain();
+const transactionPool = new TransactionPool();
+const pubSub = new PubSub({ blockchain, transactionPool });
 
 let options = {
   swaggerDefinition: {
@@ -36,7 +48,7 @@ let options = {
 expressSwagger(options);
 
 let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
-  new UserRouter(app);
+  new UserRouter(app, blockchain);
   new TransactionRouter(app);
   next();
 };

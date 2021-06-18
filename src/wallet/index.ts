@@ -1,6 +1,6 @@
-import Transaction from "./transaction";
-import { STARTING_BALANCE } from "../config/constants";
-import { newEc, cryptoHash} from "../util";
+import Transaction from './transaction';
+import { STARTING_BALANCE } from '../config/constants';
+import { newEc, cryptoHash } from '../util';
 
 class Wallet {
   balance: number;
@@ -21,7 +21,7 @@ class Wallet {
   createTransaction({ recipient, amount, chain }: { recipient: string; amount: number; chain: any[] }) {
     // IF CHAIN IS PASSED
     if (chain) {
-      this.balance = Wallet.calculateBalance({ chain, address: this.publicKey });
+      this.balance = Wallet.calculateBalance({ chain, address: this.publicKey }) as number;
     }
 
     if (amount > this.balance) {
@@ -31,9 +31,17 @@ class Wallet {
     return new Transaction({ senderWallet: this, recipient, amount });
   }
 
-  static calculateBalance({ chain, address }: {chain: any[], address: string}) {
+  static calculateBalance({ chain, address }: { chain: any[]; address: string }): number | string {
     let hasConductedTransaction = false;
     let outputsTotal = 0;
+
+    // TODO: CHECK IF VALID ADDRESS
+    try {
+      const test = newEc.keyFromPublic(address, 'hex');
+      console.log({ test });
+    } catch (error) {
+      return 'Invalid public key' as string;
+    }
 
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];

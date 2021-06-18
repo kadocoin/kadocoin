@@ -1,27 +1,33 @@
-import joi from 'joi';
+import Joi from 'joi';
 import { IUserModel } from '../types';
 
 export const registerValidation = (user: IUserModel) => {
-  const regSchema = joi.object({
-    email: joi.string().email().required(),
-    password: joi.string().min(6).required(),
-    userCreationDate: joi.string(),
+  const regSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    userCreationDate: Joi.string(),
   });
 
   return regSchema.validate(user);
 };
 
 export const emailValidation = (email: string) => {
-  const emailSchema = joi.string().email();
+  const emailSchema = Joi.string().email();
 
   return emailSchema.validate(email);
 };
 
 export const loginValidation = (user: IUserModel) => {
-  const loginSchema = joi.object({
-    email: joi.string().email().required(),
-    password: joi.string().min(6).required(),
+  const loginSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
   });
 
   return loginSchema.validate(user);
+};
+
+export const walletInfoValidation = (address: string) => {
+  const walletInfoSchema = Joi.string().required();
+
+  return walletInfoSchema.validate(address);
 };

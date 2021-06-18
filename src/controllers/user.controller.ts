@@ -1,12 +1,14 @@
 import { CommonModel } from '../models/common.model';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { emailValidation, registerValidation, loginValidation } from '../validation/user.validation';
+import { emailValidation, registerValidation, loginValidation, walletInfoValidation } from '../validation/user.validation';
 import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
 import { UserModel } from '../models/user.model';
 import jwt from 'jsonwebtoken';
-import passportEmailPassword from '../middleware/passportEmailPassword';
 import { JWTSECRET } from '../util/secret';
+import Wallet from '../wallet';
+import pubKeyToAddress from '../util/pubKeyToAddress';
+import { removeSensitiveProps } from '../util/removeSensitiveProps';
 
 const tokenLasts = '30d';
 
@@ -21,6 +23,9 @@ export class UserController {
 
   register = async (req: Request, res: Response) => {
     const { email, password, userCreationDate } = req.body;
+    const wallet = new Wallet();
+
+    const address = pubKeyToAddress(wallet.publicKey);
 
     const { error } = registerValidation(req.body);
 
@@ -38,6 +43,8 @@ export class UserController {
       email,
       hashedPassword,
       userCreationDate,
+      publicKey: wallet.publicKey,
+      address,
     });
 
     // ADD SIGNED TOKEN TO USER OBJECT
@@ -52,6 +59,8 @@ export class UserController {
         expiresIn: tokenLasts,
       }
     );
+
+    user = removeSensitiveProps(user);
 
     res.status(CREATED).json({
       user,
@@ -99,5 +108,14 @@ export class UserController {
     );
 
     res.status(SUCCESS).json({ user });
+  };
+
+  walletInfo = async (req: Request, res: Response) => {
+    const { error } = walletInfoValidation(req.body.address);
+
+    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+
+    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: req.body.address }) });
   };
 }

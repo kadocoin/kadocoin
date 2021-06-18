@@ -1,28 +1,30 @@
 import { Application, Request, Response } from 'express';
 import { DEFAULT_MESSAGE } from '../config/constants';
 import { UserController } from '../controllers/user.controller';
+import blockchainMiddleWare from '../middleware/blockchainMiddleWare';
 import { BaseRouter } from './common/baseRouter.router';
 
 export class UserRouter implements BaseRouter {
   private app: Application;
   private UserController: UserController;
+  blockchain: any;
 
-  constructor(app: Application) {
+  constructor(app: Application, blockchain: any) {
     this.app = app;
-
+    this.blockchain = blockchain;
     this.UserController = new UserController();
     this.initRoute();
   }
 
   initRoute(): void {
     this.app.get('/', (req: Request, res: Response) => {
-    
       res.send(DEFAULT_MESSAGE);
     });
 
     this.app.post('/api/doesEmailExists', this.UserController.doesEmailExists);
 
     this.app.post('/api/register', this.UserController.register);
+    this.app.post('/api/wallet-info', blockchainMiddleWare(this.blockchain), this.UserController.walletInfo);
 
     /**
      * @typedef Login
@@ -47,6 +49,6 @@ export class UserRouter implements BaseRouter {
      * @returns {Login.model}  default - Unexpected error
      */
 
-    this.app.post("/api/login", this.UserController.login);
+    this.app.post('/api/login', this.UserController.login);
   }
 }

@@ -1,14 +1,6 @@
 import { Db, MongoClient } from 'mongodb';
 import { Application, Request, Response, NextFunction, request } from 'express';
 
-declare global {
-  namespace Express {
-    interface Request {
-      dbClient: any;
-      db: Db;
-    }
-  }
-}
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
