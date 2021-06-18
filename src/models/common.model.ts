@@ -28,4 +28,17 @@ export class CommonModel implements CommonInterface<IUserModel> {
       console.log('findById', error);
     }
   };
+
+  findByAddress = async (db: Db, address: string) => {
+    try {
+      return db
+        .collection('users')
+        .findOne({
+          address,
+        })
+        .then(user => user.publicKey || null);
+    } catch (error) {
+      console.log('findByAddress', error);
+    }
+  };
 }

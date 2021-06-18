@@ -38,7 +38,6 @@ class Wallet {
     // TODO: CHECK IF VALID ADDRESS
     try {
       const test = newEc.keyFromPublic(address, 'hex');
-      console.log({ test });
     } catch (error) {
       return 'Invalid public key' as string;
     }

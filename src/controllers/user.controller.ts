@@ -115,7 +115,8 @@ export class UserController {
 
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
+    const publicKey = await this.commonModel.findByAddress(req.db, req.body.address);
 
-    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: req.body.address }) });
+    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: publicKey }) });
   };
 }
