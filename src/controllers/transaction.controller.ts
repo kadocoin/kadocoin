@@ -6,35 +6,37 @@ import Wallet from '../wallet';
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
 import TransactionMiner from '../transactionMiner';
+import { CommonModel } from '../models/common.model';
+import Transaction from '../wallet/transaction';
 
 export class TransactionController {
-  transactionPool: TransactionPool;
-  wallet: Wallet;
-  blockchain: Blockchain;
-  pubsub: PubSub;
-
+  commonModel: CommonModel;
+  wallet: any;
   constructor() {
-    this.transactionPool = new TransactionPool();
+    this.commonModel = new CommonModel();
     this.wallet = new Wallet();
-    this.blockchain = new Blockchain();
-    this.pubsub = new PubSub({ blockchain: this.blockchain, transactionPool: this.transactionPool });
   }
 
-  make = (req: Request, res: Response) => {
+  make = async (req: Request, res: Response) => {
     const { error } = transactValidation(req.body);
-    const { amount, recipient } = req.body;
+    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.details[0].message });
 
-    if (error) {
-      return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.details[0].message });
-    }
+    let { amount, recipient, address } = req.body;
+    amount = Number(amount);
+    const { transactionPool, blockchain, pubSub } = req;
 
-    let transaction = this.transactionPool.existingTransactionPool({ inputAddress: this.wallet.publicKey });
+    const userDoc = await this.commonModel.findByAddress(req.db, address);
+
+    let transaction = transactionPool.existingTransactionPool({ inputAddress: userDoc.publicKey });
+    const balance = Wallet.calculateBalance({ address: userDoc.publicKey, chain: blockchain.chain });
 
     try {
       if (transaction) {
-        transaction.update({ senderWallet: this.wallet, recipient, amount });
+        console.log('Update transaction');
+        transaction.update({ userDoc, recipient, amount, balance });
       } else {
-        transaction = this.wallet.createTransaction({ recipient, amount, chain: this.blockchain.chain });
+        console.log('New transaction');
+        transaction = this.wallet.createTransaction({ recipient, amount, chain: blockchain.chain, senderAddress: userDoc.publicKey, userDoc });
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -42,46 +44,46 @@ export class TransactionController {
       }
     }
 
-    this.transactionPool.setTransaction(transaction);
+    transactionPool.setTransaction(transaction);
 
-    this.pubsub.broadcastTransaction(transaction);
+    // pubsub.broadcastTransaction(transaction);
 
     return res.status(CREATED).json({ type: 'success', transaction });
   };
 
-  poolMap = (_: Request, res: Response) => {
-    try {
-      return res.status(SUCCESS).json(this.transactionPool.transactionMap);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
-      }
-    }
-  };
+  // poolMap = (_: Request, res: Response) => {
+  //   try {
+  //     return res.status(SUCCESS).json(this.transactionPool.transactionMap);
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+  //     }
+  //   }
+  // };
 
-  mine = (_: Request, res: Response) => {
-    try {
-      const transactionMiner = new TransactionMiner({ blockchain: this.blockchain, transactionPool: this.transactionPool, wallet: this.wallet, pubsub: this.pubsub });
+  // mine = (_: Request, res: Response) => {
+  //   try {
+  //     const transactionMiner = new TransactionMiner({ blockchain: this.blockchain, transactionPool: this.transactionPool, wallet: this.wallet, pubsub: this.pubsub });
 
-      transactionMiner.mineTransactions();
+  //     transactionMiner.mineTransactions();
 
-      res.status(SUCCESS).json({ type: 'success', message: 'Success' });
+  //     res.status(SUCCESS).json({ type: 'success', message: 'Success' });
 
-      // TODO - COINS IN CIRCULATION
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
-      }
-    }
-  };
+  //     // TODO - COINS IN CIRCULATION
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+  //     }
+  //   }
+  // };
 
-  getBlocks = (_: Request, res: Response) => {
-    try {
-      return res.status(SUCCESS).json(this.blockchain.chain);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
-      }
-    }
-  };
+  // getBlocks = (_: Request, res: Response) => {
+  //   try {
+  //     return res.status(SUCCESS).json(this.blockchain.chain);
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+  //     }
+  //   }
+  // };
 }

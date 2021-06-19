@@ -9,7 +9,6 @@ class Wallet {
 
   constructor() {
     this.balance = STARTING_BALANCE;
-
     this.keyPair = newEc.genKeyPair();
     this.publicKey = this.keyPair.getPublic().encode('hex');
   }
@@ -18,17 +17,17 @@ class Wallet {
     return this.keyPair.sign(cryptoHash(data));
   }
 
-  createTransaction({ recipient, amount, chain }: { recipient: string; amount: number; chain: any[] }) {
+  createTransaction({ recipient, amount, chain, senderAddress, userDoc }: {userDoc: any, recipient: string; amount: number; chain: any[]; senderAddress: string }) {
     // IF CHAIN IS PASSED
     if (chain) {
-      this.balance = Wallet.calculateBalance({ chain, address: this.publicKey }) as number;
+      this.balance = Wallet.calculateBalance({ chain, address: senderAddress }) as number;
     }
 
     if (amount > this.balance) {
       throw new Error('Amount exceeds the balance.');
     }
 
-    return new Transaction({ senderWallet: this, recipient, amount });
+    return new Transaction({ userDoc, recipient, amount, balance: this.balance });
   }
 
   static calculateBalance({ chain, address }: { chain: any[]; address: string }): number | string {
@@ -37,7 +36,7 @@ class Wallet {
 
     // TODO: CHECK IF VALID ADDRESS
     try {
-      const test = newEc.keyFromPublic(address, 'hex');
+      newEc.keyFromPublic(address, 'hex');
     } catch (error) {
       return 'Invalid public key' as string;
     }

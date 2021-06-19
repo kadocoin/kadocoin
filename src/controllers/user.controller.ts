@@ -23,16 +23,15 @@ export class UserController {
 
   register = async (req: Request, res: Response) => {
     const { email, password, userCreationDate } = req.body;
-    const wallet = new Wallet();
-
-    const address = pubKeyToAddress(wallet.publicKey);
-
     const { error } = registerValidation(req.body);
+
+    const wallet = new Wallet();
+    const signature = wallet.sign(email).toDER();
+    const address = pubKeyToAddress(wallet.publicKey);
 
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
     let emailExist = await this.commonModel.findByEmail(req.db, email);
-
     if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
 
     // HASH PASSWORD
@@ -43,8 +42,9 @@ export class UserController {
       email,
       hashedPassword,
       userCreationDate,
-      publicKey: wallet.publicKey,
       address,
+      signature,
+      publicKey: wallet.publicKey,
     });
 
     // ADD SIGNED TOKEN TO USER OBJECT

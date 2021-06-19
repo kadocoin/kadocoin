@@ -36,9 +36,24 @@ export class CommonModel implements CommonInterface<IUserModel> {
         .findOne({
           address,
         })
-        .then(user => user.publicKey || null);
+        .then(user => user || null);
     } catch (error) {
       console.log('findByAddress', error);
     }
   };
+
+  findWalletByAddress = async (db: Db, address: string) => {
+    try {
+      return db
+        .collection('users')
+        .findOne({
+          address,
+        })
+        .then(user => user.wallet || null);
+    } catch (error) {
+      console.log('findByAddress', error);
+    }
+  };
+
+  // END CLASS
 }

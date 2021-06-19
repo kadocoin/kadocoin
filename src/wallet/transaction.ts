@@ -19,15 +19,23 @@ interface ITransactionProps {
   amount?: number;
   outputMap?: any;
   input?: any;
+  userDoc?: any;
+  balance?: any;
 }
 interface ICreateOutputMapProps {
-  senderWallet: any;
+  senderWallet?: any;
   recipient: any;
   amount: any;
+  signature?: any;
+  userDoc?: any;
+  balance?: any;
 }
 interface ICreateInputProps {
-  senderWallet: any;
+  senderWallet?: any;
   outputMap?: any;
+  signature?: any;
+  userDoc?: any;
+  balance?: any;
 }
 interface IOutputMap {
   [recipient: string]: number;
@@ -35,27 +43,27 @@ interface IOutputMap {
 
 class Transaction {
   [x: string]: any;
-  constructor({ senderWallet, recipient, amount, outputMap, input }: ITransactionProps) {
+  constructor({ userDoc, recipient, amount, outputMap, input, balance }: ITransactionProps) {
     this.id = uuidv1();
-    this.outputMap = outputMap || this.createOutputMap({ senderWallet, recipient, amount });
-    this.input = input || this.createInput({ senderWallet, outputMap: this.outputMap });
+    this.outputMap = outputMap || this.createOutputMap({ userDoc, recipient, amount, balance });
+    this.input = input || this.createInput({ userDoc, balance });
   }
 
-  createOutputMap({ senderWallet, recipient, amount }: ICreateOutputMapProps) {
+  createOutputMap({ userDoc, recipient, amount, balance }: ICreateOutputMapProps) {
     const outputMap: IOutputMap = {};
 
     outputMap[recipient] = amount;
-    outputMap[senderWallet.publicKey] = senderWallet.balance - amount;
+    outputMap[userDoc.publicKey] = balance - amount;
 
     return outputMap;
   }
 
-  createInput({ senderWallet, outputMap }: ICreateInputProps) {
+  createInput({ userDoc, balance }: ICreateInputProps) {
     return {
       timestamp: Date.now(),
-      amount: senderWallet.balance,
-      address: senderWallet.publicKey,
-      signature: senderWallet.sign(outputMap),
+      amount: balance,
+      address: userDoc.publicKey,
+      signature: userDoc.signature,
     };
   }
 
@@ -82,8 +90,8 @@ class Transaction {
     return true;
   }
 
-  update({ senderWallet, recipient, amount }: ICreateOutputMapProps) {
-    if (amount > this.outputMap[senderWallet.publicKey]) {
+  update({ userDoc, recipient, amount, balance }: ICreateOutputMapProps) {
+    if (amount > this.outputMap[userDoc.publicKey]) {
       throw new Error('Amount exceeds the balance');
     }
 
@@ -93,9 +101,9 @@ class Transaction {
       this.outputMap[recipient] = this.outputMap[recipient] + amount;
     }
 
-    this.outputMap[senderWallet.publicKey] = this.outputMap[senderWallet.publicKey] - amount;
+    this.outputMap[userDoc.publicKey] = this.outputMap[userDoc.publicKey] - amount;
 
-    this.input = this.createInput({ senderWallet, outputMap: this.outputMap });
+    this.input = this.createInput({ userDoc, balance });
   }
 
   static rewardTransaction({ minerWallet }: { minerWallet: { input: TInput; publicKey: string } }) {

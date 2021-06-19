@@ -1,4 +1,4 @@
-import { Db } from "mongodb";
+import { Db } from 'mongodb';
 
 export interface IUserModel {
   _id?: string;
@@ -15,6 +15,8 @@ export interface IUserModel {
   publicKey?: string;
   address?: string;
   token?: string;
+  wallet?: any;
+  signature?: any;
 }
 
 declare global {
@@ -23,6 +25,9 @@ declare global {
       dbClient: any;
       db: Db;
       blockchain: any;
+      wallet: any;
+      transactionPool: any;
+      pubSub: any;
     }
   }
 }

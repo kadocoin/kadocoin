@@ -49,7 +49,7 @@ expressSwagger(options);
 
 let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
-  new TransactionRouter(app);
+  new TransactionRouter(app, transactionPool, blockchain, pubSub);
   next();
 };
 

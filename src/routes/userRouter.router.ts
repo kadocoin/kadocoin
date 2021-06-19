@@ -1,7 +1,7 @@
 import { Application, Request, Response } from 'express';
 import { DEFAULT_MESSAGE } from '../config/constants';
 import { UserController } from '../controllers/user.controller';
-import blockchainMiddleWare from '../middleware/blockchainMiddleWare';
+import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
 import { BaseRouter } from './common/baseRouter.router';
 
 export class UserRouter implements BaseRouter {
