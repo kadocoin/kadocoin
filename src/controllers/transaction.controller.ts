@@ -8,6 +8,7 @@ import PubSub from '../pubSub';
 import TransactionMiner from '../transactionMiner';
 import { CommonModel } from '../models/common.model';
 import Transaction from '../wallet/transaction';
+import isEmptyObject from '../util/isEmptyObject';
 
 export class TransactionController {
   commonModel: CommonModel;
@@ -51,31 +52,45 @@ export class TransactionController {
     return res.status(CREATED).json({ type: 'success', transaction });
   };
 
-  // poolMap = (_: Request, res: Response) => {
-  //   try {
-  //     return res.status(SUCCESS).json(this.transactionPool.transactionMap);
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
-  //     }
-  //   }
-  // };
+  poolMap = (req: Request, res: Response) => {
+    try {
+      const { transactionPool } = req;
 
-  // mine = (_: Request, res: Response) => {
-  //   try {
-  //     const transactionMiner = new TransactionMiner({ blockchain: this.blockchain, transactionPool: this.transactionPool, wallet: this.wallet, pubsub: this.pubsub });
+      return res.status(SUCCESS).json(transactionPool.transactionMap);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+    }
+  };
 
-  //     transactionMiner.mineTransactions();
+  mine = async (req: Request, res: Response) => {
+    try {
+      const { publicKey } = req.body;
+      const { transactionPool, blockchain, pubSub } = req;
 
-  //     res.status(SUCCESS).json({ type: 'success', message: 'Success' });
+      if (!isEmptyObject(transactionPool.transactionMap)) {
+        const transactionMiner = new TransactionMiner({ blockchain: blockchain, transactionPool: transactionPool, publicKey: publicKey, pubSub: pubSub });
+        const userDoc = await this.commonModel.findWalletByPublicKey(req.db, publicKey);
 
-  //     // TODO - COINS IN CIRCULATION
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
-  //     }
-  //   }
-  // };
+        const status = transactionMiner.mineTransactions(userDoc);
+
+        if (status !== 'success') {
+          return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
+        }
+
+        return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
+      }
+
+      res.status(NOT_FOUND).json({ type: 'error', message: 'No transactions to mine' });
+
+      // TODO - COINS IN CIRCULATION
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+    }
+  };
 
   // getBlocks = (_: Request, res: Response) => {
   //   try {

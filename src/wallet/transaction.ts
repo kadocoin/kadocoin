@@ -1,5 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import { IUserModel } from '../types';
 import { verifySignature } from '../util/index';
 
 type TInput = {
@@ -41,6 +42,10 @@ interface IOutputMap {
   [recipient: string]: number;
 }
 
+ type TRewardTransactionParam = {
+   minerPublicKey: string;
+ };
+
 class Transaction {
   [x: string]: any;
   constructor({ userDoc, recipient, amount, outputMap, input, balance }: ITransactionProps) {
@@ -67,7 +72,7 @@ class Transaction {
     };
   }
 
-  static validTransaction(transaction: ITransactionProps) {
+  static validTransaction(transaction: ITransactionProps, userDoc?: IUserModel) {
     const {
       input: { address, amount, signature },
       outputMap,
@@ -81,7 +86,7 @@ class Transaction {
       return false;
     }
 
-    if (!verifySignature({ publicKey: address, data: outputMap, signature })) {
+    if (!verifySignature({ publicKey: address, data: userDoc!.email, signature })) {
       console.error(`Invalid signature from ${address}`);
 
       return false;
@@ -106,10 +111,10 @@ class Transaction {
     this.input = this.createInput({ userDoc, balance });
   }
 
-  static rewardTransaction({ minerWallet }: { minerWallet: { input: TInput; publicKey: string } }) {
+  static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {
     return new Transaction({
       input: REWARD_INPUT,
-      outputMap: { [minerWallet.publicKey]: MINING_REWARD },
+      outputMap: { [minerPublicKey]: MINING_REWARD },
     });
   }
 

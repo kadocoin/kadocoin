@@ -1,3 +1,4 @@
+import { IUserModel } from '../types';
 import Transaction from './transaction';
 
 interface ITransactionParam {
@@ -8,7 +9,7 @@ interface ITransactionParam {
 
 class TransactionPool {
   transactionMap: {
-    [x: string]: any
+    [x: string]: any;
   };
 
   constructor() {
@@ -33,8 +34,8 @@ class TransactionPool {
     return transactions.find((transaction: any) => transaction.input.address === inputAddress);
   }
 
-  validTransactions() {
-    return Object.values(this.transactionMap).filter(transaction => Transaction.validTransaction(transaction));
+  validTransactions(userDoc: IUserModel) {
+    return Object.values(this.transactionMap).filter(transaction => Transaction.validTransaction(transaction, userDoc));
   }
 
   clearBlockchainTransactions({ chain }: { chain: any[] }) {

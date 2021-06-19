@@ -55,5 +55,18 @@ export class CommonModel implements CommonInterface<IUserModel> {
     }
   };
 
+  findWalletByPublicKey = async (db: Db, publicKey: string) => {
+    try {
+      return db
+        .collection('users')
+        .findOne({
+          publicKey,
+        })
+        .then(user => user || null);
+    } catch (error) {
+      console.log('findWalletByPublicKey', error);
+    }
+  };
+
   // END CLASS
 }
