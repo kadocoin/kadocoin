@@ -28,6 +28,7 @@ declare global {
       wallet: any;
       transactionPool: any;
       pubSub: any;
+      apiUser: any;
     }
   }
 }

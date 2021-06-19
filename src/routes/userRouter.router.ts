@@ -2,6 +2,7 @@ import { Application, Request, Response } from 'express';
 import { DEFAULT_MESSAGE } from '../config/constants';
 import { UserController } from '../controllers/user.controller';
 import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
+import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 import { BaseRouter } from './common/baseRouter.router';
 
 export class UserRouter implements BaseRouter {
@@ -24,7 +25,7 @@ export class UserRouter implements BaseRouter {
     this.app.post('/api/doesEmailExists', this.UserController.doesEmailExists);
 
     this.app.post('/api/register', this.UserController.register);
-    this.app.post('/api/wallet-info', blockchainMiddleWare(this.blockchain), this.UserController.walletInfo);
+    this.app.post('/api/wallet-info', mustBeLoggedIn, blockchainMiddleWare(this.blockchain), this.UserController.walletInfo);
 
     /**
      * @typedef Login

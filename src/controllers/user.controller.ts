@@ -110,13 +110,11 @@ export class UserController {
     res.status(SUCCESS).json({ user });
   };
 
-  walletInfo = async (req: Request, res: Response) => {
-    const { error } = walletInfoValidation(req.body.address);
+  walletInfo = (req: Request, res: Response) => {
+    const { error } = walletInfoValidation(req.body);
 
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
-    const publicKey = await this.commonModel.findByAddress(req.db, req.body.address);
-
-    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: publicKey }) });
+    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: req.body.publicKey }) });
   };
 }

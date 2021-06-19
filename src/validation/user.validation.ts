@@ -26,8 +26,11 @@ export const loginValidation = (user: IUserModel) => {
   return loginSchema.validate(user);
 };
 
-export const walletInfoValidation = (address: string) => {
-  const walletInfoSchema = Joi.string().required();
+export const walletInfoValidation = (publicKey: string) => {
+  const walletInfoSchema = Joi.object({
+    publicKey: Joi.string().required(),
+    token: Joi.string().required(),
+  });
 
-  return walletInfoSchema.validate(address);
+  return walletInfoSchema.validate(publicKey);
 };
