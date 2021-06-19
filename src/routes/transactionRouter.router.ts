@@ -23,6 +23,6 @@ export class TransactionRouter implements BaseRouter {
     this.app.post('/api/transact', transactionPoolMiddleWare(this.transactionPool), blockchainMiddleWare(this.blockchain), pubSubMiddleWare(this.pubSub), this.transactionController.make);
     this.app.get('/api/transaction-pool-map', transactionPoolMiddleWare(this.transactionPool), this.transactionController.poolMap);
     this.app.post('/api/mine-transactions', transactionPoolMiddleWare(this.transactionPool), blockchainMiddleWare(this.blockchain), pubSubMiddleWare(this.pubSub), this.transactionController.mine)
-    // this.app.get('/api/blocks', this.transactionController.getBlocks);
+    this.app.get('/api/blocks', blockchainMiddleWare(this.blockchain), this.transactionController.getBlocks);
   }
 }

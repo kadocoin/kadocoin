@@ -42,9 +42,9 @@ interface IOutputMap {
   [recipient: string]: number;
 }
 
- type TRewardTransactionParam = {
-   minerPublicKey: string;
- };
+type TRewardTransactionParam = {
+  minerPublicKey: string;
+};
 
 class Transaction {
   [x: string]: any;
@@ -112,6 +112,8 @@ class Transaction {
   }
 
   static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {
+    REWARD_INPUT.recipient = minerPublicKey;
+
     return new Transaction({
       input: REWARD_INPUT,
       outputMap: { [minerPublicKey]: MINING_REWARD },

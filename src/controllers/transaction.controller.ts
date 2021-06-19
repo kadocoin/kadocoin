@@ -66,18 +66,16 @@ export class TransactionController {
 
   mine = async (req: Request, res: Response) => {
     try {
+      // TODO - mineValidation()
       const { publicKey } = req.body;
       const { transactionPool, blockchain, pubSub } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({ blockchain: blockchain, transactionPool: transactionPool, publicKey: publicKey, pubSub: pubSub });
         const userDoc = await this.commonModel.findWalletByPublicKey(req.db, publicKey);
-
         const status = transactionMiner.mineTransactions(userDoc);
 
-        if (status !== 'success') {
-          return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
-        }
+        if (status !== 'success') return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }
@@ -92,13 +90,15 @@ export class TransactionController {
     }
   };
 
-  // getBlocks = (_: Request, res: Response) => {
-  //   try {
-  //     return res.status(SUCCESS).json(this.blockchain.chain);
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
-  //     }
-  //   }
-  // };
+  getBlocks = (req: Request, res: Response) => {
+    try {
+      const { blockchain } = req;
+
+      return res.status(SUCCESS).json(blockchain.chain);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+    }
+  };
 }
