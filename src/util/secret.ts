@@ -15,7 +15,7 @@ export const MONGODB_URI = prod ? process.env['MONGODB_URI'] : process.env['MONG
 /**
  * PORT
  */
-const DEFAULT_PORT = 2000;
+export const DEFAULT_PORT = 2000;
 let PEER_PORT;
 
 if (process.env.GENERATE_PEER_PORT === 'true') PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
@@ -23,6 +23,8 @@ if (process.env.GENERATE_PEER_PORT === 'true') PEER_PORT = DEFAULT_PORT + Math.c
 export const PORT = PEER_PORT || DEFAULT_PORT;
 
 export const JWTSECRET = process.env['JWTSECRET'] as string
+
+export const ROOT_NODE_ADDRESS = `http://localhost:${DEFAULT_PORT}`;
 
 /**
  * MONGODB

@@ -19,7 +19,7 @@ class Blockchain {
     this.chain.push(newBlock);
   }
 
-  replaceChain(incomingChain: any, validateTransactions: any, onSuccess: any) {
+  replaceChain(incomingChain: any, validateTransactions?: any, onSuccess?: any) {
     if (incomingChain.length <= this.chain.length) {
       console.error('The incoming chain must be longer.');
       return;

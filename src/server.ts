@@ -1,6 +1,7 @@
 import app from './app';
+import request from 'request';
 const expressSwagger = require('express-swagger-generator')(app);
-import { ENVIRONMENT, PORT } from './util/secret';
+import { DEFAULT_PORT, ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './util/secret';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import { UserRouter } from './routes/userRouter.router';
@@ -59,9 +60,30 @@ let initializeMiddleWare = (req: Request, res: Response, next: NextFunction) => 
   next();
 };
 
+const syncWithRootState = () => {
+  request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      const rootChain = JSON.parse(body);
+
+      console.log('replacing a chain on sync with', rootChain);
+      blockchain.replaceChain(rootChain);
+    }
+  });
+
+  request({ url: `${ROOT_NODE_ADDRESS}/api/transaction-pool-map` }, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      const rootTransactionPoolMap = JSON.parse(body);
+
+      console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
+      transactionPool.setMap(rootTransactionPoolMap);
+    }
+  });
+};
+
 app.use(initializeMiddleWare);
 app.use(initializeRoute);
 
 app.listen(PORT, () => {
+  if (PORT !== DEFAULT_PORT) syncWithRootState();
   console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
 });

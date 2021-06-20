@@ -1,13 +1,9 @@
 import { Request, Response } from 'express';
 import { transactValidation } from '../validation/transaction.validation';
 import { INTERNAL_SERVER_ERROR, CREATED, NOT_FOUND, SUCCESS } from '../statusCode/statusCode';
-import TransactionPool from '../wallet/transaction-pool';
 import Wallet from '../wallet';
-import Blockchain from '../blockchain';
-import PubSub from '../pubSub';
 import TransactionMiner from '../transactionMiner';
 import { CommonModel } from '../models/common.model';
-import Transaction from '../wallet/transaction';
 import isEmptyObject from '../util/isEmptyObject';
 
 export class TransactionController {
@@ -47,7 +43,7 @@ export class TransactionController {
 
     transactionPool.setTransaction(transaction);
 
-    // pubsub.broadcastTransaction(transaction);
+    pubSub.broadcastTransaction(transaction);
 
     return res.status(CREATED).json({ type: 'success', transaction });
   };
