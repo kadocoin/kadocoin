@@ -97,4 +97,18 @@ export class TransactionController {
       }
     }
   };
+
+  getABlock = (req: Request, res: Response) => {
+    try {
+      const block = req.blockchain.chain.find((block: any) => block.hash === req.params.blockHash);
+
+      if (!block) return res.status(NOT_FOUND).json('Not found');
+
+      return res.status(SUCCESS).json(block);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+    }
+  };
 }

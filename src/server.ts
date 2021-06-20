@@ -67,6 +67,8 @@ const syncWithRootState = () => {
 
       console.log('replacing a chain on sync with', rootChain);
       blockchain.replaceChain(rootChain);
+    } else {
+      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
     }
   });
 
@@ -76,6 +78,8 @@ const syncWithRootState = () => {
 
       console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
       transactionPool.setMap(rootTransactionPoolMap);
+    } else {
+      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error);
     }
   });
 };
