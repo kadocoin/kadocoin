@@ -4,7 +4,7 @@ export const DEFAULT_MESSAGE: string = 'Welcome to Kadocoin API. Visit https://k
 export const GENESIS_DATA = {
   timestamp: 1,
   lastHash: '____',
-  hash: '_____',
+  hash: 'hash-one',
   difficulty: INITIAL_DIFFICULTY,
   nonce: 0,
   data: [],
