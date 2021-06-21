@@ -20,7 +20,7 @@ class TransactionMiner {
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ data: validTransactions });
       // BROADCAST THE UPDATED BLOCKCHAIN
-      // this.pubsub.broadcastChain();
+      this.pubSub.broadcastChain();
       // CLEAR THE POOL
       this.transactionPool.clear();
 

@@ -20,7 +20,7 @@ class Blockchain {
   }
 
   replaceChain(incomingChain: any, validateTransactions?: any, onSuccess?: any) {
-    if (incomingChain.length <= this.chain.length) {
+    if (incomingChain.length > 1 && this.chain.length > 1 && incomingChain.length <= this.chain.length) {
       console.error('The incoming chain must be longer.');
       return;
     }
@@ -37,8 +37,9 @@ class Blockchain {
 
     if (onSuccess) onSuccess();
 
-    console.log('replacing the existing chain with the incoming chain:', incomingChain);
+    
     this.chain = incomingChain;
+    console.log('replaced the existing blockchain with the incoming consensus blockchain:', incomingChain);
   }
 
   validTransactionData({ chain }: { chain: any }) {

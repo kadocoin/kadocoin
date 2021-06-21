@@ -2,7 +2,7 @@ const INITIAL_DIFFICULTY = 3;
 export const MINE_RATE = 1000;
 export const DEFAULT_MESSAGE: string = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
 export const GENESIS_DATA = {
-  timestamp: Date.now(),
+  timestamp: 1,
   lastHash: '____',
   hash: '_____',
   difficulty: INITIAL_DIFFICULTY,

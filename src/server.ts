@@ -13,11 +13,12 @@ import TransactionPool from './wallet/transaction-pool';
 import PubSub from './pubSub';
 import TransactionMiner from './transactionMiner';
 import Wallet from './wallet';
+import isEmptyObject from './util/isEmptyObject';
 
 /**
  * APP GLOBAL VARIABLES RELATED TO BLOCKCHAIN
  */
-const localWallet = new Wallet();
+const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
 const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
 const pubSub = new PubSub({ blockchain, transactionPool });
@@ -66,7 +67,8 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootChain = JSON.parse(body);
 
-      console.log('replacing a chain on sync with', rootChain);
+      console.log('replacing your BLOCKCHAIN with the consensus blockchain', rootChain);
+      console.log('working on it.................');
       blockchain.replaceChain(rootChain);
     } else {
       console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
@@ -77,8 +79,15 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootTransactionPoolMap = JSON.parse(body);
 
-      console.log('replace transaction pool map on a sync with', rootTransactionPoolMap);
-      transactionPool.setMap(rootTransactionPoolMap);
+      // CHECK EMPTY
+      if (isEmptyObject(rootTransactionPoolMap)) console.log('No new transaction coming in from the network');
+      // NOT EMPTY
+      if (!isEmptyObject(rootTransactionPoolMap)) {
+        console.log('Adding latest unconfirmed TRANSACTIONS to your node', rootTransactionPoolMap);
+        console.log('working on it.................');
+        transactionPool.setMap(rootTransactionPoolMap);
+        console.log('Done!');
+      }
     } else {
       console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error);
     }
