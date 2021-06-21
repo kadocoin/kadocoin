@@ -12,11 +12,12 @@ import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
 import PubSub from './pubSub';
 import TransactionMiner from './transactionMiner';
+import Wallet from './wallet';
 
 /**
  * APP GLOBAL VARIABLES RELATED TO BLOCKCHAIN
  */
-
+const localWallet = new Wallet();
 const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
 const pubSub = new PubSub({ blockchain, transactionPool });
@@ -50,7 +51,7 @@ expressSwagger(options);
 
 let initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
-  new TransactionRouter(app, transactionPool, blockchain, pubSub);
+  new TransactionRouter(app, transactionPool, blockchain, pubSub, localWallet);
   next();
 };
 

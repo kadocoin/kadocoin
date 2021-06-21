@@ -20,7 +20,7 @@ export class TransactionController {
 
     let { amount, recipient, address } = req.body;
     amount = Number(amount);
-    const { transactionPool, blockchain, pubSub } = req;
+    const { transactionPool, blockchain, pubSub, localWallet } = req;
 
     const userDoc = await this.commonModel.findByAddress(req.db, address);
 
@@ -30,10 +30,10 @@ export class TransactionController {
     try {
       if (transaction) {
         console.log('Update transaction');
-        transaction.update({ userDoc, recipient, amount, balance });
+        transaction.update({ userDoc, recipient, amount, balance, localWallet });
       } else {
         console.log('New transaction');
-        transaction = this.wallet.createTransaction({ recipient, amount, chain: blockchain.chain, senderAddress: userDoc.publicKey, userDoc });
+        transaction = localWallet.createTransaction({ recipient, amount, chain: blockchain.chain, senderAddress: userDoc.publicKey, userDoc });
       }
     } catch (error) {
       if (error instanceof Error) {

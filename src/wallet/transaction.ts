@@ -22,6 +22,7 @@ interface ITransactionProps {
   input?: any;
   userDoc?: any;
   balance?: any;
+  localWallet?: any;
 }
 interface ICreateOutputMapProps {
   senderWallet?: any;
@@ -30,6 +31,8 @@ interface ICreateOutputMapProps {
   signature?: any;
   userDoc?: any;
   balance?: any;
+  localWallet?: any;
+  outputMap?: any;
 }
 interface ICreateInputProps {
   senderWallet?: any;
@@ -37,6 +40,8 @@ interface ICreateInputProps {
   signature?: any;
   userDoc?: any;
   balance?: any;
+  localAddress?: any;
+  localWallet: any;
 }
 interface IOutputMap {
   [recipient: string]: number;
@@ -48,10 +53,10 @@ type TRewardTransactionParam = {
 
 class Transaction {
   [x: string]: any;
-  constructor({ userDoc, recipient, amount, outputMap, input, balance }: ITransactionProps) {
+  constructor({ userDoc, recipient, amount, outputMap, input, balance, localWallet }: ITransactionProps) {
     this.id = uuidv1();
     this.outputMap = outputMap || this.createOutputMap({ userDoc, recipient, amount, balance });
-    this.input = input || this.createInput({ userDoc, balance });
+    this.input = input || this.createInput({ userDoc, balance, localWallet, outputMap: this.outputMap });
   }
 
   createOutputMap({ userDoc, recipient, amount, balance }: ICreateOutputMapProps) {
@@ -63,18 +68,19 @@ class Transaction {
     return outputMap;
   }
 
-  createInput({ userDoc, balance }: ICreateInputProps) {
+  createInput({ userDoc, balance, localWallet, outputMap }: ICreateInputProps) {
     return {
       timestamp: Date.now(),
       amount: balance,
       address: userDoc.publicKey,
-      signature: userDoc.signature,
+      localAddress: localWallet.publicKey,
+      signature: localWallet.sign(outputMap),
     };
   }
 
   static validTransaction(transaction: ITransactionProps, userDoc?: IUserModel) {
     const {
-      input: { address, amount, signature },
+      input: { address, amount, signature, localAddress },
       outputMap,
     } = transaction;
 
@@ -86,7 +92,7 @@ class Transaction {
       return false;
     }
 
-    if (!verifySignature({ publicKey: address, data: userDoc!.email, signature })) {
+    if (!verifySignature({ publicKey: localAddress, data: outputMap, signature })) {
       console.error(`Invalid signature from ${address}`);
 
       return false;
@@ -95,7 +101,7 @@ class Transaction {
     return true;
   }
 
-  update({ userDoc, recipient, amount, balance }: ICreateOutputMapProps) {
+  update({ userDoc, recipient, amount, balance, localWallet }: ICreateOutputMapProps) {
     if (amount > this.outputMap[userDoc.publicKey]) {
       throw new Error('Amount exceeds the balance');
     }
@@ -108,7 +114,7 @@ class Transaction {
 
     this.outputMap[userDoc.publicKey] = this.outputMap[userDoc.publicKey] - amount;
 
-    this.input = this.createInput({ userDoc, balance });
+    this.input = this.createInput({ userDoc, balance, localWallet });
   }
 
   static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {

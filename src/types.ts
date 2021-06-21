@@ -29,6 +29,7 @@ declare global {
       transactionPool: any;
       pubSub: any;
       apiUser: any;
+      localWallet: any;
     }
   }
 }

@@ -21,9 +21,9 @@ export function pubSubMiddleWare(pubSub: any): any {
   };
 }
 
-export function walletMiddleWare(wallet: any): any {
+export function walletMiddleWare(localWallet: any): any {
   return function (req: Request, _: Response, next: NextFunction) {
-    req.wallet = wallet;
+    req.localWallet = localWallet;
     next();
   };
 }
