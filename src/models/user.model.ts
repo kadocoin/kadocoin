@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { Db } from 'mongodb';
 
 export class UserModel {
-  async save(db: Db, { email, hashedPassword, address, userCreationDate, publicKey, signature }: IUserModel) {
+  async save(db: Db, { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel) {
     try {
       return db
         .collection('users')
@@ -16,7 +16,6 @@ export class UserModel {
           password: hashedPassword,
           address,
           publicKey,
-          signature,
           name: '',
           bio: '',
           ...(email == `${process.env.ADMIN_EMAIL}` ? { scope: ['user', 'admin'] } : { scope: ['user'] }),

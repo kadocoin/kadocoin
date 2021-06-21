@@ -93,7 +93,7 @@ class Transaction {
     }
 
     if (!verifySignature({ publicKey: localAddress, data: outputMap, signature })) {
-      console.error(`Invalid signature from ${address}`);
+      console.error(`Invalid signature from ${localAddress || address}`);
 
       return false;
     }
@@ -114,7 +114,7 @@ class Transaction {
 
     this.outputMap[userDoc.publicKey] = this.outputMap[userDoc.publicKey] - amount;
 
-    this.input = this.createInput({ userDoc, balance, localWallet });
+    this.input = this.createInput({ userDoc, balance, localWallet, outputMap: this.outputMap });
   }
 
   static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {
