@@ -24,7 +24,7 @@ class Wallet {
     }
 
     if (amount > this.balance) {
-      throw new Error('Amount exceeds the balance.');
+      throw new Error('Insufficient balance.');
     }
 
     return new Transaction({ userDoc, recipient, amount, balance: this.balance, localWallet: this });

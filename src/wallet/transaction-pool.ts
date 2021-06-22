@@ -35,7 +35,7 @@ class TransactionPool {
   }
 
   validTransactions(userDoc: IUserModel) {
-    return Object.values(this.transactionMap).filter(transaction => Transaction.validTransaction(transaction, userDoc));
+    return Object.values(this.transactionMap).filter(transaction => Transaction.validTransaction(transaction));
   }
 
   clearBlockchainTransactions({ chain }: { chain: any[] }) {

@@ -70,9 +70,8 @@ export class TransactionController {
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({ blockchain: blockchain, transactionPool: transactionPool, publicKey: publicKey, pubSub: pubSub });
-        const userDoc = await this.commonModel.findWalletByPublicKey(req.db, publicKey);
 
-        const status = transactionMiner.mineTransactions(userDoc);
+        const status = transactionMiner.mineTransactions();
 
         if (status !== 'success') return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
@@ -91,9 +90,7 @@ export class TransactionController {
 
   getBlocks = (req: Request, res: Response) => {
     try {
-      const { blockchain } = req;
-
-      return res.status(SUCCESS).json(blockchain.chain);
+      return res.status(SUCCESS).json(req.blockchain.chain);
     } catch (error) {
       if (error instanceof Error) {
         res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

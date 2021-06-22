@@ -78,7 +78,7 @@ class Transaction {
     };
   }
 
-  static validTransaction(transaction: ITransactionProps, userDoc?: IUserModel) {
+  static validTransaction(transaction: ITransactionProps) {
     const {
       input: { address, amount, signature, localAddress },
       outputMap,
@@ -103,7 +103,7 @@ class Transaction {
 
   update({ userDoc, recipient, amount, balance, localWallet }: ICreateOutputMapProps) {
     if (amount > this.outputMap[userDoc.publicKey]) {
-      throw new Error('Amount exceeds the balance');
+      throw new Error('Insufficient balance');
     }
 
     if (!this.outputMap[recipient]) {

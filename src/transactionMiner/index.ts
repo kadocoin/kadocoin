@@ -10,9 +10,9 @@ class TransactionMiner {
     this.pubSub = pubSub;
   }
 
-  mineTransactions(userDoc: IUserModel) {
+  mineTransactions() {
     // GET THE TRANSACTION POOL VALID TRANSACTIONS
-    const validTransactions = this.transactionPool.validTransactions(userDoc);
+    const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
