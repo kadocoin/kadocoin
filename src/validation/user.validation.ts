@@ -12,9 +12,7 @@ export const registerValidation = (user: IUserModel) => {
 };
 
 export const emailValidation = (email: string) => {
-  const emailSchema = Joi.string().email();
-
-  return emailSchema.validate(email);
+  return Joi.string().email().label('Email').validate(email);
 };
 
 export const loginValidation = (user: IUserModel) => {

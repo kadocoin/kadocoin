@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { transactValidation } from '../validation/transaction.validation';
-import { INTERNAL_SERVER_ERROR, CREATED, NOT_FOUND, SUCCESS } from '../statusCode/statusCode';
+import { mineValidation, transactValidation } from '../validation/transaction.validation';
+import { INTERNAL_SERVER_ERROR, CREATED, NOT_FOUND, SUCCESS, INCORRECT_VALIDATION } from '../statusCode/statusCode';
 import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
 import { CommonModel } from '../models/common.model';
@@ -16,7 +16,7 @@ export class TransactionController {
 
   make = async (req: Request, res: Response) => {
     const { error } = transactValidation(req.body);
-    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.details[0].message });
+    if (error) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: error.details[0].message });
 
     let { amount, recipient, address } = req.body;
     amount = Number(amount);
@@ -62,14 +62,16 @@ export class TransactionController {
 
   mine = async (req: Request, res: Response) => {
     try {
-      // TODO - mineValidation()
+      const { error } = mineValidation(req.body.publicKey);
+      if (error) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: error.details[0].message });
+
       const { publicKey } = req.body;
       const { transactionPool, blockchain, pubSub } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({ blockchain: blockchain, transactionPool: transactionPool, publicKey: publicKey, pubSub: pubSub });
         const userDoc = await this.commonModel.findWalletByPublicKey(req.db, publicKey);
-        
+
         const status = transactionMiner.mineTransactions(userDoc);
 
         if (status !== 'success') return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
