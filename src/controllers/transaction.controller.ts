@@ -18,22 +18,20 @@ export class TransactionController {
     const { error } = transactValidation(req.body);
     if (error) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: error.details[0].message });
 
-    let { amount, recipient, address } = req.body;
+    let { amount, recipient, publicKey } = req.body;
     amount = Number(amount);
     const { transactionPool, blockchain, pubSub, localWallet } = req;
 
-    const userDoc = await this.commonModel.findByAddress(req.db, address);
-
-    let transaction = transactionPool.existingTransactionPool({ inputAddress: userDoc.publicKey });
-    const balance = Wallet.calculateBalance({ address: userDoc.publicKey, chain: blockchain.chain });
+    let transaction = transactionPool.existingTransactionPool({ inputAddress: publicKey });
+    const balance = Wallet.calculateBalance({ address: publicKey, chain: blockchain.chain });
 
     try {
       if (transaction) {
         console.log('Update transaction');
-        transaction.update({ userDoc, recipient, amount, balance, localWallet });
+        transaction.update({ publicKey, recipient, amount, balance, localWallet });
       } else {
         console.log('New transaction');
-        transaction = localWallet.createTransaction({ recipient, amount, chain: blockchain.chain, senderAddress: userDoc.publicKey, userDoc });
+        transaction = localWallet.createTransaction({ recipient, amount, chain: blockchain.chain, publicKey });
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -78,7 +76,7 @@ export class TransactionController {
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }
 
-      res.status(NOT_FOUND).json({ type: 'error', message: 'No transactions to mine' });
+      res.status(SUCCESS).json({ type: 'error', message: 'No transactions to mine' });
 
       // TODO - COINS IN CIRCULATION
     } catch (error) {

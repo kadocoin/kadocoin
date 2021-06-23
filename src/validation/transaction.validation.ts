@@ -4,7 +4,7 @@ export const transactValidation = (body: { amount: string; recipient: string }) 
   const transactSchema = Joi.object({
     amount: Joi.number().required(),
     recipient: Joi.string().required(),
-    address: Joi.string().required(),
+    publicKey: Joi.string().required(),
     token: Joi.string().required(),
   });
 

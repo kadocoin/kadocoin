@@ -17,17 +17,17 @@ class Wallet {
     return this.keyPair.sign(cryptoHash(data));
   }
 
-  createTransaction({ recipient, amount, chain, senderAddress, userDoc }: { userDoc: any; recipient: string; amount: number; chain: any[]; senderAddress: string }) {
+  createTransaction({ recipient, amount, chain, publicKey }: { recipient: string; amount: number; chain: any[]; publicKey: string }) {
     // IF CHAIN IS PASSED
     if (chain) {
-      this.balance = Wallet.calculateBalance({ chain, address: senderAddress }) as number;
+      this.balance = Wallet.calculateBalance({ chain, address: publicKey }) as number;
     }
 
     if (amount > this.balance) {
       throw new Error('Insufficient balance.');
     }
 
-    return new Transaction({ userDoc, recipient, amount, balance: this.balance, localWallet: this });
+    return new Transaction({ publicKey, recipient, amount, balance: this.balance, localWallet: this });
   }
 
   static calculateBalance({ chain, address }: { chain: any[]; address: string }): number | string {

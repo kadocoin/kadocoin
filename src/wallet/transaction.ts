@@ -10,38 +10,32 @@ type TInput = {
   signature: string;
 };
 interface ITransactionProps {
-  senderWallet?: {
-    publicKey: string;
-    balance: number;
-    address?: string;
-    sign: (outputMap: any) => void;
-  };
   recipient?: string;
   amount?: number;
   outputMap?: any;
   input?: any;
-  userDoc?: any;
   balance?: any;
   localWallet?: any;
+  publicKey?: string;
 }
 interface ICreateOutputMapProps {
   senderWallet?: any;
   recipient: any;
   amount: any;
   signature?: any;
-  userDoc?: any;
   balance?: any;
   localWallet?: any;
   outputMap?: any;
+  publicKey?: string;
 }
 interface ICreateInputProps {
   senderWallet?: any;
   outputMap?: any;
   signature?: any;
-  userDoc?: any;
   balance?: any;
   localAddress?: any;
   localWallet: any;
+  publicKey?: string;
 }
 interface IOutputMap {
   [recipient: string]: number;
@@ -53,26 +47,26 @@ type TRewardTransactionParam = {
 
 class Transaction {
   [x: string]: any;
-  constructor({ userDoc, recipient, amount, outputMap, input, balance, localWallet }: ITransactionProps) {
+  constructor({ publicKey, recipient, amount, outputMap, input, balance, localWallet }: ITransactionProps) {
     this.id = uuidv1();
-    this.outputMap = outputMap || this.createOutputMap({ userDoc, recipient, amount, balance });
-    this.input = input || this.createInput({ userDoc, balance, localWallet, outputMap: this.outputMap });
+    this.outputMap = outputMap || this.createOutputMap({ publicKey, recipient, amount, balance });
+    this.input = input || this.createInput({ publicKey, balance, localWallet, outputMap: this.outputMap });
   }
 
-  createOutputMap({ userDoc, recipient, amount, balance }: ICreateOutputMapProps) {
+  createOutputMap({ publicKey, recipient, amount, balance }: ICreateOutputMapProps) {
     const outputMap: IOutputMap = {};
 
     outputMap[recipient] = amount;
-    outputMap[userDoc.publicKey] = balance - amount;
+    outputMap[publicKey!] = balance - amount;
 
     return outputMap;
   }
 
-  createInput({ userDoc, balance, localWallet, outputMap }: ICreateInputProps) {
+  createInput({ publicKey, balance, localWallet, outputMap }: ICreateInputProps) {
     return {
       timestamp: Date.now(),
       amount: balance,
-      address: userDoc.publicKey,
+      address: publicKey,
       localAddress: localWallet.publicKey,
       signature: localWallet.sign(outputMap),
     };
@@ -101,8 +95,8 @@ class Transaction {
     return true;
   }
 
-  update({ userDoc, recipient, amount, balance, localWallet }: ICreateOutputMapProps) {
-    if (amount > this.outputMap[userDoc.publicKey]) {
+  update({ publicKey, recipient, amount, balance, localWallet }: ICreateOutputMapProps) {
+    if (amount > this.outputMap[publicKey!]) {
       throw new Error('Insufficient balance');
     }
 
@@ -112,9 +106,9 @@ class Transaction {
       this.outputMap[recipient] = this.outputMap[recipient] + amount;
     }
 
-    this.outputMap[userDoc.publicKey] = this.outputMap[userDoc.publicKey] - amount;
+    this.outputMap[publicKey!] = this.outputMap[publicKey!] - amount;
 
-    this.input = this.createInput({ userDoc, balance, localWallet, outputMap: this.outputMap });
+    this.input = this.createInput({ publicKey, balance, localWallet, outputMap: this.outputMap });
   }
 
   static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {

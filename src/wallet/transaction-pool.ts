@@ -34,7 +34,7 @@ class TransactionPool {
     return transactions.find((transaction: any) => transaction.input.address === inputAddress);
   }
 
-  validTransactions(userDoc: IUserModel) {
+  validTransactions() {
     return Object.values(this.transactionMap).filter(transaction => Transaction.validTransaction(transaction));
   }
 
