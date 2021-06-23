@@ -15,23 +15,31 @@ export class TransactionController {
   }
 
   make = async (req: Request, res: Response) => {
+    // CHECK IF AMOUNT IS A NUMBER
+    if (isNaN(Number(req.body.amount))) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: 'Amount is not a number. Provide a number please.' });
+    // ENFORCE 8 DECIMAL PLACES
+    if (!/^\d*\.?\d{1,8}$/.test(req.body.amount)) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: 'You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin' });
+    // VALIDATE OTHER USER INPUTS
     const { error } = transactValidation(req.body);
     if (error) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: error.details[0].message });
-
-    let { amount, recipient, publicKey } = req.body;
-    amount = Number(amount);
+    // GRAB USER INPUTS
+    const { amount, recipient, publicKey } = req.body;
+    // GRAB NECESSARY MIDDLEWARES
     const { transactionPool, blockchain, pubSub, localWallet } = req;
-
+    // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
+    if (recipient === publicKey) return res.status(INCORRECT_VALIDATION).json({ type: 'error', message: 'Sender and receiver address cannot be the same.' });
+    // CHECK FOR EXISTING TRANSACTION
     let transaction = transactionPool.existingTransactionPool({ inputAddress: publicKey });
+    // GET UP TO DATE USER BALANCE
     const balance = Wallet.calculateBalance({ address: publicKey, chain: blockchain.chain });
 
     try {
       if (transaction) {
         console.log('Update transaction');
-        transaction.update({ publicKey, recipient, amount, balance, localWallet });
+        transaction.update({ publicKey, recipient, amount: Number(amount), balance, localWallet });
       } else {
         console.log('New transaction');
-        transaction = localWallet.createTransaction({ recipient, amount, chain: blockchain.chain, publicKey });
+        transaction = localWallet.createTransaction({ recipient, amount: Number(amount), chain: blockchain.chain, publicKey });
       }
     } catch (error) {
       if (error instanceof Error) {

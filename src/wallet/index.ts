@@ -57,7 +57,7 @@ class Wallet {
       if (hasConductedTransaction) break;
     }
 
-    return hasConductedTransaction ? outputsTotal : STARTING_BALANCE + outputsTotal;
+    return hasConductedTransaction ? outputsTotal.toFixed(8) : (STARTING_BALANCE + outputsTotal).toFixed(8);
   }
 }
 
