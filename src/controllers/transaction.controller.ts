@@ -43,22 +43,22 @@ export class TransactionController {
         .status(INCORRECT_VALIDATION)
         .json({ type: "error", message: error.details[0].message });
     // GRAB USER INPUTS
-    const { amount, recipient, publicKey } = req.body;
+    const { amount, recipient, publicKey, address } = req.body;
     // GRAB NECESSARY MIDDLEWARES
     const { transactionPool, blockchain, pubSub, localWallet } = req;
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
-    if (recipient === publicKey)
+    if (recipient === address)
       return res.status(INCORRECT_VALIDATION).json({
         type: "error",
         message: "Sender and receiver address cannot be the same.",
       });
     // CHECK FOR EXISTING TRANSACTION
     let transaction = transactionPool.existingTransactionPool({
-      inputAddress: publicKey,
+      inputAddress: address,
     });
     // GET UP TO DATE USER BALANCE
     const balance = Wallet.calculateBalance({
-      address: publicKey,
+      address: address,
       chain: blockchain.chain,
     });
 
@@ -67,6 +67,7 @@ export class TransactionController {
         console.log("Update transaction");
         transaction.update({
           publicKey,
+          address,
           recipient,
           amount: Number(amount),
           balance,
@@ -79,6 +80,7 @@ export class TransactionController {
           amount: Number(amount),
           chain: blockchain.chain,
           publicKey,
+          address,
         });
       }
     } catch (error) {
@@ -112,20 +114,20 @@ export class TransactionController {
 
   mine = async (req: Request, res: Response) => {
     try {
-      const { error } = mineValidation(req.body.publicKey);
+      const { error } = mineValidation(req.body.address);
       if (error)
         return res
           .status(INCORRECT_VALIDATION)
           .json({ type: "error", message: error.details[0].message });
 
-      const { publicKey } = req.body;
+      const { address } = req.body;
       const { transactionPool, blockchain, pubSub } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({
           blockchain: blockchain,
           transactionPool: transactionPool,
-          publicKey: publicKey,
+          address: address,
           pubSub: pubSub,
         });
 

@@ -5,18 +5,18 @@ class TransactionMiner {
   constructor({
     blockchain,
     transactionPool,
-    publicKey,
+    address,
     pubSub,
   }: {
     blockchain: any;
     transactionPool: any;
-    publicKey: any;
     pubSub: any;
+    address: string;
   }) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
-    this.publicKey = publicKey;
     this.pubSub = pubSub;
+    this.address = address;
   }
 
   mineTransactions() {
@@ -26,7 +26,7 @@ class TransactionMiner {
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
       validTransactions.push(
-        Transaction.rewardTransaction({ minerPublicKey: this.publicKey })
+        Transaction.rewardTransaction({ minerPublicKey: this.address })
       );
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ data: validTransactions });

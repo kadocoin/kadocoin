@@ -25,17 +25,19 @@ class Wallet {
     amount,
     chain,
     publicKey,
+    address,
   }: {
     recipient: string;
     amount: number;
     chain: any[];
     publicKey: string;
+    address: string;
   }) {
     // IF CHAIN IS PASSED
     if (chain) {
       this.balance = Wallet.calculateBalance({
         chain,
-        address: publicKey,
+        address: address,
       }) as number;
     }
 
@@ -46,6 +48,7 @@ class Wallet {
     return new Transaction({
       publicKey,
       recipient,
+      address,
       amount,
       balance: this.balance,
       localWallet: this,
@@ -62,12 +65,12 @@ class Wallet {
     let hasConductedTransaction = false;
     let outputsTotal = 0;
 
-    // TODO: CHECK IF VALID ADDRESS
-    try {
-      newEc.keyFromPublic(address, "hex");
-    } catch (error) {
-      return "Invalid public key" as string;
-    }
+    // // TODO: CHECK IF VALID ADDRESS
+    // try {
+    //   newEc.keyFromPublic(address, "hex");
+    // } catch (error) {
+    //   return "Invalid public key" as string;
+    // }
 
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];

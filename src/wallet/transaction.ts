@@ -10,6 +10,7 @@ interface ITransactionProps {
   balance?: any;
   localWallet?: any;
   publicKey?: string;
+  address?: string;
 }
 interface ICreateOutputMapProps {
   senderWallet?: any;
@@ -20,6 +21,7 @@ interface ICreateOutputMapProps {
   localWallet?: any;
   outputMap?: any;
   publicKey?: string;
+  address?: string;
 }
 interface ICreateInputProps {
   senderWallet?: any;
@@ -29,6 +31,7 @@ interface ICreateInputProps {
   localAddress?: any;
   localWallet: any;
   publicKey?: string;
+  address?: string;
 }
 interface IOutputMap {
   [recipient: string]: number;
@@ -42,6 +45,7 @@ class Transaction {
   [x: string]: any;
   constructor({
     publicKey,
+    address,
     recipient,
     amount,
     outputMap,
@@ -52,11 +56,12 @@ class Transaction {
     this.id = uuidv1();
     this.outputMap =
       outputMap ||
-      this.createOutputMap({ publicKey, recipient, amount, balance });
+      this.createOutputMap({ address, recipient, amount, balance });
     this.input =
       input ||
       this.createInput({
         publicKey,
+        address,
         balance,
         localWallet,
         outputMap: this.outputMap,
@@ -64,7 +69,7 @@ class Transaction {
   }
 
   createOutputMap({
-    publicKey,
+    address,
     recipient,
     amount,
     balance,
@@ -72,7 +77,7 @@ class Transaction {
     const outputMap: IOutputMap = {};
 
     outputMap[recipient] = amount;
-    outputMap[publicKey] = balance - amount;
+    outputMap[address] = balance - amount;
 
     return outputMap;
   }
@@ -80,13 +85,15 @@ class Transaction {
   createInput({
     publicKey,
     balance,
+    address,
     localWallet,
     outputMap,
   }: ICreateInputProps) {
     return {
       timestamp: Date.now(),
       amount: balance,
-      address: publicKey,
+      address: address,
+      publicKey: publicKey,
       localAddress: localWallet.publicKey,
       signature: localWallet.sign(outputMap),
     };
@@ -94,7 +101,7 @@ class Transaction {
 
   static validTransaction(transaction: ITransactionProps) {
     const {
-      input: { address, amount, signature, localAddress },
+      input: { address, publicKey, amount, signature, localAddress },
       outputMap,
     } = transaction;
 
@@ -103,7 +110,7 @@ class Transaction {
     );
 
     if (Number(amount) !== outputTotal) {
-      console.error(`Invalid transaction from ${address}`);
+      console.error(`Invalid transaction from ${{ publicKey, address }}`);
 
       return false;
     }
@@ -111,7 +118,7 @@ class Transaction {
     if (
       !verifySignature({ publicKey: localAddress, data: outputMap, signature })
     ) {
-      console.error(`Invalid signature from ${localAddress || address}`);
+      console.error(`Invalid signature from ${localAddress}`);
 
       return false;
     }
@@ -124,9 +131,10 @@ class Transaction {
     recipient,
     amount,
     balance,
+    address,
     localWallet,
   }: ICreateOutputMapProps) {
-    if (amount > this.outputMap[publicKey]) {
+    if (amount > this.outputMap[address]) {
       throw new Error("Insufficient balance");
     }
 
@@ -136,10 +144,11 @@ class Transaction {
       this.outputMap[recipient] = this.outputMap[recipient] + amount;
     }
 
-    this.outputMap[publicKey] = this.outputMap[publicKey] - amount;
+    this.outputMap[address] = this.outputMap[address] - amount;
 
     this.input = this.createInput({
       publicKey,
+      address,
       balance,
       localWallet,
       outputMap: this.outputMap,

@@ -8,15 +8,16 @@ export const transactValidation = (body: {
     amount: Joi.number().positive().required(),
     recipient: Joi.string().required(),
     publicKey: Joi.string().required(),
+    address: Joi.string().required(),
     token: Joi.string().required(),
   });
 
   return transactSchema.validate(body, { convert: true });
 };
 
-export const mineValidation = (publicKey: string) => {
+export const mineValidation = (address: string) => {
   return Joi.string()
     .required()
     .label("Kadocoin wallet address")
-    .validate(publicKey);
+    .validate(address);
 };

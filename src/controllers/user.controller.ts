@@ -148,7 +148,7 @@ export class UserController {
     res.status(SUCCESS).json({
       balance: Wallet.calculateBalance({
         chain: req.blockchain.chain,
-        address: req.body.publicKey,
+        address: req.body.address,
       }),
     });
   };
