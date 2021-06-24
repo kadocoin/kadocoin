@@ -11,7 +11,6 @@ import { Database } from './middleware/database';
 import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
 import PubSub from './pubSub';
-import TransactionMiner from './transactionMiner';
 import Wallet from './wallet';
 import isEmptyObject from './util/isEmptyObject';
 
@@ -22,6 +21,8 @@ const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
 const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
 const pubSub = new PubSub({ blockchain, transactionPool });
+
+console.log(localWallet);
 
 let options = {
   swaggerDefinition: {

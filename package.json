@@ -4,7 +4,7 @@
   "description": "Kadocoin is a decentralized censure-resistant peer-to-peer digital money",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon build/server.js",
+    "dev": "nodemon build/server.js || exit 1",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon build/server.js",
     "start": "tsc && node build/server.js",
     "prod": "build/server.js",

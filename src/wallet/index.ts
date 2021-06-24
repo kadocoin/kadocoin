@@ -1,16 +1,19 @@
 import Transaction from './transaction';
 import { STARTING_BALANCE } from '../config/constants';
 import { newEc, cryptoHash } from '../util';
+import pubKeyToAddress from '../util/pubKeyToAddress';
 
 class Wallet {
   balance: number;
   keyPair: any;
   publicKey: string;
+  address: string;
 
   constructor() {
     this.balance = STARTING_BALANCE;
     this.keyPair = newEc.genKeyPair();
     this.publicKey = this.keyPair.getPublic().encode('hex');
+    this.address = pubKeyToAddress(this.publicKey);
   }
 
   sign(data: any[]) {

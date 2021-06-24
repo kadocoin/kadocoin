@@ -11,7 +11,6 @@ export class TransactionController {
   wallet: any;
   constructor() {
     this.commonModel = new CommonModel();
-    this.wallet = new Wallet();
   }
 
   make = async (req: Request, res: Response) => {
