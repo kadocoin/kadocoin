@@ -18,7 +18,6 @@ import { UserModel } from "../models/user.model";
 import jwt from "jsonwebtoken";
 import { JWTSECRET } from "../util/secret";
 import Wallet from "../wallet";
-import pubKeyToAddress from "../util/pubKeyToAddress";
 import { removeSensitiveProps } from "../util/removeSensitiveProps";
 
 const tokenLasts = "30d";
