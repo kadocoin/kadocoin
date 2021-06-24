@@ -27,8 +27,6 @@ const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
 const pubSub = new PubSub({ blockchain, transactionPool });
 
-console.log(localWallet.address);
-
 const options = {
   swaggerDefinition: {
     info: {

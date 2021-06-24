@@ -37,7 +37,6 @@ export class UserController {
     const { error } = registerValidation(req.body);
 
     const wallet = new Wallet();
-    const address = pubKeyToAddress(wallet.publicKey);
 
     if (error)
       return res
@@ -58,7 +57,7 @@ export class UserController {
       email,
       hashedPassword,
       userCreationDate,
-      address,
+      address: wallet.address,
       publicKey: wallet.publicKey,
     });
 
