@@ -1,3 +1,4 @@
+import { IUserModel } from '../types';
 import Transaction from './transaction';
 
 interface ITransactionParam {
@@ -8,7 +9,7 @@ interface ITransactionParam {
 
 class TransactionPool {
   transactionMap: {
-    [x: string]: any
+    [x: string]: any;
   };
 
   constructor() {

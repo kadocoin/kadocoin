@@ -1,5 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import { IUserModel } from '../types';
 import { verifySignature } from '../util/index';
 
 type TInput = {
@@ -9,72 +10,84 @@ type TInput = {
   signature: string;
 };
 interface ITransactionProps {
-  senderWallet?: {
-    publicKey: string;
-    balance: number;
-    address?: string;
-    sign: (outputMap: any) => void;
-  };
   recipient?: string;
   amount?: number;
   outputMap?: any;
   input?: any;
+  balance?: any;
+  localWallet?: any;
+  publicKey?: string;
 }
 interface ICreateOutputMapProps {
-  senderWallet: any;
+  senderWallet?: any;
   recipient: any;
   amount: any;
+  signature?: any;
+  balance?: any;
+  localWallet?: any;
+  outputMap?: any;
+  publicKey?: string;
 }
 interface ICreateInputProps {
-  senderWallet: any;
+  senderWallet?: any;
   outputMap?: any;
+  signature?: any;
+  balance?: any;
+  localAddress?: any;
+  localWallet: any;
+  publicKey?: string;
 }
 interface IOutputMap {
   [recipient: string]: number;
 }
 
+type TRewardTransactionParam = {
+  minerPublicKey: string;
+};
+
 class Transaction {
   [x: string]: any;
-  constructor({ senderWallet, recipient, amount, outputMap, input }: ITransactionProps) {
+  constructor({ publicKey, recipient, amount, outputMap, input, balance, localWallet }: ITransactionProps) {
     this.id = uuidv1();
-    this.outputMap = outputMap || this.createOutputMap({ senderWallet, recipient, amount });
-    this.input = input || this.createInput({ senderWallet, outputMap: this.outputMap });
+    this.outputMap = outputMap || this.createOutputMap({ publicKey, recipient, amount, balance });
+    this.input = input || this.createInput({ publicKey, balance, localWallet, outputMap: this.outputMap });
   }
 
-  createOutputMap({ senderWallet, recipient, amount }: ICreateOutputMapProps) {
+  createOutputMap({ publicKey, recipient, amount, balance }: ICreateOutputMapProps) {
     const outputMap: IOutputMap = {};
 
     outputMap[recipient] = amount;
-    outputMap[senderWallet.publicKey] = senderWallet.balance - amount;
+    outputMap[publicKey!] = balance - amount;
 
     return outputMap;
   }
 
-  createInput({ senderWallet, outputMap }: ICreateInputProps) {
+  createInput({ publicKey, balance, localWallet, outputMap }: ICreateInputProps) {
     return {
       timestamp: Date.now(),
-      amount: senderWallet.balance,
-      address: senderWallet.publicKey,
-      signature: senderWallet.sign(outputMap),
+      amount: balance,
+      address: publicKey,
+      localAddress: localWallet.publicKey,
+      signature: localWallet.sign(outputMap),
     };
   }
 
   static validTransaction(transaction: ITransactionProps) {
     const {
-      input: { address, amount, signature },
+      input: { address, amount, signature, localAddress },
       outputMap,
     } = transaction;
 
     const outputTotal = Object.values(outputMap).reduce((total: any, outputAmount: any) => total + outputAmount);
 
-    if (amount !== outputTotal) {
+    if (Number(amount) !== outputTotal) {
       console.error(`Invalid transaction from ${address}`);
 
       return false;
     }
 
-    if (!verifySignature({ publicKey: address, data: outputMap, signature })) {
-      console.error(`Invalid signature from ${address}`);
+    if (!verifySignature({ publicKey: localAddress, data: outputMap, signature })) {
+      console.error(`Invalid signature from ${localAddress || address}`);
 
       return false;
     }
@@ -82,9 +95,9 @@ class Transaction {
     return true;
   }
 
-  update({ senderWallet, recipient, amount }: ICreateOutputMapProps) {
-    if (amount > this.outputMap[senderWallet.publicKey]) {
-      throw new Error('Amount exceeds the balance');
+  update({ publicKey, recipient, amount, balance, localWallet }: ICreateOutputMapProps) {
+    if (amount > this.outputMap[publicKey!]) {
+      throw new Error('Insufficient balance');
     }
 
     if (!this.outputMap[recipient]) {
@@ -93,15 +106,17 @@ class Transaction {
       this.outputMap[recipient] = this.outputMap[recipient] + amount;
     }
 
-    this.outputMap[senderWallet.publicKey] = this.outputMap[senderWallet.publicKey] - amount;
+    this.outputMap[publicKey!] = this.outputMap[publicKey!] - amount;
 
-    this.input = this.createInput({ senderWallet, outputMap: this.outputMap });
+    this.input = this.createInput({ publicKey, balance, localWallet, outputMap: this.outputMap });
   }
 
-  static rewardTransaction({ minerWallet }: { minerWallet: { input: TInput; publicKey: string } }) {
+  static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {
+    REWARD_INPUT.recipient = minerPublicKey;
+
     return new Transaction({
       input: REWARD_INPUT,
-      outputMap: { [minerWallet.publicKey]: MINING_REWARD },
+      outputMap: { [minerPublicKey]: MINING_REWARD },
     });
   }
 

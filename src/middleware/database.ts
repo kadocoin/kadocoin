@@ -1,14 +1,6 @@
 import { Db, MongoClient } from 'mongodb';
 import { Application, Request, Response, NextFunction, request } from 'express';
 
-declare global {
-  namespace Express {
-    interface Request {
-      dbClient: any;
-      db: Db;
-    }
-  }
-}
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
@@ -42,7 +34,7 @@ export class Database {
   };
 
   createIndexes = async (db: Db) => {
-    await Promise.all([db.collection('tokens').createIndex({ expireAt: -1 }, { expireAfterSeconds: 0 }), db.collection('blogPosts').createIndex({ createdAt: -1 }), db.collection('users').createIndex({ email: 1 }, { unique: true })]);
+    await Promise.all([db.collection('tokens').createIndex({ expireAt: -1 }, { expireAfterSeconds: 0 }), db.collection('users').createIndex({ email: 1 }, { unique: true })]);
     this.indexesCreated = true;
   };
 }

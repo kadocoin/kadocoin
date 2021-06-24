@@ -1,76 +1,118 @@
 import { CommonModel } from '../models/common.model';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { loginValidation, registerValidation } from '../validation/user.validation';
+import { emailValidation, registerValidation, loginValidation, walletInfoValidation } from '../validation/user.validation';
 import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
 import { UserModel } from '../models/user.model';
-import passportEmailPassword from '../middleware/passportEmailPassword';
-import { NextFunction } from 'express-serve-static-core';
+import jwt from 'jsonwebtoken';
+import { JWTSECRET } from '../util/secret';
+import Wallet from '../wallet';
+import pubKeyToAddress from '../util/pubKeyToAddress';
+import { removeSensitiveProps } from '../util/removeSensitiveProps';
+
+const tokenLasts = '30d';
 
 export class UserController {
-  private loginService: CommonModel;
+  private commonModel: CommonModel;
   private userService: UserModel;
 
   constructor() {
-    this.loginService = new CommonModel();
+    this.commonModel = new CommonModel();
     this.userService = new UserModel();
   }
 
   register = async (req: Request, res: Response) => {
     const { email, password, userCreationDate } = req.body;
-
     const { error } = registerValidation(req.body);
+
+    const wallet = new Wallet();
+    const address = pubKeyToAddress(wallet.publicKey);
 
     if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
-    let emailExist = await this.loginService.findByEmail(req.db, email);
-
+    let emailExist = await this.commonModel.findByEmail(req.db, email);
     if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
 
-    //hash password
+    // HASH PASSWORD
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await this.userService.save(req.db, {
+    let user = await this.userService.save(req.db, {
       email,
-      userCreationDate,
       hashedPassword,
+      userCreationDate,
+      address,
+      publicKey: wallet.publicKey,
     });
 
-    req.login(user, function (err) {
-      if (err) throw err;
-      return res.status(CREATED).json({
-        user: user,
-      });
+    // ADD SIGNED TOKEN TO USER OBJECT
+    user.token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        userCreationDate: user.userCreationDate,
+      },
+      JWTSECRET,
+      {
+        expiresIn: tokenLasts,
+      }
+    );
+
+    user = removeSensitiveProps(user);
+
+    res.status(CREATED).json({
+      user,
     });
   };
 
-  // login = async (req: Request, res: Response) => {
-  //   const { error } = loginValidation(req.body);
-  //   if (error) {
-  //     res.status(INTERNAL_SERVER_ERROR).json({
-  //       error: error.details[0].message,
-  //     });
-  //   }
+  doesEmailExists = async (req: Request, res: Response) => {
+    const { email } = req.body;
 
-  //   let user = await this.loginService.findByEmail(req.body.email);
-  //   if (!user)
-  //     res.status(NOT_FOUND).json({
-  //       message: "Email or password doesn't exits",
-  //     });
+    const { error } = emailValidation(email);
+    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
-  //   // password check
+    const emailExist = await this.commonModel.findByEmail(req.db, email);
 
-  //   const validPassword = await bcrypt.compare(req.body.password, user?.password as string);
-  //   if (!validPassword)
-  //     return res.status(ALREADY_EXISTS).json({
-  //       message: 'Invalid password',
-  //     });
+    if (emailExist) return res.status(SUCCESS).json({ message: 'email exists' });
 
-  //   const token = jwt.sign({ _id: user?._id, exp: Math.floor(Date.now() / 1000) + 60 * 60 }, TOKEN_SECRET);
-  //   res.header('x-header-token', token).status(SUCCESS).json({
-  //     message: 'Successfully loggedin',
-  //     token: token,
-  //   });
-  // };
+    res.status(SUCCESS).json({ message: 'unique email' });
+  };
+
+  login = async (req: Request, res: Response) => {
+    const { error } = loginValidation(req.body);
+
+    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+    let user = await this.commonModel.findByEmail(req.db, req.body.email);
+
+    if (!user) return res.status(NOT_FOUND).json({ message: 'Incorrect email or password' });
+
+    // CHECK PASSWORD
+    const validPassword = await bcrypt.compare(req.body.password, user.password);
+
+    if (!validPassword) return res.status(ALREADY_EXISTS).json({ message: 'Invalid password' });
+
+    // ADD SIGNED TOKEN TO USER OBJECT
+    user.token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        userCreationDate: user.userCreationDate,
+      },
+      JWTSECRET,
+      {
+        expiresIn: tokenLasts,
+      }
+    );
+
+    res.status(SUCCESS).json({ user });
+  };
+
+  walletInfo = (req: Request, res: Response) => {
+    const { error } = walletInfoValidation(req.body);
+
+    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: req.body.publicKey }) });
+  };
 }
