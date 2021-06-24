@@ -1,1 +1,1 @@
-declare module 'hex-to-binary';
+declare module "hex-to-binary";

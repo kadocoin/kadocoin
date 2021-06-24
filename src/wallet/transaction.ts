@@ -1,7 +1,6 @@
-import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
-import { IUserModel } from '../types';
-import { verifySignature } from '../util/index';
+import { v1 as uuidv1 } from "uuid";
+import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
+import { verifySignature } from "../util/index";
 
 type TInput = {
   timestamp: number;
@@ -47,13 +46,35 @@ type TRewardTransactionParam = {
 
 class Transaction {
   [x: string]: any;
-  constructor({ publicKey, recipient, amount, outputMap, input, balance, localWallet }: ITransactionProps) {
+  constructor({
+    publicKey,
+    recipient,
+    amount,
+    outputMap,
+    input,
+    balance,
+    localWallet,
+  }: ITransactionProps) {
     this.id = uuidv1();
-    this.outputMap = outputMap || this.createOutputMap({ publicKey, recipient, amount, balance });
-    this.input = input || this.createInput({ publicKey, balance, localWallet, outputMap: this.outputMap });
+    this.outputMap =
+      outputMap ||
+      this.createOutputMap({ publicKey, recipient, amount, balance });
+    this.input =
+      input ||
+      this.createInput({
+        publicKey,
+        balance,
+        localWallet,
+        outputMap: this.outputMap,
+      });
   }
 
-  createOutputMap({ publicKey, recipient, amount, balance }: ICreateOutputMapProps) {
+  createOutputMap({
+    publicKey,
+    recipient,
+    amount,
+    balance,
+  }: ICreateOutputMapProps) {
     const outputMap: IOutputMap = {};
 
     outputMap[recipient] = amount;
@@ -62,7 +83,12 @@ class Transaction {
     return outputMap;
   }
 
-  createInput({ publicKey, balance, localWallet, outputMap }: ICreateInputProps) {
+  createInput({
+    publicKey,
+    balance,
+    localWallet,
+    outputMap,
+  }: ICreateInputProps) {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -78,7 +104,9 @@ class Transaction {
       outputMap,
     } = transaction;
 
-    const outputTotal = Object.values(outputMap).reduce((total: any, outputAmount: any) => total + outputAmount);
+    const outputTotal = Object.values(outputMap).reduce(
+      (total: any, outputAmount: any) => total + outputAmount
+    );
 
     if (Number(amount) !== outputTotal) {
       console.error(`Invalid transaction from ${address}`);
@@ -86,7 +114,9 @@ class Transaction {
       return false;
     }
 
-    if (!verifySignature({ publicKey: localAddress, data: outputMap, signature })) {
+    if (
+      !verifySignature({ publicKey: localAddress, data: outputMap, signature })
+    ) {
       console.error(`Invalid signature from ${localAddress || address}`);
 
       return false;
@@ -95,9 +125,15 @@ class Transaction {
     return true;
   }
 
-  update({ publicKey, recipient, amount, balance, localWallet }: ICreateOutputMapProps) {
+  update({
+    publicKey,
+    recipient,
+    amount,
+    balance,
+    localWallet,
+  }: ICreateOutputMapProps) {
     if (amount > this.outputMap[publicKey!]) {
-      throw new Error('Insufficient balance');
+      throw new Error("Insufficient balance");
     }
 
     if (!this.outputMap[recipient]) {
@@ -108,7 +144,12 @@ class Transaction {
 
     this.outputMap[publicKey!] = this.outputMap[publicKey!] - amount;
 
-    this.input = this.createInput({ publicKey, balance, localWallet, outputMap: this.outputMap });
+    this.input = this.createInput({
+      publicKey,
+      balance,
+      localWallet,
+      outputMap: this.outputMap,
+    });
   }
 
   static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {

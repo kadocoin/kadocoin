@@ -1,16 +1,16 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 const cryptoHash = (...inputs: any[]) => {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
 
   hash.update(
     inputs
-      .map(input => JSON.stringify(input))
+      .map((input) => JSON.stringify(input))
       .sort()
-      .join(' ')
+      .join(" ")
   );
 
-  return hash.digest('hex');
+  return hash.digest("hex");
 };
 
 export default cryptoHash;

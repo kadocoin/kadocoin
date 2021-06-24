@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from "express";
 
 export function blockchainMiddleWare(blockchain: any): any {
   return function (req: Request, _: Response, next: NextFunction) {

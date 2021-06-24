@@ -1,16 +1,28 @@
-import { CommonModel } from '../models/common.model';
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import { emailValidation, registerValidation, loginValidation, walletInfoValidation } from '../validation/user.validation';
-import { INTERNAL_SERVER_ERROR, ALREADY_EXISTS, CREATED, NOT_FOUND, SUCCESS, TOKEN_SECRET } from '../statusCode/statusCode';
-import { UserModel } from '../models/user.model';
-import jwt from 'jsonwebtoken';
-import { JWTSECRET } from '../util/secret';
-import Wallet from '../wallet';
-import pubKeyToAddress from '../util/pubKeyToAddress';
-import { removeSensitiveProps } from '../util/removeSensitiveProps';
+import { CommonModel } from "../models/common.model";
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import {
+  emailValidation,
+  registerValidation,
+  loginValidation,
+  walletInfoValidation,
+} from "../validation/user.validation";
+import {
+  INTERNAL_SERVER_ERROR,
+  ALREADY_EXISTS,
+  CREATED,
+  NOT_FOUND,
+  SUCCESS,
+  TOKEN_SECRET,
+} from "../statusCode/statusCode";
+import { UserModel } from "../models/user.model";
+import jwt from "jsonwebtoken";
+import { JWTSECRET } from "../util/secret";
+import Wallet from "../wallet";
+import pubKeyToAddress from "../util/pubKeyToAddress";
+import { removeSensitiveProps } from "../util/removeSensitiveProps";
 
-const tokenLasts = '30d';
+const tokenLasts = "30d";
 
 export class UserController {
   private commonModel: CommonModel;
@@ -28,10 +40,16 @@ export class UserController {
     const wallet = new Wallet();
     const address = pubKeyToAddress(wallet.publicKey);
 
-    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+    if (error)
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ error: error.details[0].message });
 
-    let emailExist = await this.commonModel.findByEmail(req.db, email);
-    if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
+    const emailExist = await this.commonModel.findByEmail(req.db, email);
+    if (emailExist)
+      return res
+        .status(ALREADY_EXISTS)
+        .json({ message: "Email already exists" });
 
     // HASH PASSWORD
     const salt = await bcrypt.genSalt(10);
@@ -69,28 +87,42 @@ export class UserController {
     const { email } = req.body;
 
     const { error } = emailValidation(email);
-    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+    if (error)
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ error: error.details[0].message });
 
     const emailExist = await this.commonModel.findByEmail(req.db, email);
 
-    if (emailExist) return res.status(SUCCESS).json({ message: 'email exists' });
+    if (emailExist)
+      return res.status(SUCCESS).json({ message: "email exists" });
 
-    res.status(SUCCESS).json({ message: 'unique email' });
+    res.status(SUCCESS).json({ message: "unique email" });
   };
 
   login = async (req: Request, res: Response) => {
     const { error } = loginValidation(req.body);
 
-    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+    if (error)
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ error: error.details[0].message });
 
-    let user = await this.commonModel.findByEmail(req.db, req.body.email);
+    const user = await this.commonModel.findByEmail(req.db, req.body.email);
 
-    if (!user) return res.status(NOT_FOUND).json({ message: 'Incorrect email or password' });
+    if (!user)
+      return res
+        .status(NOT_FOUND)
+        .json({ message: "Incorrect email or password" });
 
     // CHECK PASSWORD
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    const validPassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
 
-    if (!validPassword) return res.status(ALREADY_EXISTS).json({ message: 'Invalid password' });
+    if (!validPassword)
+      return res.status(ALREADY_EXISTS).json({ message: "Invalid password" });
 
     // ADD SIGNED TOKEN TO USER OBJECT
     user.token = jwt.sign(
@@ -111,8 +143,16 @@ export class UserController {
   walletInfo = (req: Request, res: Response) => {
     const { error } = walletInfoValidation(req.body);
 
-    if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+    if (error)
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ error: error.details[0].message });
 
-    res.status(SUCCESS).json({ balance: Wallet.calculateBalance({ chain: req.blockchain.chain, address: req.body.publicKey }) });
+    res.status(SUCCESS).json({
+      balance: Wallet.calculateBalance({
+        chain: req.blockchain.chain,
+        address: req.body.publicKey,
+      }),
+    });
   };
 }

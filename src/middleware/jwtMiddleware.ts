@@ -1,6 +1,6 @@
-import { Application, Request, Response, NextFunction } from 'express';
-import { TOKEN_INVALID, TOKEN_SECRET } from '../statusCode/statusCode';
-import jwt, { verify } from 'jsonwebtoken';
+import { Application, Request, Response, NextFunction } from "express";
+import { TOKEN_INVALID, TOKEN_SECRET } from "../statusCode/statusCode";
+import jwt, { verify } from "jsonwebtoken";
 
 export class JWTMiddleWare {
   private app: Application;
@@ -11,23 +11,23 @@ export class JWTMiddleWare {
 
   verifyRoute = async (req: Request, res: Response, next: NextFunction) => {
     console.log(req.header);
-    let token = req.header('authorization');
+    let token = req.header("authorization");
 
     console.log(`token...${token}`);
 
     if (!token)
       return res.status(401).json({
-        message: 'Access Denied',
+        message: "Access Denied",
       });
 
     try {
-      token = token.split(' ')[1];
+      token = token.split(" ")[1];
 
       const verified: any = await jwt.verify(token, TOKEN_SECRET);
       req.body.userId = verified._id;
     } catch (err) {
       res.status(TOKEN_INVALID).json({
-        message: 'Token Invalid',
+        message: "Token Invalid",
       });
     }
     next();

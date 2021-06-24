@@ -1,6 +1,5 @@
-import { Db, MongoClient } from 'mongodb';
-import { Application, Request, Response, NextFunction, request } from 'express';
-
+import { Db, MongoClient } from "mongodb";
+import { Application, Request, Response, NextFunction, request } from "express";
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
@@ -28,13 +27,18 @@ export class Database {
 
     if (!this.indexesCreated) await this.createIndexes(req.db as Db);
 
-    console.log('MongoDb connected!');
+    console.log("MongoDb connected!");
 
     return next();
   };
 
   createIndexes = async (db: Db) => {
-    await Promise.all([db.collection('tokens').createIndex({ expireAt: -1 }, { expireAfterSeconds: 0 }), db.collection('users').createIndex({ email: 1 }, { unique: true })]);
+    await Promise.all([
+      db
+        .collection("tokens")
+        .createIndex({ expireAt: -1 }, { expireAfterSeconds: 0 }),
+      db.collection("users").createIndex({ email: 1 }, { unique: true }),
+    ]);
     this.indexesCreated = true;
   };
 }

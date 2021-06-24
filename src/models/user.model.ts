@@ -1,29 +1,34 @@
-import { IUserModel } from '../types';
-import { nanoid } from 'nanoid';
-import { Db } from 'mongodb';
+import { IUserModel } from "../types";
+import { nanoid } from "nanoid";
+import { Db } from "mongodb";
 
 export class UserModel {
-  async save(db: Db, { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel) {
+  async save(
+    db: Db,
+    { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel
+  ) {
     try {
       return db
-        .collection('users')
+        .collection("users")
         .insertOne({
           _id: nanoid(12),
           emailVerified: false,
-          profilePicture: '',
+          profilePicture: "",
           userCreationDate,
           email,
           password: hashedPassword,
           address,
           publicKey,
-          name: '',
-          bio: '',
-          ...(email == `${process.env.ADMIN_EMAIL}` ? { scope: ['user', 'admin'] } : { scope: ['user'] }),
-          registrationMethod: 'email_password',
+          name: "",
+          bio: "",
+          ...(email == `${process.env.ADMIN_EMAIL}`
+            ? { scope: ["user", "admin"] }
+            : { scope: ["user"] }),
+          registrationMethod: "email_password",
         })
         .then(({ ops }) => ops[0]);
     } catch (error) {
-      console.log('insertUser', error);
+      console.log("insertUser", error);
     }
   }
 }

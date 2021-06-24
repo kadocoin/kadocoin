@@ -1,6 +1,6 @@
-import hexToBinary from 'hex-to-binary';
-import { GENESIS_DATA, MINE_RATE } from '../config/constants';
-import { cryptoHash } from '../util/index';
+import hexToBinary from "hex-to-binary";
+import { GENESIS_DATA, MINE_RATE } from "../config/constants";
+import { cryptoHash } from "../util/index";
 
 interface IBlockProps {
   timestamp: number;
@@ -19,7 +19,14 @@ class Block {
   nonce: number;
   difficulty: number;
 
-  constructor({ timestamp, lastHash, hash, data, nonce, difficulty }: IBlockProps) {
+  constructor({
+    timestamp,
+    lastHash,
+    hash,
+    data,
+    nonce,
+    difficulty,
+  }: IBlockProps) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
     this.hash = hash;
@@ -32,7 +39,13 @@ class Block {
     return new Block(GENESIS_DATA);
   }
 
-  static minedBlock({ lastBlock, data }: { lastBlock: IBlockProps; data: any[] }) {
+  static minedBlock({
+    lastBlock,
+    data,
+  }: {
+    lastBlock: IBlockProps;
+    data: any[];
+  }) {
     let hash,
       timestamp,
       nonce = 0,
@@ -42,9 +55,14 @@ class Block {
     do {
       nonce++;
       timestamp = Date.now();
-      difficulty = Block.adjustDifficulty({ originalBlock: lastBlock, timestamp });
+      difficulty = Block.adjustDifficulty({
+        originalBlock: lastBlock,
+        timestamp,
+      });
       hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty);
-    } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
+    } while (
+      hexToBinary(hash).substring(0, difficulty) !== "0".repeat(difficulty)
+    );
 
     return new Block({
       timestamp,
@@ -56,7 +74,13 @@ class Block {
     });
   }
 
-  static adjustDifficulty({ originalBlock, timestamp }: { originalBlock: IBlockProps; timestamp: number }) {
+  static adjustDifficulty({
+    originalBlock,
+    timestamp,
+  }: {
+    originalBlock: IBlockProps;
+    timestamp: number;
+  }) {
     const { difficulty } = originalBlock;
 
     if (difficulty < 1) return 1;

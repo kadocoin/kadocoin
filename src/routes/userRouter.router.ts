@@ -1,9 +1,9 @@
-import { Application, Request, Response } from 'express';
-import { DEFAULT_MESSAGE } from '../config/constants';
-import { UserController } from '../controllers/user.controller';
-import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
-import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
-import { BaseRouter } from './common/baseRouter.router';
+import { Application, Request, Response } from "express";
+import { DEFAULT_MESSAGE } from "../config/constants";
+import { UserController } from "../controllers/user.controller";
+import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
+import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
+import { BaseRouter } from "./common/baseRouter.router";
 
 export class UserRouter implements BaseRouter {
   private app: Application;
@@ -18,14 +18,19 @@ export class UserRouter implements BaseRouter {
   }
 
   initRoute(): void {
-    this.app.get('/', (req: Request, res: Response) => {
+    this.app.get("/", (req: Request, res: Response) => {
       res.send(DEFAULT_MESSAGE);
     });
 
-    this.app.post('/api/doesEmailExists', this.UserController.doesEmailExists);
+    this.app.post("/api/doesEmailExists", this.UserController.doesEmailExists);
 
-    this.app.post('/api/register', this.UserController.register);
-    this.app.post('/api/wallet-info', mustBeLoggedIn, blockchainMiddleWare(this.blockchain), this.UserController.walletInfo);
+    this.app.post("/api/register", this.UserController.register);
+    this.app.post(
+      "/api/wallet-info",
+      mustBeLoggedIn,
+      blockchainMiddleWare(this.blockchain),
+      this.UserController.walletInfo
+    );
 
     /**
      * @typedef Login
@@ -50,6 +55,6 @@ export class UserRouter implements BaseRouter {
      * @returns {Login.model}  default - Unexpected error
      */
 
-    this.app.post('/api/login', this.UserController.login);
+    this.app.post("/api/login", this.UserController.login);
   }
 }

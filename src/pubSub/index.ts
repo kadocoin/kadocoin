@@ -1,13 +1,19 @@
-import { redisClientPub, redisClientSub } from '../config/redis'
+import { redisClientPub, redisClientSub } from "../config/redis";
 
 const CHANNELS = {
-  BLOCKCHAIN: 'BLOCKCHAIN',
-  TRANSACTION: 'TRANSACTION',
+  BLOCKCHAIN: "BLOCKCHAIN",
+  TRANSACTION: "TRANSACTION",
 };
 
 class PubSub {
   [x: string]: any;
-  constructor({ blockchain, transactionPool }: { blockchain: any, transactionPool: any }) {
+  constructor({
+    blockchain,
+    transactionPool,
+  }: {
+    blockchain: any;
+    transactionPool: any;
+  }) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
 
@@ -16,7 +22,9 @@ class PubSub {
 
     this.subscribeToChannel();
 
-    this.subscriber.on('message', (channel: string, message: string) => this.handleMessage(channel, message));
+    this.subscriber.on("message", (channel: string, message: string) =>
+      this.handleMessage(channel, message)
+    );
   }
 
   handleMessage(channel: string, message: string) {
@@ -27,7 +35,9 @@ class PubSub {
     switch (channel) {
       case CHANNELS.BLOCKCHAIN:
         this.blockchain.replaceChain(parsedMessage, true, () => {
-          this.transactionPool.clearBlockchainTransactions({ chain: parsedMessage });
+          this.transactionPool.clearBlockchainTransactions({
+            chain: parsedMessage,
+          });
         });
         return;
       case CHANNELS.TRANSACTION:
@@ -39,13 +49,13 @@ class PubSub {
   }
 
   subscribeToChannel() {
-    Object.values(CHANNELS).forEach(channel => {
+    Object.values(CHANNELS).forEach((channel) => {
       this.subscriber.subscribe(channel);
     });
   }
 
   // UNSUBSCRIBE SO YOU DON'T SEND THE SAME MESSAGE TO YOURSELF. SUBSCRIBE AFTER SENDING THE MESSAGE
-  publish({ channel, message }:{channel: string, message: string}) {
+  publish({ channel, message }: { channel: string; message: string }) {
     this.subscriber.unsubscribe(channel, () => {
       this.publisher.publish(channel, message, () => {
         this.subscriber.subscribe(channel);
@@ -54,7 +64,10 @@ class PubSub {
   }
 
   broadcastChain() {
-    this.publish({ channel: CHANNELS.BLOCKCHAIN, message: JSON.stringify(this.blockchain.chain) });
+    this.publish({
+      channel: CHANNELS.BLOCKCHAIN,
+      message: JSON.stringify(this.blockchain.chain),
+    });
   }
 
   broadcastTransaction(transaction: any) {
