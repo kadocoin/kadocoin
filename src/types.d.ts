@@ -1,5 +1,4 @@
 import { Db } from "mongodb";
-import express from "express";
 
 export interface IUserModel {
   _id?: string;

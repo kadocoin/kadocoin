@@ -1,5 +1,5 @@
 import { Db, MongoClient } from "mongodb";
-import { Application, Request, Response, NextFunction, request } from "express";
+import { Application, Request, Response, NextFunction } from "express";
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
@@ -16,7 +16,7 @@ export class Database {
 
   openMongo = async (req: Request, res: Response, next: NextFunction) => {
     if (!customGlobal.mongo.client) {
-      customGlobal.mongo.client = new MongoClient(process.env.MONGODB_URI!, {
+      customGlobal.mongo.client = new MongoClient(process.env.MONGODB_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });

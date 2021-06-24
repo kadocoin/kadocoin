@@ -11,7 +11,7 @@ export class Session {
 
   sessionMiddleware = (req: Request, res: Response, next: NextFunction) => {
     return session({
-      secret: process.env.SESSION_SECRET!,
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({

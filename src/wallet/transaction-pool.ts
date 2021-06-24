@@ -1,4 +1,3 @@
-import { IUserModel } from "../types";
 import Transaction from "./transaction";
 
 interface ITransactionParam {

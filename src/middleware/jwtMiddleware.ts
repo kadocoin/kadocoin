@@ -1,6 +1,6 @@
 import { Application, Request, Response, NextFunction } from "express";
 import { TOKEN_INVALID, TOKEN_SECRET } from "../statusCode/statusCode";
-import jwt, { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export class JWTMiddleWare {
   private app: Application;

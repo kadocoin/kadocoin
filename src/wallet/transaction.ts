@@ -2,12 +2,6 @@ import { v1 as uuidv1 } from "uuid";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
 import { verifySignature } from "../util/index";
 
-type TInput = {
-  timestamp: number;
-  amount: number;
-  address: string;
-  signature: string;
-};
 interface ITransactionProps {
   recipient?: string;
   amount?: number;
@@ -78,7 +72,7 @@ class Transaction {
     const outputMap: IOutputMap = {};
 
     outputMap[recipient] = amount;
-    outputMap[publicKey!] = balance - amount;
+    outputMap[publicKey] = balance - amount;
 
     return outputMap;
   }
@@ -132,7 +126,7 @@ class Transaction {
     balance,
     localWallet,
   }: ICreateOutputMapProps) {
-    if (amount > this.outputMap[publicKey!]) {
+    if (amount > this.outputMap[publicKey]) {
       throw new Error("Insufficient balance");
     }
 
@@ -142,7 +136,7 @@ class Transaction {
       this.outputMap[recipient] = this.outputMap[recipient] + amount;
     }
 
-    this.outputMap[publicKey!] = this.outputMap[publicKey!] - amount;
+    this.outputMap[publicKey] = this.outputMap[publicKey] - amount;
 
     this.input = this.createInput({
       publicKey,

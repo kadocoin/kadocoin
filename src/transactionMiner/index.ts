@@ -1,4 +1,3 @@
-import { IUserModel } from "../types";
 import Transaction from "../wallet/transaction";
 
 class TransactionMiner {

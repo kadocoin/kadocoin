@@ -13,7 +13,6 @@ import {
   CREATED,
   NOT_FOUND,
   SUCCESS,
-  TOKEN_SECRET,
 } from "../statusCode/statusCode";
 import { UserModel } from "../models/user.model";
 import jwt from "jsonwebtoken";
