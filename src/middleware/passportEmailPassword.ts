@@ -1,8 +1,8 @@
-import passportEmailPassword from 'passport';
-import bcrypt from 'bcryptjs';
-import { Strategy as LocalStrategy } from 'passport-local';
-import { CommonModel } from '../models/common.model';
-import { Request } from 'express';
+import passportEmailPassword from "passport";
+import bcrypt from "bcryptjs";
+import { Strategy as LocalStrategy } from "passport-local";
+import { CommonModel } from "../models/common.model";
+import { Request } from "express";
 
 const { findById, findByEmail } = new CommonModel();
 
@@ -14,29 +14,35 @@ passportEmailPassword.serializeUser((user: any, done) => {
 passportEmailPassword.deserializeUser((req: Request, id: string, done: any) => {
   try {
     findById(req.db, id)
-      .then(user => {
+      .then((user) => {
         return done(null, user);
       })
-      .catch(err => done(err));
+      .catch((err) => done(err));
   } catch (error) {
     return done(error);
   }
 });
 
 passportEmailPassword.use(
-  new LocalStrategy({ usernameField: 'email', passReqToCallback: true }, async (req, email, password, done) => {
-    const user = await findByEmail(req.db, email);
+  new LocalStrategy(
+    { usernameField: "email", passReqToCallback: true },
+    async (req, email, password, done) => {
+      const user = await findByEmail(req.db, email);
 
-    if (!user) return done(null, false, { message: 'Email or password is incorrect' });
+      if (!user)
+        return done(null, false, { message: "Email or password is incorrect" });
 
-    if (user.password) {
-      if (await bcrypt.compare(password, user.password)) done(null, user);
-      else done(null, false, { message: 'Email or password is incorrect' });
-    } else {
-      const regMethod = user.registrationMethod;
-      return done(null, false, { message: `Whoops! Looks like you registered using your ${regMethod}` });
+      if (user.password) {
+        if (await bcrypt.compare(password, user.password)) done(null, user);
+        else done(null, false, { message: "Email or password is incorrect" });
+      } else {
+        const regMethod = user.registrationMethod;
+        return done(null, false, {
+          message: `Whoops! Looks like you registered using your ${regMethod}`,
+        });
+      }
     }
-  })
+  )
 );
 
 export default passportEmailPassword;

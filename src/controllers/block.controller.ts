@@ -1,8 +1,6 @@
-import { Request, Response } from 'express';
-import { INTERNAL_SERVER_ERROR, SUCCESS } from '../statusCode/statusCode';
-import Blockchain from '../blockchain';
-
-
+import { Request, Response } from "express";
+import { INTERNAL_SERVER_ERROR, SUCCESS } from "../statusCode/statusCode";
+import Blockchain from "../blockchain";
 
 export class BlockController {
   blockchain: Blockchain;
@@ -16,7 +14,9 @@ export class BlockController {
       return res.status(SUCCESS).json(this.blockchain.chain);
     } catch (error) {
       if (error instanceof Error) {
-        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+        res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: "error", message: error.message });
       }
     }
   };

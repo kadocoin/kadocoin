@@ -7,4 +7,3 @@ export const ALREADY_EXISTS = 400;
 export const NOT_FOUND = 400;
 export const INCORRECT_VALIDATION = 400;
 export const TOKEN_INVALID = 400;
-export const TOKEN_SECRET = "abcdefghijklmnopqrestuvwxyz";

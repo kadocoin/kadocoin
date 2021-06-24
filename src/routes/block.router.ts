@@ -1,6 +1,6 @@
-import { Application } from 'express';
-import { BlockController } from '../controllers/block.controller';
-import { BaseRouter } from './common/baseRouter.router';
+import { Application } from "express";
+import { BlockController } from "../controllers/block.controller";
+import { BaseRouter } from "./common/baseRouter.router";
 
 export class BlockRouter implements BaseRouter {
   private app: Application;
@@ -14,6 +14,6 @@ export class BlockRouter implements BaseRouter {
   }
 
   initRoute(): void {
-    this.app.get('/api/blocks', this.blockController.getBlocks);
+    this.app.get("/api/blocks", this.blockController.getBlocks);
   }
 }

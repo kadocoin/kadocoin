@@ -1,9 +1,18 @@
-import { IUserModel } from '../types';
-import Transaction from '../wallet/transaction';
+import Transaction from "../wallet/transaction";
 
 class TransactionMiner {
   [x: string]: any;
-  constructor({ blockchain, transactionPool, publicKey, pubSub }: { blockchain: any; transactionPool: any; publicKey: any; pubSub: any }) {
+  constructor({
+    blockchain,
+    transactionPool,
+    publicKey,
+    pubSub,
+  }: {
+    blockchain: any;
+    transactionPool: any;
+    publicKey: any;
+    pubSub: any;
+  }) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
     this.publicKey = publicKey;
@@ -16,7 +25,9 @@ class TransactionMiner {
 
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
-      validTransactions.push(Transaction.rewardTransaction({ minerPublicKey: this.publicKey }));
+      validTransactions.push(
+        Transaction.rewardTransaction({ minerPublicKey: this.publicKey })
+      );
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ data: validTransactions });
       // BROADCAST THE UPDATED BLOCKCHAIN
@@ -24,9 +35,9 @@ class TransactionMiner {
       // CLEAR THE POOL
       this.transactionPool.clear();
 
-      return 'success';
+      return "success";
     }
-    return 'error';
+    return "error";
   }
 }
 

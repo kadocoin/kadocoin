@@ -1,1 +1,2 @@
-declare module 'hex-to-binary';
+/* eslint-disable prettier/prettier */
+declare module "hex-to-binary";

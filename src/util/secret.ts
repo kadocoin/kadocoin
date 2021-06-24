@@ -1,16 +1,20 @@
-import dotenv from 'dotenv';
-import fs from 'fs';
+import dotenv from "dotenv";
+import fs from "fs";
 
-if (fs.existsSync('.env')) {
-  console.debug('Using .env file to supply config environment variables');
-  dotenv.config({ path: '.env' });
+if (fs.existsSync(".env")) {
+  console.debug("Using .env file to supply config environment variables");
+  dotenv.config({ path: ".env" });
 } else {
-  console.debug('Using .env.example file to supply config environment variables');
-  dotenv.config({ path: '.env.example' }); // you can delete this after you create your own .env file!
+  console.debug(
+    "Using .env.example file to supply config environment variables"
+  );
+  dotenv.config({ path: ".env.example" }); // you can delete this after you create your own .env file!
 }
-export const ENVIRONMENT = process.env.NODE_ENV || 'development';
-const prod = ENVIRONMENT === 'production'; // Anything else is treated as 'dev'
-export const MONGODB_URI = prod ? process.env['MONGODB_URI'] : process.env['MONGODB_URI_LOCAL'];
+export const ENVIRONMENT = process.env.NODE_ENV || "development";
+const prod = ENVIRONMENT === "production"; // Anything else is treated as 'dev'
+export const MONGODB_URI = prod
+  ? process.env["MONGODB_URI"]
+  : process.env["MONGODB_URI_LOCAL"];
 
 /**
  * PORT
@@ -18,11 +22,12 @@ export const MONGODB_URI = prod ? process.env['MONGODB_URI'] : process.env['MONG
 export const DEFAULT_PORT = 2000;
 let PEER_PORT;
 
-if (process.env.GENERATE_PEER_PORT === 'true') PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
+if (process.env.GENERATE_PEER_PORT === "true")
+  PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
 
 export const PORT = PEER_PORT || DEFAULT_PORT;
 
-export const JWTSECRET = process.env['JWTSECRET'] as string
+export const JWTSECRET = process.env["JWTSECRET"] as string;
 
 export const ROOT_NODE_ADDRESS = `http://localhost:${DEFAULT_PORT}`;
 
