@@ -34,7 +34,7 @@ interface ICreateInputProps {
   address?: string;
 }
 interface IOutputMap {
-  [recipient: string]: number;
+  [recipient: string]: string;
 }
 
 type TRewardTransactionParam = {
@@ -76,8 +76,8 @@ class Transaction {
   }: ICreateOutputMapProps) {
     const outputMap: IOutputMap = {};
 
-    outputMap[recipient] = amount;
-    outputMap[address] = balance - amount;
+    outputMap[recipient] = amount.toFixed(8);
+    outputMap[address] = (balance - amount).toFixed(8);
 
     return outputMap;
   }
@@ -105,12 +105,14 @@ class Transaction {
       outputMap,
     } = transaction;
 
+    console.log(outputMap);
+
     const outputTotal = Object.values(outputMap).reduce(
-      (total: any, outputAmount: any) => total + outputAmount
+      (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
     );
 
     if (Number(amount) !== outputTotal) {
-      console.error(`Invalid transaction from ${{ publicKey, address }}`);
+      console.error(`Invalid transaction from ${address} ${publicKey}`);
 
       return false;
     }
@@ -134,17 +136,25 @@ class Transaction {
     address,
     localWallet,
   }: ICreateOutputMapProps) {
+    // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
+    amount = Number(amount);
+    this.outputMap[address] = Number(this.outputMap[address]);
+    this.outputMap[recipient] = Number(this.outputMap[recipient]);
+
     if (amount > this.outputMap[address]) {
       throw new Error("Insufficient balance");
     }
 
+    // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
     if (!this.outputMap[recipient]) {
-      this.outputMap[recipient] = amount;
+      this.outputMap[recipient] = amount.toFixed(8);
     } else {
-      this.outputMap[recipient] = this.outputMap[recipient] + amount;
+      this.outputMap[recipient] = (this.outputMap[recipient] + amount).toFixed(
+        8
+      );
     }
 
-    this.outputMap[address] = this.outputMap[address] - amount;
+    this.outputMap[address] = (this.outputMap[address] - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,
