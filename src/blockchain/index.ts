@@ -70,7 +70,7 @@ class Blockchain {
             return false;
           }
 
-          if (Object.values(transaction.outputMap)[0] !== MINING_REWARD) {
+          if (Object.values(transaction.output)[0] !== MINING_REWARD) {
             console.error("Miner reward amount is invalid");
             return false;
           }

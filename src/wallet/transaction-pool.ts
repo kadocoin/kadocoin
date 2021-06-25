@@ -4,7 +4,7 @@ import Transaction from "./transaction";
 interface ITransactionParam {
   id: string;
   input: any;
-  outputMap: any;
+  output: any;
 }
 
 class TransactionPool {

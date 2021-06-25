@@ -9,7 +9,7 @@ type TOutputMap = { recipient?: string; address?: string };
 interface ITransactionProps {
   recipient?: string;
   amount?: number;
-  outputMap?: any;
+  output?: any;
   input?: any;
   balance?: number | string;
   localWallet?: Wallet;
@@ -23,16 +23,16 @@ interface ICreateOutputMapProps {
   signature?: any;
   balance?: number | string;
   localWallet?: Wallet;
-  outputMap?: any;
+  output?: any;
   publicKey?: string;
   address?: string;
 }
 interface ICreateInputProps {
   senderWallet?: Wallet;
-  outputMap?: any;
+  output?: any;
   signature?: any;
   balance?: number | string;
-  localAddress?: string;
+  localPublicKey?: string;
   localWallet?: Wallet;
   publicKey?: string;
   address?: string;
@@ -46,7 +46,7 @@ type TRewardTransactionParam = {
 
 class Transaction {
   id: string;
-  outputMap: TOutputMap;
+  output: TOutputMap;
   input: ICreateInputProps;
 
   constructor({
@@ -54,15 +54,14 @@ class Transaction {
     address,
     recipient,
     amount,
-    outputMap,
+    output,
     input,
     balance,
     localWallet,
   }: ITransactionProps) {
     this.id = uuidv1();
-    this.outputMap =
-      outputMap ||
-      this.createOutputMap({ address, recipient, amount, balance });
+    this.output =
+      output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
       input ||
       this.createInput({
@@ -70,7 +69,7 @@ class Transaction {
         address,
         balance,
         localWallet,
-        outputMap: this.outputMap,
+        output: this.output,
       });
   }
 
@@ -80,12 +79,12 @@ class Transaction {
     amount,
     balance,
   }: ICreateOutputMapProps): TOutputMap {
-    const outputMap = {};
+    const output = {};
 
-    outputMap[recipient] = amount.toFixed(8);
-    outputMap[address] = ((balance as number) - amount).toFixed(8);
+    output[address] = ((balance as number) - amount).toFixed(8);
+    output[recipient] = amount.toFixed(8);
 
-    return outputMap;
+    return output;
   }
 
   createInput({
@@ -93,25 +92,25 @@ class Transaction {
     balance,
     address,
     localWallet,
-    outputMap,
+    output,
   }: ICreateInputProps): ICreateInputProps {
     return {
       timestamp: Date.now(),
       amount: balance as number,
       address: address,
       publicKey: publicKey,
-      localAddress: localWallet.publicKey,
-      signature: localWallet.sign(outputMap),
+      localPublicKey: localWallet.publicKey,
+      signature: localWallet.sign(output),
     };
   }
 
   static validTransaction(transaction: ITransactionProps): boolean {
     const {
-      input: { address, publicKey, amount, signature, localAddress },
-      outputMap,
+      input: { address, publicKey, amount, signature, localPublicKey },
+      output,
     } = transaction;
 
-    const outputTotal = Object.values(outputMap).reduce(
+    const outputTotal = Object.values(output).reduce(
       (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
     );
 
@@ -122,9 +121,9 @@ class Transaction {
     }
 
     if (
-      !verifySignature({ publicKey: localAddress, data: outputMap, signature })
+      !verifySignature({ publicKey: localPublicKey, data: output, signature })
     ) {
-      console.error(`Invalid signature from ${localAddress}`);
+      console.error(`Invalid signature from ${localPublicKey}`);
 
       return false;
     }
@@ -142,30 +141,28 @@ class Transaction {
   }: ICreateOutputMapProps): void {
     // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
     amount = Number(amount);
-    this.outputMap[address] = Number(this.outputMap[address]);
-    this.outputMap[recipient] = Number(this.outputMap[recipient]);
+    this.output[address] = Number(this.output[address]);
+    this.output[recipient] = Number(this.output[recipient]);
 
-    if (amount > this.outputMap[address]) {
+    if (amount > this.output[address]) {
       throw new Error("Insufficient balance");
     }
 
     // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
-    if (!this.outputMap[recipient]) {
-      this.outputMap[recipient] = amount.toFixed(8);
+    if (!this.output[recipient]) {
+      this.output[recipient] = amount.toFixed(8);
     } else {
-      this.outputMap[recipient] = (this.outputMap[recipient] + amount).toFixed(
-        8
-      );
+      this.output[recipient] = (this.output[recipient] + amount).toFixed(8);
     }
 
-    this.outputMap[address] = (this.outputMap[address] - amount).toFixed(8);
+    this.output[address] = (this.output[address] - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,
       address,
       balance,
       localWallet,
-      outputMap: this.outputMap,
+      output: this.output,
     });
   }
 
@@ -176,7 +173,7 @@ class Transaction {
 
     return new Transaction({
       input: REWARD_INPUT,
-      outputMap: { [minerPublicKey]: MINING_REWARD },
+      output: { [minerPublicKey]: MINING_REWARD },
     });
   }
 

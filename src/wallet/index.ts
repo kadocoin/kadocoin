@@ -80,7 +80,7 @@ class Wallet {
         if (transaction.input.address === address)
           hasConductedTransaction = true;
 
-        const addressOutput = Number(transaction.outputMap[address]);
+        const addressOutput = Number(transaction.output[address]);
 
         if (addressOutput) {
           outputsTotal += addressOutput;
