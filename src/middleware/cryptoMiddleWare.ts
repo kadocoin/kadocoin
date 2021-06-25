@@ -4,7 +4,9 @@ import PubSub from "../pubSub";
 import Wallet from "../wallet";
 import TransactionPool from "../wallet/transaction-pool";
 
-export function blockchainMiddleWare(blockchain: Blockchain): any {
+type TReturnType = (req: Request, _: Response, next: NextFunction) => void;
+
+export function blockchainMiddleWare(blockchain: Blockchain): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
     req.blockchain = blockchain;
     next();
@@ -13,21 +15,21 @@ export function blockchainMiddleWare(blockchain: Blockchain): any {
 
 export function transactionPoolMiddleWare(
   transactionPool: TransactionPool
-): any {
+): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
     req.transactionPool = transactionPool;
     next();
   };
 }
 
-export function pubSubMiddleWare(pubSub: PubSub): any {
+export function pubSubMiddleWare(pubSub: PubSub): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
     req.pubSub = pubSub;
     next();
   };
 }
 
-export function walletMiddleWare(localWallet: Wallet): any {
+export function walletMiddleWare(localWallet: Wallet): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
     req.localWallet = localWallet;
     next();

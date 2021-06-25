@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Transaction from "./transaction";
 import { STARTING_BALANCE } from "../config/constants";
 import { newEc, cryptoHash } from "../util";
@@ -16,7 +17,7 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(data: any[]): any {
+  sign(data: unknown): string {
     return this.keyPair.sign(cryptoHash(data));
   }
 

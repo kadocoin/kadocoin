@@ -5,7 +5,7 @@ const newEc = new ec("secp256k1");
 
 interface IVerifySignatureProps {
   publicKey: string;
-  data: any;
+  data: any[];
   signature: string;
 }
 

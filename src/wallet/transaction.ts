@@ -1,35 +1,39 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v1 as uuidv1 } from "uuid";
+import Wallet from ".";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
 import { verifySignature } from "../util/index";
+
+type TOutputMap = { recipient?: string; address?: string };
 
 interface ITransactionProps {
   recipient?: string;
   amount?: number;
   outputMap?: any;
   input?: any;
-  balance?: any;
-  localWallet?: any;
+  balance?: number;
+  localWallet?: Wallet;
   publicKey?: string;
   address?: string;
 }
 interface ICreateOutputMapProps {
-  senderWallet?: any;
-  recipient: any;
-  amount: any;
+  senderWallet?: Wallet;
+  recipient: string;
+  amount: number;
   signature?: any;
-  balance?: any;
-  localWallet?: any;
+  balance?: number;
+  localWallet?: Wallet;
   outputMap?: any;
   publicKey?: string;
   address?: string;
 }
 interface ICreateInputProps {
-  senderWallet?: any;
+  senderWallet?: Wallet;
   outputMap?: any;
   signature?: any;
-  balance?: any;
-  localAddress?: any;
-  localWallet?: any;
+  balance?: number;
+  localAddress?: string;
+  localWallet?: Wallet;
   publicKey?: string;
   address?: string;
   amount?: number;
@@ -41,7 +45,10 @@ type TRewardTransactionParam = {
 };
 
 class Transaction {
-  [x: string]: any;
+  id: string;
+  outputMap: TOutputMap;
+  input: ICreateInputProps;
+
   constructor({
     publicKey,
     address,
@@ -72,7 +79,7 @@ class Transaction {
     recipient,
     amount,
     balance,
-  }: ICreateOutputMapProps): { recipient?: string; address?: string } {
+  }: ICreateOutputMapProps): TOutputMap {
     const outputMap = {};
 
     outputMap[recipient] = amount.toFixed(8);

@@ -18,7 +18,7 @@ export class Database {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<any> => {
+  ): Promise<void> => {
     if (!customGlobal.mongo.client) {
       customGlobal.mongo.client = new MongoClient(process.env.MONGODB_URI, {
         useNewUrlParser: true,

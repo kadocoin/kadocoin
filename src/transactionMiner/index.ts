@@ -1,4 +1,7 @@
+import Blockchain from "../blockchain";
+import PubSub from "../pubSub";
 import Transaction from "../wallet/transaction";
+import TransactionPool from "../wallet/transaction-pool";
 
 class TransactionMiner {
   [x: string]: any;
@@ -8,9 +11,9 @@ class TransactionMiner {
     address,
     pubSub,
   }: {
-    blockchain: any;
-    transactionPool: any;
-    pubSub: any;
+    blockchain: Blockchain;
+    transactionPool: TransactionPool;
+    pubSub: PubSub;
     address: string;
   }) {
     this.blockchain = blockchain;

@@ -9,7 +9,7 @@ import { BaseRouter } from "./common/baseRouter.router";
 export class UserRouter implements BaseRouter {
   private app: Application;
   private UserController: UserController;
-  blockchain: any;
+  blockchain: Blockchain;
 
   constructor(app: Application, blockchain: Blockchain) {
     this.app = app;
