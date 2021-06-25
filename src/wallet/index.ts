@@ -65,7 +65,7 @@ class Wallet {
     let hasConductedTransaction = false;
     let outputsTotal = 0;
 
-    // // TODO: CHECK IF VALID ADDRESS
+    // TODO: CHECK IF VALID ADDRESS
     // try {
     //   newEc.keyFromPublic(address, "hex");
     // } catch (error) {
@@ -79,7 +79,7 @@ class Wallet {
         if (transaction.input.address === address)
           hasConductedTransaction = true;
 
-        const addressOutput = transaction.outputMap[address];
+        const addressOutput = Number(transaction.outputMap[address]);
 
         if (addressOutput) {
           outputsTotal += addressOutput;

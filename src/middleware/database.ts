@@ -27,8 +27,6 @@ export class Database {
 
     if (!this.indexesCreated) await this.createIndexes(req.db as Db);
 
-    console.log("MongoDb connected!");
-
     return next();
   };
 

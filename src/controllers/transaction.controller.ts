@@ -29,6 +29,7 @@ export class TransactionController {
         type: "error",
         message: "Amount is not a number. Provide a number please.",
       });
+
     // ENFORCE 8 DECIMAL PLACES
     if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -36,26 +37,32 @@ export class TransactionController {
         message:
           "You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin",
       });
+
     // VALIDATE OTHER USER INPUTS
     const { error } = transactValidation(req.body);
     if (error)
       return res
         .status(INCORRECT_VALIDATION)
         .json({ type: "error", message: error.details[0].message });
+
     // GRAB USER INPUTS
     const { amount, recipient, publicKey, address } = req.body;
+
     // GRAB NECESSARY MIDDLEWARES
     const { transactionPool, blockchain, pubSub, localWallet } = req;
+
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
       return res.status(INCORRECT_VALIDATION).json({
         type: "error",
         message: "Sender and receiver address cannot be the same.",
       });
+
     // CHECK FOR EXISTING TRANSACTION
     let transaction = transactionPool.existingTransactionPool({
       inputAddress: address,
     });
+
     // GET UP TO DATE USER BALANCE
     const balance = Wallet.calculateBalance({
       address: address,

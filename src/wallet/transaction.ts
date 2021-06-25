@@ -105,8 +105,6 @@ class Transaction {
       outputMap,
     } = transaction;
 
-    console.log(outputMap);
-
     const outputTotal = Object.values(outputMap).reduce(
       (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
     );
