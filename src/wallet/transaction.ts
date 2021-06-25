@@ -29,12 +29,11 @@ interface ICreateInputProps {
   signature?: any;
   balance?: any;
   localAddress?: any;
-  localWallet: any;
+  localWallet?: any;
   publicKey?: string;
   address?: string;
-}
-interface IOutputMap {
-  [recipient: string]: string;
+  amount?: number;
+  timestamp?: number;
 }
 
 type TRewardTransactionParam = {
@@ -73,8 +72,8 @@ class Transaction {
     recipient,
     amount,
     balance,
-  }: ICreateOutputMapProps) {
-    const outputMap: IOutputMap = {};
+  }: ICreateOutputMapProps): { recipient?: string; address?: string } {
+    const outputMap = {};
 
     outputMap[recipient] = amount.toFixed(8);
     outputMap[address] = (balance - amount).toFixed(8);
@@ -88,7 +87,7 @@ class Transaction {
     address,
     localWallet,
     outputMap,
-  }: ICreateInputProps) {
+  }: ICreateInputProps): ICreateInputProps {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -99,7 +98,7 @@ class Transaction {
     };
   }
 
-  static validTransaction(transaction: ITransactionProps) {
+  static validTransaction(transaction: ITransactionProps): boolean {
     const {
       input: { address, publicKey, amount, signature, localAddress },
       outputMap,
@@ -133,7 +132,7 @@ class Transaction {
     balance,
     address,
     localWallet,
-  }: ICreateOutputMapProps) {
+  }: ICreateOutputMapProps): void {
     // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
     amount = Number(amount);
     this.outputMap[address] = Number(this.outputMap[address]);
@@ -163,7 +162,9 @@ class Transaction {
     });
   }
 
-  static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {
+  static rewardTransaction({
+    minerPublicKey,
+  }: TRewardTransactionParam): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
 
     return new Transaction({

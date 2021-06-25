@@ -22,7 +22,7 @@ export class TransactionController {
     this.commonModel = new CommonModel();
   }
 
-  make = async (req: Request, res: Response) => {
+  make = async (req: Request, res: Response): Promise<Response> => {
     // CHECK IF AMOUNT IS A NUMBER
     if (isNaN(Number(req.body.amount)))
       return res.status(INCORRECT_VALIDATION).json({
@@ -105,7 +105,7 @@ export class TransactionController {
     return res.status(CREATED).json({ type: "success", transaction });
   };
 
-  poolMap = (req: Request, res: Response) => {
+  poolMap = (req: Request, res: Response): Response => {
     try {
       const { transactionPool } = req;
 
@@ -119,7 +119,7 @@ export class TransactionController {
     }
   };
 
-  mine = async (req: Request, res: Response) => {
+  mine = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = mineValidation(req.body.address);
       if (error)
@@ -164,7 +164,7 @@ export class TransactionController {
     }
   };
 
-  getBlocks = (req: Request, res: Response) => {
+  getBlocks = (req: Request, res: Response): Response => {
     try {
       return res.status(SUCCESS).json(req.blockchain.chain);
     } catch (error) {
@@ -176,7 +176,7 @@ export class TransactionController {
     }
   };
 
-  getABlock = (req: Request, res: Response) => {
+  getABlock = (req: Request, res: Response): Response => {
     try {
       const block = req.blockchain.chain.find(
         (block: any) => block.hash === req.params.blockHash

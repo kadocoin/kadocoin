@@ -1,7 +1,7 @@
-import Joi from "joi";
+import Joi, { ValidationResult } from "joi";
 import { IUserModel } from "../types";
 
-export const registerValidation = (user: IUserModel) => {
+export const registerValidation = (user: IUserModel): ValidationResult => {
   const regSchema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
@@ -11,11 +11,11 @@ export const registerValidation = (user: IUserModel) => {
   return regSchema.validate(user);
 };
 
-export const emailValidation = (email: string) => {
+export const emailValidation = (email: string): ValidationResult => {
   return Joi.string().email().label("Email").validate(email);
 };
 
-export const loginValidation = (user: IUserModel) => {
+export const loginValidation = (user: IUserModel): ValidationResult => {
   const loginSchema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
@@ -24,7 +24,7 @@ export const loginValidation = (user: IUserModel) => {
   return loginSchema.validate(user);
 };
 
-export const walletInfoValidation = (address: string) => {
+export const walletInfoValidation = (address: string): ValidationResult => {
   const walletInfoSchema = Joi.object({
     address: Joi.string().required(),
     token: Joi.string().required(),

@@ -1,9 +1,9 @@
-import Joi from "joi";
+import Joi, { ValidationResult } from "joi";
 
 export const transactValidation = (body: {
   amount: number;
   recipient: string;
-}) => {
+}): ValidationResult => {
   const transactSchema = Joi.object().keys({
     amount: Joi.number().positive().required(),
     recipient: Joi.string().required(),
@@ -15,7 +15,7 @@ export const transactValidation = (body: {
   return transactSchema.validate(body, { convert: true });
 };
 
-export const mineValidation = (address: string) => {
+export const mineValidation = (address: string): ValidationResult => {
   return Joi.string()
     .required()
     .label("Kadocoin wallet address")

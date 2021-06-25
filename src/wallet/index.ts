@@ -16,7 +16,7 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(data: any[]) {
+  sign(data: any[]): any {
     return this.keyPair.sign(cryptoHash(data));
   }
 
@@ -32,7 +32,7 @@ class Wallet {
     chain: any[];
     publicKey: string;
     address: string;
-  }) {
+  }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) {
       this.balance = Wallet.calculateBalance({
