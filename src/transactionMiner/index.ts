@@ -19,7 +19,7 @@ class TransactionMiner {
     this.address = address;
   }
 
-  mineTransactions() {
+  mineTransactions(): string {
     // GET THE TRANSACTION POOL VALID TRANSACTIONS
     const validTransactions = this.transactionPool.validTransactions();
 

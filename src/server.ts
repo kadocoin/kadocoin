@@ -20,11 +20,20 @@ import Wallet from "./wallet";
 import isEmptyObject from "./util/isEmptyObject";
 
 /**
- * APP GLOBAL VARIABLES RELATED TO BLOCKCHAIN
+ * @var localWallet - signs and verifies transactions on this node
  */
 const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
+/**
+ * @var blockchain app wide variable
+ */
 const blockchain = new Blockchain();
+/**
+ * @var transactionPool app wide variable
+ */
 const transactionPool = new TransactionPool();
+/**
+ * @var pubSub app wide variable
+ */
 const pubSub = new PubSub({ blockchain, transactionPool });
 
 const options = {
@@ -60,11 +69,7 @@ const initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   next();
 };
 
-const initializeMiddleWare = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const initializeMiddleWare = (_: Request, __: Response, next: NextFunction) => {
   new ExpressMiddleWares(app);
   new Database(app);
   next();

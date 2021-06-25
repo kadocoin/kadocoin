@@ -1,6 +1,6 @@
 import { IUserModel } from "../types";
 
-export function removeSensitiveProps(user: IUserModel) {
+export function removeSensitiveProps(user: IUserModel): IUserModel {
   return (user = {
     _id: user._id,
     emailVerified: user.emailVerified,

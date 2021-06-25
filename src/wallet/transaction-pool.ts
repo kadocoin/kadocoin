@@ -15,19 +15,23 @@ class TransactionPool {
     this.transactionMap = {};
   }
 
-  clear() {
+  clear(): void {
     this.transactionMap = {};
   }
 
-  setTransaction(transaction: ITransactionParam) {
+  setTransaction(transaction: ITransactionParam): void {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  setMap(transactionMap: Record<any, never>) {
+  setMap(transactionMap: Record<any, never>): void {
     this.transactionMap = transactionMap;
   }
 
-  existingTransactionPool({ inputAddress }: { inputAddress: string }) {
+  existingTransactionPool({
+    inputAddress,
+  }: {
+    inputAddress: string;
+  }): Transaction {
     const transactions = Object.values(this.transactionMap);
 
     return transactions.find(
@@ -35,13 +39,13 @@ class TransactionPool {
     );
   }
 
-  validTransactions() {
+  validTransactions(): any[] {
     return Object.values(this.transactionMap).filter((transaction) =>
       Transaction.validTransaction(transaction)
     );
   }
 
-  clearBlockchainTransactions({ chain }: { chain: any[] }) {
+  clearBlockchainTransactions({ chain }: { chain: any[] }): void {
     for (let i = 0; i < chain.length; i++) {
       const block = chain[i];
 

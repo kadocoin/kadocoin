@@ -13,7 +13,7 @@ const verifySignature = ({
   publicKey,
   data,
   signature,
-}: IVerifySignatureProps) => {
+}: IVerifySignatureProps): boolean => {
   const keyFromPublic = newEc.keyFromPublic(publicKey, "hex");
 
   return keyFromPublic.verify(cryptoHash(data), signature);

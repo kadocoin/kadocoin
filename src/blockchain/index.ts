@@ -20,9 +20,9 @@ class Blockchain {
   }
 
   replaceChain(
-    incomingChain: any,
-    validateTransactions?: any,
-    onSuccess?: any
+    incomingChain: any[],
+    validateTransactions?: boolean,
+    onSuccess?: () => void
   ): void {
     if (
       incomingChain.length > 1 &&
@@ -97,7 +97,7 @@ class Blockchain {
     return true;
   }
 
-  static isValidChain(chain: any): boolean {
+  static isValidChain(chain: any[]): boolean {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis()))
       return false;
 

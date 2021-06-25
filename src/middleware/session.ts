@@ -9,7 +9,11 @@ export class Session {
     this.app.use(this.sessionMiddleware);
   }
 
-  sessionMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  sessionMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void => {
     return session({
       secret: process.env.SESSION_SECRET,
       resave: false,

@@ -1,4 +1,5 @@
 import { Application } from "express";
+import Blockchain from "../blockchain";
 import { TransactionController } from "../controllers/transaction.controller";
 import {
   blockchainMiddleWare,
@@ -7,22 +8,25 @@ import {
   walletMiddleWare,
 } from "../middleware/cryptoMiddleWare";
 import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
+import PubSub from "../pubSub";
+import Wallet from "../wallet";
+import TransactionPool from "../wallet/transaction-pool";
 import { BaseRouter } from "./common/baseRouter.router";
 
 export class TransactionRouter implements BaseRouter {
   private app: Application;
   private transactionController: TransactionController;
-  transactionPool: any;
-  blockchain: any;
-  pubSub: any;
-  localWallet: any;
+  transactionPool: TransactionPool;
+  blockchain: Blockchain;
+  pubSub: PubSub;
+  localWallet: Wallet;
 
   constructor(
     app: Application,
-    transactionPool: any,
-    blockchain: any,
-    pubSub: any,
-    localWallet: any
+    transactionPool: TransactionPool,
+    blockchain: Blockchain,
+    pubSub: PubSub,
+    localWallet: Wallet
   ) {
     this.app = app;
     this.transactionPool = transactionPool;

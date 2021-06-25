@@ -1,4 +1,5 @@
 import { Application, Request, Response } from "express";
+import Blockchain from "../blockchain";
 import { DEFAULT_MESSAGE } from "../config/constants";
 import { UserController } from "../controllers/user.controller";
 import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
@@ -10,7 +11,7 @@ export class UserRouter implements BaseRouter {
   private UserController: UserController;
   blockchain: any;
 
-  constructor(app: Application, blockchain: any) {
+  constructor(app: Application, blockchain: Blockchain) {
     this.app = app;
     this.blockchain = blockchain;
     this.UserController = new UserController();

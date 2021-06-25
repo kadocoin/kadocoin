@@ -35,7 +35,7 @@ class Block {
     this.difficulty = difficulty;
   }
 
-  static genesis() {
+  static genesis(): Block {
     return new Block(GENESIS_DATA);
   }
 
@@ -45,7 +45,7 @@ class Block {
   }: {
     lastBlock: IBlockProps;
     data: any[];
-  }) {
+  }): Block {
     let hash,
       timestamp,
       nonce = 0,
@@ -80,7 +80,7 @@ class Block {
   }: {
     originalBlock: IBlockProps;
     timestamp: number;
-  }) {
+  }): number {
     const { difficulty } = originalBlock;
 
     if (difficulty < 1) return 1;

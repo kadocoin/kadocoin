@@ -9,7 +9,7 @@ export class BlockController {
     this.blockchain = new Blockchain();
   }
 
-  getBlocks = (_: Request, res: Response) => {
+  getBlocks = (_: Request, res: Response): Response => {
     try {
       return res.status(SUCCESS).json(this.blockchain.chain);
     } catch (error) {
