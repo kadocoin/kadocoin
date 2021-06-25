@@ -1,3 +1,3 @@
-export default function isEmptyObject(obj: { obj: unknown }): boolean {
+export default function isEmptyObject(obj: any): boolean {
   return Object.keys(obj).length === 0;
 }

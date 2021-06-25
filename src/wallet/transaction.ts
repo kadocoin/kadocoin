@@ -11,7 +11,7 @@ interface ITransactionProps {
   amount?: number;
   outputMap?: any;
   input?: any;
-  balance?: number;
+  balance?: number | string;
   localWallet?: Wallet;
   publicKey?: string;
   address?: string;
@@ -21,7 +21,7 @@ interface ICreateOutputMapProps {
   recipient: string;
   amount: number;
   signature?: any;
-  balance?: number;
+  balance?: number | string;
   localWallet?: Wallet;
   outputMap?: any;
   publicKey?: string;
@@ -31,7 +31,7 @@ interface ICreateInputProps {
   senderWallet?: Wallet;
   outputMap?: any;
   signature?: any;
-  balance?: number;
+  balance?: number | string;
   localAddress?: string;
   localWallet?: Wallet;
   publicKey?: string;
@@ -83,7 +83,7 @@ class Transaction {
     const outputMap = {};
 
     outputMap[recipient] = amount.toFixed(8);
-    outputMap[address] = (balance - amount).toFixed(8);
+    outputMap[address] = ((balance as number) - amount).toFixed(8);
 
     return outputMap;
   }
@@ -97,7 +97,7 @@ class Transaction {
   }: ICreateInputProps): ICreateInputProps {
     return {
       timestamp: Date.now(),
-      amount: balance,
+      amount: balance as number,
       address: address,
       publicKey: publicKey,
       localAddress: localWallet.publicKey,
