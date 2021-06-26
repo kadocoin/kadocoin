@@ -14,10 +14,7 @@ import Wallet from "../wallet";
 import TransactionMiner from "../transactionMiner";
 import { CommonModel } from "../models/common.model";
 import isEmptyObject from "../util/isEmptyObject";
-import {
-  pubKeyToAddress,
-  isValidChecksumAddress,
-} from "../util/pubKeyToAddress";
+import { isValidChecksumAddress } from "../util/pubKeyToAddress";
 
 export class TransactionController {
   commonModel: CommonModel;
