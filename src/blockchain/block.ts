@@ -12,12 +12,12 @@ interface IBlockProps {
 }
 
 class Block {
-  timestamp: number;
-  lastHash: string;
-  hash: string;
-  data: any[];
-  nonce: number;
-  difficulty: number;
+  public timestamp: number;
+  public lastHash: string;
+  public hash: string;
+  public data: any[];
+  public nonce: number;
+  public difficulty: number;
 
   constructor({
     timestamp,
@@ -46,8 +46,8 @@ class Block {
     lastBlock: IBlockProps;
     data: any[];
   }): Block {
-    let hash,
-      timestamp,
+    let hash: string,
+      timestamp: number,
       nonce = 0,
       { difficulty } = lastBlock;
     const lastHash = lastBlock.hash;

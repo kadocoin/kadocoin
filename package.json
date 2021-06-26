@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch src/ --exec ts-node src/server.ts",
-    "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon dist/server.js",
+    "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "start": "tsc && node dist/server.js",
     "lint": "eslint",
     "lint:fix": "eslint . --fix"

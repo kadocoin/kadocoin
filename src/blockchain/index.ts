@@ -2,9 +2,10 @@ import Block from "./block";
 import cryptoHash from "../util/crypto-hash";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
 import Transaction from "../wallet/transaction";
+import { IChain } from "../types";
 
 class Blockchain {
-  chain: any[];
+  public chain: IChain;
 
   constructor() {
     this.chain = [Block.genesis()];
@@ -20,7 +21,7 @@ class Blockchain {
   }
 
   replaceChain(
-    incomingChain: any[],
+    incomingChain: IChain,
     validateTransactions?: boolean,
     onSuccess?: () => void
   ): void {
@@ -55,7 +56,7 @@ class Blockchain {
     );
   }
 
-  validTransactionData({ chain }: { chain: any }): boolean {
+  validTransactionData({ chain }: { chain: IChain }): boolean {
     for (let i = 1; i < chain.length; i++) {
       const block = chain[i];
       const transactionSet = new Set();
@@ -97,7 +98,7 @@ class Blockchain {
     return true;
   }
 
-  static isValidChain(chain: any[]): boolean {
+  static isValidChain(chain: IChain): boolean {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis()))
       return false;
 

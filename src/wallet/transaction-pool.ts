@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { IChain } from "../types";
 import Transaction from "./transaction";
 
 interface ITransactionParam {
@@ -46,7 +47,7 @@ class TransactionPool {
     );
   }
 
-  clearBlockchainTransactions({ chain }: { chain: any[] }): void {
+  clearBlockchainTransactions({ chain }: { chain: IChain }): void {
     for (let i = 0; i < chain.length; i++) {
       const block = chain[i];
 

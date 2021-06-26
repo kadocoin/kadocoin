@@ -4,12 +4,13 @@ import { STARTING_BALANCE } from "../config/constants";
 import newEc from "../util/secp256k1";
 import cryptoHash from "../util/crypto-hash";
 import { pubKeyToAddress } from "../util/pubKeyToAddress";
+import { IChain } from "../types";
 
 class Wallet {
-  balance: number;
-  keyPair: any;
-  publicKey: string;
-  address: string;
+  public balance: number;
+  public keyPair: any;
+  public publicKey: string;
+  public address: string;
 
   constructor() {
     this.balance = STARTING_BALANCE;
@@ -32,7 +33,7 @@ class Wallet {
   }: {
     recipient: string;
     amount: number;
-    chain: any[];
+    chain: IChain;
     publicKey: string;
     address: string;
   }): Transaction {
@@ -62,7 +63,7 @@ class Wallet {
     chain,
     address,
   }: {
-    chain: any[];
+    chain: IChain;
     address: string;
   }): number | string {
     let hasConductedTransaction = false;

@@ -64,14 +64,18 @@ const options = {
 
 expressSwagger(options);
 
-const initializeRoute = (_: Request, __: Response, next: NextFunction) => {
+const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
   new BlockRouter(app, blockchain);
   new TransactionRouter(app, transactionPool, blockchain, pubSub, localWallet);
   next();
 };
 
-const initializeMiddleWare = (_: Request, __: Response, next: NextFunction) => {
+const initializeMiddleWares = (
+  _: Request,
+  __: Response,
+  next: NextFunction
+) => {
   new ExpressMiddleWares(app);
   new Database(app);
   next();
@@ -122,8 +126,8 @@ const syncWithRootState = () => {
   );
 };
 
-app.use(initializeMiddleWare);
-app.use(initializeRoute);
+app.use(initializeMiddleWares);
+app.use(initializeRoutes);
 
 app.listen(PORT, () => {
   if (PORT !== DEFAULT_PORT) syncWithRootState();

@@ -1,8 +1,11 @@
 import { Db, MongoClient } from "mongodb";
 import Blockchain from "./blockchain";
+import Block from "./blockchain/block";
 import PubSub from "./pubSub";
 import Wallet from "./wallet";
 import TransactionPool from "./wallet/transaction-pool";
+
+type IChain = Array<Block>;
 
 export interface IUserModel {
   _id?: string;
