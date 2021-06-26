@@ -56,14 +56,14 @@ export class TransactionController {
     // GRAB USER INPUTS
     const { amount, recipient, publicKey, address } = req.body;
 
-    // CHECK VALIDITY OF RECIPIENT ADDRESS
+    // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient))
       return res.status(INCORRECT_VALIDATION).json({
         type: "error",
         message: "Invalid recipient address.",
       });
 
-    // CHECK VALIDITY OF RECIPIENT ADDRESS
+    // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(address))
       return res.status(INCORRECT_VALIDATION).json({
         type: "error",
