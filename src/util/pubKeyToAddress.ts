@@ -1,5 +1,4 @@
 import Web3 from "web3";
-import elliptic from "elliptic";
 
 const web3 = new Web3();
 
