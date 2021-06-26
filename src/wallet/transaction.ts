@@ -115,20 +115,23 @@ class Transaction {
       (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
     );
 
+    // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
     if (Number(amount) !== outputTotal) {
       console.error(`Invalid transaction from ${address} ${publicKey}`);
 
       return false;
     }
 
-    if (!isValidChecksumAddress(address)) {
-      console.error(
-        "Invalid Kadocoin address. Please check the address again."
-      );
+    // CHECK FOR ADDRESS VALIDITY VIA CHECKSUM
+    Object.keys(output).map((address: string): boolean => {
+      if (!isValidChecksumAddress(address)) {
+        console.error(`Invalid address => ${address}`);
 
-      return false;
-    }
+        return false;
+      }
+    });
 
+    // VERIFY THAT THE SENDER CORRECTLY SIGNED THE TRANSACTION
     if (
       !verifySignature({ publicKey: localPublicKey, data: output, signature })
     ) {
