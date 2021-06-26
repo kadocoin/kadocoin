@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Transaction from "./transaction";
 import { STARTING_BALANCE } from "../config/constants";
-import { newEc, cryptoHash } from "../util";
+import newEc from "../util/secp256k1";
+import cryptoHash from "../util/crypto-hash";
 import { pubKeyToAddress } from "../util/pubKeyToAddress";
 
 class Wallet {

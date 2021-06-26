@@ -1,6 +1,6 @@
 import hexToBinary from "hex-to-binary";
 import { GENESIS_DATA, MINE_RATE } from "../config/constants";
-import { cryptoHash } from "../util/index";
+import cryptoHash from "../util/crypto-hash";
 
 interface IBlockProps {
   timestamp: number;

@@ -12,16 +12,10 @@ import {
 } from "../statusCode/statusCode";
 import Wallet from "../wallet";
 import TransactionMiner from "../transactionMiner";
-import { CommonModel } from "../models/common.model";
 import isEmptyObject from "../util/isEmptyObject";
 import { isValidChecksumAddress } from "../util/pubKeyToAddress";
 
-export class TransactionController {
-  commonModel: CommonModel;
-  wallet: any;
-  constructor() {
-    this.commonModel = new CommonModel();
-  }
+export default class TransactionController {
   /**
    * Send Kadocoin
    *
@@ -177,36 +171,6 @@ export class TransactionController {
         .json({ type: "error", message: "No transactions to mine" });
 
       // TODO - COINS IN CIRCULATION
-    } catch (error) {
-      if (error instanceof Error) {
-        res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ type: "error", message: error.message });
-      }
-    }
-  };
-
-  getBlocks = (req: Request, res: Response): Response => {
-    try {
-      return res.status(SUCCESS).json(req.blockchain.chain);
-    } catch (error) {
-      if (error instanceof Error) {
-        res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ type: "error", message: error.message });
-      }
-    }
-  };
-
-  getABlock = (req: Request, res: Response): Response => {
-    try {
-      const block = req.blockchain.chain.find(
-        (block: any) => block.hash === req.params.blockHash
-      );
-
-      if (!block) return res.status(NOT_FOUND).json("Not found");
-
-      return res.status(SUCCESS).json(block);
     } catch (error) {
       if (error instanceof Error) {
         res

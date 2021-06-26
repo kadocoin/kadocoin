@@ -1,5 +1,5 @@
 import Block from "./block";
-import { cryptoHash } from "../util/index";
+import cryptoHash from "../util/crypto-hash";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
 import Transaction from "../wallet/transaction";
 

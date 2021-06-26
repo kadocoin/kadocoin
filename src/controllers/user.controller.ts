@@ -1,4 +1,4 @@
-import { CommonModel } from "../models/common.model";
+import CommonModel from "../models/common.model";
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import {
@@ -14,7 +14,7 @@ import {
   NOT_FOUND,
   SUCCESS,
 } from "../statusCode/statusCode";
-import { UserModel } from "../models/user.model";
+import UserModel from "../models/user.model";
 import jwt from "jsonwebtoken";
 import { JWTSECRET } from "../util/secret";
 import Wallet from "../wallet";
@@ -22,7 +22,7 @@ import { removeSensitiveProps } from "../util/removeSensitiveProps";
 
 const tokenLasts = "30d";
 
-export class UserController {
+export default class UserController {
   private commonModel: CommonModel;
   private userService: UserModel;
 
@@ -52,7 +52,7 @@ export class UserController {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    let user = await this.userService.save(req.db, {
+    let user = await this.userService.register(req.db, {
       email,
       hashedPassword,
       userCreationDate,

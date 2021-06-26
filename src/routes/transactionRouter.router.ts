@@ -1,6 +1,6 @@
 import { Application } from "express";
 import Blockchain from "../blockchain";
-import { TransactionController } from "../controllers/transaction.controller";
+import TransactionController from "../controllers/transaction.controller";
 import {
   blockchainMiddleWare,
   pubSubMiddleWare,
@@ -11,15 +11,14 @@ import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
 import PubSub from "../pubSub";
 import Wallet from "../wallet";
 import TransactionPool from "../wallet/transaction-pool";
-import { BaseRouter } from "./common/baseRouter.router";
 
-export class TransactionRouter implements BaseRouter {
+export default class TransactionRouter {
   private app: Application;
   private transactionController: TransactionController;
-  transactionPool: TransactionPool;
-  blockchain: Blockchain;
-  pubSub: PubSub;
-  localWallet: Wallet;
+  private transactionPool: TransactionPool;
+  private blockchain: Blockchain;
+  private pubSub: PubSub;
+  private localWallet: Wallet;
 
   constructor(
     app: Application,
@@ -58,16 +57,6 @@ export class TransactionRouter implements BaseRouter {
       blockchainMiddleWare(this.blockchain),
       pubSubMiddleWare(this.pubSub),
       this.transactionController.mine
-    );
-    this.app.get(
-      "/api/blocks",
-      blockchainMiddleWare(this.blockchain),
-      this.transactionController.getBlocks
-    );
-    this.app.get(
-      "/api/block/:blockHash",
-      blockchainMiddleWare(this.blockchain),
-      this.transactionController.getABlock
     );
   }
 }

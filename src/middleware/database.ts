@@ -1,12 +1,13 @@
 import { Db, MongoClient } from "mongodb";
 import { Application, Request, Response, NextFunction } from "express";
+import { MONGODB_URI, DB_NAME } from "../util/secret";
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
 
-export class Database {
+export default class Database {
   private app: Application;
-  indexesCreated: boolean;
+  private indexesCreated: boolean;
 
   constructor(app: Application) {
     this.app = app;
@@ -20,14 +21,14 @@ export class Database {
     next: NextFunction
   ): Promise<void> => {
     if (!customGlobal.mongo.client) {
-      customGlobal.mongo.client = new MongoClient(process.env.MONGODB_URI, {
+      customGlobal.mongo.client = new MongoClient(MONGODB_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });
       await customGlobal.mongo.client.connect();
     }
     req.dbClient = customGlobal.mongo.client;
-    req.db = customGlobal.mongo.client.db(process.env.DB_NAME);
+    req.db = customGlobal.mongo.client.db(DB_NAME);
 
     if (!this.indexesCreated) await this.createIndexes(req.db as Db);
 

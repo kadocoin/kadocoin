@@ -2,7 +2,7 @@
 import { v1 as uuidv1 } from "uuid";
 import Wallet from ".";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
-import { verifySignature } from "../util/index";
+import verifySignature from "../util/verifySignature";
 import { isValidChecksumAddress } from "../util/pubKeyToAddress";
 
 type TOutputMap = { recipient?: string; address?: string };

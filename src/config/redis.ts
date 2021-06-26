@@ -1,15 +1,9 @@
 import { createClient } from "redis";
-export const redisClientPub = createClient(
-  6379,
-  "redis-kado-kobo.server01.dankore.com",
-  {
-    password: process.env.REDIS_PASSWORD as string,
-  }
-);
-export const redisClientSub = createClient(
-  6379,
-  "redis-kado-kobo.server01.dankore.com",
-  {
-    password: process.env.REDIS_PASSWORD as string,
-  }
-);
+import { REDIS_URL, REDIS_PASSWORD } from "../util/secret";
+
+export const redisClientPub = createClient(6379, REDIS_URL, {
+  password: REDIS_PASSWORD as string,
+});
+export const redisClientSub = createClient(6379, REDIS_URL, {
+  password: REDIS_PASSWORD as string,
+});

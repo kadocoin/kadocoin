@@ -9,15 +9,16 @@ import {
 } from "./util/secret";
 import "dotenv/config";
 import { Request, Response, NextFunction } from "express";
-import { UserRouter } from "./routes/userRouter.router";
-import { ExpressMiddleWares } from "./middleware/expressMiddlewares";
-import { TransactionRouter } from "./routes/transactionRouter.router";
-import { Database } from "./middleware/database";
+import UserRouter from "./routes/userRouter.router";
+import ExpressMiddleWares from "./middleware/expressMiddlewares";
+import TransactionRouter from "./routes/transactionRouter.router";
+import Database from "./middleware/database";
 import Blockchain from "./blockchain";
 import TransactionPool from "./wallet/transaction-pool";
 import PubSub from "./pubSub";
 import Wallet from "./wallet";
 import isEmptyObject from "./util/isEmptyObject";
+import { BlockRouter } from "./routes/block.router";
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -65,6 +66,7 @@ expressSwagger(options);
 
 const initializeRoute = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
+  new BlockRouter(app, blockchain);
   new TransactionRouter(app, transactionPool, blockchain, pubSub, localWallet);
   next();
 };
