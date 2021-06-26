@@ -1,6 +1,6 @@
 import { Application } from "express";
 import Blockchain from "../blockchain";
-import { BlockController } from "../controllers/block.controller";
+import BlockController from "../controllers/block.controller";
 import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
 import { BaseRouter } from "./common/baseRouter.router";
 

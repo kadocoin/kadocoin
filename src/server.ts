@@ -9,10 +9,10 @@ import {
 } from "./util/secret";
 import "dotenv/config";
 import { Request, Response, NextFunction } from "express";
-import { UserRouter } from "./routes/userRouter.router";
-import { ExpressMiddleWares } from "./middleware/expressMiddlewares";
-import { TransactionRouter } from "./routes/transactionRouter.router";
-import { Database } from "./middleware/database";
+import UserRouter from "./routes/userRouter.router";
+import ExpressMiddleWares from "./middleware/expressMiddlewares";
+import TransactionRouter from "./routes/transactionRouter.router";
+import Database from "./middleware/database";
 import Blockchain from "./blockchain";
 import TransactionPool from "./wallet/transaction-pool";
 import PubSub from "./pubSub";

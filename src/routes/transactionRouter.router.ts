@@ -1,6 +1,6 @@
 import { Application } from "express";
 import Blockchain from "../blockchain";
-import { TransactionController } from "../controllers/transaction.controller";
+import TransactionController from "../controllers/transaction.controller";
 import {
   blockchainMiddleWare,
   pubSubMiddleWare,
@@ -13,7 +13,7 @@ import Wallet from "../wallet";
 import TransactionPool from "../wallet/transaction-pool";
 import { BaseRouter } from "./common/baseRouter.router";
 
-export class TransactionRouter implements BaseRouter {
+export default class TransactionRouter implements BaseRouter {
   private app: Application;
   private transactionController: TransactionController;
   private transactionPool: TransactionPool;

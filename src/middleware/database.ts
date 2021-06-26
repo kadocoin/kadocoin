@@ -4,9 +4,9 @@ import { Application, Request, Response, NextFunction } from "express";
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
 
-export class Database {
+export default class Database {
   private app: Application;
-  indexesCreated: boolean;
+  private indexesCreated: boolean;
 
   constructor(app: Application) {
     this.app = app;

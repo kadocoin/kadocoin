@@ -6,7 +6,7 @@ import {
 } from "../statusCode/statusCode";
 import Block from "../blockchain/block";
 
-export class BlockController {
+export default class BlockController {
   getBlocks = (req: Request, res: Response): Response => {
     try {
       return res.status(SUCCESS).json(req.blockchain.chain);

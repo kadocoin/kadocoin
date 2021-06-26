@@ -2,7 +2,7 @@ import { IUserModel } from "../types";
 import { nanoid } from "nanoid";
 import { Db } from "mongodb";
 
-export class UserModel {
+export default class UserModel {
   async save(
     db: Db,
     { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel

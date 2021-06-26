@@ -15,7 +15,7 @@ import TransactionMiner from "../transactionMiner";
 import isEmptyObject from "../util/isEmptyObject";
 import { isValidChecksumAddress } from "../util/pubKeyToAddress";
 
-export class TransactionController {
+export default class TransactionController {
   /**
    * Send Kadocoin
    *
