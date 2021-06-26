@@ -1,7 +1,5 @@
-import { ec } from "elliptic";
 import cryptoHash from "./crypto-hash";
-
-const newEc = new ec("secp256k1");
+import newEc from "./secp256k1";
 
 interface IVerifySignatureProps {
   publicKey: string;
@@ -9,14 +7,12 @@ interface IVerifySignatureProps {
   signature: string;
 }
 
-const verifySignature = ({
+export default function verifySignature({
   publicKey,
   data,
   signature,
-}: IVerifySignatureProps): boolean => {
+}: IVerifySignatureProps): boolean {
   const keyFromPublic = newEc.keyFromPublic(publicKey, "hex");
 
   return keyFromPublic.verify(cryptoHash(data), signature);
-};
-
-export { newEc, verifySignature, cryptoHash };
+}

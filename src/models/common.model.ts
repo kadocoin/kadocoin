@@ -1,8 +1,7 @@
 import { Db } from "mongodb";
 import { IUserModel } from "../types";
-import { CommonInterface } from "./common/common.interface";
 
-export default class CommonModel implements CommonInterface<IUserModel> {
+export default class CommonModel {
   findByEmail = async (db: Db, email: string): Promise<IUserModel> => {
     try {
       return db

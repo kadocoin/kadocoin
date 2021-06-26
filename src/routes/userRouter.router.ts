@@ -4,9 +4,8 @@ import { DEFAULT_MESSAGE } from "../config/constants";
 import UserController from "../controllers/user.controller";
 import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
 import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
-import { BaseRouter } from "./common/baseRouter.router";
 
-export default class UserRouter implements BaseRouter {
+export default class UserRouter {
   private app: Application;
   private UserController: UserController;
   private blockchain: Blockchain;

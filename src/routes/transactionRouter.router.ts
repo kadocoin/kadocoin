@@ -11,9 +11,8 @@ import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
 import PubSub from "../pubSub";
 import Wallet from "../wallet";
 import TransactionPool from "../wallet/transaction-pool";
-import { BaseRouter } from "./common/baseRouter.router";
 
-export default class TransactionRouter implements BaseRouter {
+export default class TransactionRouter {
   private app: Application;
   private transactionController: TransactionController;
   private transactionPool: TransactionPool;

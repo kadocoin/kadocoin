@@ -2,9 +2,8 @@ import { Application } from "express";
 import Blockchain from "../blockchain";
 import BlockController from "../controllers/block.controller";
 import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
-import { BaseRouter } from "./common/baseRouter.router";
 
-export class BlockRouter implements BaseRouter {
+export class BlockRouter {
   private app: Application;
   private blockController: BlockController;
   private blockchain: Blockchain;
