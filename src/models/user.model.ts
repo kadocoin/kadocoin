@@ -1,9 +1,10 @@
 import { IUserModel } from "../types";
+import { ADMIN_EMAIL } from "../util/secret";
 import { nanoid } from "nanoid";
 import { Db } from "mongodb";
 
 export default class UserModel {
-  async save(
+  async register(
     db: Db,
     { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel
   ): Promise<IUserModel> {
@@ -21,14 +22,14 @@ export default class UserModel {
           publicKey,
           name: "",
           bio: "",
-          ...(email == `${process.env.ADMIN_EMAIL}`
+          ...(email == `${ADMIN_EMAIL}`
             ? { scope: ["user", "admin"] }
             : { scope: ["user"] }),
           registrationMethod: "email_password",
         })
         .then(({ ops }) => ops[0]);
     } catch (error) {
-      console.log("insertUser", error);
+      console.log("register", error);
     }
   }
 }

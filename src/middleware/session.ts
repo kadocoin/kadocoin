@@ -1,5 +1,6 @@
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import { SESSION_SECRET } from "../util/secret";
 import { Application, Request, Response, NextFunction } from "express";
 
 export class Session {
@@ -15,7 +16,7 @@ export class Session {
     next: NextFunction
   ): void => {
     return session({
-      secret: process.env.SESSION_SECRET,
+      secret: SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({

@@ -52,7 +52,7 @@ export default class UserController {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    let user = await this.userService.save(req.db, {
+    let user = await this.userService.register(req.db, {
       email,
       hashedPassword,
       userCreationDate,

@@ -38,7 +38,7 @@ if (!MONGODB_URI) {
  * PORT
  */
 export const DEFAULT_PORT = 2000;
-let PEER_PORT;
+let PEER_PORT: number;
 
 if (process.env.GENERATE_PEER_PORT === "true")
   PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
@@ -51,3 +51,6 @@ export const ROOT_NODE_ADDRESS = `http://localhost:${DEFAULT_PORT}`;
 
 export const REDIS_URL = process.env["REDIS_URL"];
 export const REDIS_PASSWORD = process.env["REDIS_PASSWORD"];
+
+export const SESSION_SECRET = process.env["SESSION_SECRET"];
+export const ADMIN_EMAIL = process.env["ADMIN_EMAIL"];
