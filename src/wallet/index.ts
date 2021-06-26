@@ -2,7 +2,7 @@
 import Transaction from "./transaction";
 import { STARTING_BALANCE } from "../config/constants";
 import { newEc, cryptoHash } from "../util";
-import pubKeyToAddress from "../util/pubKeyToAddress";
+import { pubKeyToAddress } from "../util/pubKeyToAddress";
 
 class Wallet {
   balance: number;
@@ -17,7 +17,8 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(data: unknown): string {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  sign(data: any): string {
     return this.keyPair.sign(cryptoHash(data));
   }
 

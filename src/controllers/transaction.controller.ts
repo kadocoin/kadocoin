@@ -14,6 +14,10 @@ import Wallet from "../wallet";
 import TransactionMiner from "../transactionMiner";
 import { CommonModel } from "../models/common.model";
 import isEmptyObject from "../util/isEmptyObject";
+import {
+  pubKeyToAddress,
+  isValidChecksumAddress,
+} from "../util/pubKeyToAddress";
 
 export class TransactionController {
   commonModel: CommonModel;
@@ -21,7 +25,14 @@ export class TransactionController {
   constructor() {
     this.commonModel = new CommonModel();
   }
-
+  /**
+   * Send Kadocoin
+   *
+   * @method make
+   * @param {Request} req Express Request object
+   * @param {Response} res Express Response object
+   * @return a transaction object
+   */
   make = async (req: Request, res: Response): Promise<Response> => {
     // CHECK IF AMOUNT IS A NUMBER
     if (isNaN(Number(req.body.amount)))
@@ -47,6 +58,20 @@ export class TransactionController {
 
     // GRAB USER INPUTS
     const { amount, recipient, publicKey, address } = req.body;
+
+    // CHECK VALIDITY OF RECIPIENT ADDRESS
+    if (!isValidChecksumAddress(recipient))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: "error",
+        message: "Invalid recipient address.",
+      });
+
+    // CHECK VALIDITY OF RECIPIENT ADDRESS
+    if (!isValidChecksumAddress(address))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: "error",
+        message: "Invalid sender address.",
+      });
 
     // GRAB NECESSARY MIDDLEWARES
     const { transactionPool, blockchain, pubSub, localWallet } = req;
