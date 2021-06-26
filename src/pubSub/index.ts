@@ -1,4 +1,8 @@
+import { RedisClient } from "redis";
+import Blockchain from "../blockchain";
 import { redisClientPub, redisClientSub } from "../config/redis";
+import Transaction from "../wallet/transaction";
+import TransactionPool from "../wallet/transaction-pool";
 
 const CHANNELS = {
   BLOCKCHAIN: "BLOCKCHAIN",
@@ -6,13 +10,17 @@ const CHANNELS = {
 };
 
 class PubSub {
-  [x: string]: any;
+  blockchain: Blockchain;
+  transactionPool: TransactionPool;
+  publisher: RedisClient;
+  subscriber: RedisClient;
+
   constructor({
     blockchain,
     transactionPool,
   }: {
-    blockchain: any;
-    transactionPool: any;
+    blockchain: Blockchain;
+    transactionPool: TransactionPool;
   }) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
@@ -27,7 +35,7 @@ class PubSub {
     );
   }
 
-  handleMessage(channel: string, message: string) {
+  handleMessage(channel: string, message: string): void {
     console.log(`Message received. Channel: ${channel}. Message: ${message}`);
 
     const parsedMessage = JSON.parse(message);
@@ -48,14 +56,14 @@ class PubSub {
     }
   }
 
-  subscribeToChannel() {
+  subscribeToChannel(): void {
     Object.values(CHANNELS).forEach((channel) => {
       this.subscriber.subscribe(channel);
     });
   }
 
   // UNSUBSCRIBE SO YOU DON'T SEND THE SAME MESSAGE TO YOURSELF. SUBSCRIBE AFTER SENDING THE MESSAGE
-  publish({ channel, message }: { channel: string; message: string }) {
+  publish({ channel, message }: { channel: string; message: string }): void {
     this.subscriber.unsubscribe(channel, () => {
       this.publisher.publish(channel, message, () => {
         this.subscriber.subscribe(channel);
@@ -63,14 +71,14 @@ class PubSub {
     });
   }
 
-  broadcastChain() {
+  broadcastChain(): void {
     this.publish({
       channel: CHANNELS.BLOCKCHAIN,
       message: JSON.stringify(this.blockchain.chain),
     });
   }
 
-  broadcastTransaction(transaction: any) {
+  broadcastTransaction(transaction: Transaction): void {
     this.publish({
       channel: CHANNELS.TRANSACTION,
       message: JSON.stringify(transaction),

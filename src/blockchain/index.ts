@@ -10,7 +10,7 @@ class Blockchain {
     this.chain = [Block.genesis()];
   }
 
-  addBlock({ data }: { data: any }) {
+  addBlock({ data }: { data: any }): void {
     const newBlock = Block.minedBlock({
       lastBlock: this.chain[this.chain.length - 1],
       data,
@@ -20,10 +20,10 @@ class Blockchain {
   }
 
   replaceChain(
-    incomingChain: any,
-    validateTransactions?: any,
-    onSuccess?: any
-  ) {
+    incomingChain: any[],
+    validateTransactions?: boolean,
+    onSuccess?: () => void
+  ): void {
     if (
       incomingChain.length > 1 &&
       this.chain.length > 1 &&
@@ -55,7 +55,7 @@ class Blockchain {
     );
   }
 
-  validTransactionData({ chain }: { chain: any }) {
+  validTransactionData({ chain }: { chain: any }): boolean {
     for (let i = 1; i < chain.length; i++) {
       const block = chain[i];
       const transactionSet = new Set();
@@ -70,7 +70,7 @@ class Blockchain {
             return false;
           }
 
-          if (Object.values(transaction.outputMap)[0] !== MINING_REWARD) {
+          if (Object.values(transaction.output)[0] !== MINING_REWARD) {
             console.error("Miner reward amount is invalid");
             return false;
           }
@@ -97,7 +97,7 @@ class Blockchain {
     return true;
   }
 
-  static isValidChain(chain: any) {
+  static isValidChain(chain: any[]): boolean {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis()))
       return false;
 

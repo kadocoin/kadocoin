@@ -3,7 +3,7 @@ import { IUserModel } from "../types";
 import { CommonInterface } from "./common/common.interface";
 
 export class CommonModel implements CommonInterface<IUserModel> {
-  findByEmail = async (db: Db, email: string) => {
+  findByEmail = async (db: Db, email: string): Promise<IUserModel> => {
     try {
       return db
         .collection("users")
@@ -16,7 +16,7 @@ export class CommonModel implements CommonInterface<IUserModel> {
     }
   };
 
-  findById = async (db: Db, id: string) => {
+  findById = async (db: Db, id: string): Promise<IUserModel> => {
     try {
       return db
         .collection("users")
@@ -26,45 +26,6 @@ export class CommonModel implements CommonInterface<IUserModel> {
         .then((user) => user || null);
     } catch (error) {
       console.log("findById", error);
-    }
-  };
-
-  findByAddress = async (db: Db, address: string) => {
-    try {
-      return db
-        .collection("users")
-        .findOne({
-          address,
-        })
-        .then((user) => user || null);
-    } catch (error) {
-      console.log("findByAddress", error);
-    }
-  };
-
-  findWalletByAddress = async (db: Db, address: string) => {
-    try {
-      return db
-        .collection("users")
-        .findOne({
-          address,
-        })
-        .then((user) => user.wallet || null);
-    } catch (error) {
-      console.log("findByAddress", error);
-    }
-  };
-
-  findWalletByPublicKey = async (db: Db, publicKey: string) => {
-    try {
-      return db
-        .collection("users")
-        .findOne({
-          publicKey,
-        })
-        .then((user) => user || null);
-    } catch (error) {
-      console.log("findWalletByPublicKey", error);
     }
   };
 

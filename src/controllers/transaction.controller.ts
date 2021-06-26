@@ -14,6 +14,7 @@ import Wallet from "../wallet";
 import TransactionMiner from "../transactionMiner";
 import { CommonModel } from "../models/common.model";
 import isEmptyObject from "../util/isEmptyObject";
+import { isValidChecksumAddress } from "../util/pubKeyToAddress";
 
 export class TransactionController {
   commonModel: CommonModel;
@@ -21,14 +22,22 @@ export class TransactionController {
   constructor() {
     this.commonModel = new CommonModel();
   }
-
-  make = async (req: Request, res: Response) => {
+  /**
+   * Send Kadocoin
+   *
+   * @method make
+   * @param {Request} req Express Request object
+   * @param {Response} res Express Response object
+   * @return a transaction object
+   */
+  make = async (req: Request, res: Response): Promise<Response> => {
     // CHECK IF AMOUNT IS A NUMBER
     if (isNaN(Number(req.body.amount)))
       return res.status(INCORRECT_VALIDATION).json({
         type: "error",
         message: "Amount is not a number. Provide a number please.",
       });
+
     // ENFORCE 8 DECIMAL PLACES
     if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -36,29 +45,49 @@ export class TransactionController {
         message:
           "You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin",
       });
+
     // VALIDATE OTHER USER INPUTS
     const { error } = transactValidation(req.body);
     if (error)
       return res
         .status(INCORRECT_VALIDATION)
         .json({ type: "error", message: error.details[0].message });
+
     // GRAB USER INPUTS
-    const { amount, recipient, publicKey } = req.body;
+    const { amount, recipient, publicKey, address } = req.body;
+
+    // CHECK VALIDITY OF RECIPIENT ADDRESS
+    if (!isValidChecksumAddress(recipient))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: "error",
+        message: "Invalid recipient address.",
+      });
+
+    // CHECK VALIDITY OF RECIPIENT ADDRESS
+    if (!isValidChecksumAddress(address))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: "error",
+        message: "Invalid sender address.",
+      });
+
     // GRAB NECESSARY MIDDLEWARES
     const { transactionPool, blockchain, pubSub, localWallet } = req;
+
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
-    if (recipient === publicKey)
+    if (recipient === address)
       return res.status(INCORRECT_VALIDATION).json({
         type: "error",
         message: "Sender and receiver address cannot be the same.",
       });
+
     // CHECK FOR EXISTING TRANSACTION
     let transaction = transactionPool.existingTransactionPool({
-      inputAddress: publicKey,
+      inputAddress: address,
     });
+
     // GET UP TO DATE USER BALANCE
     const balance = Wallet.calculateBalance({
-      address: publicKey,
+      address: address,
       chain: blockchain.chain,
     });
 
@@ -67,6 +96,7 @@ export class TransactionController {
         console.log("Update transaction");
         transaction.update({
           publicKey,
+          address,
           recipient,
           amount: Number(amount),
           balance,
@@ -79,6 +109,7 @@ export class TransactionController {
           amount: Number(amount),
           chain: blockchain.chain,
           publicKey,
+          address,
         });
       }
     } catch (error) {
@@ -96,7 +127,7 @@ export class TransactionController {
     return res.status(CREATED).json({ type: "success", transaction });
   };
 
-  poolMap = (req: Request, res: Response) => {
+  poolMap = (req: Request, res: Response): Response => {
     try {
       const { transactionPool } = req;
 
@@ -110,22 +141,22 @@ export class TransactionController {
     }
   };
 
-  mine = async (req: Request, res: Response) => {
+  mine = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { error } = mineValidation(req.body.publicKey);
+      const { error } = mineValidation(req.body.address);
       if (error)
         return res
           .status(INCORRECT_VALIDATION)
           .json({ type: "error", message: error.details[0].message });
 
-      const { publicKey } = req.body;
+      const { address } = req.body;
       const { transactionPool, blockchain, pubSub } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({
           blockchain: blockchain,
           transactionPool: transactionPool,
-          publicKey: publicKey,
+          address: address,
           pubSub: pubSub,
         });
 
@@ -155,7 +186,7 @@ export class TransactionController {
     }
   };
 
-  getBlocks = (req: Request, res: Response) => {
+  getBlocks = (req: Request, res: Response): Response => {
     try {
       return res.status(SUCCESS).json(req.blockchain.chain);
     } catch (error) {
@@ -167,7 +198,7 @@ export class TransactionController {
     }
   };
 
-  getABlock = (req: Request, res: Response) => {
+  getABlock = (req: Request, res: Response): Response => {
     try {
       const block = req.blockchain.chain.find(
         (block: any) => block.hash === req.params.blockHash

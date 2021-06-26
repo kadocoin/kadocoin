@@ -14,7 +14,11 @@ export class Database {
     this.indexesCreated = false;
   }
 
-  openMongo = async (req: Request, res: Response, next: NextFunction) => {
+  openMongo = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     if (!customGlobal.mongo.client) {
       customGlobal.mongo.client = new MongoClient(process.env.MONGODB_URI, {
         useNewUrlParser: true,
@@ -27,12 +31,10 @@ export class Database {
 
     if (!this.indexesCreated) await this.createIndexes(req.db as Db);
 
-    console.log("MongoDb connected!");
-
     return next();
   };
 
-  createIndexes = async (db: Db) => {
+  createIndexes = async (db: Db): Promise<void> => {
     await Promise.all([
       db
         .collection("tokens")

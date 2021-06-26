@@ -31,7 +31,7 @@ export class UserController {
     this.userService = new UserModel();
   }
 
-  register = async (req: Request, res: Response) => {
+  register = async (req: Request, res: Response): Promise<Response> => {
     const { email, password, userCreationDate } = req.body;
     const { error } = registerValidation(req.body);
 
@@ -80,7 +80,7 @@ export class UserController {
     });
   };
 
-  doesEmailExists = async (req: Request, res: Response) => {
+  doesEmailExists = async (req: Request, res: Response): Promise<Response> => {
     const { email } = req.body;
 
     const { error } = emailValidation(email);
@@ -97,7 +97,7 @@ export class UserController {
     res.status(SUCCESS).json({ message: "unique email" });
   };
 
-  login = async (req: Request, res: Response) => {
+  login = async (req: Request, res: Response): Promise<Response> => {
     const { error } = loginValidation(req.body);
 
     if (error)
@@ -137,7 +137,7 @@ export class UserController {
     res.status(SUCCESS).json({ user });
   };
 
-  walletInfo = (req: Request, res: Response) => {
+  walletInfo = (req: Request, res: Response): Response => {
     const { error } = walletInfoValidation(req.body);
 
     if (error)
@@ -148,7 +148,7 @@ export class UserController {
     res.status(SUCCESS).json({
       balance: Wallet.calculateBalance({
         chain: req.blockchain.chain,
-        address: req.body.publicKey,
+        address: req.body.address,
       }),
     });
   };

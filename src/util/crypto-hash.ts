@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
-const cryptoHash = (...inputs: any[]) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cryptoHash = (...inputs: any[]): string => {
   const hash = crypto.createHash("sha256");
 
   hash.update(

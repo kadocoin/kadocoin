@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Transaction from "./transaction";
 import { STARTING_BALANCE } from "../config/constants";
 import { newEc, cryptoHash } from "../util";
-import pubKeyToAddress from "../util/pubKeyToAddress";
+import { pubKeyToAddress } from "../util/pubKeyToAddress";
 
 class Wallet {
   balance: number;
@@ -16,7 +17,8 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(data: any[]) {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  sign(data: any): string {
     return this.keyPair.sign(cryptoHash(data));
   }
 
@@ -25,17 +27,19 @@ class Wallet {
     amount,
     chain,
     publicKey,
+    address,
   }: {
     recipient: string;
     amount: number;
     chain: any[];
     publicKey: string;
-  }) {
+    address: string;
+  }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) {
       this.balance = Wallet.calculateBalance({
         chain,
-        address: publicKey,
+        address: address,
       }) as number;
     }
 
@@ -46,6 +50,7 @@ class Wallet {
     return new Transaction({
       publicKey,
       recipient,
+      address,
       amount,
       balance: this.balance,
       localWallet: this,
@@ -63,11 +68,11 @@ class Wallet {
     let outputsTotal = 0;
 
     // TODO: CHECK IF VALID ADDRESS
-    try {
-      newEc.keyFromPublic(address, "hex");
-    } catch (error) {
-      return "Invalid public key" as string;
-    }
+    // try {
+    //   newEc.keyFromPublic(address, "hex");
+    // } catch (error) {
+    //   return "Invalid public key" as string;
+    // }
 
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];
@@ -76,7 +81,7 @@ class Wallet {
         if (transaction.input.address === address)
           hasConductedTransaction = true;
 
-        const addressOutput = transaction.outputMap[address];
+        const addressOutput = Number(transaction.output[address]);
 
         if (addressOutput) {
           outputsTotal += addressOutput;

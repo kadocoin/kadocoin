@@ -1,37 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v1 as uuidv1 } from "uuid";
+import Wallet from ".";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
+import { INCORRECT_VALIDATION } from "../statusCode/statusCode";
 import { verifySignature } from "../util/index";
+import { isValidChecksumAddress } from "../util/pubKeyToAddress";
+
+type TOutputMap = { recipient?: string; address?: string };
 
 interface ITransactionProps {
   recipient?: string;
   amount?: number;
-  outputMap?: any;
+  output?: any;
   input?: any;
-  balance?: any;
-  localWallet?: any;
+  balance?: number | string;
+  localWallet?: Wallet;
   publicKey?: string;
+  address?: string;
 }
 interface ICreateOutputMapProps {
-  senderWallet?: any;
-  recipient: any;
-  amount: any;
+  senderWallet?: Wallet;
+  recipient: string;
+  amount: number;
   signature?: any;
-  balance?: any;
-  localWallet?: any;
-  outputMap?: any;
+  balance?: number | string;
+  localWallet?: Wallet;
+  output?: any;
   publicKey?: string;
+  address?: string;
 }
 interface ICreateInputProps {
-  senderWallet?: any;
-  outputMap?: any;
+  senderWallet?: Wallet;
+  output?: any;
   signature?: any;
-  balance?: any;
-  localAddress?: any;
-  localWallet: any;
+  balance?: number | string;
+  localPublicKey?: string;
+  localWallet?: Wallet;
   publicKey?: string;
-}
-interface IOutputMap {
-  [recipient: string]: number;
+  address?: string;
+  amount?: number;
+  timestamp?: number;
 }
 
 type TRewardTransactionParam = {
@@ -39,79 +47,93 @@ type TRewardTransactionParam = {
 };
 
 class Transaction {
-  [x: string]: any;
+  id: string;
+  output: TOutputMap;
+  input: ICreateInputProps;
+
   constructor({
     publicKey,
+    address,
     recipient,
     amount,
-    outputMap,
+    output,
     input,
     balance,
     localWallet,
   }: ITransactionProps) {
     this.id = uuidv1();
-    this.outputMap =
-      outputMap ||
-      this.createOutputMap({ publicKey, recipient, amount, balance });
+    this.output =
+      output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
       input ||
       this.createInput({
         publicKey,
+        address,
         balance,
         localWallet,
-        outputMap: this.outputMap,
+        output: this.output,
       });
   }
 
   createOutputMap({
-    publicKey,
+    address,
     recipient,
     amount,
     balance,
-  }: ICreateOutputMapProps) {
-    const outputMap: IOutputMap = {};
+  }: ICreateOutputMapProps): TOutputMap {
+    const output = {};
 
-    outputMap[recipient] = amount;
-    outputMap[publicKey] = balance - amount;
+    output[address] = ((balance as number) - amount).toFixed(8);
+    output[recipient] = amount.toFixed(8);
 
-    return outputMap;
+    return output;
   }
 
   createInput({
     publicKey,
     balance,
+    address,
     localWallet,
-    outputMap,
-  }: ICreateInputProps) {
+    output,
+  }: ICreateInputProps): ICreateInputProps {
     return {
       timestamp: Date.now(),
-      amount: balance,
-      address: publicKey,
-      localAddress: localWallet.publicKey,
-      signature: localWallet.sign(outputMap),
+      amount: balance as number,
+      address: address,
+      publicKey: publicKey,
+      localPublicKey: localWallet.publicKey,
+      signature: localWallet.sign(output),
     };
   }
 
-  static validTransaction(transaction: ITransactionProps) {
+  static validTransaction(transaction: ITransactionProps): boolean {
     const {
-      input: { address, amount, signature, localAddress },
-      outputMap,
+      input: { address, publicKey, amount, signature, localPublicKey },
+      output,
     } = transaction;
 
-    const outputTotal = Object.values(outputMap).reduce(
-      (total: any, outputAmount: any) => total + outputAmount
+    const outputTotal = Object.values(output).reduce(
+      (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
     );
 
     if (Number(amount) !== outputTotal) {
-      console.error(`Invalid transaction from ${address}`);
+      console.error(`Invalid transaction from ${address} ${publicKey}`);
+
+      return false;
+    }
+
+    if (!isValidChecksumAddress(address)) {
+      console.error(
+        "Invalid Kadocoin address. Please check the address again."
+      );
 
       return false;
     }
 
     if (
-      !verifySignature({ publicKey: localAddress, data: outputMap, signature })
+      !verifySignature({ publicKey: localPublicKey, data: output, signature })
     ) {
-      console.error(`Invalid signature from ${localAddress || address}`);
+      console.error(`Invalid signature from ${localPublicKey}`);
 
       return false;
     }
@@ -124,34 +146,44 @@ class Transaction {
     recipient,
     amount,
     balance,
+    address,
     localWallet,
-  }: ICreateOutputMapProps) {
-    if (amount > this.outputMap[publicKey]) {
+  }: ICreateOutputMapProps): void {
+    // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
+    amount = Number(amount);
+    this.output[address] = Number(this.output[address]);
+    this.output[recipient] = Number(this.output[recipient]);
+
+    if (amount > this.output[address]) {
       throw new Error("Insufficient balance");
     }
 
-    if (!this.outputMap[recipient]) {
-      this.outputMap[recipient] = amount;
+    // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
+    if (!this.output[recipient]) {
+      this.output[recipient] = amount.toFixed(8);
     } else {
-      this.outputMap[recipient] = this.outputMap[recipient] + amount;
+      this.output[recipient] = (this.output[recipient] + amount).toFixed(8);
     }
 
-    this.outputMap[publicKey] = this.outputMap[publicKey] - amount;
+    this.output[address] = (this.output[address] - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,
+      address,
       balance,
       localWallet,
-      outputMap: this.outputMap,
+      output: this.output,
     });
   }
 
-  static rewardTransaction({ minerPublicKey }: TRewardTransactionParam) {
+  static rewardTransaction({
+    minerPublicKey,
+  }: TRewardTransactionParam): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
 
     return new Transaction({
       input: REWARD_INPUT,
-      outputMap: { [minerPublicKey]: MINING_REWARD },
+      output: { [minerPublicKey]: MINING_REWARD },
     });
   }
 

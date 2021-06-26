@@ -7,9 +7,9 @@ export function mustBeLoggedIn(
   req: Request,
   res: Response,
   next: NextFunction
-) {
+): void {
   try {
-    req.apiUser = jwt.verify(req.body.token, JWTSECRET);
+    jwt.verify(req.body.token, JWTSECRET);
     next();
   } catch (error) {
     res

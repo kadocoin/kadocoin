@@ -1,32 +1,35 @@
+import Blockchain from "../blockchain";
+import PubSub from "../pubSub";
 import Transaction from "../wallet/transaction";
+import TransactionPool from "../wallet/transaction-pool";
 
 class TransactionMiner {
   [x: string]: any;
   constructor({
     blockchain,
     transactionPool,
-    publicKey,
+    address,
     pubSub,
   }: {
-    blockchain: any;
-    transactionPool: any;
-    publicKey: any;
-    pubSub: any;
+    blockchain: Blockchain;
+    transactionPool: TransactionPool;
+    pubSub: PubSub;
+    address: string;
   }) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
-    this.publicKey = publicKey;
     this.pubSub = pubSub;
+    this.address = address;
   }
 
-  mineTransactions() {
+  mineTransactions(): string {
     // GET THE TRANSACTION POOL VALID TRANSACTIONS
     const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
       validTransactions.push(
-        Transaction.rewardTransaction({ minerPublicKey: this.publicKey })
+        Transaction.rewardTransaction({ minerPublicKey: this.address })
       );
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ data: validTransactions });

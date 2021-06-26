@@ -6,7 +6,7 @@ export class UserModel {
   async save(
     db: Db,
     { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel
-  ) {
+  ): Promise<IUserModel> {
     try {
       return db
         .collection("users")
