@@ -16,10 +16,10 @@ import { BaseRouter } from "./common/baseRouter.router";
 export class TransactionRouter implements BaseRouter {
   private app: Application;
   private transactionController: TransactionController;
-  transactionPool: TransactionPool;
-  blockchain: Blockchain;
-  pubSub: PubSub;
-  localWallet: Wallet;
+  private transactionPool: TransactionPool;
+  private blockchain: Blockchain;
+  private pubSub: PubSub;
+  private localWallet: Wallet;
 
   constructor(
     app: Application,
@@ -58,16 +58,6 @@ export class TransactionRouter implements BaseRouter {
       blockchainMiddleWare(this.blockchain),
       pubSubMiddleWare(this.pubSub),
       this.transactionController.mine
-    );
-    this.app.get(
-      "/api/blocks",
-      blockchainMiddleWare(this.blockchain),
-      this.transactionController.getBlocks
-    );
-    this.app.get(
-      "/api/block/:blockHash",
-      blockchainMiddleWare(this.blockchain),
-      this.transactionController.getABlock
     );
   }
 }
