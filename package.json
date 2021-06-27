@@ -70,12 +70,16 @@
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
     "ts-node": "^10.0.0"
   },
+  "lint-staged": {
+    "*.ts": "yarn run lint"
+  },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint"
+      "pre-commit": "lint-staged"
     }
   }
 }
