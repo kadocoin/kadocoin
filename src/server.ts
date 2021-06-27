@@ -125,7 +125,7 @@ const syncWithRootState = () => {
     }
   );
 };
-console.log("adamu");
+console.log("adamu is awesome");
 app.use(initializeMiddleWares);
 app.use(initializeRoutes);
 
