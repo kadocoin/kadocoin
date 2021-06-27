@@ -125,7 +125,7 @@ const syncWithRootState = () => {
     }
   );
 };
-
+console.log("test");
 app.use(initializeMiddleWares);
 app.use(initializeRoutes);
 
