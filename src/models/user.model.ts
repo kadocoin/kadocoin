@@ -1,5 +1,5 @@
 import { IUserModel } from "../types";
-import { ADMIN_EMAIL } from "../util/secret";
+import { ADMIN_EMAIL } from "../config/secret";
 import { nanoid } from "nanoid";
 import { Db } from "mongodb";
 

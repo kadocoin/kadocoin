@@ -1,6 +1,6 @@
 import { Db, MongoClient } from "mongodb";
 import { Application, Request, Response, NextFunction } from "express";
-import { MONGODB_URI, DB_NAME } from "../util/secret";
+import { MONGODB_URI, DB_NAME } from "../config/secret";
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};

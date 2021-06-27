@@ -16,7 +16,7 @@ import {
 } from "../statusCode/statusCode";
 import UserModel from "../models/user.model";
 import jwt from "jsonwebtoken";
-import { JWTSECRET } from "../util/secret";
+import { JWTSECRET } from "../config/secret";
 import Wallet from "../wallet";
 import { removeSensitiveProps } from "../util/removeSensitiveProps";
 

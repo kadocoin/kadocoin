@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { NOT_FOUND } from "../statusCode/statusCode";
-import { JWTSECRET } from "../util/secret";
+import { JWTSECRET } from "../config/secret";
 
 export function mustBeLoggedIn(
   req: Request,
