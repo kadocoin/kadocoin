@@ -75,12 +75,17 @@
     "prettier": "^2.3.1",
     "ts-node": "^10.0.0"
   },
-  "lint-staged": {
-    "*.ts": "yarn run lint"
-  },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "pre-push": "lint-staged"
     }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint",
+      "git add"
+    ]
   }
 }
