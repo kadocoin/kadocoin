@@ -6,7 +6,7 @@ import {
   ENVIRONMENT,
   PORT,
   ROOT_NODE_ADDRESS,
-} from "./util/secret";
+} from "./config/secret";
 import "dotenv/config";
 import { Request, Response, NextFunction } from "express";
 import UserRouter from "./routes/userRouter.router";

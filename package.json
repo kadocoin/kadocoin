@@ -8,7 +8,8 @@
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "start": "tsc && node dist/server.js",
     "lint": "eslint",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky install"
   },
   "keywords": [
     "kadocoin"
@@ -69,7 +70,21 @@
     "eslint": "^7.29.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
     "ts-node": "^10.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "yarn test"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint"
+    ]
   }
 }

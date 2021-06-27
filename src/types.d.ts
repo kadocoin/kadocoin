@@ -5,7 +5,56 @@ import PubSub from "./pubSub";
 import Wallet from "./wallet";
 import TransactionPool from "./wallet/transaction-pool";
 
-type IChain = Array<Block>;
+interface ICreateOutputParams {
+  publicKey?: string;
+  address?: string;
+  recipient?: string;
+  amount?: number;
+  balance?: string | number;
+  localWallet?: Wallet;
+}
+
+type TOutput = { recipient?: string; address?: string };
+
+interface IBaseInput {
+  publicKey: string;
+  address: string;
+}
+
+interface IInput extends IBaseInput {
+  timestamp: number;
+  amount: number;
+  localPublicKey: string;
+  signature: string;
+  balance?: string | number;
+  output?: ICreateOutputParams;
+  localWallet?: Wallet;
+}
+
+interface ICreateInputParams extends IBaseInput {
+  balance?: string | number;
+  output?: ICreateOutputParams;
+  localWallet?: Wallet;
+}
+
+interface ITransactionClassParams {
+  recipient?: string;
+  amount?: number;
+  output?: ICreateOutputParams;
+  input?: IInput;
+  balance?: number | string;
+  localWallet?: Wallet;
+  publicKey?: string;
+  address?: string;
+}
+
+type TDataChild = {
+  id: string;
+  output: { [key: string]: string };
+  input: IInput;
+};
+
+export type IChain = Array<Block>;
 
 export interface IUserModel {
   _id?: string;
@@ -22,9 +71,6 @@ export interface IUserModel {
   publicKey?: string;
   address?: string;
   token?: string;
-  wallet?: Wallet;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  signature?: any;
 }
 
 declare global {

@@ -1,6 +1,6 @@
 import session from "express-session";
 import MongoStore from "connect-mongo";
-import { SESSION_SECRET } from "../util/secret";
+import { SESSION_SECRET } from "../config/secret";
 import { Application, Request, Response, NextFunction } from "express";
 
 export class Session {
