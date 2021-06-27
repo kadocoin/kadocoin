@@ -61,9 +61,11 @@ class Transaction {
     localWallet,
     output,
   }: ICreateInputParams): IInput {
+    if (typeof balance == "number") balance.toFixed(8);
+
     return {
       timestamp: Date.now(),
-      amount: balance as number,
+      amount: balance,
       address,
       publicKey,
       localPublicKey: localWallet.publicKey,
@@ -120,11 +122,8 @@ class Transaction {
     localWallet,
   }: ICreateOutputParams): void {
     // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
-    amount = Number(amount);
-    this.output[address] = Number(this.output[address]);
-    this.output[recipient] = Number(this.output[recipient]);
 
-    if (amount > this.output[address]) {
+    if (amount > Number(this.output[address])) {
       throw new Error("Insufficient balance");
     }
 
@@ -132,10 +131,12 @@ class Transaction {
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
     } else {
-      this.output[recipient] = (this.output[recipient] + amount).toFixed(8);
+      this.output[recipient] = (
+        Number(this.output[recipient]) + amount
+      ).toFixed(8);
     }
 
-    this.output[address] = (this.output[address] - amount).toFixed(8);
+    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,

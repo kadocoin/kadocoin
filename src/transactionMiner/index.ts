@@ -4,7 +4,11 @@ import Transaction from "../wallet/transaction";
 import TransactionPool from "../wallet/transaction-pool";
 
 class TransactionMiner {
-  [x: string]: any;
+  public blockchain: Blockchain;
+  public transactionPool: TransactionPool;
+  public pubSub: PubSub;
+  public address: string;
+
   constructor({
     blockchain,
     transactionPool,

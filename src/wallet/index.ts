@@ -7,13 +7,13 @@ import { pubKeyToAddress } from "../util/pubKeyToAddress";
 import { IChain } from "../types";
 
 class Wallet {
-  public balance: number;
+  public balance: string | number;
   public keyPair: any;
   public publicKey: string;
   public address: string;
 
   constructor() {
-    this.balance = STARTING_BALANCE;
+    this.balance = STARTING_BALANCE.toFixed(8);
     this.keyPair = newEc.genKeyPair();
     this.publicKey = this.keyPair.getPublic().encode("hex");
     this.address = pubKeyToAddress(this.publicKey);
@@ -41,11 +41,11 @@ class Wallet {
     if (chain) {
       this.balance = Wallet.calculateBalance({
         chain,
-        address: address,
+        address,
       }) as number;
     }
 
-    if (amount > this.balance) {
+    if (amount > Number(this.balance)) {
       throw new Error("Insufficient balance.");
     }
 
@@ -68,13 +68,6 @@ class Wallet {
   }): number | string {
     let hasConductedTransaction = false;
     let outputsTotal = 0;
-
-    // TODO: CHECK IF VALID ADDRESS
-    // try {
-    //   newEc.keyFromPublic(address, "hex");
-    // } catch (error) {
-    //   return "Invalid public key" as string;
-    // }
 
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];

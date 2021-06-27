@@ -23,7 +23,7 @@ interface IBaseInput {
 
 interface IInput extends IBaseInput {
   timestamp: number;
-  amount: number;
+  amount: string | number;
   localPublicKey: string;
   signature: string;
   balance?: string | number;

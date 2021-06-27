@@ -156,6 +156,7 @@ export default class TransactionController {
 
         const status = transactionMiner.mineTransactions();
 
+        // POOL CONTAINS INVALID TRANSACTIONS
         if (status !== "success")
           return res
             .status(NOT_FOUND)
