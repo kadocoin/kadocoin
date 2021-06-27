@@ -77,13 +77,15 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "pre-push": "lint-staged"
     }
   },
   "lint-staged": {
     "*.ts": [
       "prettier --write",
-      "eslint"
+      "eslint",
+      "git add"
     ]
   }
 }
