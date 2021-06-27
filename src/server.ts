@@ -99,7 +99,7 @@ const syncWithRootState = () => {
       }
     }
   );
-
+  console.log("adamu");
   request(
     { url: `${ROOT_NODE_ADDRESS}/api/transaction-pool-map` },
     (error, response, body) => {
