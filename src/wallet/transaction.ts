@@ -46,7 +46,7 @@ class Transaction {
     amount,
     balance,
   }: ICreateOutputParams): TOutput {
-    const output = { address: "", recipient: "" };
+    const output = {};
 
     output[address] = ((balance as number) - amount).toFixed(8);
     output[recipient] = amount.toFixed(8);
@@ -81,6 +81,8 @@ class Transaction {
       (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
     );
 
+    console.log(Number(amount), outputTotal);
+
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
     if (Number(amount) !== outputTotal) {
       console.error(`Invalid transaction from ${address} ${publicKey}`);
@@ -92,7 +94,6 @@ class Transaction {
     Object.keys(output).map((address: string): boolean => {
       if (!isValidChecksumAddress(address)) {
         console.error(`Invalid address => ${address}`);
-
         return false;
       }
     });
