@@ -1,7 +1,7 @@
 import passportEmailPassword from "passport";
 import bcrypt from "bcryptjs";
 import { Strategy as LocalStrategy } from "passport-local";
-import { CommonModel } from "../models/common.model";
+import CommonModel from "../models/common.model";
 import { Request } from "express";
 
 const { findById, findByEmail } = new CommonModel();
