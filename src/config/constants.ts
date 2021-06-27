@@ -17,7 +17,9 @@ export const REWARD_INPUT = {
   address: "*authorized-reward*",
   recipient: "___",
   amount: MINING_REWARD,
-  timestamp: new Date(),
+  timestamp: 83838383838,
   signature: "*authorized-signature*",
+  localPublicKey: "*authorized-localPublicKey*",
+  publicKey: "*authorized-publicKey*",
 };
 export const COINS_IN_CIRCULATION = 0;

@@ -1,54 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { v1 as uuidv1 } from "uuid";
-import Wallet from ".";
 import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
 import verifySignature from "../util/verifySignature";
 import { isValidChecksumAddress } from "../util/pubKeyToAddress";
-
-type TOutputMap = { recipient?: string; address?: string };
-
-interface ITransactionProps {
-  recipient?: string;
-  amount?: number;
-  output?: any;
-  input?: any;
-  balance?: number | string;
-  localWallet?: Wallet;
-  publicKey?: string;
-  address?: string;
-}
-interface ICreateOutputMapProps {
-  senderWallet?: Wallet;
-  recipient: string;
-  amount: number;
-  signature?: any;
-  balance?: number | string;
-  localWallet?: Wallet;
-  output?: any;
-  publicKey?: string;
-  address?: string;
-}
-interface ICreateInputProps {
-  senderWallet?: Wallet;
-  output?: any;
-  signature?: any;
-  balance?: number | string;
-  localPublicKey?: string;
-  localWallet?: Wallet;
-  publicKey?: string;
-  address?: string;
-  amount?: number;
-  timestamp?: number;
-}
-
-type TRewardTransactionParam = {
-  minerPublicKey: string;
-};
+import {
+  ICreateInputParams,
+  ICreateOutputParams,
+  IInput,
+  ITransactionClassParams,
+  TOutput,
+} from "../types";
 
 class Transaction {
-  id: string;
-  output: TOutputMap;
-  input: ICreateInputProps;
+  public id: string;
+  public output: TOutput;
+  public input: ICreateInputParams;
 
   constructor({
     publicKey,
@@ -59,7 +25,7 @@ class Transaction {
     input,
     balance,
     localWallet,
-  }: ITransactionProps) {
+  }: ITransactionClassParams) {
     this.id = uuidv1();
     this.output =
       output || this.createOutputMap({ address, recipient, amount, balance });
@@ -79,8 +45,8 @@ class Transaction {
     recipient,
     amount,
     balance,
-  }: ICreateOutputMapProps): TOutputMap {
-    const output = {};
+  }: ICreateOutputParams): TOutput {
+    const output = { address: "", recipient: "" };
 
     output[address] = ((balance as number) - amount).toFixed(8);
     output[recipient] = amount.toFixed(8);
@@ -94,18 +60,18 @@ class Transaction {
     address,
     localWallet,
     output,
-  }: ICreateInputProps): ICreateInputProps {
+  }: ICreateInputParams): IInput {
     return {
       timestamp: Date.now(),
       amount: balance as number,
-      address: address,
-      publicKey: publicKey,
+      address,
+      publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
     };
   }
 
-  static validTransaction(transaction: ITransactionProps): boolean {
+  static validTransaction(transaction: ITransactionClassParams): boolean {
     const {
       input: { address, publicKey, amount, signature, localPublicKey },
       output,
@@ -150,7 +116,7 @@ class Transaction {
     balance,
     address,
     localWallet,
-  }: ICreateOutputMapProps): void {
+  }: ICreateOutputParams): void {
     // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
     amount = Number(amount);
     this.output[address] = Number(this.output[address]);
@@ -180,7 +146,9 @@ class Transaction {
 
   static rewardTransaction({
     minerPublicKey,
-  }: TRewardTransactionParam): Transaction {
+  }: {
+    minerPublicKey: string;
+  }): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
 
     return new Transaction({
