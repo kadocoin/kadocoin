@@ -77,16 +77,17 @@ class Transaction {
       output,
     } = transaction;
 
-    const outputTotal = Object.values(output).reduce(
-      (total: any, outputAmount: any) => Number(total) + Number(outputAmount)
+    let outputTotal = Object.values(output).reduce(
+      (total: any, outputAmount: any) => Number(total) + Number(outputAmount),
+      0
     );
 
-    console.log(Number(amount), outputTotal);
+    // CONVERT THE SUM TO 8 DECIMAL PLACES
+    outputTotal = outputTotal.toFixed(8);
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
-    if (Number(amount) !== outputTotal) {
+    if (Number(amount) !== Number(outputTotal)) {
       console.error(`Invalid transaction from ${address} ${publicKey}`);
-
       return false;
     }
 
