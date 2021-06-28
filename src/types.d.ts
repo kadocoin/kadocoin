@@ -5,7 +5,7 @@ import PubSub from "./pubSub";
 import Wallet from "./wallet";
 import TransactionPool from "./wallet/transaction-pool";
 
-interface ICreateOutputParams {
+export interface ICreateOutputParams {
   publicKey?: string;
   address?: string;
   recipient?: string;
@@ -16,12 +16,12 @@ interface ICreateOutputParams {
 
 type TOutput = { recipient?: string; address?: string };
 
-interface IBaseInput {
+export interface IBaseInput {
   publicKey: string;
   address: string;
 }
 
-interface IInput extends IBaseInput {
+export interface IInput extends IBaseInput {
   timestamp: number;
   amount: string | number;
   localPublicKey: string;
@@ -31,13 +31,13 @@ interface IInput extends IBaseInput {
   localWallet?: Wallet;
 }
 
-interface ICreateInputParams extends IBaseInput {
+export interface ICreateInputParams extends IBaseInput {
   balance?: string | number;
   output?: ICreateOutputParams;
   localWallet?: Wallet;
 }
 
-interface ITransactionClassParams {
+export interface ITransactionClassParams {
   recipient?: string;
   amount?: number;
   output?: ICreateOutputParams;
@@ -48,7 +48,7 @@ interface ITransactionClassParams {
   address?: string;
 }
 
-type TDataChild = {
+export type TDataChild = {
   id: string;
   output: { [key: string]: string };
   input: IInput;
