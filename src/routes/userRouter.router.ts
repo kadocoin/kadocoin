@@ -1,6 +1,5 @@
-import { Application, Request, Response } from "express";
+import { Application } from "express";
 import Blockchain from "../blockchain";
-import { DEFAULT_MESSAGE } from "../config/constants";
 import UserController from "../controllers/user.controller";
 import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
 import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
@@ -18,12 +17,7 @@ export default class UserRouter {
   }
 
   initRoute(): void {
-    this.app.get("/", (req: Request, res: Response) => {
-      res.send(DEFAULT_MESSAGE);
-    });
-
     this.app.post("/api/doesEmailExists", this.UserController.doesEmailExists);
-
     this.app.post("/api/register", this.UserController.register);
     this.app.post(
       "/api/wallet-info",

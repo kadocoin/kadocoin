@@ -6,14 +6,20 @@
   "scripts": {
     "dev": "nodemon --watch src/ --exec ts-node src/server.ts",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
-    "start": "tsc && node dist/server.js",
+    "start": "node dist/server.js",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky install",
+    "prepare-husky": "husky install",
     "format": "prettier --write"
   },
   "keywords": [
-    "kadocoin"
+    "kadocoin",
+    "crypto",
+    "p2p",
+    "kado village",
+    "cryptography"
   ],
   "author": "Adamu Muhammad Dankore",
   "license": "MIT",

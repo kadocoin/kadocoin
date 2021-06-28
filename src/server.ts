@@ -44,8 +44,8 @@ const options = {
       title: "Kadocoin",
       version: "1.0.0",
     },
-    host: "localhost:3000",
-    basePath: "",
+    host: "localhost:2000",
+    basePath: "/",
     produces: ["application/json", "application/xml"],
     schemes: ["http", "https"],
     securityDefinitions: {
@@ -59,10 +59,8 @@ const options = {
     },
   },
   basedir: __dirname, //app absolute path
-  files: ["../src/routes/*.*.ts"], //Path to the API handle folder
+  files: ["../dist/routes/*.*.js"], //Path to the API handle folder
 };
-
-expressSwagger(options);
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
@@ -128,7 +126,7 @@ const syncWithRootState = () => {
 
 app.use(initializeMiddleWares);
 app.use(initializeRoutes);
-
+expressSwagger(options);
 app.listen(PORT, () => {
   if (PORT !== DEFAULT_PORT) syncWithRootState();
   console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
