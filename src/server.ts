@@ -1,6 +1,5 @@
 import app from "./app";
 import request from "request";
-import expressSwagger from "express-swagger-generator";
 import {
   DEFAULT_PORT,
   ENVIRONMENT,
@@ -19,6 +18,26 @@ import PubSub from "./pubSub";
 import Wallet from "./wallet";
 import isEmptyObject from "./util/isEmptyObject";
 import { BlockRouter } from "./routes/block.router";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+
+const options = {
+  swaggerDefinition: {
+    info: {
+      description: "Kadocoin MultiWallet API",
+      title: "Kadocoin MultiWallet API",
+      version: "1.0.0",
+    },
+    host: "localhost:2000",
+    basePath: "/",
+    produces: ["application/json", "application/xml"],
+    schemes: ["http", "https"],
+  },
+  basedir: __dirname,
+  apis: ["./src/routes/userRouter.router.ts"], //Path to the API handle folder
+};
+
+const swaggerSpecification = swaggerJsdoc(options);
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -36,31 +55,6 @@ const transactionPool = new TransactionPool();
  * @var pubSub app wide variable
  */
 const pubSub = new PubSub({ blockchain, transactionPool });
-
-const options = {
-  swaggerDefinition: {
-    info: {
-      description: "Kadocoin",
-      title: "Kadocoin",
-      version: "1.0.0",
-    },
-    host: "localhost:2000",
-    basePath: "/",
-    produces: ["application/json", "application/xml"],
-    schemes: ["http", "https"],
-    securityDefinitions: {
-      JWT: {
-        type: "apiKey",
-        in: "header",
-        name: "Authorization",
-        description: "",
-      },
-      value: "Bearer <JWT>",
-    },
-  },
-  basedir: __dirname, //app absolute path
-  files: ["../dist/routes/*.*.js"], //Path to the API handle folder
-};
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
@@ -126,7 +120,8 @@ const syncWithRootState = () => {
 
 app.use(initializeMiddleWares);
 app.use(initializeRoutes);
-expressSwagger(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
+
 app.listen(PORT, () => {
   if (PORT !== DEFAULT_PORT) syncWithRootState();
   console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
