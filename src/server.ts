@@ -20,24 +20,9 @@ import isEmptyObject from "./util/isEmptyObject";
 import { BlockRouter } from "./routes/block.router";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import { swaggerOptions } from "./config/constants";
 
-const options = {
-  swaggerDefinition: {
-    info: {
-      description: "Kadocoin MultiWallet API",
-      title: "Kadocoin MultiWallet API",
-      version: "1.0.0",
-    },
-    host: "localhost:2000",
-    basePath: "/",
-    produces: ["application/json", "application/xml"],
-    schemes: ["http", "https"],
-  },
-  basedir: __dirname,
-  apis: ["./src/routes/userRouter.router.ts"], //Path to the API handle folder
-};
-
-const swaggerSpecification = swaggerJsdoc(options);
+const swaggerSpecification = swaggerJsdoc(swaggerOptions);
 
 /**
  * @var localWallet - signs and verifies transactions on this node

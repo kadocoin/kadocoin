@@ -24,6 +24,8 @@ export default class UserRouter {
      * /api/register:
      *  post:
      *    description: API for registering users
+     *    tags:
+     *     - Registration
      *    consumes:
      *    - application/json
      *    produces:
@@ -69,6 +71,8 @@ export default class UserRouter {
      * /api/login:
      *  post:
      *    description: API for authenticating users
+     *    tags:
+     *     - Login
      *    consumes:
      *    - application/json
      *    produces:

@@ -23,3 +23,42 @@ export const REWARD_INPUT = {
   publicKey: "*authorized-publicKey*",
 };
 export const COINS_IN_CIRCULATION = 0;
+
+export const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      description: "Kadocoin MultiWallet API",
+      title: "Kadocoin MultiWallet API",
+      version: "1.0.0",
+      contact: {
+        name: "Adamu Muhammad Dankore",
+        url: "https://dankore.com",
+        email: "adamu@kadocoin.com",
+      },
+      license: {
+        name: "MIT",
+        url: "https://dankore.com",
+      },
+    },
+    externalDocs: {
+      url: "https://kadocoin.com/terms",
+      description: "Terms of Use",
+    },
+    consumes: ["application/json"],
+    tags: [
+      { name: "Registration", description: "API" },
+      { name: "Login", description: "API" },
+    ],
+    uiConfig: {
+      docExpansion: "full",
+      deepLinking: false,
+    },
+    staticCSP: true,
+    host: "localhost:2000",
+    basePath: "/",
+    produces: ["application/json", "application/xml"],
+    schemes: ["http", "https"],
+  },
+  basedir: __dirname,
+  apis: ["./src/routes/userRouter.router.ts"], //Path to the API route handle folder
+};
