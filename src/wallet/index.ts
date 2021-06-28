@@ -33,9 +33,9 @@ class Wallet {
   }: {
     recipient: string;
     amount: number;
-    chain: IChain;
-    publicKey: string;
-    address: string;
+    chain?: IChain;
+    publicKey?: string;
+    address?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) {
@@ -46,7 +46,7 @@ class Wallet {
     }
 
     if (amount > Number(this.balance)) {
-      throw new Error("Insufficient balance.");
+      throw new Error("Insufficient balance");
     }
 
     return new Transaction({
