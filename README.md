@@ -1,7 +1,7 @@
 Kadocoin Multi-Wallet API
 =====================================
 
-https://kadocoin.com
+<https://kadocoin.com>
 
 What is Kadocoin?
 ----------------
