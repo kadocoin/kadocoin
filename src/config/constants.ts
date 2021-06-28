@@ -15,9 +15,9 @@ export const STARTING_BALANCE = 1000;
 export const MINING_REWARD = 50;
 export const REWARD_INPUT = {
   address: "*authorized-reward*",
-  recipient: "___",
+  recipient: "*authorized-recipient*",
   amount: MINING_REWARD,
-  timestamp: 83838383838,
+  timestamp: 1624848894788,
   signature: "*authorized-signature*",
   localPublicKey: "*authorized-localPublicKey*",
   publicKey: "*authorized-publicKey*",
