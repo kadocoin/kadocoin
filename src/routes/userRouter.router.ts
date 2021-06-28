@@ -18,6 +18,44 @@ export default class UserRouter {
 
   initRoute(): void {
     this.app.post("/api/doesEmailExists", this.UserController.doesEmailExists);
+
+    /**
+     * @swagger
+     * /api/register:
+     *  post:
+     *    description: API for registering users
+     *    consumes:
+     *    - application/json
+     *    produces:
+     *    - application/json
+     *    parameters:
+     *    - in: body
+     *      name: Register API
+     *      schema:
+     *        $ref: '#/definitions/Register'
+     *    responses:
+     *        200:
+     *            description: It's ok and user logged successfully
+     *        400:
+     *            description: It's bad request
+     *        500:
+     *            description: It's internal server error
+     * definitions:
+     *    Register:
+     *        type: object
+     *        required:
+     *        - email
+     *        - password
+     *        properties:
+     *            email:
+     *                type: string
+     *                example: user@example.com
+     *            password:
+     *                type: string
+     *                example: your-password
+     *
+     *
+     */
     this.app.post("/api/register", this.UserController.register);
     this.app.post(
       "/api/wallet-info",
@@ -27,26 +65,41 @@ export default class UserRouter {
     );
 
     /**
-     * @typedef Login
-     * @property {string} email.required - Some description for Login
-     * @property {string} password.required - Some description for Login
-     */
-
-    /**
-     * @typedef Error
-     * @property {string} code.required
-     */
-
-    /**
-     * This function comment is parsed by doctrine
-     * @route POST /login
-     * @group Login - Operations about user
-     * @param {Login.model} Post.body.required - the new point
-     * @operationId retrieveUserInfo
-     * @produces application/json application/xml
-     * @consumes application/json application/xml
-     * @returns {Response.model} 201 - An array of user info
-     * @returns {Login.model}  default - Unexpected error
+     * @swagger
+     * /api/login:
+     *  post:
+     *    description: API for authenticating users
+     *    consumes:
+     *    - application/json
+     *    produces:
+     *    - application/json
+     *    parameters:
+     *    - in: body
+     *      name: Login API
+     *      schema:
+     *        $ref: '#/definitions/Login'
+     *    responses:
+     *        200:
+     *            description: It's ok and user logged successfully
+     *        400:
+     *            description: It's bad request
+     *        500:
+     *            description: It's internal server error
+     * definitions:
+     *    Login:
+     *        type: object
+     *        required:
+     *        - email
+     *        - password
+     *        properties:
+     *            email:
+     *                type: string
+     *                example: user@example.com
+     *            password:
+     *                type: string
+     *                example: your-password
+     *
+     *
      */
 
     this.app.post("/api/login", this.UserController.login);
