@@ -1,4 +1,4 @@
-import hexToBinary from "hex-to-binary";
+import hexToBinary from "hex-to-bin";
 import { GENESIS_DATA, MINE_RATE } from "../config/constants";
 import cryptoHash from "../util/crypto-hash";
 

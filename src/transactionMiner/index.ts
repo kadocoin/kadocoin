@@ -27,7 +27,7 @@ class TransactionMiner {
   }
 
   mineTransactions(): string {
-    // GET THE TRANSACTION POOL VALID TRANSACTIONS
+    // GET THE TRANSACTION POOL'S VALID TRANSACTIONS
     const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
@@ -35,10 +35,13 @@ class TransactionMiner {
       validTransactions.push(
         Transaction.rewardTransaction({ minerPublicKey: this.address })
       );
+
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ data: validTransactions });
+
       // BROADCAST THE UPDATED BLOCKCHAIN
       this.pubSub.broadcastChain();
+
       // CLEAR THE POOL
       this.transactionPool.clear();
 
