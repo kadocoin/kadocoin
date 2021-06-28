@@ -10,7 +10,7 @@
     "build": "tsc --build",
     "clean": "tsc --build --clean",
     "test": "jest --colors --watchAll",
-    "lint": "eslint .",
+    "lint": "eslint",
     "lint:fix": "eslint . --fix",
     "prepare-husky": "husky install",
     "format": "prettier --write"
@@ -22,10 +22,6 @@
     "kado village",
     "cryptography"
   ],
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node"
-  },
   "author": "Adamu Muhammad Dankore",
   "license": "MIT",
   "dependencies": {

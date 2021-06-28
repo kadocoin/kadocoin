@@ -1,7 +1,7 @@
 import Wallet from "../src/wallet/index";
 
 describe("Wallet", () => {
-  let wallet;
+  let wallet: Wallet;
 
   beforeEach(() => {
     wallet = new Wallet();
