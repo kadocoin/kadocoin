@@ -11,7 +11,8 @@
   },  
   "include": [  
     "src/**/*",
-    ".eslintrc.yaml"
+     "__tests__/**/*",
+     "babel.config.js"
   ],  
   "exclude": [  
     "node_modules"  
