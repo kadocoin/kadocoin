@@ -16,7 +16,7 @@ class TransactionPool {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  setMap(transactionMap: Record<string, any>): void {
+  setMap(transactionMap: Record<string, TDataChild | Transaction>): void {
     this.transactionMap = transactionMap;
   }
 

@@ -14,7 +14,6 @@ import Wallet from "../wallet";
 import TransactionMiner from "../transactionMiner";
 import isEmptyObject from "../util/isEmptyObject";
 import { isValidChecksumAddress } from "../util/pubKeyToAddress";
-import { TDataChild } from "../types";
 import Transaction from "../wallet/transaction";
 
 export default class TransactionController {
