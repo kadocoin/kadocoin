@@ -49,6 +49,12 @@ export interface ITransactionClassParams {
   address?: string;
 }
 
+interface ITransactionParam {
+  id: string;
+  input: IInput;
+  output: ICreateOutputParams;
+}
+
 export type TDataChild = {
   id: string;
   output: { [key: string]: string };
