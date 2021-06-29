@@ -1,8 +1,8 @@
-import Blockchain from "../src/blockchain";
-import { TDataChild } from "../src/types";
-import Wallet from "../src/wallet";
-import Transaction from "../src/wallet/transaction";
-import TransactionPool from "../src/wallet/transaction-pool";
+import Blockchain from "../blockchain";
+import { TDataChild } from "../types";
+import Wallet from ".";
+import Transaction from "./transaction";
+import TransactionPool from "./transaction-pool";
 
 describe("TransactionPool", () => {
   let transactionPool: TransactionPool,

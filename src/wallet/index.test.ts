@@ -1,8 +1,8 @@
-import Blockchain from "../src/blockchain";
-import { STARTING_BALANCE } from "../src/config/constants";
-import verifySignature from "../src/util/verifySignature";
-import Wallet from "../src/wallet/index";
-import Transaction from "../src/wallet/transaction";
+import Blockchain from "../blockchain";
+import { STARTING_BALANCE } from "../config/constants";
+import verifySignature from "../util/verifySignature";
+import Wallet from "./index";
+import Transaction from "./transaction";
 
 describe("Wallet", () => {
   let wallet: Wallet, localWallet: Wallet;
