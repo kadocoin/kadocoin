@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "test": "jest --colors --watchAll",
+    "test": "jest --colors --bail --findRelatedTests --watchAll",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
     "prepare-husky": "husky install",
@@ -95,7 +95,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && yarn run test"
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
