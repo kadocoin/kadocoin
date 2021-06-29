@@ -49,7 +49,7 @@ export interface ITransactionClassParams {
   address?: string;
 }
 
-interface ITransactionParam {
+export interface ITransactionParam {
   id: string;
   input: IInput;
   output: ICreateOutputParams;

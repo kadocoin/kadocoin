@@ -14,6 +14,8 @@ import Wallet from "../wallet";
 import TransactionMiner from "../transactionMiner";
 import isEmptyObject from "../util/isEmptyObject";
 import { isValidChecksumAddress } from "../util/pubKeyToAddress";
+import { TDataChild } from "../types";
+import Transaction from "../wallet/transaction";
 
 export default class TransactionController {
   /**
@@ -88,14 +90,16 @@ export default class TransactionController {
     try {
       if (transaction) {
         console.log("Update transaction");
-        transaction.update({
-          publicKey,
-          address,
-          recipient,
-          amount: Number(amount),
-          balance,
-          localWallet,
-        });
+        if (transaction instanceof Transaction) {
+          transaction.update({
+            publicKey,
+            address,
+            recipient,
+            amount: Number(amount),
+            balance,
+            localWallet,
+          });
+        }
       } else {
         console.log("New transaction");
         transaction = localWallet.createTransaction({
