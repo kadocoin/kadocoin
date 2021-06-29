@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "test": "jest --bail --findRelatedTests",
+    "test": "jest --bail --findRelatedTests --coverage",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
     "prepare-husky": "husky install",
