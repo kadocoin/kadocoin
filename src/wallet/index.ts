@@ -50,8 +50,8 @@ class Wallet {
     }
 
     return new Transaction({
-      publicKey,
       recipient,
+      publicKey,
       address,
       amount,
       balance: this.balance,

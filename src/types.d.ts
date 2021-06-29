@@ -36,6 +36,8 @@ export interface ICreateInputParams extends IBaseInput {
   output?: ICreateOutputParams;
   localWallet?: Wallet;
   localPublicKey?: string; // FOR TESTING PURPOSES
+  amount?: string | number; // FOR TESTING PURPOSES
+  signature?: string; // FOR TESTING PURPOSES
 }
 
 export interface ITransactionClassParams {
