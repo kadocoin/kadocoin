@@ -84,7 +84,7 @@ class Transaction {
       0
     );
 
-    // CONVERT THE SUM TO 8 DECIMAL PLACES!!
+    // CONVERT THE SUM TO 8 DECIMAL PLACES
     outputTotal = outputTotal.toFixed(8);
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
