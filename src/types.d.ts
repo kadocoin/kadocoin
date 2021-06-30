@@ -59,11 +59,20 @@ export interface ITransactionParam {
 
 export type TDataChild = {
   id: string;
-  output: { [key: string]: string };
+  output: { [key: string]: string | number };
   input: IInput;
 };
 
 export type IChain = Array<Block>;
+
+export interface IBlockProps {
+  timestamp: number;
+  lastHash: string;
+  hash: string;
+  data: Array<TDataChild>;
+  nonce: number;
+  difficulty: number;
+}
 
 export interface IUserModel {
   _id?: string;
