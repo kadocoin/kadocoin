@@ -79,7 +79,7 @@ class Block {
     timestamp,
   }: {
     originalBlock: IBlockProps;
-    timestamp: number;
+    timestamp?: number;
   }): number {
     const { difficulty } = originalBlock;
 
