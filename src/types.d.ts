@@ -31,13 +31,19 @@ export interface IInput extends IBaseInput {
   localWallet?: Wallet;
 }
 
+export interface IVerifySignatureProps {
+  publicKey: string;
+  data: any;
+  signature: string;
+}
+
 export interface ICreateInputParams extends IBaseInput {
   balance?: string | number;
   output?: ICreateOutputParams;
   localWallet?: Wallet;
   localPublicKey?: string; // FOR TESTING PURPOSES
   amount?: string | number; // FOR TESTING PURPOSES
-  signature?: string; // FOR TESTING PURPOSES
+  signature?: string;
 }
 
 export interface ITransactionClassParams {

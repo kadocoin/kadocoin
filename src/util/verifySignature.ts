@@ -1,11 +1,6 @@
+import { IVerifySignatureProps } from "../types";
 import cryptoHash from "./crypto-hash";
 import newEc from "./secp256k1";
-
-interface IVerifySignatureProps {
-  publicKey: string;
-  data: any;
-  signature: string;
-}
 
 export default function verifySignature({
   publicKey,
