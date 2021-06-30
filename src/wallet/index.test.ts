@@ -1,5 +1,5 @@
 import Blockchain from "../blockchain";
-import { STARTING_BALANCE } from "../config/constants";
+import { sampleDataForTests, STARTING_BALANCE } from "../config/constants";
 import verifySignature from "../util/verifySignature";
 import Wallet from "./index";
 import Transaction from "./transaction";
@@ -26,7 +26,7 @@ describe("Wallet", () => {
    */
 
   describe("signing data", () => {
-    const data = "kadocoin";
+    const data = sampleDataForTests;
 
     it("verifies a signature", () =>
       expect(

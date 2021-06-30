@@ -1,6 +1,7 @@
 import {
   MINING_REWARD,
   REWARD_INPUT,
+  sampleDataForTests,
   STARTING_BALANCE,
 } from "../config/constants";
 import { ITransactionClassParams } from "../types";
@@ -98,7 +99,7 @@ describe("Transaction", () => {
 
       describe("and the transaction input signature value is invalid", () => {
         it("returns false and logs an error", () => {
-          transaction.input.signature = new Wallet().sign("tampered-data");
+          transaction.input.signature = new Wallet().sign(sampleDataForTests);
           expect(Transaction.validTransaction(transaction)).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
