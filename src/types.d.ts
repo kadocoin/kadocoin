@@ -14,7 +14,7 @@ export interface ICreateOutputParams {
   localWallet?: Wallet;
 }
 
-type TOutput = { recipient?: string; address?: string };
+type TOutput = { [key: string]: string | number } | ICreateOutputParams;
 
 export interface IBaseInput {
   publicKey: string;

@@ -4,7 +4,7 @@ import { STARTING_BALANCE } from "../config/constants";
 import newEc from "../util/secp256k1";
 import cryptoHash from "../util/crypto-hash";
 import { pubKeyToAddress } from "../util/pubKeyToAddress";
-import { IChain, ICreateOutputParams } from "../types";
+import { IChain, ICreateOutputParams, TDataChild } from "../types";
 
 class Wallet {
   public balance: string | number;
@@ -19,7 +19,7 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(data: ICreateOutputParams): string {
+  sign(data: TDataChild | ICreateOutputParams): string {
     return this.keyPair.sign(cryptoHash(data));
   }
 
