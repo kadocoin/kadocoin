@@ -1,137 +1,275 @@
-import { GENESIS_DATA, MINE_RATE } from "../config/constants";
+import { sampleDataForTests } from "../config/constants";
 import cryptoHash from "../util/crypto-hash";
 import Block from "./block";
-import hexToBinary from "hex-to-bin";
+import Blockchain from ".";
+import Wallet from "../wallet";
+import Transaction from "../wallet/transaction";
 
-describe("Block", () => {
-  const timestamp = 123456;
-  const lastHash = "foo-last-hash";
-  const hash = "foo-hash";
-  const data = [
-    {
-      id: "2d5791f0-d9af-11eb-ac13-099d1d20fcfc",
-      output: {
-        "0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD": "770.00000000",
-        "0x86045b56bfeb1A35C6818081130BA0F789dc27c9": "230.00000000",
-      },
-      input: {
-        timestamp: 1625063196815,
-        amount: "1000.00000000",
-        address: "0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD",
-        publicKey:
-          "0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4",
-        localPublicKey:
-          "04b9c0f354c36f7df448ed4125480e84aad425b1851e1736c90d08835e4a77e9e7d33bfda4df16b8bf13d933592942aafdeefc2dac7450c833dbdbf445abe258dc",
-        signature: "signature",
-      },
-    },
-  ];
-  const nonce = 1;
-  const difficulty = 1;
+describe("Blockchain", () => {
+  let blockchain: Blockchain,
+    newChain: Blockchain,
+    originalChain,
+    errorMock: jest.Mock<any, any>;
 
-  const block = new Block({
-    timestamp,
-    lastHash,
-    hash,
-    data,
-    nonce,
-    difficulty,
+  beforeEach(() => {
+    blockchain = new Blockchain();
+    newChain = new Blockchain();
+    errorMock = jest.fn();
+
+    originalChain = blockchain.chain;
+    global.console.error = errorMock;
   });
 
-  it("has a timestamp, lastHash, hash, and data property.", () => {
-    expect(block.timestamp).toEqual(timestamp);
-    expect(block.lastHash).toEqual(lastHash);
-    expect(block.hash).toEqual(hash);
-    expect(block.data).toEqual(data);
-    expect(block.nonce).toEqual(nonce);
-    expect(block.difficulty).toEqual(difficulty);
+  it("contains a `chain` array instance", () => {
+    expect(blockchain.chain instanceof Array).toBe(true);
   });
 
-  describe("genesis()", () => {
-    const genesisBlock = Block.genesis();
+  it("starts with the genesis block", () => {
+    expect(blockchain.chain[0]).toEqual(Block.genesis());
+  });
 
-    it("returns a Block instance", () => {
-      expect(genesisBlock instanceof Block).toBe(true);
+  it("adds a new block to the chain", () => {
+    const newData = ["foo bar"];
+    blockchain.addBlock({ data: newData });
+
+    expect(blockchain.chain[blockchain.chain.length - 1].data).toEqual(newData);
+  });
+
+  describe("isValidChain()", () => {
+    describe("when the chain does not start with the genesis block", () => {
+      it("returns false", () => {
+        blockchain.chain[0] = {
+          timestamp: 2,
+          lastHash: "lastHash",
+          hash: "hash-one",
+          data: [],
+          nonce: 2,
+          difficulty: 1,
+        };
+
+        expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
+      });
     });
 
-    it("returns the genesis data", () => {
-      expect(genesisBlock).toEqual(GENESIS_DATA);
+    describe("when the chain starts with the genesis block and has multiple blocks", () => {
+      beforeEach(() => {
+        blockchain.addBlock({ data: ["Abuja"] });
+        blockchain.addBlock({ data: ["Kaduna"] });
+        blockchain.addBlock({ data: ["Bayelsa"] });
+      });
+
+      describe("and a lastHash reference has changed.", () => {
+        it("returns false", () => {
+          blockchain.chain[2].lastHash = "broken-lastHash";
+
+          expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
+        });
+      });
+
+      describe("and the chain contains a block with an invalid field", () => {
+        it("returns false", () => {
+          blockchain.chain[2].data = [sampleDataForTests];
+
+          expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
+        });
+      });
+
+      describe("and the chain contains a block with a jumped difficulty", () => {
+        it("returns false", () => {
+          const lastBlock = blockchain.chain[blockchain.chain.length - 1];
+          const lastHash = lastBlock.hash;
+          const timestamp = Date.now();
+          const nonce = 0;
+          const data = [];
+          const difficulty = lastBlock.difficulty - 3;
+          const hash = cryptoHash(timestamp, lastHash, difficulty, nonce, data);
+          const badBlock = new Block({
+            timestamp,
+            lastHash,
+            hash,
+            nonce,
+            difficulty,
+            data,
+          });
+
+          blockchain.chain.push(badBlock);
+
+          expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
+        });
+      });
+
+      describe("and the chain does not contain any invalid blocks", () => {
+        it("returns true", () => {
+          expect(Blockchain.isValidChain(blockchain.chain)).toBe(true);
+        });
+      });
+      // END starts with the genesis block and has multiple blocks
+    });
+
+    // END isValidChain()
+  });
+
+  describe("replaceChain()", () => {
+    let logMock;
+
+    beforeEach(() => {
+      logMock = jest.fn();
+      global.console.log = logMock;
+    });
+
+    describe("when the new chain is not longer", () => {
+      beforeEach(() => {
+        newChain.chain[0] = {
+          timestamp: 1,
+          lastHash: "0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD",
+          hash: "0x86045b56bfeb1A35C6818081130BA0F789dc27c9",
+          data: [],
+          nonce: 0,
+          difficulty: 3,
+        };
+
+        blockchain.replaceChain(newChain.chain);
+      });
+
+      it("does not replace the chain", () => {
+        expect(blockchain.chain).toEqual(originalChain);
+      });
+
+      it("logs an error", () => {
+        expect(errorMock).toHaveBeenCalled();
+      });
+    });
+
+    describe("when the chain is longer", () => {
+      beforeEach(() => {
+        newChain.addBlock({ data: ["Abuja"] });
+        newChain.addBlock({ data: ["Kaduna"] });
+        newChain.addBlock({ data: ["Bayelsa"] });
+      });
+      describe("and the chain is invalid", () => {
+        beforeEach(() => {
+          newChain.chain[2].hash = "invalid hash";
+          blockchain.replaceChain(newChain.chain);
+        });
+
+        it("does not replace the chain", () => {
+          expect(blockchain.chain).toEqual(originalChain);
+        });
+
+        it("logs an error", () => {
+          expect(errorMock).toHaveBeenCalled();
+        });
+      });
+      describe("and the chain is valid", () => {
+        beforeEach(() => {
+          blockchain.replaceChain(newChain.chain);
+        });
+        it("replaces the chain", () => {
+          expect(blockchain.chain).toEqual(newChain.chain);
+        });
+
+        it("logs about the chain replacement", () => {
+          expect(logMock).toHaveBeenCalled();
+        });
+      });
+    });
+
+    describe("and the `validateTransactions` flag i true", () => {
+      it("calls validateTransactionData()", () => {
+        const validateTransactionDataMock = jest.fn();
+
+        blockchain.validTransactionData = validateTransactionDataMock;
+
+        newChain.addBlock({ data: ["Kado"] });
+        blockchain.replaceChain(newChain.chain, true);
+
+        expect(validateTransactionDataMock).toHaveBeenCalled();
+      });
     });
   });
 
-  describe("minedBlock", () => {
-    const lastBlock = Block.genesis();
-    const data = ["mined data"];
-    const minedBlock = Block.minedBlock({ lastBlock, data });
+  describe("validTransactionData()", () => {
+    let transaction: Transaction,
+      rewardTransaction: Transaction,
+      wallet: Wallet;
 
-    it("returns a Block instance", () => {
-      expect(minedBlock instanceof Block).toBe(true);
+    beforeEach(() => {
+      wallet = new Wallet();
+
+      transaction = wallet.createTransaction({
+        recipient: "0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD",
+        amount: 65,
+        address: wallet.address,
+        publicKey: wallet.publicKey,
+      });
+
+      rewardTransaction = Transaction.rewardTransaction({
+        minerPublicKey: wallet.publicKey,
+      });
     });
 
-    it("sets the `lastHash` to be the `hash` of the lastBlock", () => {
-      expect(minedBlock.lastHash).toEqual(lastBlock.hash);
+    describe("and transaction data is valid", () => {
+      it("returns true", () => {
+        newChain.addBlock({ data: [transaction, rewardTransaction] });
+
+        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(
+          true
+        );
+        expect(errorMock).not.toHaveBeenCalled();
+      });
     });
 
-    it("sets the `data`", () => {
-      expect(minedBlock.data).toEqual(data);
+    describe("and the transaction data has multiple rewards", () => {
+      it("returns false and logs and error", () => {
+        newChain.addBlock({
+          data: [transaction, rewardTransaction, rewardTransaction],
+        });
+        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(
+          false
+        );
+        expect(errorMock).toHaveBeenCalled();
+      });
     });
 
-    it("sets a `timestamp`", () => {
-      expect(minedBlock.timestamp).not.toEqual(undefined);
+    describe("and the transaction data has at least one malformed output", () => {
+      describe("and the transaction is not a reward transaction", () => {
+        it("returns false and logs and error", () => {
+          transaction.output[wallet.address] = 999999;
+
+          newChain.addBlock({ data: [transaction, rewardTransaction] });
+
+          expect(
+            blockchain.validTransactionData({ chain: newChain.chain })
+          ).toBe(false);
+          expect(errorMock).toHaveBeenCalled();
+        });
+      });
+
+      describe("and the transaction is a reward transaction", () => {
+        it("returns false and logs and error", () => {
+          rewardTransaction.output[wallet.publicKey] = 999999;
+
+          newChain.addBlock({ data: [transaction, rewardTransaction] });
+
+          expect(
+            blockchain.validTransactionData({ chain: newChain.chain })
+          ).toBe(false);
+          expect(errorMock).toHaveBeenCalled();
+        });
+      });
     });
 
-    it("creates a SHA-256 `hash` based on the proper inputs", () => {
-      expect(minedBlock.hash).toEqual(
-        cryptoHash(
-          minedBlock.timestamp,
-          minedBlock.nonce,
-          minedBlock.difficulty,
-          lastBlock.hash,
-          data
-        )
-      );
-    });
+    describe("and a block contains multiple identical transaction", () => {
+      it("returns false and logs an error", () => {
+        newChain.addBlock({
+          data: [transaction, transaction, transaction],
+        });
 
-    it("sets of `hash` that matches the difficulty criteria", () => {
-      expect(
-        hexToBinary(minedBlock.hash).substring(0, minedBlock.difficulty)
-      ).toEqual("0".repeat(minedBlock.difficulty));
-    });
-
-    it("adjusts the difficulty", () => {
-      const possibleResults = [
-        lastBlock.difficulty + 1,
-        lastBlock.difficulty - 1,
-      ];
-      expect(possibleResults.includes(minedBlock.difficulty)).toBe(true);
+        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(
+          false
+        );
+        expect(errorMock).toHaveBeenCalled();
+      });
     });
   });
-
-  describe("adjustDifficulty()", () => {
-    it("raises the difficulty for a quickly mined block", () => {
-      expect(
-        Block.adjustDifficulty({
-          originalBlock: block,
-          timestamp: block.timestamp + MINE_RATE - 100,
-        })
-      ).toEqual(block.difficulty + 1);
-    });
-    it("lowers the difficulty for a slowly mined block", () => {
-      expect(
-        Block.adjustDifficulty({
-          originalBlock: block,
-          timestamp: block.timestamp + MINE_RATE + 100,
-        })
-      ).toEqual(block.difficulty - 1);
-    });
-
-    it("has a lower limit of 1", () => {
-      block.difficulty = -1;
-      expect(
-        Block.adjustDifficulty({ originalBlock: block, timestamp })
-      ).toEqual(1);
-    });
-  });
-
-  // END BLOCK CLASS TEST SUITE
 });
