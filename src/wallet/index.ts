@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Transaction from "./transaction";
 import { STARTING_BALANCE } from "../config/constants";
 import newEc from "../util/secp256k1";
