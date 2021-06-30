@@ -1,4 +1,8 @@
-import { STARTING_BALANCE } from "../config/constants";
+import {
+  MINING_REWARD,
+  REWARD_INPUT,
+  STARTING_BALANCE,
+} from "../config/constants";
 import { ITransactionClassParams } from "../types";
 import verifySignature from "../util/verifySignature";
 import Wallet from ".";
@@ -70,7 +74,7 @@ describe("Transaction", () => {
   });
 
   describe("validTransaction()", () => {
-    let errorMock;
+    let errorMock: jest.Mock<any, any>;
 
     beforeEach(() => {
       errorMock = jest.fn();
@@ -80,6 +84,144 @@ describe("Transaction", () => {
     describe("when the transaction is valid", () => {
       it("returns true", () =>
         expect(Transaction.validTransaction(transaction)).toBe(true));
+    });
+
+    describe("when the transaction is invalid", () => {
+      describe("and a transaction output value is invalid", () => {
+        it("returns false and logs an error", () => {
+          transaction.output[senderWallet.address] = 99999999;
+
+          expect(Transaction.validTransaction(transaction)).toBe(false);
+          expect(errorMock).toHaveBeenCalled();
+        });
+      });
+
+      describe("and the transaction input signature value is invalid", () => {
+        it("returns false and logs an error", () => {
+          transaction.input.signature = new Wallet().sign("tampered-data");
+          expect(Transaction.validTransaction(transaction)).toBe(false);
+          expect(errorMock).toHaveBeenCalled();
+        });
+      });
+    });
+    // END VALID-TRANSACTION()
+  });
+
+  describe("update()", () => {
+    let origSignature: string,
+      origSenderOutput,
+      nextRecipient: string,
+      nextAmount: number;
+
+    describe("and amount is invalid", () => {
+      it("throws an error", () => {
+        expect(() => {
+          if (transaction instanceof Transaction) {
+            transaction.update({
+              localWallet,
+              recipient: "Kado",
+              amount: 999999,
+              address: senderWallet.address,
+              publicKey: senderWallet.publicKey,
+            });
+          }
+        }).toThrow("Insufficient balance");
+      });
+    });
+
+    describe("and the amount is valid", () => {
+      beforeEach(() => {
+        origSignature = transaction.input.signature;
+        origSenderOutput = transaction.output[senderWallet.address];
+        nextRecipient = "next-recipient";
+        nextAmount = 50;
+
+        if (transaction instanceof Transaction) {
+          transaction.update({
+            localWallet,
+            recipient: nextRecipient,
+            amount: nextAmount,
+            address: senderWallet.address,
+            publicKey: senderWallet.publicKey,
+            balance: STARTING_BALANCE,
+          });
+        }
+      });
+
+      it("outputs the amount to the next recipient", () => {
+        expect(transaction.output[nextRecipient]).toEqual(
+          nextAmount.toFixed(8)
+        );
+      });
+
+      it("subtracts the amount from the original sender output amount", () => {
+        expect(transaction.output[senderWallet.address]).toEqual(
+          (origSenderOutput - nextAmount).toFixed(8)
+        );
+      });
+
+      it("maintains a total output that matches the input amount", () => {
+        expect(
+          Object.values(transaction.output).reduce(
+            (total, outputAmount) => Number(total) + Number(outputAmount)
+          )
+        ).toEqual(transaction.input.amount);
+      });
+
+      it("re-signs the transaction", () => {
+        expect(transaction.input.signature).not.toEqual(origSignature);
+      });
+
+      describe("and another update for the same recipient", () => {
+        let addedAmount: number;
+
+        beforeEach(() => {
+          addedAmount = 80;
+          transaction instanceof Transaction &&
+            transaction.update({
+              localWallet,
+              recipient: nextRecipient,
+              address: senderWallet.address,
+              publicKey: senderWallet.publicKey,
+              balance: STARTING_BALANCE,
+              amount: addedAmount,
+            });
+        });
+
+        it("adds to the recipient amount", () => {
+          expect(transaction.output[nextRecipient]).toEqual(
+            (nextAmount + addedAmount).toFixed(8)
+          );
+        });
+
+        it("subtract the amount from the original sender output amount", () => {
+          expect(transaction.output[senderWallet.address]).toEqual(
+            (origSenderOutput - nextAmount - addedAmount).toFixed(8)
+          );
+        });
+      });
+    });
+    // END UPDATE()
+  });
+
+  describe("rewardTransaction()", () => {
+    let rewardTransaction: Transaction, minerWallet: Wallet;
+
+    beforeEach(() => {
+      minerWallet = new Wallet();
+      rewardTransaction = Transaction.rewardTransaction({
+        minerPublicKey: minerWallet.publicKey,
+      });
+    });
+
+    it("creates a transaction with the reward input", () => {
+      expect(rewardTransaction.input).toEqual(REWARD_INPUT);
+    });
+
+    it("creates one transaction for the miner with the `MINING_REWARD`", () => {
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(
+        MINING_REWARD
+      );
     });
   });
 
