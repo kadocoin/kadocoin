@@ -1,4 +1,4 @@
-import Joi, { ValidationResult } from "joi";
+import Joi, { ValidationResult } from 'joi';
 
 export const transactValidation = (body: {
   amount: number;
@@ -16,8 +16,5 @@ export const transactValidation = (body: {
 };
 
 export const mineValidation = (address: string): ValidationResult => {
-  return Joi.string()
-    .required()
-    .label("Kadocoin wallet address")
-    .validate(address);
+  return Joi.string().required().label('Kadocoin wallet address').validate(address);
 };

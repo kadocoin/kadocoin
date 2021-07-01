@@ -1,16 +1,16 @@
-import { Application } from "express";
-import Blockchain from "../blockchain";
-import TransactionController from "../controllers/transaction.controller";
+import { Application } from 'express';
+import Blockchain from '../blockchain';
+import TransactionController from '../controllers/transaction.controller';
 import {
   blockchainMiddleWare,
   pubSubMiddleWare,
   transactionPoolMiddleWare,
   walletMiddleWare,
-} from "../middleware/cryptoMiddleWare";
-import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
-import PubSub from "../pubSub";
-import Wallet from "../wallet";
-import TransactionPool from "../wallet/transaction-pool";
+} from '../middleware/cryptoMiddleWare';
+import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
+import PubSub from '../pubSub';
+import Wallet from '../wallet';
+import TransactionPool from '../wallet/transaction-pool';
 
 export default class TransactionRouter {
   private app: Application;
@@ -38,7 +38,7 @@ export default class TransactionRouter {
 
   initRoute(): void {
     this.app.post(
-      "/api/transact",
+      '/api/transact',
       /**mustBeLoggedIn, */ walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
@@ -46,12 +46,12 @@ export default class TransactionRouter {
       this.transactionController.make
     );
     this.app.get(
-      "/api/transaction-pool-map",
+      '/api/transaction-pool-map',
       transactionPoolMiddleWare(this.transactionPool),
       this.transactionController.poolMap
     );
     this.app.post(
-      "/api/mine-transactions",
+      '/api/mine-transactions',
       mustBeLoggedIn,
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),

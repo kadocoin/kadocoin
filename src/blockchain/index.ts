@@ -1,8 +1,8 @@
-import Block from "./block";
-import cryptoHash from "../util/crypto-hash";
-import { REWARD_INPUT, MINING_REWARD } from "../config/constants";
-import Transaction from "../wallet/transaction";
-import { IChain } from "../types";
+import Block from './block';
+import cryptoHash from '../util/crypto-hash';
+import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import Transaction from '../wallet/transaction';
+import { IChain } from '../types';
 
 class Blockchain {
   public chain: IChain;
@@ -30,20 +30,17 @@ class Blockchain {
       this.chain.length > 1 &&
       incomingChain.length <= this.chain.length
     ) {
-      console.error("The incoming chain must be longer.");
+      console.error('The incoming chain must be longer.');
       return;
     }
 
     if (!Blockchain.isValidChain(incomingChain)) {
-      console.error("The incoming chain must be valid.");
+      console.error('The incoming chain must be valid.');
       return;
     }
 
-    if (
-      validateTransactions &&
-      !this.validTransactionData({ chain: incomingChain })
-    ) {
-      console.error("The incoming chain has an invalid data");
+    if (validateTransactions && !this.validTransactionData({ chain: incomingChain })) {
+      console.error('The incoming chain has an invalid data');
       return;
     }
 
@@ -51,7 +48,7 @@ class Blockchain {
 
     this.chain = incomingChain;
     console.log(
-      "replaced the existing blockchain with the incoming consensus blockchain:",
+      'replaced the existing blockchain with the incoming consensus blockchain:',
       incomingChain
     );
   }
@@ -67,24 +64,22 @@ class Blockchain {
           rewardTransactionCount += 1;
 
           if (rewardTransactionCount > 1) {
-            console.error("Miner rewards exceed limit");
+            console.error('Miner rewards exceed limit');
             return false;
           }
 
           if (Object.values(transaction.output)[0] !== MINING_REWARD) {
-            console.error("Miner reward amount is invalid");
+            console.error('Miner reward amount is invalid');
             return false;
           }
         } else {
           if (!Transaction.validTransaction(transaction)) {
-            console.error("Invalid transaction");
+            console.error('Invalid transaction');
             return false;
           }
 
           if (transactionSet.has(transaction)) {
-            console.error(
-              "An identical transaction appears more than once in the block"
-            );
+            console.error('An identical transaction appears more than once in the block');
             return false;
           } else {
             transactionSet.add(transaction);
@@ -99,19 +94,12 @@ class Blockchain {
   }
 
   static isValidChain(chain: IChain): boolean {
-    if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis()))
-      return false;
+    if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
 
     for (let i = 1; i < chain.length; i++) {
       const { timestamp, lastHash, hash, data, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
-      const validatedHash = cryptoHash(
-        timestamp,
-        lastHash,
-        data,
-        nonce,
-        difficulty
-      );
+      const validatedHash = cryptoHash(timestamp, lastHash, data, nonce, difficulty);
       const lastDifficulty = chain[i - 1].difficulty;
 
       if (previousHash !== lastHash) return false;

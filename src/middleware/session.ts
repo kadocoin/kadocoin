@@ -1,7 +1,7 @@
-import session from "express-session";
-import MongoStore from "connect-mongo";
-import { SESSION_SECRET } from "../config/secret";
-import { Application, Request, Response, NextFunction } from "express";
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import { SESSION_SECRET } from '../config/secret';
+import { Application, Request, Response, NextFunction } from 'express';
 
 export class Session {
   private app: Application;
@@ -10,11 +10,7 @@ export class Session {
     this.app.use(this.sessionMiddleware);
   }
 
-  sessionMiddleware = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): void => {
+  sessionMiddleware = (req: Request, res: Response, next: NextFunction): void => {
     return session({
       secret: SESSION_SECRET,
       resave: false,

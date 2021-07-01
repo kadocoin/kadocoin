@@ -1,4 +1,4 @@
-import Web3 from "web3";
+import Web3 from 'web3';
 
 const web3 = new Web3();
 
@@ -9,7 +9,7 @@ export function pubKeyToAddress(publicKey: string): string {
 }
 
 function trimFirst12Bytes(hexString: string): string {
-  return "0x".concat(hexString.substr(hexString.length - 40));
+  return '0x'.concat(hexString.substr(hexString.length - 40));
 }
 
 export function isValidChecksumAddress(address: string): boolean {

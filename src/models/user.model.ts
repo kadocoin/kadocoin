@@ -1,7 +1,7 @@
-import { IUserModel } from "../types";
-import { ADMIN_EMAIL } from "../config/secret";
-import { nanoid } from "nanoid";
-import { Db } from "mongodb";
+import { IUserModel } from '../types';
+import { ADMIN_EMAIL } from '../config/secret';
+import { nanoid } from 'nanoid';
+import { Db } from 'mongodb';
 
 export default class UserModel {
   async register(
@@ -10,22 +10,20 @@ export default class UserModel {
   ): Promise<IUserModel> {
     try {
       return db
-        .collection("users")
+        .collection('users')
         .insertOne({
           _id: nanoid(12),
           emailVerified: false,
-          profilePicture: "",
+          profilePicture: '',
           userCreationDate,
           email,
           password: hashedPassword,
           address,
           publicKey,
-          name: "",
-          bio: "",
-          ...(email == `${ADMIN_EMAIL}`
-            ? { scope: ["user", "admin"] }
-            : { scope: ["user"] }),
-          registrationMethod: "email_password",
+          name: '',
+          bio: '',
+          ...(email == `${ADMIN_EMAIL}` ? { scope: ['user', 'admin'] } : { scope: ['user'] }),
+          registrationMethod: 'email_password',
         })
         .then(({ ops }) => ops[0]);
     } catch (error) {

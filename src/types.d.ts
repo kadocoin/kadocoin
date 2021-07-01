@@ -1,9 +1,9 @@
-import { Db, MongoClient } from "mongodb";
-import Blockchain from "./blockchain";
-import Block from "./blockchain/block";
-import PubSub from "./pubSub";
-import Wallet from "./wallet";
-import TransactionPool from "./wallet/transaction-pool";
+import { Db, MongoClient } from 'mongodb';
+import Blockchain from './blockchain';
+import Block from './blockchain/block';
+import PubSub from './pubSub';
+import Wallet from './wallet';
+import TransactionPool from './wallet/transaction-pool';
 
 interface IObjectKeys {
   [key: string]: string | number | Wallet;
@@ -14,7 +14,7 @@ export interface ICreateOutputParams extends IObjectKeys {
   address?: string;
   recipient?: string;
   amount?: number;
-  balance?: string | number;
+  balance?: string;
   localWallet?: Wallet;
 }
 

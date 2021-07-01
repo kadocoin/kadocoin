@@ -1,13 +1,13 @@
-import { RedisClient } from "redis";
-import Blockchain from "../blockchain";
-import { redisClientPub, redisClientSub } from "../config/redis";
-import { TDataChild } from "../types";
-import Transaction from "../wallet/transaction";
-import TransactionPool from "../wallet/transaction-pool";
+import { RedisClient } from 'redis';
+import Blockchain from '../blockchain';
+import { redisClientPub, redisClientSub } from '../config/redis';
+import { TDataChild } from '../types';
+import Transaction from '../wallet/transaction';
+import TransactionPool from '../wallet/transaction-pool';
 
 const CHANNELS = {
-  BLOCKCHAIN: "BLOCKCHAIN",
-  TRANSACTION: "TRANSACTION",
+  BLOCKCHAIN: 'BLOCKCHAIN',
+  TRANSACTION: 'TRANSACTION',
 };
 
 class PubSub {
@@ -31,7 +31,7 @@ class PubSub {
 
     this.subscribeToChannel();
 
-    this.subscriber.on("message", (channel: string, message: string) =>
+    this.subscriber.on('message', (channel: string, message: string) =>
       this.handleMessage(channel, message)
     );
   }
@@ -58,7 +58,7 @@ class PubSub {
   }
 
   subscribeToChannel(): void {
-    Object.values(CHANNELS).forEach((channel) => {
+    Object.values(CHANNELS).forEach(channel => {
       this.subscriber.subscribe(channel);
     });
   }

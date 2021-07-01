@@ -3,13 +3,13 @@ import {
   REWARD_INPUT,
   sampleDataForTests,
   STARTING_BALANCE,
-} from "../config/constants";
-import { ITransactionClassParams } from "../types";
-import verifySignature from "../util/verifySignature";
-import Wallet from ".";
-import Transaction from "./transaction";
+} from '../config/constants';
+import { ITransactionClassParams } from '../types';
+import verifySignature from '../util/verifySignature';
+import Wallet from '.';
+import Transaction from './transaction';
 
-describe("Transaction", () => {
+describe('Transaction', () => {
   let transaction: Transaction | ITransactionClassParams,
     senderWallet: Wallet,
     recipient: string,
@@ -19,7 +19,7 @@ describe("Transaction", () => {
   beforeEach(() => {
     senderWallet = new Wallet();
     localWallet = new Wallet();
-    recipient = "kadocoin-recipient-address";
+    recipient = 'kadocoin-recipient-address';
     amount = 500;
     transaction = new Transaction({
       amount,
@@ -31,36 +31,34 @@ describe("Transaction", () => {
     });
   });
 
-  it("has an `id` property", () => expect(transaction).toHaveProperty("id"));
+  it('has an `id` property', () => expect(transaction).toHaveProperty('id'));
 
-  describe("output", () => {
-    it("has an `output` property", () =>
-      expect(transaction).toHaveProperty("output"));
+  describe('output', () => {
+    it('has an `output` property', () => expect(transaction).toHaveProperty('output'));
 
-    it("outputs the amount to the recipient", () =>
+    it('outputs the amount to the recipient', () =>
       expect(transaction.output[recipient]).toEqual(amount.toFixed(8)));
 
-    it("outputs the remaining balance for the `senderWallet`", () => {
+    it('outputs the remaining balance for the `senderWallet`', () => {
       expect(Number(transaction.output[senderWallet.address])).toEqual(
         Number(senderWallet.balance) - amount
       );
     });
 
-    describe("input", () => {
-      it("has an `input` property", () =>
-        expect(transaction).toHaveProperty("input"));
+    describe('input', () => {
+      it('has an `input` property', () => expect(transaction).toHaveProperty('input'));
 
-      it("has a `timestamp` property in the input", () =>
-        expect(transaction.input).toHaveProperty("timestamp"));
+      it('has a `timestamp` property in the input', () =>
+        expect(transaction.input).toHaveProperty('timestamp'));
     });
 
-    it("sets the `amount` to the `senderWallet` balance", () =>
+    it('sets the `amount` to the `senderWallet` balance', () =>
       expect(transaction.input.amount).toEqual(senderWallet.balance));
 
-    it("sets the `address` to the `senderWallet` address", () =>
+    it('sets the `address` to the `senderWallet` address', () =>
       expect(transaction.input.address).toEqual(senderWallet.address));
 
-    it("signs the input", () =>
+    it('signs the input', () =>
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
@@ -72,7 +70,7 @@ describe("Transaction", () => {
     // END OUTPUT
   });
 
-  describe("validTransaction()", () => {
+  describe('validTransaction()', () => {
     let errorMock: jest.Mock<any, any>;
 
     beforeEach(() => {
@@ -80,14 +78,13 @@ describe("Transaction", () => {
       global.console.error = errorMock;
     });
 
-    describe("when the transaction is valid", () => {
-      it("returns true", () =>
-        expect(Transaction.validTransaction(transaction)).toBe(true));
+    describe('when the transaction is valid', () => {
+      it('returns true', () => expect(Transaction.validTransaction(transaction)).toBe(true));
     });
 
-    describe("when the transaction is invalid", () => {
-      describe("and a transaction output value is invalid", () => {
-        it("returns false and logs an error", () => {
+    describe('when the transaction is invalid', () => {
+      describe('and a transaction output value is invalid', () => {
+        it('returns false and logs an error', () => {
           transaction.output[senderWallet.address] = 99999999;
 
           expect(Transaction.validTransaction(transaction)).toBe(false);
@@ -95,8 +92,8 @@ describe("Transaction", () => {
         });
       });
 
-      describe("and the transaction input signature value is invalid", () => {
-        it("returns false and logs an error", () => {
+      describe('and the transaction input signature value is invalid', () => {
+        it('returns false and logs an error', () => {
           transaction.input.signature = new Wallet().sign(sampleDataForTests);
           expect(Transaction.validTransaction(transaction)).toBe(false);
           expect(errorMock).toHaveBeenCalled();
@@ -106,33 +103,33 @@ describe("Transaction", () => {
     // END VALID-TRANSACTION()
   });
 
-  describe("update()", () => {
+  describe('update()', () => {
     let origSignature: string,
       origSenderOutput: string | number | Wallet,
       nextRecipient: string,
       nextAmount: number;
 
-    describe("and amount is invalid", () => {
-      it("throws an error", () => {
+    describe('and amount is invalid', () => {
+      it('throws an error', () => {
         expect(() => {
           if (transaction instanceof Transaction) {
             transaction.update({
               localWallet,
-              recipient: "Kado",
+              recipient: 'Kado',
               amount: 999999,
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
             });
           }
-        }).toThrow("Insufficient balance");
+        }).toThrow('Insufficient balance');
       });
     });
 
-    describe("and the amount is valid", () => {
+    describe('and the amount is valid', () => {
       beforeEach(() => {
         origSignature = transaction.input.signature;
         origSenderOutput = transaction.output[senderWallet.address];
-        nextRecipient = "next-recipient";
+        nextRecipient = 'next-recipient';
         nextAmount = 50;
 
         if (transaction instanceof Transaction) {
@@ -142,36 +139,33 @@ describe("Transaction", () => {
             amount: nextAmount,
             address: senderWallet.address,
             publicKey: senderWallet.publicKey,
-            balance: STARTING_BALANCE,
+            balance: STARTING_BALANCE.toFixed(8),
           });
         }
       });
 
-      it("outputs the amount to the next recipient", () => {
-        expect(transaction.output[nextRecipient]).toEqual(
-          nextAmount.toFixed(8)
-        );
+      it('outputs the amount to the next recipient', () => {
+        expect(transaction.output[nextRecipient]).toEqual(nextAmount.toFixed(8));
       });
 
-      it("subtracts the amount from the original sender output amount", () => {
+      it('subtracts the amount from the original sender output amount', () => {
         expect(transaction.output[senderWallet.address]).toEqual(
           ((origSenderOutput as number) - nextAmount).toFixed(8)
         );
       });
 
-      it("maintains a total output that matches the input amount", () => {
-        expect(
-          Object.values(transaction.output).reduce(
-            (total, outputAmount) => Number(total) + Number(outputAmount)
-          )
-        ).toEqual(transaction.input.amount);
+      it('maintains a total output that matches the input amount', () => {
+        const total = Object.values(transaction.output).reduce(
+          (total, outputAmount) => Number(total) + Number(outputAmount)
+        );
+        expect((total as number).toFixed(8)).toEqual(transaction.input.amount);
       });
 
-      it("re-signs the transaction", () => {
+      it('re-signs the transaction', () => {
         expect(transaction.input.signature).not.toEqual(origSignature);
       });
 
-      describe("and another update for the same recipient", () => {
+      describe('and another update for the same recipient', () => {
         let addedAmount: number;
 
         beforeEach(() => {
@@ -182,18 +176,16 @@ describe("Transaction", () => {
               recipient: nextRecipient,
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
-              balance: STARTING_BALANCE,
+              balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
             });
         });
 
-        it("adds to the recipient amount", () => {
-          expect(transaction.output[nextRecipient]).toEqual(
-            (nextAmount + addedAmount).toFixed(8)
-          );
+        it('adds to the recipient amount', () => {
+          expect(transaction.output[nextRecipient]).toEqual((nextAmount + addedAmount).toFixed(8));
         });
 
-        it("subtract the amount from the original sender output amount", () => {
+        it('subtract the amount from the original sender output amount', () => {
           expect(transaction.output[senderWallet.address]).toEqual(
             ((origSenderOutput as number) - nextAmount - addedAmount).toFixed(8)
           );
@@ -203,7 +195,7 @@ describe("Transaction", () => {
     // END UPDATE()
   });
 
-  describe("rewardTransaction()", () => {
+  describe('rewardTransaction()', () => {
     let rewardTransaction: Transaction, minerWallet: Wallet;
 
     beforeEach(() => {
@@ -213,14 +205,12 @@ describe("Transaction", () => {
       });
     });
 
-    it("creates a transaction with the reward input", () => {
+    it('creates a transaction with the reward input', () => {
       expect(rewardTransaction.input).toEqual(REWARD_INPUT);
     });
 
-    it("creates one transaction for the miner with the `MINING_REWARD`", () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(
-        MINING_REWARD
-      );
+    it('creates one transaction for the miner with the `MINING_REWARD`', () => {
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(MINING_REWARD);
     });
   });
 
