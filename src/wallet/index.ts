@@ -6,7 +6,7 @@ import { pubKeyToAddress } from "../util/pubKeyToAddress";
 import { IChain, ICreateOutputParams, TDataChild } from "../types";
 
 class Wallet {
-  public balance: string | number;
+  public balance: string;
   public keyPair: any;
   public publicKey: string;
   public address: string;
@@ -39,9 +39,8 @@ class Wallet {
     if (chain) {
       this.balance = Wallet.calculateBalance({
         chain,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        address: address!,
-      }) as number;
+        address: address,
+      });
     }
 
     if (amount > Number(this.balance)) {
@@ -64,7 +63,7 @@ class Wallet {
   }: {
     chain: IChain;
     address: string;
-  }): number | string {
+  }): string {
     let hasConductedTransaction = false;
     let outputsTotal = 0;
 

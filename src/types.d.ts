@@ -55,7 +55,7 @@ export interface ITransactionClassParams {
   amount?: number;
   output?: ICreateOutputParams;
   input?: IInput;
-  balance?: number | string;
+  balance?: string;
   localWallet?: Wallet;
   publicKey?: string;
   address?: string;

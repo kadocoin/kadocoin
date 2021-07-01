@@ -27,7 +27,7 @@ describe("Transaction", () => {
       address: senderWallet.address,
       publicKey: senderWallet.publicKey,
       localWallet,
-      balance: STARTING_BALANCE,
+      balance: STARTING_BALANCE.toFixed(8),
     });
   });
 
@@ -55,9 +55,7 @@ describe("Transaction", () => {
     });
 
     it("sets the `amount` to the `senderWallet` balance", () =>
-      expect((transaction.input.amount as number).toFixed(8)).toEqual(
-        senderWallet.balance
-      ));
+      expect(transaction.input.amount).toEqual(senderWallet.balance));
 
     it("sets the `address` to the `senderWallet` address", () =>
       expect(transaction.input.address).toEqual(senderWallet.address));
