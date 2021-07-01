@@ -7,6 +7,7 @@ import {
   ICreateInputParams,
   ICreateOutputParams,
   IInput,
+  IOutput,
   ITransactionClassParams,
   TOutput,
 } from "../types";
@@ -46,7 +47,7 @@ class Transaction {
     amount,
     balance,
   }: ICreateOutputParams): TOutput {
-    const output = {};
+    const output: IOutput = {} as IOutput;
 
     output[address] = ((balance as number) - amount).toFixed(8);
     output[recipient] = amount.toFixed(8);
@@ -87,7 +88,7 @@ class Transaction {
     );
 
     // CONVERT THE SUM TO 8 DECIMAL PLACES
-    outputTotal = outputTotal.toFixed(8);
+    if (typeof outputTotal == "number") outputTotal = outputTotal.toFixed(8);
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
     if (Number(amount) !== Number(outputTotal)) {

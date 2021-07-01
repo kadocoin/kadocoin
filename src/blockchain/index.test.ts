@@ -4,11 +4,12 @@ import Block from "./block";
 import Blockchain from ".";
 import Wallet from "../wallet";
 import Transaction from "../wallet/transaction";
+import { IChain, TDataChild } from "../types";
 
 describe("Blockchain", () => {
   let blockchain: Blockchain,
     newChain: Blockchain,
-    originalChain,
+    originalChain: IChain,
     errorMock: jest.Mock<any, any>;
 
   beforeEach(() => {
@@ -80,7 +81,7 @@ describe("Blockchain", () => {
           const lastHash = lastBlock.hash;
           const timestamp = Date.now();
           const nonce = 0;
-          const data = [];
+          const data: Array<TDataChild> = [];
           const difficulty = lastBlock.difficulty - 3;
           const hash = cryptoHash(timestamp, lastHash, difficulty, nonce, data);
           const badBlock = new Block({
@@ -110,7 +111,7 @@ describe("Blockchain", () => {
   });
 
   describe("replaceChain()", () => {
-    let logMock;
+    let logMock: jest.Mock<any, any>;
 
     beforeEach(() => {
       logMock = jest.fn();

@@ -110,7 +110,7 @@ describe("Transaction", () => {
 
   describe("update()", () => {
     let origSignature: string,
-      origSenderOutput,
+      origSenderOutput: string | number | Wallet,
       nextRecipient: string,
       nextAmount: number;
 
@@ -157,7 +157,7 @@ describe("Transaction", () => {
 
       it("subtracts the amount from the original sender output amount", () => {
         expect(transaction.output[senderWallet.address]).toEqual(
-          (origSenderOutput - nextAmount).toFixed(8)
+          ((origSenderOutput as number) - nextAmount).toFixed(8)
         );
       });
 
@@ -197,7 +197,7 @@ describe("Transaction", () => {
 
         it("subtract the amount from the original sender output amount", () => {
           expect(transaction.output[senderWallet.address]).toEqual(
-            (origSenderOutput - nextAmount - addedAmount).toFixed(8)
+            ((origSenderOutput as number) - nextAmount - addedAmount).toFixed(8)
           );
         });
       });

@@ -5,7 +5,11 @@ import PubSub from "./pubSub";
 import Wallet from "./wallet";
 import TransactionPool from "./wallet/transaction-pool";
 
-export interface ICreateOutputParams {
+interface IObjectKeys {
+  [key: string]: string | number | Wallet;
+}
+
+export interface ICreateOutputParams extends IObjectKeys {
   publicKey?: string;
   address?: string;
   recipient?: string;
@@ -109,4 +113,9 @@ declare global {
       localWallet: Wallet;
     }
   }
+}
+
+export interface IOutput extends IObjectKeys {
+  address: string;
+  recipient: string;
 }

@@ -11,7 +11,7 @@ class App {
   }
 
   bootstrap() {
-    this.app.get("/", (req: Request, res: Response) => {
+    this.app.get("/", (_: Request, res: Response) => {
       res.send(DEFAULT_MESSAGE);
     });
   }

@@ -7,7 +7,11 @@
     "sourceMap": true,  
     "resolveJsonModule": true,  
     "lib": ["es6", "dom"],  
-    "esModuleInterop": true  
+    "esModuleInterop": true,  
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": false,
+    "forceConsistentCasingInFileNames": true,
   },  
   "include": [  
     "src/**/*",

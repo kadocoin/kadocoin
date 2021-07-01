@@ -17,7 +17,7 @@ export default class Database {
 
   openMongo = async (
     req: Request,
-    res: Response,
+    _: Response,
     next: NextFunction
   ): Promise<void> => {
     if (!customGlobal.mongo.client) {
