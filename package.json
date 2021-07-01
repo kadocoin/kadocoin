@@ -5,15 +5,15 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch src/ --exec ts-node src/server.ts",
+    "average-work": "node dist/average-work.js",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
+    "lint": "eslint",
+    "lint:fix": "eslint . --fix",
     "start": "node dist/server.js",
     "build": "tsc --build",
-    "clean": "tsc --build --clean",
     "test": "jest --passWithNoTests --bail",
     "test-watch": "jest --colors --watch",
     "test-watchAll": "jest --colors --watchAll",
-    "lint": "eslint",
-    "lint:fix": "eslint . --fix",
     "prepare-husky": "husky install",
     "format": "prettier --write"
   },
