@@ -1,17 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { IChain } from "../types";
+import { IChain, TDataChild } from "../types";
 import Transaction from "./transaction";
 
-interface ITransactionParam {
-  id: string;
-  input: any;
-  output: any;
-}
-
 class TransactionPool {
-  transactionMap: {
-    [x: string]: any;
-  };
+  transactionMap: Record<string, Transaction | TDataChild>;
 
   constructor() {
     this.transactionMap = {};
@@ -21,11 +12,11 @@ class TransactionPool {
     this.transactionMap = {};
   }
 
-  setTransaction(transaction: ITransactionParam): void {
+  setTransaction(transaction: TDataChild | Transaction): void {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  setMap(transactionMap: Record<any, never>): void {
+  setMap(transactionMap: Record<string, TDataChild | Transaction>): void {
     this.transactionMap = transactionMap;
   }
 
@@ -33,17 +24,17 @@ class TransactionPool {
     inputAddress,
   }: {
     inputAddress: string;
-  }): Transaction {
+  }): Transaction | TDataChild {
     const transactions = Object.values(this.transactionMap);
 
     return transactions.find(
-      (transaction: any) => transaction.input.address === inputAddress
+      (transaction) => transaction.input.address === inputAddress
     );
   }
 
-  validTransactions(): any[] {
+  validTransactions(): Array<Transaction | TDataChild> {
     return Object.values(this.transactionMap).filter((transaction) =>
-      Transaction.validTransaction(transaction)
+      Transaction.validTransaction(transaction as TDataChild)
     );
   }
 

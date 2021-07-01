@@ -5,12 +5,15 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch src/ --exec ts-node src/server.ts",
+    "average-work": "node dist/average-work.js",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
-    "start": "node dist/server.js",
-    "build": "tsc --build",
-    "clean": "tsc --build --clean",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
+    "start": "node dist/server.js",
+    "build": "tsc --build",
+    "test": "jest --passWithNoTests --bail",
+    "test-watch": "jest --colors --watch",
+    "test-watchAll": "jest --colors --watchAll",
     "prepare-husky": "husky install",
     "format": "prettier --write"
   },
@@ -40,7 +43,6 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.9",
     "nanoid": "^3.1.23",
-    "nodemon": "^2.0.7",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "redis": "^3.1.2",
@@ -52,6 +54,8 @@
     "web3": "^1.3.6"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-typescript": "^7.14.5",
     "@types/bcryptjs": "^2.4.2",
     "@types/body-parser": "^1.19.0",
     "@types/cors": "^2.8.10",
@@ -60,9 +64,9 @@
     "@types/express": "^4.17.12",
     "@types/express-session": "^1.17.3",
     "@types/helmet": "^4.0.0",
+    "@types/jest": "^26.0.23",
     "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^8.5.1",
-    "@types/mocha": "^8.2.2",
     "@types/mongodb": "^3.6.17",
     "@types/mongoose": "^5.11.97",
     "@types/nanoid": "^3.0.0",
@@ -79,24 +83,28 @@
     "@types/web3": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
+    "babel-jest": "^27.0.6",
     "eslint": "^7.29.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^6.0.0",
+    "jest": "^27.0.6",
     "lint-staged": "^11.0.0",
+    "nodemon": "^2.0.7",
     "prettier": "^2.3.1",
+    "ts-jest": "^27.0.3",
     "ts-node": "^10.0.0"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "yarn test"
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
     "*.ts": [
       "yarn format",
-      "yarn lint"
+      "yarn lint",
+      "yarn run test"
     ]
   }
 }

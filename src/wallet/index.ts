@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Transaction from "./transaction";
 import { STARTING_BALANCE } from "../config/constants";
 import newEc from "../util/secp256k1";
 import cryptoHash from "../util/crypto-hash";
 import { pubKeyToAddress } from "../util/pubKeyToAddress";
-import { IChain } from "../types";
+import { IChain, ICreateOutputParams, TDataChild } from "../types";
 
 class Wallet {
   public balance: string | number;
@@ -19,8 +18,7 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  sign(data: any): string {
+  sign(data: TDataChild | ICreateOutputParams): string {
     return this.keyPair.sign(cryptoHash(data));
   }
 
@@ -33,9 +31,9 @@ class Wallet {
   }: {
     recipient: string;
     amount: number;
-    chain: IChain;
-    publicKey: string;
-    address: string;
+    chain?: IChain;
+    publicKey?: string;
+    address?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) {
@@ -46,12 +44,12 @@ class Wallet {
     }
 
     if (amount > Number(this.balance)) {
-      throw new Error("Insufficient balance.");
+      throw new Error("Insufficient balance");
     }
 
     return new Transaction({
-      publicKey,
       recipient,
+      publicKey,
       address,
       amount,
       balance: this.balance,

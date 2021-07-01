@@ -62,3 +62,22 @@ export const swaggerOptions = {
   basedir: __dirname,
   apis: ["./src/routes/userRouter.router.ts"], //Path to the API route handle folder
 };
+
+export const sampleDataForTests = {
+  id: "2d5791f0-d9af-11eb-ac13-099d1d20fcfc",
+  output: {
+    "0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD": "770.00000000",
+    "0x86045b56bfeb1A35C6818081130BA0F789dc27c9": "230.00000000",
+  },
+  input: {
+    timestamp: 1625063196815,
+    amount: "1000.00000000",
+    address: "0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD",
+    publicKey:
+      "0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4",
+    localPublicKey:
+      "04b9c0f354c36f7df448ed4125480e84aad425b1851e1736c90d08835e4a77e9e7d33bfda4df16b8bf13d933592942aafdeefc2dac7450c833dbdbf445abe258dc",
+    signature:
+      "7fd13c4a4175fda39615766a5f0bfce40c0aeccd1d38c5f9e2ab7f8744ac26e2",
+  },
+};

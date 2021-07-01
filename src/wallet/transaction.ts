@@ -73,7 +73,9 @@ class Transaction {
     };
   }
 
-  static validTransaction(transaction: ITransactionClassParams): boolean {
+  static validTransaction(
+    transaction: Transaction | ITransactionClassParams
+  ): boolean {
     const {
       input: { address, publicKey, amount, signature, localPublicKey },
       output,

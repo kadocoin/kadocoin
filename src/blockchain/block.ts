@@ -1,32 +1,17 @@
 import hexToBinary from "hex-to-bin";
 import { GENESIS_DATA, MINE_RATE } from "../config/constants";
+import { TDataChild } from "../types";
 import cryptoHash from "../util/crypto-hash";
-
-interface IBlockProps {
-  timestamp: number;
-  lastHash: string;
-  hash: string;
-  data: any[];
-  nonce: number;
-  difficulty: number;
-}
 
 class Block {
   public timestamp: number;
   public lastHash: string;
   public hash: string;
-  public data: any[];
+  public data: Array<TDataChild>;
   public nonce: number;
   public difficulty: number;
 
-  constructor({
-    timestamp,
-    lastHash,
-    hash,
-    data,
-    nonce,
-    difficulty,
-  }: IBlockProps) {
+  constructor({ timestamp, lastHash, hash, data, nonce, difficulty }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
     this.hash = hash;
@@ -43,7 +28,7 @@ class Block {
     lastBlock,
     data,
   }: {
-    lastBlock: IBlockProps;
+    lastBlock: Block;
     data: any[];
   }): Block {
     let hash: string,
@@ -78,7 +63,7 @@ class Block {
     originalBlock,
     timestamp,
   }: {
-    originalBlock: IBlockProps;
+    originalBlock: Block;
     timestamp: number;
   }): number {
     const { difficulty } = originalBlock;

@@ -14,7 +14,7 @@ export interface ICreateOutputParams {
   localWallet?: Wallet;
 }
 
-type TOutput = { recipient?: string; address?: string };
+type TOutput = { [key: string]: string | number } | ICreateOutputParams;
 
 export interface IBaseInput {
   publicKey: string;
@@ -31,10 +31,19 @@ export interface IInput extends IBaseInput {
   localWallet?: Wallet;
 }
 
+export interface IVerifySignatureProps {
+  publicKey: string;
+  data: any;
+  signature: string;
+}
+
 export interface ICreateInputParams extends IBaseInput {
   balance?: string | number;
   output?: ICreateOutputParams;
   localWallet?: Wallet;
+  localPublicKey?: string; // FOR TESTING PURPOSES
+  amount?: string | number; // FOR TESTING PURPOSES
+  signature?: string;
 }
 
 export interface ITransactionClassParams {
@@ -48,13 +57,28 @@ export interface ITransactionClassParams {
   address?: string;
 }
 
+export interface ITransactionParam {
+  id: string;
+  input: IInput;
+  output: ICreateOutputParams;
+}
+
 export type TDataChild = {
   id: string;
-  output: { [key: string]: string };
+  output: { [key: string]: string | number };
   input: IInput;
 };
 
 export type IChain = Array<Block>;
+
+export interface IBlockProps {
+  timestamp: number;
+  lastHash: string;
+  hash: string;
+  data: Array<TDataChild>;
+  nonce: number;
+  difficulty: number;
+}
 
 export interface IUserModel {
   _id?: string;
