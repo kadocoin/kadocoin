@@ -29,7 +29,7 @@ export default class UserModel {
         })
         .then(({ ops }) => ops[0]);
     } catch (error) {
-      console.log("register", error);
+      throw new Error(`register, ${error}`);
     }
   }
 }

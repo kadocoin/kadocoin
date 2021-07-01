@@ -12,10 +12,11 @@ export default class BlockController {
       return res.status(SUCCESS).json(req.blockchain.chain);
     } catch (error) {
       if (error instanceof Error) {
-        res
+        return res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: "error", message: error.message });
       }
+      throw new Error(error.message);
     }
   };
 
@@ -33,7 +34,9 @@ export default class BlockController {
         res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: "error", message: error.message });
+        throw new Error(error.message);
       }
+      throw new Error(error.message);
     }
   };
 }

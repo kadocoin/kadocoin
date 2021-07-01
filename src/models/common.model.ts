@@ -11,7 +11,7 @@ export default class CommonModel {
         })
         .then((user) => user || null);
     } catch (error) {
-      console.log("findByEmail", error);
+      throw new Error(`findByEmail", ${error}`);
     }
   };
 
@@ -24,7 +24,7 @@ export default class CommonModel {
         })
         .then((user) => user || null);
     } catch (error) {
-      console.log("findById", error);
+      throw new Error(`findById", ${error}`);
     }
   };
 

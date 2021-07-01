@@ -21,7 +21,7 @@ export default class Database {
     next: NextFunction
   ): Promise<void> => {
     if (!customGlobal.mongo.client) {
-      customGlobal.mongo.client = new MongoClient(MONGODB_URI, {
+      customGlobal.mongo.client = new MongoClient(MONGODB_URI as string, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       });

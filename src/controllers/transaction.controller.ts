@@ -124,14 +124,14 @@ export default class TransactionController {
     return res.status(CREATED).json({ type: "success", transaction });
   };
 
-  poolMap = (req: Request, res: Response): Response => {
+  poolMap = (req: Request, res: Response): Response | undefined => {
     try {
       const { transactionPool } = req;
 
       return res.status(SUCCESS).json(transactionPool.transactionMap);
     } catch (error) {
       if (error instanceof Error) {
-        res
+        return res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: "error", message: error.message });
       }
@@ -170,14 +170,14 @@ export default class TransactionController {
           .json({ type: "success", message: "Success" });
       }
 
-      res
+      return res
         .status(SUCCESS)
         .json({ type: "error", message: "No transactions to mine" });
 
       // TODO - COINS IN CIRCULATION
     } catch (error) {
       if (error instanceof Error) {
-        res
+        return res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: "error", message: error.message });
       }

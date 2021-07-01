@@ -27,7 +27,7 @@ export interface IBaseInput {
 
 export interface IInput extends IBaseInput {
   timestamp: number;
-  amount: string | number;
+  amount: string | number | undefined;
   localPublicKey: string;
   signature: string;
   balance?: string | number;

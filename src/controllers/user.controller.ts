@@ -32,124 +32,159 @@ export default class UserController {
   }
 
   register = async (req: Request, res: Response): Promise<Response> => {
-    const { email, password, userCreationDate } = req.body;
-    const { error } = registerValidation(req.body);
+    try {
+      const { email, password, userCreationDate } = req.body;
+      const { error } = registerValidation(req.body);
 
-    const wallet = new Wallet();
+      const wallet = new Wallet();
 
-    if (error)
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ error: error.details[0].message });
 
-    const emailExist = await this.commonModel.findByEmail(req.db, email);
-    if (emailExist)
-      return res
-        .status(ALREADY_EXISTS)
-        .json({ message: "Email already exists" });
+      const emailExist = await this.commonModel.findByEmail(req.db, email);
+      if (emailExist)
+        return res
+          .status(ALREADY_EXISTS)
+          .json({ message: "Email already exists" });
 
-    // HASH PASSWORD
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+      // HASH PASSWORD
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
-    let user = await this.userService.register(req.db, {
-      email,
-      hashedPassword,
-      userCreationDate,
-      address: wallet.address,
-      publicKey: wallet.publicKey,
-    });
+      let user = await this.userService.register(req.db, {
+        email,
+        hashedPassword,
+        userCreationDate,
+        address: wallet.address,
+        publicKey: wallet.publicKey,
+      });
 
-    // ADD SIGNED TOKEN TO USER OBJECT
-    user.token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        userCreationDate: user.userCreationDate,
-      },
-      JWTSECRET,
-      {
-        expiresIn: tokenLasts,
+      // ADD SIGNED TOKEN TO USER OBJECT
+      user.token = jwt.sign(
+        {
+          id: user._id,
+          email: user.email,
+          userCreationDate: user.userCreationDate,
+        },
+        JWTSECRET,
+        {
+          expiresIn: tokenLasts,
+        }
+      );
+
+      user = removeSensitiveProps(user);
+
+      return res.status(CREATED).json({
+        user,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: "error", message: error.message });
       }
-    );
-
-    user = removeSensitiveProps(user);
-
-    res.status(CREATED).json({
-      user,
-    });
+      throw new Error(error.message);
+    }
   };
 
   doesEmailExists = async (req: Request, res: Response): Promise<Response> => {
-    const { email } = req.body;
+    try {
+      const { email } = req.body;
 
-    const { error } = emailValidation(email);
-    if (error)
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ error: error.details[0].message });
+      const { error } = emailValidation(email);
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ error: error.details[0].message });
 
-    const emailExist = await this.commonModel.findByEmail(req.db, email);
+      const emailExist = await this.commonModel.findByEmail(req.db, email);
 
-    if (emailExist)
-      return res.status(SUCCESS).json({ message: "email exists" });
+      if (emailExist)
+        return res.status(SUCCESS).json({ message: "email exists" });
 
-    res.status(SUCCESS).json({ message: "unique email" });
+      return res.status(SUCCESS).json({ message: "unique email" });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: "error", message: error.message });
+      }
+      throw new Error(error.message);
+    }
   };
 
   login = async (req: Request, res: Response): Promise<Response> => {
-    const { error } = loginValidation(req.body);
+    try {
+      const { error } = loginValidation(req.body);
 
-    if (error)
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ error: error.details[0].message });
 
-    const user = await this.commonModel.findByEmail(req.db, req.body.email);
+      const user = await this.commonModel.findByEmail(req.db, req.body.email);
 
-    if (!user)
-      return res
-        .status(NOT_FOUND)
-        .json({ message: "Incorrect email or password" });
+      if (!user)
+        return res
+          .status(NOT_FOUND)
+          .json({ message: "Incorrect email or password" });
 
-    // CHECK PASSWORD
-    const validPassword = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
+      // CHECK PASSWORD
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        user.password as string
+      );
 
-    if (!validPassword)
-      return res.status(ALREADY_EXISTS).json({ message: "Invalid password" });
+      if (!validPassword)
+        return res.status(ALREADY_EXISTS).json({ message: "Invalid password" });
 
-    // ADD SIGNED TOKEN TO USER OBJECT
-    user.token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        userCreationDate: user.userCreationDate,
-      },
-      JWTSECRET,
-      {
-        expiresIn: tokenLasts,
+      // ADD SIGNED TOKEN TO USER OBJECT
+      user.token = jwt.sign(
+        {
+          id: user._id,
+          email: user.email,
+          userCreationDate: user.userCreationDate,
+        },
+        JWTSECRET,
+        {
+          expiresIn: tokenLasts,
+        }
+      );
+
+      return res.status(SUCCESS).json({ user });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: "error", message: error.message });
       }
-    );
-
-    res.status(SUCCESS).json({ user });
+      throw new Error(error.message);
+    }
   };
 
   walletInfo = (req: Request, res: Response): Response => {
-    const { error } = walletInfoValidation(req.body);
+    try {
+      const { error } = walletInfoValidation(req.body);
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ error: error.details[0].message });
 
-    if (error)
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ error: error.details[0].message });
-
-    res.status(SUCCESS).json({
-      balance: Wallet.calculateBalance({
-        chain: req.blockchain.chain,
-        address: req.body.address,
-      }),
-    });
+      return res.status(SUCCESS).json({
+        balance: Wallet.calculateBalance({
+          chain: req.blockchain.chain,
+          address: req.body.address,
+        }),
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: "error", message: error.message });
+      }
+      throw new Error(error.message);
+    }
   };
 }

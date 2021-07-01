@@ -39,7 +39,8 @@ class Wallet {
     if (chain) {
       this.balance = Wallet.calculateBalance({
         chain,
-        address,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        address: address!,
       }) as number;
     }
 

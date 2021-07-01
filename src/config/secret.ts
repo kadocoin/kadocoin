@@ -38,7 +38,7 @@ if (!MONGODB_URI) {
  * PORT
  */
 export const DEFAULT_PORT = 2000;
-let PEER_PORT: number;
+let PEER_PORT = 0;
 
 if (process.env.GENERATE_PEER_PORT === "true")
   PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
