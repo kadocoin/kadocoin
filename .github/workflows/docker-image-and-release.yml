@@ -5,7 +5,7 @@ on:
 
 jobs:
  # Publishes a docker image of Kadocoin multi-wallet API and release files
-  Build Docker Image and Release:
+  build-docker-image-and-release:
     runs-on: ubuntu-latest
     container: node:14
     steps:
