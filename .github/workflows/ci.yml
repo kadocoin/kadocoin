@@ -18,7 +18,7 @@ jobs:
       id: prep
       run: |
         REGISTRY="docker.pkg.github.com"
-        IMAGE="${REGISTRY}/${{ github.repository }}/${{ github.event.repository.name }}"
+        IMAGE="${REGISTRY}/kado-coin/${{ github.event.repository.name }}"
         TAGS="${IMAGE}:${{ github.sha }}"
         if [[ $GITHUB_REF == ref/head/master ]]; then
           TAGS="${TAGS},${IMAGE}:latest"
