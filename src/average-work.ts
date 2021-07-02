@@ -1,13 +1,13 @@
-import Blockchain from "./blockchain";
-import Block from "./blockchain/block";
+import Blockchain from './blockchain';
+import Block from './blockchain/block';
 
 (function averageWork(): void {
   const blockchain = new Blockchain(),
     times: Array<number> = [];
 
   // ADD FIRST BLOCK
-  blockchain.addBlock({ data: ["first-block-data"] });
-  console.log("first block", blockchain.chain[blockchain.chain.length - 1]);
+  blockchain.addBlock({ data: ['first-block-data'] });
+  console.log('first block', blockchain.chain[blockchain.chain.length - 1]);
 
   let prevTimestamp: number,
     nextTimestamp: number,

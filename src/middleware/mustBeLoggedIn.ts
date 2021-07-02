@@ -1,19 +1,13 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { NOT_FOUND } from "../statusCode/statusCode";
-import { JWTSECRET } from "../config/secret";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { NOT_FOUND } from '../statusCode/statusCode';
+import { JWTSECRET } from '../config/secret';
 
-export function mustBeLoggedIn(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function mustBeLoggedIn(req: Request, res: Response, next: NextFunction): void {
   try {
     jwt.verify(req.body.token, JWTSECRET);
     next();
   } catch (error) {
-    res
-      .status(NOT_FOUND)
-      .json("You are not logged in. Please log in to perform this operation.");
+    res.status(NOT_FOUND).json('You are not logged in. Please log in to perform this operation.');
   }
 }

@@ -1,5 +1,5 @@
-import Joi, { ValidationResult } from "joi";
-import { IUserModel } from "../types";
+import Joi, { ValidationResult } from 'joi';
+import { IUserModel } from '../types';
 
 export const registerValidation = (user: IUserModel): ValidationResult => {
   const regSchema = Joi.object({
@@ -12,7 +12,7 @@ export const registerValidation = (user: IUserModel): ValidationResult => {
 };
 
 export const emailValidation = (email: string): ValidationResult => {
-  return Joi.string().email().label("Email").validate(email);
+  return Joi.string().email().label('Email').validate(email);
 };
 
 export const loginValidation = (user: IUserModel): ValidationResult => {

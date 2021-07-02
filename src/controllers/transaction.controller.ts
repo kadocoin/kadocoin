@@ -1,20 +1,17 @@
-import { Request, Response } from "express";
-import {
-  mineValidation,
-  transactValidation,
-} from "../validation/transaction.validation";
+import { Request, Response } from 'express';
+import { mineValidation, transactValidation } from '../validation/transaction.validation';
 import {
   INTERNAL_SERVER_ERROR,
   CREATED,
   NOT_FOUND,
   SUCCESS,
   INCORRECT_VALIDATION,
-} from "../statusCode/statusCode";
-import Wallet from "../wallet";
-import TransactionMiner from "../transactionMiner";
-import isEmptyObject from "../util/isEmptyObject";
-import { isValidChecksumAddress } from "../util/pubKeyToAddress";
-import Transaction from "../wallet/transaction";
+} from '../statusCode/statusCode';
+import Wallet from '../wallet';
+import TransactionMiner from '../transactionMiner';
+import isEmptyObject from '../util/isEmptyObject';
+import { isValidChecksumAddress } from '../util/pubKeyToAddress';
+import Transaction from '../wallet/transaction';
 
 export default class TransactionController {
   /**
@@ -29,16 +26,16 @@ export default class TransactionController {
     // CHECK IF AMOUNT IS A NUMBER
     if (isNaN(Number(req.body.amount)))
       return res.status(INCORRECT_VALIDATION).json({
-        type: "error",
-        message: "Amount is not a number. Provide a number please.",
+        type: 'error',
+        message: 'Amount is not a number. Provide a number please.',
       });
 
     // ENFORCE 8 DECIMAL PLACES
     if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
-        type: "error",
+        type: 'error',
         message:
-          "You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin",
+          'You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin',
       });
 
     // VALIDATE OTHER USER INPUTS
@@ -46,7 +43,7 @@ export default class TransactionController {
     if (error)
       return res
         .status(INCORRECT_VALIDATION)
-        .json({ type: "error", message: error.details[0].message });
+        .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
     const { amount, recipient, publicKey, address } = req.body;
@@ -54,15 +51,15 @@ export default class TransactionController {
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient))
       return res.status(INCORRECT_VALIDATION).json({
-        type: "error",
-        message: "Invalid recipient address.",
+        type: 'error',
+        message: 'Invalid recipient address.',
       });
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(address))
       return res.status(INCORRECT_VALIDATION).json({
-        type: "error",
-        message: "Invalid sender address.",
+        type: 'error',
+        message: 'Invalid sender address.',
       });
 
     // GRAB NECESSARY MIDDLEWARES
@@ -71,8 +68,8 @@ export default class TransactionController {
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
       return res.status(INCORRECT_VALIDATION).json({
-        type: "error",
-        message: "Sender and receiver address cannot be the same.",
+        type: 'error',
+        message: 'Sender and receiver address cannot be the same.',
       });
 
     // CHECK FOR EXISTING TRANSACTION
@@ -88,7 +85,7 @@ export default class TransactionController {
 
     try {
       if (transaction) {
-        console.log("Update transaction");
+        console.log('Update transaction');
         if (transaction instanceof Transaction) {
           transaction.update({
             publicKey,
@@ -100,7 +97,7 @@ export default class TransactionController {
           });
         }
       } else {
-        console.log("New transaction");
+        console.log('New transaction');
         transaction = localWallet.createTransaction({
           recipient,
           amount: Number(amount),
@@ -111,9 +108,7 @@ export default class TransactionController {
       }
     } catch (error) {
       if (error instanceof Error) {
-        return res
-          .status(NOT_FOUND)
-          .json({ type: "error", message: error.message });
+        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
       }
     }
 
@@ -121,7 +116,7 @@ export default class TransactionController {
 
     pubSub.broadcastTransaction(transaction);
 
-    return res.status(CREATED).json({ type: "success", transaction });
+    return res.status(CREATED).json({ type: 'success', transaction });
   };
 
   poolMap = (req: Request, res: Response): Response | undefined => {
@@ -131,9 +126,7 @@ export default class TransactionController {
       return res.status(SUCCESS).json(transactionPool.transactionMap);
     } catch (error) {
       if (error instanceof Error) {
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ type: "error", message: error.message });
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
       }
     }
   };
@@ -144,7 +137,7 @@ export default class TransactionController {
       if (error)
         return res
           .status(INCORRECT_VALIDATION)
-          .json({ type: "error", message: error.details[0].message });
+          .json({ type: 'error', message: error.details[0].message });
 
       const { address } = req.body;
       const { transactionPool, blockchain, pubSub } = req;
@@ -160,26 +153,18 @@ export default class TransactionController {
         const status = transactionMiner.mineTransactions();
 
         // POOL CONTAINS INVALID TRANSACTIONS
-        if (status !== "success")
-          return res
-            .status(NOT_FOUND)
-            .json({ type: "error", message: "No valid transactions" });
+        if (status !== 'success')
+          return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
-        return res
-          .status(SUCCESS)
-          .json({ type: "success", message: "Success" });
+        return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }
 
-      return res
-        .status(SUCCESS)
-        .json({ type: "error", message: "No transactions to mine" });
+      return res.status(SUCCESS).json({ type: 'error', message: 'No transactions to mine' });
 
       // TODO - COINS IN CIRCULATION
     } catch (error) {
       if (error instanceof Error) {
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ type: "error", message: error.message });
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
       }
     }
   };

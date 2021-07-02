@@ -1,6 +1,6 @@
-import { Db, MongoClient } from "mongodb";
-import { Application, Request, Response, NextFunction } from "express";
-import { MONGODB_URI, DB_NAME } from "../config/secret";
+import { Db, MongoClient } from 'mongodb';
+import { Application, Request, Response, NextFunction } from 'express';
+import { MONGODB_URI, DB_NAME } from '../config/secret';
 
 const customGlobal: any = global;
 customGlobal.mongo = customGlobal.mongo || {};
@@ -15,11 +15,7 @@ export default class Database {
     this.indexesCreated = false;
   }
 
-  openMongo = async (
-    req: Request,
-    _: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  openMongo = async (req: Request, _: Response, next: NextFunction): Promise<void> => {
     if (!customGlobal.mongo.client) {
       customGlobal.mongo.client = new MongoClient(MONGODB_URI as string, {
         useNewUrlParser: true,
@@ -37,10 +33,8 @@ export default class Database {
 
   createIndexes = async (db: Db): Promise<void> => {
     await Promise.all([
-      db
-        .collection("tokens")
-        .createIndex({ expireAt: -1 }, { expireAfterSeconds: 0 }),
-      db.collection("users").createIndex({ email: 1 }, { unique: true }),
+      db.collection('tokens').createIndex({ expireAt: -1 }, { expireAfterSeconds: 0 }),
+      db.collection('users').createIndex({ email: 1 }, { unique: true }),
     ]);
     this.indexesCreated = true;
   };

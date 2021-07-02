@@ -1,7 +1,7 @@
-import { Application } from "express";
-import Blockchain from "../blockchain";
-import BlockController from "../controllers/block.controller";
-import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
+import { Application } from 'express';
+import Blockchain from '../blockchain';
+import BlockController from '../controllers/block.controller';
+import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
 
 export class BlockRouter {
   private app: Application;
@@ -17,13 +17,13 @@ export class BlockRouter {
 
   initRoute(): void {
     this.app.get(
-      "/api/blocks",
+      '/api/blocks',
       blockchainMiddleWare(this.blockchain),
       this.blockController.getBlocks
     );
 
     this.app.get(
-      "/api/block/:blockHash",
+      '/api/block/:blockHash',
       blockchainMiddleWare(this.blockchain),
       this.blockController.getABlock
     );

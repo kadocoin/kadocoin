@@ -1,7 +1,7 @@
-import hexToBinary from "hex-to-bin";
-import { GENESIS_DATA, MINE_RATE } from "../config/constants";
-import { TDataChild } from "../types";
-import cryptoHash from "../util/crypto-hash";
+import hexToBinary from 'hex-to-bin';
+import { GENESIS_DATA, MINE_RATE } from '../config/constants';
+import { TDataChild } from '../types';
+import cryptoHash from '../util/crypto-hash';
 
 class Block {
   public timestamp: number;
@@ -24,13 +24,7 @@ class Block {
     return new Block(GENESIS_DATA);
   }
 
-  static minedBlock({
-    lastBlock,
-    data,
-  }: {
-    lastBlock: Block;
-    data: any[];
-  }): Block {
+  static minedBlock({ lastBlock, data }: { lastBlock: Block; data: any[] }): Block {
     let hash: string,
       timestamp: number,
       nonce = 0,
@@ -45,9 +39,7 @@ class Block {
         timestamp,
       });
       hash = cryptoHash(timestamp, lastHash, data, nonce, difficulty);
-    } while (
-      hexToBinary(hash).substring(0, difficulty) !== "0".repeat(difficulty)
-    );
+    } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
     return new Block({
       timestamp,

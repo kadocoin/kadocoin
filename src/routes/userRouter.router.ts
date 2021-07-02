@@ -1,8 +1,8 @@
-import { Application } from "express";
-import Blockchain from "../blockchain";
-import UserController from "../controllers/user.controller";
-import { blockchainMiddleWare } from "../middleware/cryptoMiddleWare";
-import { mustBeLoggedIn } from "../middleware/mustBeLoggedIn";
+import { Application } from 'express';
+import Blockchain from '../blockchain';
+import UserController from '../controllers/user.controller';
+import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
+import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 
 export default class UserRouter {
   private app: Application;
@@ -17,7 +17,7 @@ export default class UserRouter {
   }
 
   initRoute(): void {
-    this.app.post("/api/doesEmailExists", this.UserController.doesEmailExists);
+    this.app.post('/api/doesEmailExists', this.UserController.doesEmailExists);
 
     /**
      * @swagger
@@ -58,9 +58,9 @@ export default class UserRouter {
      *
      *
      */
-    this.app.post("/api/register", this.UserController.register);
+    this.app.post('/api/register', this.UserController.register);
     this.app.post(
-      "/api/wallet-info",
+      '/api/wallet-info',
       mustBeLoggedIn,
       blockchainMiddleWare(this.blockchain),
       this.UserController.walletInfo
@@ -106,6 +106,6 @@ export default class UserRouter {
      *
      */
 
-    this.app.post("/api/login", this.UserController.login);
+    this.app.post('/api/login', this.UserController.login);
   }
 }

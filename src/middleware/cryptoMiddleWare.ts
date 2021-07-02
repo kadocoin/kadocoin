@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import Blockchain from "../blockchain";
-import PubSub from "../pubSub";
-import Wallet from "../wallet";
-import TransactionPool from "../wallet/transaction-pool";
+import { NextFunction, Request, Response } from 'express';
+import Blockchain from '../blockchain';
+import PubSub from '../pubSub';
+import Wallet from '../wallet';
+import TransactionPool from '../wallet/transaction-pool';
 
 type TReturnType = (req: Request, _: Response, next: NextFunction) => void;
 
@@ -13,9 +13,7 @@ export function blockchainMiddleWare(blockchain: Blockchain): TReturnType {
   };
 }
 
-export function transactionPoolMiddleWare(
-  transactionPool: TransactionPool
-): TReturnType {
+export function transactionPoolMiddleWare(transactionPool: TransactionPool): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
     req.transactionPool = transactionPool;
     next();

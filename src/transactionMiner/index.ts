@@ -1,7 +1,7 @@
-import Blockchain from "../blockchain";
-import PubSub from "../pubSub";
-import Transaction from "../wallet/transaction";
-import TransactionPool from "../wallet/transaction-pool";
+import Blockchain from '../blockchain';
+import PubSub from '../pubSub';
+import Transaction from '../wallet/transaction';
+import TransactionPool from '../wallet/transaction-pool';
 
 class TransactionMiner {
   public blockchain: Blockchain;
@@ -32,9 +32,7 @@ class TransactionMiner {
 
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
-      validTransactions.push(
-        Transaction.rewardTransaction({ minerPublicKey: this.address })
-      );
+      validTransactions.push(Transaction.rewardTransaction({ minerPublicKey: this.address }));
 
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ data: validTransactions });
@@ -45,9 +43,9 @@ class TransactionMiner {
       // CLEAR THE POOL
       this.transactionPool.clear();
 
-      return "success";
+      return 'success';
     }
-    return "error";
+    return 'error';
   }
 }
 

@@ -1,5 +1,5 @@
-import { IChain, TDataChild } from "../types";
-import Transaction from "./transaction";
+import { IChain, TDataChild } from '../types';
+import Transaction from './transaction';
 
 class TransactionPool {
   transactionMap: Record<string, Transaction | TDataChild>;
@@ -20,20 +20,14 @@ class TransactionPool {
     this.transactionMap = transactionMap;
   }
 
-  existingTransactionPool({
-    inputAddress,
-  }: {
-    inputAddress: string;
-  }): Transaction | TDataChild {
+  existingTransactionPool({ inputAddress }: { inputAddress: string }): Transaction | TDataChild {
     const transactions = Object.values(this.transactionMap);
 
-    return transactions.find(
-      (transaction) => transaction.input.address === inputAddress
-    );
+    return transactions.find(transaction => transaction.input.address === inputAddress);
   }
 
   validTransactions(): Array<Transaction | TDataChild> {
-    return Object.values(this.transactionMap).filter((transaction) =>
+    return Object.values(this.transactionMap).filter(transaction =>
       Transaction.validTransaction(transaction as TDataChild)
     );
   }

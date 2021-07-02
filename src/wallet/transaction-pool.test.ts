@@ -1,13 +1,12 @@
-import Blockchain from "../blockchain";
-import { TDataChild } from "../types";
-import Wallet from ".";
-import Transaction from "./transaction";
-import TransactionPool from "./transaction-pool";
-import { sampleDataForTests } from "../config/constants";
+import Blockchain from '../blockchain';
+import Wallet from '.';
+import Transaction from './transaction';
+import TransactionPool from './transaction-pool';
+import { sampleDataForTests } from '../config/constants';
 
-describe("TransactionPool", () => {
+describe('TransactionPool', () => {
   let transactionPool: TransactionPool,
-    transaction: Transaction | TDataChild,
+    transaction: InstanceType<typeof Transaction>,
     senderWallet: Wallet;
 
   beforeAll(() => {
@@ -15,22 +14,22 @@ describe("TransactionPool", () => {
     transactionPool = new TransactionPool();
     transaction = new Transaction({
       address: senderWallet.address,
-      recipient: "someone",
+      recipient: 'someone',
       amount: 50,
       localWallet: new Wallet(),
     });
   });
 
-  describe("setTransaction()", () => {
-    it("adds a transaction", () => {
+  describe('setTransaction()', () => {
+    it('adds a transaction', () => {
       transactionPool.setTransaction(transaction);
 
       expect(transactionPool.transactionMap[transaction.id]).toBe(transaction);
     });
   });
 
-  describe("existingTransaction()", () => {
-    it("returns an existing transaction given an input address", () => {
+  describe('existingTransaction()', () => {
+    it('returns an existing transaction given an input address', () => {
       transactionPool.setTransaction(transaction);
 
       expect(
@@ -41,7 +40,7 @@ describe("TransactionPool", () => {
     });
   });
 
-  describe("validTransaction", () => {
+  describe('validTransaction', () => {
     let validTransactions: Array<Transaction>, errorMock: jest.Mock<any, any>;
     const localWallet = new Wallet();
 
@@ -55,15 +54,15 @@ describe("TransactionPool", () => {
           publicKey: senderWallet.publicKey,
           address: senderWallet.address,
           localWallet: localWallet,
-          recipient: "someone",
+          recipient: 'someone',
           amount: 30,
           balance: senderWallet.balance,
         });
 
         if (i % 3 === 0) {
-          transaction.input.amount = 999999;
+          transaction.input.amount = '999999';
         } else if (i % 3 === 1) {
-          transaction.input.signature = new Wallet().sign(sampleDataForTests);
+          transaction.input.signature = new Wallet().sign([sampleDataForTests]);
         } else {
           validTransactions.push(transaction);
         }
@@ -72,33 +71,32 @@ describe("TransactionPool", () => {
       }
     });
 
-    it("returns valid transaction", () => {
+    it('returns valid transaction', () => {
       expect(transactionPool.validTransactions()).toEqual(validTransactions);
     });
 
-    it("logs errors for the invalid transactions", () => {
+    it('logs errors for the invalid transactions', () => {
       transactionPool.validTransactions();
       expect(errorMock).toHaveBeenCalled();
     });
   });
 
-  describe("clear()", () => {
-    it("clears the transactions", () => {
+  describe('clear()', () => {
+    it('clears the transactions', () => {
       transactionPool.clear();
 
       expect(transactionPool.transactionMap).toEqual({});
     });
   });
 
-  describe("clearBlockchainTransactions()", () => {
-    it("clears the pool of any existing blockchain transactions", () => {
+  describe('clearBlockchainTransactions()', () => {
+    it('clears the pool of any existing blockchain transactions', () => {
       const blockchain = new Blockchain();
-      const expectedTransactionMap: { [key: string]: string | Transaction } =
-        {};
+      const expectedTransactionMap: { [key: string]: string | Transaction } = {};
 
       for (let i = 0; i < 6; i++) {
         const transaction = new Wallet().createTransaction({
-          recipient: "Kado",
+          recipient: 'Kado',
           amount: 20,
         });
         transactionPool.setTransaction(transaction);

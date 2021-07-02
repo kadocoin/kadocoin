@@ -1,10 +1,6 @@
-import { Request, Response } from "express";
-import {
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-  SUCCESS,
-} from "../statusCode/statusCode";
-import Block from "../blockchain/block";
+import { Request, Response } from 'express';
+import { INTERNAL_SERVER_ERROR, NOT_FOUND, SUCCESS } from '../statusCode/statusCode';
+import Block from '../blockchain/block';
 
 export default class BlockController {
   getBlocks = (req: Request, res: Response): Response => {
@@ -12,9 +8,7 @@ export default class BlockController {
       return res.status(SUCCESS).json(req.blockchain.chain);
     } catch (error) {
       if (error instanceof Error) {
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ type: "error", message: error.message });
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
       }
       throw new Error(error.message);
     }
@@ -26,14 +20,12 @@ export default class BlockController {
         (block: Block) => block.hash === req.params.blockHash
       );
 
-      if (!block) return res.status(NOT_FOUND).json("Block not found");
+      if (!block) return res.status(NOT_FOUND).json('Block not found');
 
       return res.status(SUCCESS).json(block);
     } catch (error) {
       if (error instanceof Error) {
-        res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ type: "error", message: error.message });
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
         throw new Error(error.message);
       }
       throw new Error(error.message);
