@@ -16,7 +16,7 @@ export const GENESIS_DATA = {
 };
 
 export const STARTING_BALANCE = 1000;
-export const MINING_REWARD = 50;
+export const MINING_REWARD = (50).toFixed(8);
 export const REWARD_INPUT = {
   address: '*authorized-reward*',
   recipient: '*authorized-recipient*',

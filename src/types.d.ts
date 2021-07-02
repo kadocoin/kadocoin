@@ -37,7 +37,7 @@ export interface IInput extends IBaseInput {
 
 export interface IVerifySignatureProps {
   publicKey: string;
-  data: any;
+  data: Array<TDataChild>;
   signature: string;
 }
 
@@ -115,7 +115,55 @@ declare global {
   }
 }
 
-export interface IOutput extends IObjectKeys {
+/** Transaction Class */
+export interface ITransaction {
+  publicKey?: string;
+  address?: string;
+  recipient?: string;
+  amount?: number;
+  output?: ICOutput_R;
+  input?: ICInput_R;
+  balance?: string;
+  localWallet?: Wallet;
+}
+/** COMMON TYPES createInput() */
+interface ICommon_Address_PublicKey {
+  address: string;
+  publicKey: string;
+}
+/** createInput() PARAMS TYPE */
+export interface ICInput extends ICommon_Address_PublicKey {
+  balance: string;
+  localWallet: Wallet;
+  output: ICOutput_R;
+}
+/** createInput() RETURN TYPE  */
+export interface ICInput_R extends ICommon_Address_PublicKey {
+  timestamp: number;
+  amount: string;
+  localPublicKey: string;
+  signature: string;
+}
+
+/** createOutput() PARAMS TYPE */
+export interface ICOutput {
   address: string;
   recipient: string;
+  amount: number;
+  balance: string;
+}
+/** createOutput() RETURN TYPE  */
+export interface ICOutput_R {
+  [key: string]: string | number;
+}
+// export interface ICOutput_R { Record<string, [key: string]: string | number> }
+
+/** update() PARAMS TYPE  */
+export interface IUpdate {
+  publicKey: string;
+  address: string;
+  recipient: string;
+  amount: number;
+  balance: string;
+  localWallet: Wallet;
 }

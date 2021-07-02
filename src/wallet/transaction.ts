@@ -3,18 +3,19 @@ import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
-  ICreateInputParams,
-  ICreateOutputParams,
-  IInput,
-  IOutput,
-  ITransactionClassParams,
-  TOutput,
+  ICInput,
+  ICInput_R,
+  ICOutput,
+  ICOutput_R,
+  ITransaction,
+  IUpdate,
+  TDataChild,
 } from '../types';
 
 class Transaction {
   public id: string;
-  public output: TOutput;
-  public input: ICreateInputParams;
+  input: ICInput_R;
+  output: ICOutput_R;
 
   constructor({
     publicKey,
@@ -25,32 +26,14 @@ class Transaction {
     input,
     balance,
     localWallet,
-  }: ITransactionClassParams) {
+  }: ITransaction) {
     this.id = uuidv1();
     this.output = output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
-      input ||
-      this.createInput({
-        publicKey,
-        address,
-        balance,
-        localWallet,
-        output: this.output,
-      });
+      input || this.createInput({ publicKey, address, balance, localWallet, output: this.output });
   }
 
-  createOutputMap({ address, recipient, amount, balance }: ICreateOutputParams): TOutput {
-    const output: IOutput = {} as IOutput;
-
-    output[address] = (Number(balance) - amount).toFixed(8);
-    output[recipient] = amount.toFixed(8);
-
-    return output;
-  }
-
-  createInput({ publicKey, balance, address, localWallet, output }: ICreateInputParams): IInput {
-    if (typeof balance == 'number') balance.toFixed(8);
-
+  createInput({ publicKey, balance, address, localWallet, output }: ICInput): ICInput_R {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -61,7 +44,16 @@ class Transaction {
     };
   }
 
-  static validTransaction(transaction: Transaction | ITransactionClassParams): boolean {
+  createOutputMap({ address, recipient, amount, balance }: ICOutput): ICOutput_R {
+    const output: ICOutput_R = {} as ICOutput_R;
+
+    output[address] = (Number(balance) - amount).toFixed(8);
+    output[recipient] = amount.toFixed(8);
+
+    return output;
+  }
+
+  static validTransaction(transaction: TDataChild): boolean {
     const {
       input: { address, publicKey, amount, signature, localPublicKey },
       output,
@@ -99,14 +91,7 @@ class Transaction {
     return true;
   }
 
-  update({
-    publicKey,
-    recipient,
-    amount,
-    balance,
-    address,
-    localWallet,
-  }: ICreateOutputParams): void {
+  update({ publicKey, recipient, amount, balance, address, localWallet }: IUpdate): void {
     // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
 
     if (amount > Number(this.output[address])) {

@@ -4,13 +4,12 @@ import {
   sampleDataForTests,
   STARTING_BALANCE,
 } from '../config/constants';
-import { ITransactionClassParams } from '../types';
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
 
 describe('Transaction', () => {
-  let transaction: Transaction | ITransactionClassParams,
+  let transaction: InstanceType<typeof Transaction>,
     senderWallet: Wallet,
     recipient: string,
     amount: number,
@@ -85,7 +84,7 @@ describe('Transaction', () => {
     describe('when the transaction is invalid', () => {
       describe('and a transaction output value is invalid', () => {
         it('returns false and logs an error', () => {
-          transaction.output[senderWallet.address] = 99999999;
+          transaction.output[senderWallet.address] = '99999999';
 
           expect(Transaction.validTransaction(transaction)).toBe(false);
           expect(errorMock).toHaveBeenCalled();
@@ -94,7 +93,7 @@ describe('Transaction', () => {
 
       describe('and the transaction input signature value is invalid', () => {
         it('returns false and logs an error', () => {
-          transaction.input.signature = new Wallet().sign(sampleDataForTests);
+          transaction.input.signature = new Wallet().sign([sampleDataForTests]);
           expect(Transaction.validTransaction(transaction)).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
@@ -119,6 +118,7 @@ describe('Transaction', () => {
               amount: 999999,
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
+              balance: '300.00000000',
             });
           }
         }).toThrow('Insufficient balance');

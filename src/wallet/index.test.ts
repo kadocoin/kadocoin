@@ -26,7 +26,7 @@ describe('Wallet', () => {
    */
 
   describe('signing data', () => {
-    const data = sampleDataForTests;
+    const data = [sampleDataForTests];
 
     it('verifies a signature', () =>
       expect(
