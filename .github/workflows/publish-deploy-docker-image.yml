@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy_to_caprover:
-    name: Push Docker image to DockerHub and GitHub Container Registry
+    name: Push Docker image to DockerHub and GitHub Container Registry. Deploy image to Caprover.
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -50,7 +50,7 @@ jobs:
           server: "${{ secrets.CAPROVER_URL }}"
           password: "${{ secrets.CAPROVER_PASSWORD }}"
           appName: "${{ secrets.CAPROVER_APP }}"
-          image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:master
+          image: dankore/kadocoin-multi-wallet-api:master
       
       - name: get-npm-version
         id: package-version
