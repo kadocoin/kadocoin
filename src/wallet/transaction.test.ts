@@ -119,6 +119,7 @@ describe('Transaction', () => {
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
               balance: '300.00000000',
+              message: ' Hello from transaction test',
             });
           }
         }).toThrow('Insufficient balance');
@@ -140,6 +141,7 @@ describe('Transaction', () => {
             address: senderWallet.address,
             publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
+            message: 'Hello from transaction test',
           });
         }
       });
@@ -178,6 +180,7 @@ describe('Transaction', () => {
               publicKey: senderWallet.publicKey,
               balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
+              message: 'Hello from transaction test',
             });
         });
 

@@ -18,13 +18,14 @@ export const GENESIS_DATA = {
 export const STARTING_BALANCE = 1000;
 export const MINING_REWARD = (50).toFixed(8);
 export const REWARD_INPUT = {
-  address: '*authorized-reward*',
-  recipient: '*authorized-recipient*',
+  address: '',
+  recipient: '',
   amount: MINING_REWARD,
   timestamp: 1624848894788,
-  signature: '*authorized-signature*',
-  localPublicKey: '*authorized-localPublicKey*',
-  publicKey: '*authorized-publicKey*',
+  signature: '',
+  localPublicKey: '',
+  publicKey: '',
+  message: '',
 };
 export const COINS_IN_CIRCULATION = 0;
 

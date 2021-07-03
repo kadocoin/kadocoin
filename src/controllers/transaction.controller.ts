@@ -46,7 +46,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    const { amount, recipient, publicKey, address } = req.body;
+    const { amount, recipient, publicKey, address, message } = req.body;
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient))
@@ -94,6 +94,7 @@ export default class TransactionController {
             amount: Number(amount),
             balance,
             localWallet,
+            message,
           });
         }
       } else {
@@ -104,6 +105,7 @@ export default class TransactionController {
           chain: blockchain.chain,
           publicKey,
           address,
+          message,
         });
       }
     } catch (error) {

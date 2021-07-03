@@ -85,12 +85,14 @@ export interface ITransaction {
   input?: ICInput_R;
   balance?: string;
   localWallet?: Wallet;
+  message?: string;
 }
 
 /** COMMON TYPES createInput() */
 interface ICommon_Address_PublicKey {
   address: string;
   publicKey: string;
+  message: string;
 }
 /** createInput() PARAM type */
 export interface ICInput extends ICommon_Address_PublicKey {
@@ -126,6 +128,7 @@ export interface IUpdate {
   amount: number;
   balance: string;
   localWallet: Wallet;
+  message: string;
 }
 
 /**

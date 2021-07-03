@@ -28,12 +28,14 @@ class Wallet {
     chain,
     publicKey,
     address,
+    message,
   }: {
     recipient: string;
     amount: number;
     chain?: IChain;
     publicKey?: string;
     address?: string;
+    message?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) {
@@ -54,6 +56,7 @@ class Wallet {
       amount,
       balance: this.balance,
       localWallet: this,
+      message,
     });
   }
 

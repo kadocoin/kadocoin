@@ -26,14 +26,16 @@ class Transaction {
     input,
     balance,
     localWallet,
+    message,
   }: ITransaction) {
     this.id = uuidv1();
     this.output = output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
-      input || this.createInput({ publicKey, address, balance, localWallet, output: this.output });
+      input ||
+      this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
   }
 
-  createInput({ publicKey, balance, address, localWallet, output }: ICInput): ICInput_R {
+  createInput({ publicKey, balance, address, localWallet, output, message }: ICInput): ICInput_R {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -41,6 +43,7 @@ class Transaction {
       publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
+      message,
     };
   }
 
@@ -91,7 +94,7 @@ class Transaction {
     return true;
   }
 
-  update({ publicKey, recipient, amount, balance, address, localWallet }: IUpdate): void {
+  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
     // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
 
     if (amount > Number(this.output[address])) {
@@ -113,6 +116,7 @@ class Transaction {
       balance,
       localWallet,
       output: this.output,
+      message,
     });
   }
 

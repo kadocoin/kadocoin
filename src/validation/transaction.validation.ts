@@ -10,6 +10,7 @@ export const transactValidation = (body: {
     publicKey: Joi.string().required(),
     address: Joi.string().required(),
     token: Joi.string().required(),
+    message: Joi.string(),
   });
 
   return transactSchema.validate(body, { convert: true });
