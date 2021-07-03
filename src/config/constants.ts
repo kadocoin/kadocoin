@@ -4,7 +4,7 @@ const INITIAL_DIFFICULTY = 3;
 export const MINE_RATE = 1000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
 
-const data: Array<TDataChild> = [];
+const transactions: Array<TDataChild> = [];
 
 export const GENESIS_DATA = {
   timestamp: 1,
@@ -12,7 +12,7 @@ export const GENESIS_DATA = {
   hash: 'hash-one',
   difficulty: INITIAL_DIFFICULTY,
   nonce: 0,
-  data,
+  transactions,
 };
 
 export const STARTING_BALANCE = 1000;

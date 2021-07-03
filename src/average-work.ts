@@ -6,7 +6,7 @@ import Block from './blockchain/block';
     times: Array<number> = [];
 
   // ADD FIRST BLOCK
-  blockchain.addBlock({ data: ['first-block-data'] });
+  blockchain.addBlock({ transactions: ['first-block-transactions'] });
   console.log('first block', blockchain.chain[blockchain.chain.length - 1]);
 
   let prevTimestamp: number,
@@ -18,7 +18,7 @@ import Block from './blockchain/block';
   for (let i = 0; i < 10000; i++) {
     prevTimestamp = blockchain.chain[blockchain.chain.length - 1].timestamp;
 
-    blockchain.addBlock({ data: [`block ${i}`] });
+    blockchain.addBlock({ transactions: [`block ${i}`] });
     nextBlock = blockchain.chain[blockchain.chain.length - 1];
 
     nextTimestamp = nextBlock.timestamp;

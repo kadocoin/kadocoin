@@ -102,7 +102,7 @@ describe('TransactionPool', () => {
         transactionPool.setTransaction(transaction);
 
         if (i % 2) {
-          blockchain.addBlock({ data: [transaction] });
+          blockchain.addBlock({ transactions: [transaction] });
         } else {
           expectedTransactionMap[transaction.id] = transaction;
         }

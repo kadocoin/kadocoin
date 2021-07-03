@@ -35,7 +35,7 @@ class TransactionMiner {
       validTransactions.push(Transaction.rewardTransaction({ minerPublicKey: this.address }));
 
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
-      this.blockchain.addBlock({ data: validTransactions });
+      this.blockchain.addBlock({ transactions: validTransactions });
 
       // BROADCAST THE UPDATED BLOCKCHAIN
       this.pubSub.broadcastChain();

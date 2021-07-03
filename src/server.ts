@@ -1,6 +1,6 @@
 import app from './app';
 import request from 'request';
-import { DEFAULT_PORT, ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
+import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/userRouter.router';

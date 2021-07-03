@@ -25,15 +25,15 @@ describe('Wallet', () => {
    * WALLET CLASS METHODS TESTS
    */
 
-  describe('signing data', () => {
-    const data = [sampleDataForTests];
+  describe('signing transactions', () => {
+    const transactions = [sampleDataForTests];
 
     it('verifies a signature', () =>
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
-          data: data,
-          signature: localWallet.sign(data),
+          transactions: transactions,
+          signature: localWallet.sign(transactions),
         })
       ).toBe(true));
 
@@ -41,8 +41,8 @@ describe('Wallet', () => {
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
-          data: data,
-          signature: new Wallet().sign(data),
+          transactions: transactions,
+          signature: new Wallet().sign(transactions),
         })
       ).toBe(false));
   });
@@ -130,7 +130,7 @@ describe('Wallet', () => {
           amount: 60,
         });
 
-        blockchain.addBlock({ data: [transactionOne, transactionTwo] });
+        blockchain.addBlock({ transactions: [transactionOne, transactionTwo] });
       });
 
       it('adds the sum of all outputs to the wallet balance', () => {
@@ -159,7 +159,7 @@ describe('Wallet', () => {
             address: wallet.address,
           });
 
-          blockchain.addBlock({ data: [recentTransaction] });
+          blockchain.addBlock({ transactions: [recentTransaction] });
         });
 
         it('returns the remaining output amount after the recent transaction', () => {
@@ -188,7 +188,7 @@ describe('Wallet', () => {
             });
 
             blockchain.addBlock({
-              data: [recentTransaction, sampleBlockTransaction],
+              transactions: [recentTransaction, sampleBlockTransaction],
             });
 
             nextBlockTransaction = senderWallet.createTransaction({
@@ -198,7 +198,7 @@ describe('Wallet', () => {
               address: senderWallet.address,
             });
 
-            blockchain.addBlock({ data: [nextBlockTransaction] });
+            blockchain.addBlock({ transactions: [nextBlockTransaction] });
           });
 
           it('includes the output amounts in the returned balance', () => {

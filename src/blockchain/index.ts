@@ -12,10 +12,10 @@ class Blockchain {
     this.chain = [Block.genesis()];
   }
 
-  addBlock({ data }: { data: any[] }): void {
+  addBlock({ transactions }: { transactions: any[] }): void {
     const newBlock = Block.minedBlock({
       lastBlock: this.chain[this.chain.length - 1],
-      data,
+      transactions,
     });
 
     this.chain.push(newBlock);
@@ -41,7 +41,7 @@ class Blockchain {
     }
 
     if (validateTransactions && !this.validTransactionData({ chain: incomingChain })) {
-      console.error('The incoming chain has an invalid data');
+      console.error('The incoming chain has an invalid transactions');
       return;
     }
 
@@ -61,7 +61,7 @@ class Blockchain {
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
 
-      for (const transaction of block.data) {
+      for (const transaction of block.transactions) {
         if (transaction.input.address === REWARD_INPUT.address) {
           rewardTransactionCount += 1;
 
@@ -99,9 +99,9 @@ class Blockchain {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
 
     for (let i = 1; i < chain.length; i++) {
-      const { timestamp, lastHash, hash, data, nonce, difficulty } = chain[i];
+      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
-      const validatedHash = cryptoHash(timestamp, lastHash, data, nonce, difficulty);
+      const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
       const lastDifficulty = chain[i - 1].difficulty;
 
       if (previousHash !== lastHash) return false;

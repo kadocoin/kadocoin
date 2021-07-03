@@ -4,14 +4,14 @@ import newEc from './secp256k1';
 
 export default function verifySignature({
   publicKey,
-  data,
+  transactions,
   signature,
 }: {
   publicKey: string;
-  data: ICOutput_R | TDataChild[];
+  transactions: ICOutput_R | TDataChild[];
   signature: string;
 }): boolean {
   const keyFromPublic = newEc.keyFromPublic(publicKey, 'hex');
 
-  return keyFromPublic.verify(cryptoHash(data), signature);
+  return keyFromPublic.verify(cryptoHash(transactions), signature);
 }

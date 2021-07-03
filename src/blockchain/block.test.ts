@@ -7,23 +7,23 @@ describe('Block', () => {
   const timestamp = 2000;
   const lastHash = 'foo-last-hash';
   const hash = 'foo-hash';
-  const data = [sampleDataForTests];
+  const transactions = [sampleDataForTests];
   const nonce = 1;
   const difficulty = 1;
   const block = new Block({
     timestamp,
     lastHash,
     hash,
-    data,
+    transactions,
     nonce,
     difficulty,
   });
 
-  it('has a timestamp, lastHash, hash, and data property.', () => {
+  it('has a timestamp, lastHash, hash, and transactions property.', () => {
     expect(block.timestamp).toEqual(timestamp);
     expect(block.lastHash).toEqual(lastHash);
     expect(block.hash).toEqual(hash);
-    expect(block.data).toEqual(data);
+    expect(block.transactions).toEqual(transactions);
     expect(block.nonce).toEqual(nonce);
     expect(block.difficulty).toEqual(difficulty);
   });
@@ -35,15 +35,15 @@ describe('Block', () => {
       expect(genesisBlock instanceof Block).toBe(true);
     });
 
-    it('returns the genesis data', () => {
+    it('returns the genesis transactions', () => {
       expect(genesisBlock).toEqual(GENESIS_DATA);
     });
   });
 
   describe('minedBlock', () => {
     const lastBlock = Block.genesis();
-    const data = ['mined data'];
-    const minedBlock = Block.minedBlock({ lastBlock, data });
+    const transactions = ['mined transactions'];
+    const minedBlock = Block.minedBlock({ lastBlock, transactions });
 
     it('returns a Block instance', () => {
       expect(minedBlock instanceof Block).toBe(true);
@@ -53,8 +53,8 @@ describe('Block', () => {
       expect(minedBlock.lastHash).toEqual(lastBlock.hash);
     });
 
-    it('sets the `data`', () => {
-      expect(minedBlock.data).toEqual(data);
+    it('sets the `transactions`', () => {
+      expect(minedBlock.transactions).toEqual(transactions);
     });
 
     it('sets a `timestamp`', () => {
@@ -68,7 +68,7 @@ describe('Block', () => {
           minedBlock.nonce,
           minedBlock.difficulty,
           lastBlock.hash,
-          data
+          transactions
         )
       );
     });

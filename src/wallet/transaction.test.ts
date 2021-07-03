@@ -61,7 +61,7 @@ describe('Transaction', () => {
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
-          data: transaction.output,
+          transactions: transaction.output,
           signature: transaction.input.signature,
         })
       ).toBe(true));

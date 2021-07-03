@@ -24,7 +24,7 @@ export interface IInput {
  */
 export interface IVerifySignatureProps {
   publicKey: string;
-  data: Array<TDataChild>;
+  transactions: Array<TDataChild>;
   signature: string;
 }
 

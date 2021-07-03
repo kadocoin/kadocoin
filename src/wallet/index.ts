@@ -18,8 +18,8 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(data: Array<TDataChild> | ICOutput_R): string {
-    return this.keyPair.sign(cryptoHash(data));
+  sign(transactions: Array<TDataChild> | ICOutput_R): string {
+    return this.keyPair.sign(cryptoHash(transactions));
   }
 
   createTransaction({
@@ -64,7 +64,7 @@ class Wallet {
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];
 
-      for (const transaction of block.data) {
+      for (const transaction of block.transactions) {
         if (transaction.input.address === address) hasConductedTransaction = true;
 
         const addressOutput = Number(transaction.output[address]);
