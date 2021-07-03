@@ -1,11 +1,11 @@
-name: Publish Docker image
+name: Publish and Deploy Docker image to Caprover
 
 on:
   push:
     branches: ['master']
 
 jobs:
-  push_to_registries:
+  deploy_to_caprover:
     name: Push Docker image to DockerHub and GitHub Container Registry
     runs-on: ubuntu-latest
     permissions:
@@ -43,6 +43,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      
+      - name: Deploy to Caprover Using GitHub Actions
+        uses: dankore/github-to-caprover@v.1.0.6
+        with:
+          server: "${{ secrets.CAPROVER_URL }}"
+          password: "${{ secrets.CAPROVER_PASSWORD }}"
+          appName: "${{ secrets.CAPROVER_APP }}"
+          image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:master
       
       - name: get-npm-version
         id: package-version
