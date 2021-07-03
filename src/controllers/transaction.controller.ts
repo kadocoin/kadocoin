@@ -77,15 +77,15 @@ export default class TransactionController {
       inputAddress: address,
     });
 
-    // GET UP TO DATE USER BALANCE
-    const balance = Wallet.calculateBalance({
-      address: address,
-      chain: blockchain.chain,
-    });
-
     try {
       if (transaction) {
         console.log('Update transaction');
+        // GET UP TO DATE USER BALANCE
+        const balance = Wallet.calculateBalance({
+          address: address,
+          chain: blockchain.chain,
+        });
+
         if (transaction instanceof Transaction) {
           transaction.update({
             publicKey,

@@ -40,33 +40,33 @@ describe('Block', () => {
     });
   });
 
-  describe('minedBlock', () => {
+  describe('mineBlock', () => {
     const lastBlock = Block.genesis();
-    const transactions = ['mined transactions'];
-    const minedBlock = Block.minedBlock({ lastBlock, transactions });
+    const transactions = [sampleDataForTests];
+    const mineBlock = Block.mineBlock({ lastBlock, transactions });
 
     it('returns a Block instance', () => {
-      expect(minedBlock instanceof Block).toBe(true);
+      expect(mineBlock instanceof Block).toBe(true);
     });
 
     it('sets the `lastHash` to be the `hash` of the lastBlock', () => {
-      expect(minedBlock.lastHash).toEqual(lastBlock.hash);
+      expect(mineBlock.lastHash).toEqual(lastBlock.hash);
     });
 
     it('sets the `transactions`', () => {
-      expect(minedBlock.transactions).toEqual(transactions);
+      expect(mineBlock.transactions).toEqual(transactions);
     });
 
     it('sets a `timestamp`', () => {
-      expect(minedBlock.timestamp).not.toEqual(undefined);
+      expect(mineBlock.timestamp).not.toEqual(undefined);
     });
 
     it('creates a SHA-256 `hash` based on the proper inputs', () => {
-      expect(minedBlock.hash).toEqual(
+      expect(mineBlock.hash).toEqual(
         cryptoHash(
-          minedBlock.timestamp,
-          minedBlock.nonce,
-          minedBlock.difficulty,
+          mineBlock.timestamp,
+          mineBlock.nonce,
+          mineBlock.difficulty,
           lastBlock.hash,
           transactions
         )
@@ -74,14 +74,14 @@ describe('Block', () => {
     });
 
     it('sets of `hash` that matches the difficulty criteria', () => {
-      expect(hexToBinary(minedBlock.hash).substring(0, minedBlock.difficulty)).toEqual(
-        '0'.repeat(minedBlock.difficulty)
+      expect(hexToBinary(mineBlock.hash).substring(0, mineBlock.difficulty)).toEqual(
+        '0'.repeat(mineBlock.difficulty)
       );
     });
 
     it('adjusts the difficulty', () => {
       const possibleResults = [lastBlock.difficulty + 1, lastBlock.difficulty - 1];
-      expect(possibleResults.includes(minedBlock.difficulty)).toBe(true);
+      expect(possibleResults.includes(mineBlock.difficulty)).toBe(true);
     });
   });
 

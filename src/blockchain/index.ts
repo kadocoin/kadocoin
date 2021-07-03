@@ -2,7 +2,7 @@ import Block from './block';
 import cryptoHash from '../util/crypto-hash';
 import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import Transaction from '../wallet/transaction';
-import { IChain } from '../types';
+import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 
 class Blockchain {
@@ -12,8 +12,8 @@ class Blockchain {
     this.chain = [Block.genesis()];
   }
 
-  addBlock({ transactions }: { transactions: any[] }): void {
-    const newBlock = Block.minedBlock({
+  addBlock({ transactions }: { transactions: TTransactions }): void {
+    const newBlock = Block.mineBlock({
       lastBlock: this.chain[this.chain.length - 1],
       transactions,
     });

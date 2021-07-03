@@ -28,6 +28,8 @@ export interface IVerifySignatureProps {
   signature: string;
 }
 
+export type TTransactions = Array<TTransactionChild>;
+
 /**
  * Signature type for the Data children
  * The Data Array holds all the transactions of the block

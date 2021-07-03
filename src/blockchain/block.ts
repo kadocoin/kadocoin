@@ -1,6 +1,6 @@
 import hexToBinary from 'hex-to-bin';
 import { GENESIS_DATA, MINE_RATE } from '../config/constants';
-import { TTransactionChild } from '../types';
+import { TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 
 class Block {
@@ -24,7 +24,13 @@ class Block {
     return new Block(GENESIS_DATA);
   }
 
-  static minedBlock({ lastBlock, transactions }: { lastBlock: Block; transactions: any[] }): Block {
+  static mineBlock({
+    lastBlock,
+    transactions,
+  }: {
+    lastBlock: Block;
+    transactions: TTransactions;
+  }): Block {
     let hash: string,
       timestamp: number,
       nonce = 0,

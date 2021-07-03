@@ -30,7 +30,7 @@ describe('Blockchain', () => {
   });
 
   it('adds a new block to the chain', () => {
-    const newData = ['foo bar'];
+    const newData = [sampleDataForTests];
     blockchain.addBlock({ transactions: newData });
 
     expect(blockchain.chain[blockchain.chain.length - 1].transactions).toEqual(newData);
@@ -54,9 +54,9 @@ describe('Blockchain', () => {
 
     describe('when the chain starts with the genesis block and has multiple blocks', () => {
       beforeEach(() => {
-        blockchain.addBlock({ transactions: ['Abuja'] });
-        blockchain.addBlock({ transactions: ['Kaduna'] });
-        blockchain.addBlock({ transactions: ['Bayelsa'] });
+        blockchain.addBlock({ transactions: [sampleDataForTests] });
+        blockchain.addBlock({ transactions: [sampleDataForTests] });
+        blockchain.addBlock({ transactions: [sampleDataForTests] });
       });
 
       describe('and a lastHash reference has changed.', () => {
@@ -69,6 +69,7 @@ describe('Blockchain', () => {
 
       describe('and the chain contains a block with an invalid field', () => {
         it('returns false', () => {
+          sampleDataForTests.id = 'bad id';
           blockchain.chain[2].transactions = [sampleDataForTests];
 
           expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -143,9 +144,9 @@ describe('Blockchain', () => {
 
     describe('when the chain is longer', () => {
       beforeEach(() => {
-        newChain.addBlock({ transactions: ['Abuja'] });
-        newChain.addBlock({ transactions: ['Kaduna'] });
-        newChain.addBlock({ transactions: ['Bayelsa'] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
       });
       describe('and the chain is invalid', () => {
         beforeEach(() => {
@@ -181,7 +182,7 @@ describe('Blockchain', () => {
 
         blockchain.validTransactionData = validateTransactionDataMock;
 
-        newChain.addBlock({ transactions: ['Kado'] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
         blockchain.replaceChain(newChain.chain, true);
 
         expect(validateTransactionDataMock).toHaveBeenCalled();
