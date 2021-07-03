@@ -24,14 +24,9 @@ COPY --from=builder /app/package.json ./package.json
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S kado -u 1001
-RUN chown -R kado:nodejs /app/.next
+RUN chown -R kado:nodejs /app
 USER kado
 
 EXPOSE 2000
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://kado.org/telemetry
-# Uncomment the following line in case you want to disable telemetry.
-# RUN npx next telemetry disable
 
 CMD ["yarn", "start"]
