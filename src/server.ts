@@ -54,7 +54,7 @@ const syncWithRootState = () => {
     if (!error && response.statusCode === 200) {
       const rootChain = JSON.parse(body);
 
-      console.log('replacing your BLOCKCHAIN with the consensus blockchain', rootChain);
+      console.log('Replacing your LOCAL blockchain with the consensus blockchain');
       console.log('working on it.................');
       blockchain.replaceChain(rootChain);
     } else {
@@ -87,6 +87,6 @@ app.use(initializeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
 
 app.listen(PORT, () => {
-  if (PORT !== DEFAULT_PORT) syncWithRootState();
+  syncWithRootState();
   console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
 });

@@ -3,6 +3,7 @@ import cryptoHash from '../util/crypto-hash';
 import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain } from '../types';
+import size from '../util/size';
 
 class Blockchain {
   public chain: IChain;
@@ -48,8 +49,9 @@ class Blockchain {
 
     this.chain = incomingChain;
     console.log(
-      'replaced the existing blockchain with the incoming consensus blockchain:',
-      incomingChain
+      `Replaced your LOCAL blockchain with the incoming consensus blockchain: ${size(
+        this.chain
+      )} bytes`
     );
   }
 
