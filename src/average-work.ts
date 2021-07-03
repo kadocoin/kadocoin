@@ -1,12 +1,13 @@
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
+import { sampleDataForTests } from './config/constants';
 
 (function averageWork(): void {
   const blockchain = new Blockchain(),
     times: Array<number> = [];
 
   // ADD FIRST BLOCK
-  blockchain.addBlock({ transactions: ['first-block-transactions'] });
+  blockchain.addBlock({ transactions: [sampleDataForTests] });
   console.log('first block', blockchain.chain[blockchain.chain.length - 1]);
 
   let prevTimestamp: number,
@@ -18,7 +19,7 @@ import Block from './blockchain/block';
   for (let i = 0; i < 10000; i++) {
     prevTimestamp = blockchain.chain[blockchain.chain.length - 1].timestamp;
 
-    blockchain.addBlock({ transactions: [`block ${i}`] });
+    blockchain.addBlock({ transactions: [sampleDataForTests] });
     nextBlock = blockchain.chain[blockchain.chain.length - 1];
 
     nextTimestamp = nextBlock.timestamp;
