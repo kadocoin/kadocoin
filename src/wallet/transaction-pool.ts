@@ -1,8 +1,8 @@
-import { IChain, TDataChild } from '../types';
+import { IChain, TTransactionChild } from '../types';
 import Transaction from './transaction';
 
 class TransactionPool {
-  transactionMap: Record<string, Transaction | TDataChild>;
+  transactionMap: Record<string, Transaction | TTransactionChild>;
 
   constructor() {
     this.transactionMap = {};
@@ -12,23 +12,27 @@ class TransactionPool {
     this.transactionMap = {};
   }
 
-  setTransaction(transaction: TDataChild | Transaction): void {
+  setTransaction(transaction: TTransactionChild | Transaction): void {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  setMap(transactionMap: Record<string, TDataChild | Transaction>): void {
+  setMap(transactionMap: Record<string, TTransactionChild | Transaction>): void {
     this.transactionMap = transactionMap;
   }
 
-  existingTransactionPool({ inputAddress }: { inputAddress: string }): Transaction | TDataChild {
+  existingTransactionPool({
+    inputAddress,
+  }: {
+    inputAddress: string;
+  }): Transaction | TTransactionChild {
     const transactions = Object.values(this.transactionMap);
 
     return transactions.find(transaction => transaction.input.address === inputAddress);
   }
 
-  validTransactions(): Array<Transaction | TDataChild> {
+  validTransactions(): Array<Transaction | TTransactionChild> {
     return Object.values(this.transactionMap).filter(transaction =>
-      Transaction.validTransaction(transaction as TDataChild)
+      Transaction.validTransaction(transaction as TTransactionChild)
     );
   }
 
@@ -36,7 +40,7 @@ class TransactionPool {
     for (let i = 0; i < chain.length; i++) {
       const block = chain[i];
 
-      for (const transaction of block.data) {
+      for (const transaction of block.transactions) {
         if (this.transactionMap[transaction.id]) {
           delete this.transactionMap[transaction.id];
         }

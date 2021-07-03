@@ -4,7 +4,7 @@ import Block from './block';
 import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
-import { IChain, TDataChild } from '../types';
+import { IChain, TTransactionChild } from '../types';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
@@ -30,10 +30,10 @@ describe('Blockchain', () => {
   });
 
   it('adds a new block to the chain', () => {
-    const newData = ['foo bar'];
-    blockchain.addBlock({ data: newData });
+    const newData = [sampleDataForTests];
+    blockchain.addBlock({ transactions: newData });
 
-    expect(blockchain.chain[blockchain.chain.length - 1].data).toEqual(newData);
+    expect(blockchain.chain[blockchain.chain.length - 1].transactions).toEqual(newData);
   });
 
   describe('isValidChain()', () => {
@@ -43,7 +43,7 @@ describe('Blockchain', () => {
           timestamp: 2,
           lastHash: 'lastHash',
           hash: 'hash-one',
-          data: [],
+          transactions: [],
           nonce: 2,
           difficulty: 1,
         };
@@ -54,9 +54,9 @@ describe('Blockchain', () => {
 
     describe('when the chain starts with the genesis block and has multiple blocks', () => {
       beforeEach(() => {
-        blockchain.addBlock({ data: ['Abuja'] });
-        blockchain.addBlock({ data: ['Kaduna'] });
-        blockchain.addBlock({ data: ['Bayelsa'] });
+        blockchain.addBlock({ transactions: [sampleDataForTests] });
+        blockchain.addBlock({ transactions: [sampleDataForTests] });
+        blockchain.addBlock({ transactions: [sampleDataForTests] });
       });
 
       describe('and a lastHash reference has changed.', () => {
@@ -69,7 +69,8 @@ describe('Blockchain', () => {
 
       describe('and the chain contains a block with an invalid field', () => {
         it('returns false', () => {
-          blockchain.chain[2].data = [sampleDataForTests];
+          sampleDataForTests.id = 'bad id';
+          blockchain.chain[2].transactions = [sampleDataForTests];
 
           expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
         });
@@ -81,16 +82,16 @@ describe('Blockchain', () => {
           const lastHash = lastBlock.hash;
           const timestamp = Date.now();
           const nonce = 0;
-          const data: Array<TDataChild> = [];
+          const transactions: Array<TTransactionChild> = [];
           const difficulty = lastBlock.difficulty - 3;
-          const hash = cryptoHash(timestamp, lastHash, difficulty, nonce, data);
+          const hash = cryptoHash(timestamp, lastHash, difficulty, nonce, transactions);
           const badBlock = new Block({
             timestamp,
             lastHash,
             hash,
             nonce,
             difficulty,
-            data,
+            transactions,
           });
 
           blockchain.chain.push(badBlock);
@@ -124,7 +125,7 @@ describe('Blockchain', () => {
           timestamp: 1,
           lastHash: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD',
           hash: '0x86045b56bfeb1A35C6818081130BA0F789dc27c9',
-          data: [],
+          transactions: [],
           nonce: 0,
           difficulty: 3,
         };
@@ -143,9 +144,9 @@ describe('Blockchain', () => {
 
     describe('when the chain is longer', () => {
       beforeEach(() => {
-        newChain.addBlock({ data: ['Abuja'] });
-        newChain.addBlock({ data: ['Kaduna'] });
-        newChain.addBlock({ data: ['Bayelsa'] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
       });
       describe('and the chain is invalid', () => {
         beforeEach(() => {
@@ -181,7 +182,7 @@ describe('Blockchain', () => {
 
         blockchain.validTransactionData = validateTransactionDataMock;
 
-        newChain.addBlock({ data: ['Kado'] });
+        newChain.addBlock({ transactions: [sampleDataForTests] });
         blockchain.replaceChain(newChain.chain, true);
 
         expect(validateTransactionDataMock).toHaveBeenCalled();
@@ -207,31 +208,31 @@ describe('Blockchain', () => {
       });
     });
 
-    describe('and transaction data is valid', () => {
+    describe('and transaction transactions is valid', () => {
       it('returns true', () => {
-        newChain.addBlock({ data: [transaction, rewardTransaction] });
+        newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
         expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(true);
         expect(errorMock).not.toHaveBeenCalled();
       });
     });
 
-    describe('and the transaction data has multiple rewards', () => {
+    describe('and the transaction transactions has multiple rewards', () => {
       it('returns false and logs and error', () => {
         newChain.addBlock({
-          data: [transaction, rewardTransaction, rewardTransaction],
+          transactions: [transaction, rewardTransaction, rewardTransaction],
         });
         expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });
 
-    describe('and the transaction data has at least one malformed output', () => {
+    describe('and the transaction transactions has at least one malformed output', () => {
       describe('and the transaction is not a reward transaction', () => {
         it('returns false and logs and error', () => {
           transaction.output[wallet.address] = 999999;
 
-          newChain.addBlock({ data: [transaction, rewardTransaction] });
+          newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
           expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
           expect(errorMock).toHaveBeenCalled();
@@ -242,7 +243,7 @@ describe('Blockchain', () => {
         it('returns false and logs and error', () => {
           rewardTransaction.output[wallet.publicKey] = 999999;
 
-          newChain.addBlock({ data: [transaction, rewardTransaction] });
+          newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
           expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
           expect(errorMock).toHaveBeenCalled();
@@ -253,7 +254,7 @@ describe('Blockchain', () => {
     describe('and a block contains multiple identical transaction', () => {
       it('returns false and logs an error', () => {
         newChain.addBlock({
-          data: [transaction, transaction, transaction],
+          transactions: [transaction, transaction, transaction],
         });
 
         expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);

@@ -24,15 +24,17 @@ export interface IInput {
  */
 export interface IVerifySignatureProps {
   publicKey: string;
-  data: Array<TDataChild>;
+  transactions: Array<TTransactionChild>;
   signature: string;
 }
+
+export type TTransactions = Array<TTransactionChild>;
 
 /**
  * Signature type for the Data children
  * The Data Array holds all the transactions of the block
  */
-export type TDataChild = {
+export type TTransactionChild = {
   id: string;
   output: { [key: string]: string | number };
   input: IInput;
@@ -83,12 +85,14 @@ export interface ITransaction {
   input?: ICInput_R;
   balance?: string;
   localWallet?: Wallet;
+  message?: string;
 }
 
 /** COMMON TYPES createInput() */
 interface ICommon_Address_PublicKey {
   address: string;
   publicKey: string;
+  message: string;
 }
 /** createInput() PARAM type */
 export interface ICInput extends ICommon_Address_PublicKey {
@@ -115,7 +119,6 @@ export interface ICOutput {
 export interface ICOutput_R {
   [key: string]: string | number;
 }
-// export interface ICOutput_R { Record<string, [key: string]: string | number> }
 
 /** update() PARAMS type  */
 export interface IUpdate {
@@ -125,6 +128,7 @@ export interface IUpdate {
   amount: number;
   balance: string;
   localWallet: Wallet;
+  message: string;
 }
 
 /**
