@@ -19,12 +19,13 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
+COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S kado -u 1001
-RUN chown -R kado:nodejs /app
+RUN chown -R kado:nodejs /app/dist
 USER kado
 
 EXPOSE 2000
