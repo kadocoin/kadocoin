@@ -46,7 +46,6 @@ jobs:
       
       - name: Deploy to Caprover Using GitHub Actions
         uses: dankore/github-to-caprover@v.1.0.6
-        container:
         image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:master
         credentials:
           username: ${{ github.actor }}
