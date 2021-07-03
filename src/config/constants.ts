@@ -1,10 +1,10 @@
-import { TDataChild } from '../types';
+import { TTransactionChild } from '../types';
 
 const INITIAL_DIFFICULTY = 3;
 export const MINE_RATE = 1000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
 
-const transactions: Array<TDataChild> = [];
+const transactions: Array<TTransactionChild> = [];
 
 export const GENESIS_DATA = {
   timestamp: 1,

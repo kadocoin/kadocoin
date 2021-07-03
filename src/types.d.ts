@@ -24,7 +24,7 @@ export interface IInput {
  */
 export interface IVerifySignatureProps {
   publicKey: string;
-  transactions: Array<TDataChild>;
+  transactions: Array<TTransactionChild>;
   signature: string;
 }
 
@@ -32,7 +32,7 @@ export interface IVerifySignatureProps {
  * Signature type for the Data children
  * The Data Array holds all the transactions of the block
  */
-export type TDataChild = {
+export type TTransactionChild = {
   id: string;
   output: { [key: string]: string | number };
   input: IInput;
@@ -115,7 +115,6 @@ export interface ICOutput {
 export interface ICOutput_R {
   [key: string]: string | number;
 }
-// export interface ICOutput_R { Record<string, [key: string]: string | number> }
 
 /** update() PARAMS type  */
 export interface IUpdate {

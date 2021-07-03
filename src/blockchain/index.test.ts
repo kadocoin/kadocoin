@@ -4,7 +4,7 @@ import Block from './block';
 import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
-import { IChain, TDataChild } from '../types';
+import { IChain, TTransactionChild } from '../types';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
@@ -81,7 +81,7 @@ describe('Blockchain', () => {
           const lastHash = lastBlock.hash;
           const timestamp = Date.now();
           const nonce = 0;
-          const transactions: Array<TDataChild> = [];
+          const transactions: Array<TTransactionChild> = [];
           const difficulty = lastBlock.difficulty - 3;
           const hash = cryptoHash(timestamp, lastHash, difficulty, nonce, transactions);
           const badBlock = new Block({

@@ -1,7 +1,7 @@
 import { RedisClient } from 'redis';
 import Blockchain from '../blockchain';
 import { redisClientPub, redisClientSub } from '../config/redis';
-import { TDataChild } from '../types';
+import { TTransactionChild } from '../types';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -79,7 +79,7 @@ class PubSub {
     });
   }
 
-  broadcastTransaction(transaction: Transaction | TDataChild): void {
+  broadcastTransaction(transaction: Transaction | TTransactionChild): void {
     this.publish({
       channel: CHANNELS.TRANSACTION,
       message: JSON.stringify(transaction),

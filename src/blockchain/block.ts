@@ -1,13 +1,13 @@
 import hexToBinary from 'hex-to-bin';
 import { GENESIS_DATA, MINE_RATE } from '../config/constants';
-import { TDataChild } from '../types';
+import { TTransactionChild } from '../types';
 import cryptoHash from '../util/crypto-hash';
 
 class Block {
   public timestamp: number;
   public lastHash: string;
   public hash: string;
-  public transactions: Array<TDataChild>;
+  public transactions: Array<TTransactionChild>;
   public nonce: number;
   public difficulty: number;
 

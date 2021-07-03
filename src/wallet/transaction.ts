@@ -9,7 +9,7 @@ import {
   ICOutput_R,
   ITransaction,
   IUpdate,
-  TDataChild,
+  TTransactionChild,
 } from '../types';
 
 class Transaction {
@@ -53,7 +53,7 @@ class Transaction {
     return output;
   }
 
-  static validTransaction(transaction: TDataChild): boolean {
+  static validTransaction(transaction: TTransactionChild): boolean {
     const {
       input: { address, publicKey, amount, signature, localPublicKey },
       output,
