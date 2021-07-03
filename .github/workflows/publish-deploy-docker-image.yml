@@ -6,6 +6,12 @@ on:
 
 jobs:
   deploy_to_caprover:
+    container:
+        image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:master
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
     name: Push Docker image to DockerHub and GitHub Container Registry. Deploy image to Caprover.
     runs-on: ubuntu-latest
     permissions:
@@ -46,10 +52,6 @@ jobs:
       
       - name: Deploy to Caprover Using GitHub Actions
         uses: dankore/github-to-caprover@v.1.0.6
-        image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:master
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
         with:
           server: "${{ secrets.CAPROVER_URL }}"
           password: "${{ secrets.CAPROVER_PASSWORD }}"
@@ -63,8 +65,8 @@ jobs:
       - name: Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with: 
-           repo_token: ${{ secrets.CR_PAT }}
-           automatic_release_tag: latest
-           draft: false
-           prerelease: false
-           title: ${{ steps.package-version.outputs.current-version}}
+          repo_token: ${{ secrets.CR_PAT }}
+          automatic_release_tag: latest
+          draft: false
+          prerelease: false
+          title: ${{ steps.package-version.outputs.current-version}}
