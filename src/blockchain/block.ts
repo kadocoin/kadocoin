@@ -80,7 +80,7 @@ class Block {
       blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
       transactionVolume: transactionVolume({ transactions }),
       blockReward: MINING_REWARD,
-      blockchainHeight: chain.length,
+      blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
     });
   }
 
