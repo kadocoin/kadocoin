@@ -46,6 +46,7 @@ describe('Blockchain', () => {
           transactions: [],
           nonce: 2,
           difficulty: 1,
+          blockSize: '999',
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -92,6 +93,7 @@ describe('Blockchain', () => {
             nonce,
             difficulty,
             transactions,
+            blockSize: '999',
           });
 
           blockchain.chain.push(badBlock);
@@ -128,6 +130,7 @@ describe('Blockchain', () => {
           transactions: [],
           nonce: 0,
           difficulty: 3,
+          blockSize: '999',
         };
 
         blockchain.replaceChain(newChain.chain);

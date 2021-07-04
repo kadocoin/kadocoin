@@ -17,6 +17,7 @@ describe('Block', () => {
     transactions,
     nonce,
     difficulty,
+    blockSize: '999',
   });
 
   it('has a timestamp, lastHash, hash, and transactions property.', () => {

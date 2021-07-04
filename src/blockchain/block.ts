@@ -2,6 +2,7 @@ import hexToBinary from 'hex-to-bin';
 import { GENESIS_DATA, MINE_RATE } from '../config/constants';
 import { TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
+import size from '../util/size';
 
 class Block {
   public timestamp: number;
@@ -10,14 +11,16 @@ class Block {
   public transactions: Array<TTransactionChild>;
   public nonce: number;
   public difficulty: number;
+  public blockSize: string;
 
-  constructor({ timestamp, lastHash, hash, transactions, nonce, difficulty }: Block) {
+  constructor({ timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
     this.hash = hash;
     this.transactions = transactions;
     this.nonce = nonce;
     this.difficulty = difficulty;
+    this.blockSize = blockSize;
   }
 
   static genesis(): Block {
@@ -54,6 +57,7 @@ class Block {
       difficulty,
       nonce,
       hash,
+      blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
     });
   }
 

@@ -1,31 +1,38 @@
 import { TTransactionChild } from '../types';
+import size from '../util/size';
 
 const INITIAL_DIFFICULTY = 3;
 export const MINE_RATE = 1000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
 
 const transactions: Array<TTransactionChild> = [];
-
-export const GENESIS_DATA = {
+const GENESIS_DATA = {
   timestamp: 1,
   lastHash: '____',
   hash: 'hash-one',
   difficulty: INITIAL_DIFFICULTY,
   nonce: 0,
   transactions,
+  blockSize: '',
 };
+
+const genesisBlockSize = size(GENESIS_DATA);
+
+GENESIS_DATA.blockSize = genesisBlockSize;
+
+export { GENESIS_DATA };
 
 export const STARTING_BALANCE = 1000;
 export const MINING_REWARD = (50).toFixed(8);
 export const REWARD_INPUT = {
-  address: '',
-  recipient: '',
-  amount: MINING_REWARD,
   timestamp: 1624848894788,
-  signature: '',
-  localPublicKey: '',
+  amount: MINING_REWARD,
+  address: '',
   publicKey: '',
-  message: '',
+  localPublicKey: '',
+  recipient: '',
+  signature: '',
+  message: '*Mining Reward Transaction*',
 };
 export const COINS_IN_CIRCULATION = 0;
 
