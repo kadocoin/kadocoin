@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch src/ --exec ts-node src/server.ts",
+    "test-watch": "jest --colors --watch",
+    "test-watchAll": "jest --colors --watchAll",
     "average-work": "node dist/average-work.js",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "lint": "eslint",
@@ -12,8 +14,6 @@
     "start": "node dist/server.js",
     "build": "tsc --build",
     "test": "jest --passWithNoTests --bail",
-    "test-watch": "jest --colors --watch",
-    "test-watchAll": "jest --colors --watchAll",
     "prepare-husky": "husky install",
     "format": "prettier --write"
   },

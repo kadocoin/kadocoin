@@ -1,4 +1,4 @@
-import { sampleDataForTests } from '../config/constants';
+import { MINING_REWARD, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
 import Block from './block';
 import Blockchain from '.';
@@ -47,6 +47,9 @@ describe('Blockchain', () => {
           nonce: 2,
           difficulty: 1,
           blockSize: '999',
+          transactionVolume: '999',
+          blockReward: MINING_REWARD,
+          blockchainHeight: newChain.chain.length,
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -94,6 +97,9 @@ describe('Blockchain', () => {
             difficulty,
             transactions,
             blockSize: '999',
+            transactionVolume: '999',
+            blockReward: MINING_REWARD,
+            blockchainHeight: newChain.chain.length,
           });
 
           blockchain.chain.push(badBlock);
@@ -131,6 +137,9 @@ describe('Blockchain', () => {
           nonce: 0,
           difficulty: 3,
           blockSize: '999',
+          transactionVolume: '999',
+          blockReward: MINING_REWARD,
+          blockchainHeight: newChain.chain.length,
         };
 
         blockchain.replaceChain(newChain.chain);

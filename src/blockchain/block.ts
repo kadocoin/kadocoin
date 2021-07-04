@@ -1,8 +1,9 @@
 import hexToBinary from 'hex-to-bin';
-import { GENESIS_DATA, MINE_RATE } from '../config/constants';
-import { TTransactionChild, TTransactions } from '../types';
+import { GENESIS_DATA, MINE_RATE, MINING_REWARD } from '../config/constants';
+import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
+import { transactionVolume } from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
@@ -12,8 +13,22 @@ class Block {
   public nonce: number;
   public difficulty: number;
   public blockSize: string;
+  public transactionVolume: string;
+  public blockReward: string;
+  public blockchainHeight: number;
 
-  constructor({ timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize }: Block) {
+  constructor({
+    timestamp,
+    lastHash,
+    hash,
+    transactions,
+    nonce,
+    difficulty,
+    blockSize,
+    transactionVolume,
+    blockReward,
+    blockchainHeight,
+  }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
     this.hash = hash;
@@ -21,6 +36,9 @@ class Block {
     this.nonce = nonce;
     this.difficulty = difficulty;
     this.blockSize = blockSize;
+    this.transactionVolume = transactionVolume;
+    this.blockReward = blockReward;
+    this.blockchainHeight = blockchainHeight;
   }
 
   static genesis(): Block {
@@ -30,9 +48,11 @@ class Block {
   static mineBlock({
     lastBlock,
     transactions,
+    chain,
   }: {
     lastBlock: Block;
     transactions: TTransactions;
+    chain: IChain;
   }): Block {
     let hash: string,
       timestamp: number,
@@ -58,6 +78,9 @@ class Block {
       nonce,
       hash,
       blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
+      transactionVolume: transactionVolume({ transactions }),
+      blockReward: MINING_REWARD,
+      blockchainHeight: chain.length,
     });
   }
 

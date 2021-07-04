@@ -1,6 +1,6 @@
 import hexToBinary from 'hex-to-bin';
 import Block from './block';
-import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE, MINING_REWARD, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
 
 describe('Block', () => {
@@ -18,15 +18,22 @@ describe('Block', () => {
     nonce,
     difficulty,
     blockSize: '999',
+    transactionVolume: '999',
+    blockReward: MINING_REWARD,
+    blockchainHeight: 1,
   });
 
-  it('has a timestamp, lastHash, hash, and transactions property.', () => {
-    expect(block.timestamp).toEqual(timestamp);
-    expect(block.lastHash).toEqual(lastHash);
-    expect(block.hash).toEqual(hash);
-    expect(block.transactions).toEqual(transactions);
-    expect(block.nonce).toEqual(nonce);
-    expect(block.difficulty).toEqual(difficulty);
+  it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, transactionVolume, blockReward, & blockchainHeight properties.', () => {
+    expect(block).toHaveProperty('timestamp');
+    expect(block).toHaveProperty('lastHash');
+    expect(block).toHaveProperty('hash');
+    expect(block).toHaveProperty('transactions');
+    expect(block).toHaveProperty('nonce');
+    expect(block).toHaveProperty('difficulty');
+    expect(block).toHaveProperty('blockSize');
+    expect(block).toHaveProperty('transactionVolume');
+    expect(block).toHaveProperty('blockReward');
+    expect(block).toHaveProperty('blockchainHeight');
   });
 
   describe('genesis()', () => {
@@ -44,7 +51,7 @@ describe('Block', () => {
   describe('mineBlock', () => {
     const lastBlock = Block.genesis();
     const transactions = [sampleDataForTests];
-    const mineBlock = Block.mineBlock({ lastBlock, transactions });
+    const mineBlock = Block.mineBlock({ lastBlock, transactions, chain: [] });
 
     it('returns a Block instance', () => {
       expect(mineBlock instanceof Block).toBe(true);

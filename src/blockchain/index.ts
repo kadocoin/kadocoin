@@ -16,6 +16,7 @@ class Blockchain {
     const newBlock = Block.mineBlock({
       lastBlock: this.chain[this.chain.length - 1],
       transactions,
+      chain: this.chain,
     });
 
     this.chain.push(newBlock);
