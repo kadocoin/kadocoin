@@ -2,15 +2,15 @@ function numberWithCommas(x: number) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function kadocoinSupplyAtBlock(blocks: number) {
+function kadocoinSupply(blocks: number) {
   // IT TAKES THIS NUMBER OF BLOCKS IN THE BLOCKCHAIN TO GET 500,000,000 KADOCOINS - FIVE HUNDRED MILLION
   // BEYOND THAT NUMBER, THE NUMBER OF KADOCOINS WON'T GO BEYOND 500,000,000
   if (blocks >= Number('169,999,999'.replace(/,/g, '')))
     return { MINING_REWARD: 0, supply: '500,000,000' };
 
-  let reward = 50;
-  let supply = 0;
-  const y = Number('5,000,000'.replace(/,/g, '')); // NUMBER OF BLOCKS IN THE BLOCKCHAIN
+  let reward = 50,
+    supply = 0;
+  const y = Number('5,000,000'.replace(/,/g, '')); // NUMBER OF BLOCKS IN THE BLOCKCHAIN FOR HALVING
 
   while (blocks > y - 1) {
     supply = supply + y * reward;
@@ -26,4 +26,4 @@ function kadocoinSupplyAtBlock(blocks: number) {
   };
 }
 
-console.log(kadocoinSupplyAtBlock(Number('169,999,999'.replace(/,/g, ''))));
+console.log(kadocoinSupply(Number('169,999,999'.replace(/,/g, ''))));

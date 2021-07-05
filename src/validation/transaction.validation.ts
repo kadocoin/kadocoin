@@ -1,16 +1,20 @@
 import Joi, { ValidationResult } from 'joi';
 
 export const transactValidation = (body: {
-  amount: number;
+  amount: string;
   recipient: string;
+  publicKey: string;
+  address: string;
+  token: string;
+  message: string;
 }): ValidationResult => {
   const transactSchema = Joi.object().keys({
     amount: Joi.number().positive().required(),
-    recipient: Joi.string().required(),
-    publicKey: Joi.string().required(),
-    address: Joi.string().required(),
-    token: Joi.string().required(),
-    message: Joi.string(),
+    recipient: Joi.string().trim().required(),
+    publicKey: Joi.string().trim().required(),
+    address: Joi.string().trim().required(),
+    token: Joi.string().trim().required(),
+    message: Joi.string().trim().max(160),
   });
 
   return transactSchema.validate(body, { convert: true });
