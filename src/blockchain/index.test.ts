@@ -1,4 +1,4 @@
-import { MINING_REWARD, sampleDataForTests } from '../config/constants';
+import { sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
 import Block from './block';
 import Blockchain from '.';
@@ -48,7 +48,7 @@ describe('Blockchain', () => {
           difficulty: 1,
           blockSize: '999',
           transactionVolume: '999',
-          blockReward: MINING_REWARD,
+          blockReward: (50).toFixed(8),
           blockchainHeight: newChain.chain.length,
         };
 
@@ -98,7 +98,7 @@ describe('Blockchain', () => {
             transactions,
             blockSize: '999',
             transactionVolume: '999',
-            blockReward: MINING_REWARD,
+            blockReward: (50).toFixed(8),
             blockchainHeight: newChain.chain.length,
           });
 
@@ -138,7 +138,7 @@ describe('Blockchain', () => {
           difficulty: 3,
           blockSize: '999',
           transactionVolume: '999',
-          blockReward: MINING_REWARD,
+          blockReward: (50).toFixed(8),
           blockchainHeight: newChain.chain.length,
         };
 
@@ -218,6 +218,7 @@ describe('Blockchain', () => {
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: wallet.publicKey,
         message: '',
+        chainLength: 999,
       });
     });
 

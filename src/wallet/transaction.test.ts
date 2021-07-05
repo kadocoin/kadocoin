@@ -1,9 +1,4 @@
-import {
-  MINING_REWARD,
-  REWARD_INPUT,
-  sampleDataForTests,
-  STARTING_BALANCE,
-} from '../config/constants';
+import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
@@ -206,6 +201,7 @@ describe('Transaction', () => {
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: minerWallet.publicKey,
         message: '',
+        chainLength: 999,
       });
     });
 
@@ -214,7 +210,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(MINING_REWARD);
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50).toFixed(8));
     });
   });
 

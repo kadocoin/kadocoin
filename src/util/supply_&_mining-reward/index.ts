@@ -13,7 +13,7 @@ class Mining_Reward {
     // IT TAKES THIS NUMBER OF BLOCKS IN THE BLOCKCHAIN TO GET 500,000,000 KADOCOINS - FIVE HUNDRED MILLION
     // BEYOND THAT NUMBER, THE NUMBER OF KADOCOINS WON'T GO BEYOND 500,000,000
     if (this.chainLength >= Number('169,999,999'.replace(/,/g, '')))
-      return { MINING_REWARD: '0', supply: '500,000,000' };
+      return { MINING_REWARD: (0).toFixed(8), supply: (500000000).toFixed(8) };
 
     let reward = 50,
       supply = 0;
@@ -28,12 +28,8 @@ class Mining_Reward {
     supply = supply + this.chainLength * reward;
     return {
       MINING_REWARD: reward.toFixed(8),
-      supply: this.formatNumWithCommas(Math.round(supply + reward)),
+      supply: Math.round(supply + reward).toFixed(8),
     };
-  }
-
-  private formatNumWithCommas(x: number): string {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 }
 

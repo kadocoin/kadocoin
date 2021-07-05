@@ -26,10 +26,9 @@ GENESIS_DATA.blockSize = genesisBlockSize;
 export { GENESIS_DATA };
 
 export const STARTING_BALANCE = 1000;
-export const MINING_REWARD = (50).toFixed(8);
 export const REWARD_INPUT = {
   timestamp: 1624848894788,
-  amount: MINING_REWARD,
+  amount: '',
   address: '',
   publicKey: '',
   localPublicKey: '',

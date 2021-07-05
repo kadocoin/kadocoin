@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import { REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -11,6 +11,7 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
+import Mining_Reward from '../util/supply_&_mining-reward';
 
 class Transaction {
   public id: string;
@@ -123,12 +124,17 @@ class Transaction {
   static rewardTransaction({
     minerPublicKey,
     message,
+    chainLength,
   }: {
     minerPublicKey: string;
     message: string;
+    chainLength: number;
   }): Transaction {
+    const { MINING_REWARD } = new Mining_Reward({ chainLength });
+
     REWARD_INPUT.recipient = minerPublicKey;
     REWARD_INPUT.message = message;
+    REWARD_INPUT.amount = MINING_REWARD;
 
     return new Transaction({
       input: REWARD_INPUT,

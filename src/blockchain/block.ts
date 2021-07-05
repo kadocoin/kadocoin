@@ -1,8 +1,9 @@
 import hexToBinary from 'hex-to-bin';
-import { GENESIS_DATA, MINE_RATE, MINING_REWARD } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE } from '../config/constants';
 import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
+import Mining_Reward from '../util/supply_&_mining-reward';
 import { transactionVolume } from '../util/transaction-metrics';
 
 class Block {
@@ -79,7 +80,7 @@ class Block {
       hash,
       blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
       transactionVolume: transactionVolume({ transactions }),
-      blockReward: MINING_REWARD,
+      blockReward: new Mining_Reward({ chainLength: chain.length }).MINING_REWARD,
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
     });
   }

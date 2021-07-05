@@ -26,7 +26,11 @@ class TransactionMiner {
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
       validTransactions.push(
-        Transaction.rewardTransaction({ minerPublicKey: this.address, message: this.message })
+        Transaction.rewardTransaction({
+          minerPublicKey: this.address,
+          message: this.message,
+          chainLength: this.blockchain.chain.length,
+        })
       );
 
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK

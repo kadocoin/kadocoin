@@ -1,9 +1,10 @@
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import { REWARD_INPUT } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
+import Mining_Reward from '../util/supply_&_mining-reward';
 
 class Blockchain {
   public chain: IChain;
@@ -71,7 +72,10 @@ class Blockchain {
             return false;
           }
 
-          if (Object.values(transaction.output)[0] !== MINING_REWARD) {
+          if (
+            Object.values(transaction.output)[0] !==
+            new Mining_Reward({ chainLength: this.chain.length }).MINING_REWARD
+          ) {
             console.error('Miner reward amount is invalid');
             return false;
           }

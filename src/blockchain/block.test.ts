@@ -1,6 +1,6 @@
 import hexToBinary from 'hex-to-bin';
 import Block from './block';
-import { GENESIS_DATA, MINE_RATE, MINING_REWARD, sampleDataForTests } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
 
 describe('Block', () => {
@@ -19,7 +19,7 @@ describe('Block', () => {
     difficulty,
     blockSize: '999',
     transactionVolume: '999',
-    blockReward: MINING_REWARD,
+    blockReward: (50).toFixed(8),
     blockchainHeight: 1,
   });
 
