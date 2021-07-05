@@ -1,13 +1,14 @@
 {
   "name": "kadocoin",
   "version": "1.0.0",
-  "description": "Kadocoin is a decentralized censure-resistant peer-to-peer digital money",
-  "main": "server.js",
+  "description": "Kadocoin is a decentralized censure-resistant peer-to-peer digital currency and asset",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --watch src/ --exec ts-node src/server.ts",
     "test-watch": "jest --colors --watch",
     "test-watchAll": "jest --colors --watchAll",
-    "average-work": "node dist/average-work.js",
+    "average-work": "nodemon --watch src/ --exec ts-node src/util/average-work.ts",
+    "supply": "nodemon --watch src/ --exec ts-node src/util/kadocoin-supply/index.ts",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",

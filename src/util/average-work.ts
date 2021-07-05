@@ -1,6 +1,7 @@
-import Blockchain from './blockchain';
-import Block from './blockchain/block';
-import { sampleDataForTests } from './config/constants';
+import Blockchain from '../blockchain';
+import Block from '../blockchain/block';
+import { sampleDataForTests } from '../config/constants';
+import { MINE_RATE } from '../config/constants';
 
 (function averageWork(): void {
   const blockchain = new Blockchain(),
@@ -9,6 +10,7 @@ import { sampleDataForTests } from './config/constants';
   // ADD FIRST BLOCK
   blockchain.addBlock({ transactions: [sampleDataForTests] });
   console.log('first block', blockchain.chain[blockchain.chain.length - 1]);
+  console.log({ MINE_RATE });
 
   let prevTimestamp: number,
     nextTimestamp: number,
@@ -30,7 +32,7 @@ import { sampleDataForTests } from './config/constants';
     average = times.reduce((total, num) => total + num) / times.length;
 
     console.log(
-      `Time to mine block: ${timeDiff}ms. Difficulty: ${nextBlock.difficulty}. Average time: ${average}ms. iteration ${i}`
+      `Time to mine block: ${timeDiff}ms. Difficulty: ${nextBlock.difficulty}. Average time: ${average}ms. Iteration ${i}`
     );
   }
 })();
