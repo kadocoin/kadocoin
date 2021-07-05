@@ -5,7 +5,6 @@ export const transactValidation = (body: {
   recipient: string;
   publicKey: string;
   address: string;
-  token: string;
   message: string;
 }): ValidationResult => {
   const transactSchema = Joi.object().keys({
@@ -20,6 +19,12 @@ export const transactValidation = (body: {
   return transactSchema.validate(body, { convert: true });
 };
 
-export const mineValidation = (address: string): ValidationResult => {
-  return Joi.string().required().label('Kadocoin wallet address').validate(address);
+export const mineValidation = (body: { address: string; message: string }): ValidationResult => {
+  const mineSchema = Joi.object().keys({
+    address: Joi.string().trim().required(),
+    message: Joi.string().trim().max(160),
+    token: Joi.string().trim().required(),
+  });
+
+  return mineSchema.validate(body);
 };

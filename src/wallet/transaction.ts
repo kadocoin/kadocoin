@@ -120,8 +120,15 @@ class Transaction {
     });
   }
 
-  static rewardTransaction({ minerPublicKey }: { minerPublicKey: string }): Transaction {
+  static rewardTransaction({
+    minerPublicKey,
+    message,
+  }: {
+    minerPublicKey: string;
+    message: string;
+  }): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
+    REWARD_INPUT.message = message;
 
     return new Transaction({
       input: REWARD_INPUT,

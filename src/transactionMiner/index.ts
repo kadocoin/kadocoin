@@ -1,5 +1,6 @@
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
+import { ITMinerConstructorParams } from '../types';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -8,22 +9,14 @@ class TransactionMiner {
   public transactionPool: TransactionPool;
   public pubSub: PubSub;
   public address: string;
+  public message: string;
 
-  constructor({
-    blockchain,
-    transactionPool,
-    address,
-    pubSub,
-  }: {
-    blockchain: Blockchain;
-    transactionPool: TransactionPool;
-    pubSub: PubSub;
-    address: string;
-  }) {
+  constructor({ blockchain, transactionPool, address, pubSub, message }: ITMinerConstructorParams) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
     this.pubSub = pubSub;
     this.address = address;
+    this.message = message;
   }
 
   mineTransactions(): string {
@@ -32,7 +25,9 @@ class TransactionMiner {
 
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
-      validTransactions.push(Transaction.rewardTransaction({ minerPublicKey: this.address }));
+      validTransactions.push(
+        Transaction.rewardTransaction({ minerPublicKey: this.address, message: this.message })
+      );
 
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       this.blockchain.addBlock({ transactions: validTransactions });

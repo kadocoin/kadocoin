@@ -5,6 +5,14 @@ import PubSub from './pubSub';
 import Wallet from './wallet';
 import TransactionPool from './wallet/transaction-pool';
 
+export interface ITMinerConstructorParams {
+  blockchain: Blockchain;
+  transactionPool: TransactionPool;
+  pubSub: PubSub;
+  address: string;
+  message: string;
+}
+
 /**
  * INPUT types
  * @param Transaction

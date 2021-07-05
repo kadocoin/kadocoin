@@ -35,7 +35,7 @@ export const REWARD_INPUT = {
   localPublicKey: '',
   recipient: '',
   signature: '',
-  message: '*Mining Reward Transaction*',
+  message: '',
 };
 export const COINS_IN_CIRCULATION = 0;
 

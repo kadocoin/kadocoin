@@ -151,13 +151,28 @@ export default class TransactionController {
 
   mine = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { error } = mineValidation(req.body.address);
+      const { error } = mineValidation(req.body);
       if (error)
         return res
           .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
-      const { address } = req.body;
+      /**
+       * @param address miner address
+       * @param message miner message
+       */
+      let { address, message } = req.body;
+
+      // SANITIZE - REMOVE SCRIPTS/HTML TAGS
+      address = sanitizeHTML(address, {
+        allowedTags: [],
+        allowedAttributes: {},
+      });
+      message = sanitizeHTML(message, {
+        allowedTags: [],
+        allowedAttributes: {},
+      });
+
       const { transactionPool, blockchain, pubSub } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
@@ -166,6 +181,7 @@ export default class TransactionController {
           transactionPool: transactionPool,
           address: address,
           pubSub: pubSub,
+          message: message,
         });
 
         const status = transactionMiner.mineTransactions();
