@@ -13,6 +13,7 @@ import isEmptyObject from '../util/isEmptyObject';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
+import Mining_Reward from '../util/supply_&_mining-reward';
 
 export default class TransactionController {
   /**
@@ -172,7 +173,7 @@ export default class TransactionController {
         allowedTags: [],
         allowedAttributes: {},
       });
-
+      // GRAB NECESSARY MIDDLEWARES
       const { transactionPool, blockchain, pubSub } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
@@ -190,12 +191,15 @@ export default class TransactionController {
         if (status !== 'success')
           return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
+        // UPDATE MINING_REWARD
+        const { MINING_REWARD, COINS_IN_CIRCULATION } = new Mining_Reward({
+          chainLength: blockchain.chain.length,
+        });
+        console.log({ MINING_REWARD, COINS_IN_CIRCULATION });
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }
-
+      // NOTHING TO MINE
       return res.status(SUCCESS).json({ type: 'error', message: 'No transactions to mine' });
-
-      // TODO - COINS IN CIRCULATION
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

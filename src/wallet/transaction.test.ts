@@ -205,6 +205,7 @@ describe('Transaction', () => {
       minerWallet = new Wallet();
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: minerWallet.publicKey,
+        message: '',
       });
     });
 

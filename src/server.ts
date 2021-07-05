@@ -16,6 +16,7 @@ import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerOptions } from './config/constants';
+import Mining_Reward from './util/supply_&_mining-reward';
 
 const swaggerSpecification = swaggerJsdoc(swaggerOptions);
 
@@ -58,6 +59,12 @@ const syncWithRootState = () => {
       console.log('Replacing your LOCAL blockchain with the consensus blockchain');
       console.log('working on it.................');
       blockchain.replaceChain(rootChain);
+
+      // UPDATE MINING_REWARD
+      const { MINING_REWARD, COINS_IN_CIRCULATION } = new Mining_Reward({
+        chainLength: blockchain.chain.length,
+      });
+      console.log({ MINING_REWARD, COINS_IN_CIRCULATION });
     } else {
       console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
     }
