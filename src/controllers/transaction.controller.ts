@@ -12,6 +12,7 @@ import TransactionMiner from '../transactionMiner';
 import isEmptyObject from '../util/isEmptyObject';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
+import sanitizeHTML from 'sanitize-html';
 
 export default class TransactionController {
   /**
@@ -23,13 +24,6 @@ export default class TransactionController {
    * @return a transaction object
    */
   make = async (req: Request, res: Response): Promise<Response> => {
-    // CHECK IF AMOUNT IS A NUMBER
-    if (isNaN(Number(req.body.amount)))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Amount is not a number. Provide a number please.',
-      });
-
     // ENFORCE 8 DECIMAL PLACES
     if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -46,17 +40,39 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    const { amount, recipient, publicKey, address, message } = req.body;
+    let { amount, recipient, publicKey, address, message } = req.body;
+
+    // SANITIZE - REMOVE SCRIPTS/HTML TAGS
+    amount = sanitizeHTML(amount, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
+    (recipient = sanitizeHTML(recipient, {
+      allowedTags: [],
+      allowedAttributes: {},
+    })),
+      (publicKey = sanitizeHTML(publicKey, {
+        allowedTags: [],
+        allowedAttributes: {},
+      }));
+    address = sanitizeHTML(address, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
+    message = sanitizeHTML(message, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
-    if (!isValidChecksumAddress(recipient))
+    if (!isValidChecksumAddress(recipient.trim()))
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',
         message: 'Invalid recipient address.',
       });
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
-    if (!isValidChecksumAddress(address))
+    if (!isValidChecksumAddress(address.trim()))
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',
         message: 'Invalid sender address.',
