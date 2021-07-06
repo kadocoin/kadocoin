@@ -2,6 +2,7 @@ import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/co
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
+import costOfMessage from '../util/text-2-coins';
 
 describe('Transaction', () => {
   let transaction: InstanceType<typeof Transaction>,
@@ -101,7 +102,8 @@ describe('Transaction', () => {
     let origSignature: string,
       origSenderOutput: string | number | Wallet,
       nextRecipient: string,
-      nextAmount: number;
+      nextAmount: number,
+      message: string;
 
     describe('and amount is invalid', () => {
       it('throws an error', () => {
@@ -114,7 +116,7 @@ describe('Transaction', () => {
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
               balance: '300.00000000',
-              message: ' Hello from transaction test',
+              message: 'Hello from transaction test',
             });
           }
         }).toThrow('Insufficient balance');
@@ -127,6 +129,7 @@ describe('Transaction', () => {
         origSenderOutput = transaction.output[senderWallet.address];
         nextRecipient = 'next-recipient';
         nextAmount = 50;
+        message = 'Hello from transaction test';
 
         if (transaction instanceof Transaction) {
           transaction.update({
@@ -136,7 +139,7 @@ describe('Transaction', () => {
             address: senderWallet.address,
             publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
-            message: 'Hello from transaction test',
+            message,
           });
         }
       });
@@ -144,12 +147,12 @@ describe('Transaction', () => {
       it('outputs the amount to the next recipient', () => {
         expect(transaction.output[nextRecipient]).toEqual(nextAmount.toFixed(8));
       });
-      // TODO
-      // it('subtracts the amount from the original sender output amount', () => {
-      //   expect(transaction.output[senderWallet.address]).toEqual(
-      //     ((origSenderOutput as number) - nextAmount).toFixed(8)
-      //   );
-      // });
+
+      it('subtracts the amount from the original sender output amount', () => {
+        expect(transaction.output[senderWallet.address]).toEqual(
+          ((origSenderOutput as number) - costOfMessage({ message }) - nextAmount).toFixed(8)
+        );
+      });
 
       it('maintains a total output that matches the input amount', () => {
         const total = Object.values(transaction.output).reduce(
@@ -182,12 +185,17 @@ describe('Transaction', () => {
         it('adds to the recipient amount', () => {
           expect(transaction.output[nextRecipient]).toEqual((nextAmount + addedAmount).toFixed(8));
         });
-        // TODO
-        // it('subtract the amount from the original sender output amount', () => {
-        //   expect(transaction.output[senderWallet.address]).toEqual(
-        //     ((origSenderOutput as number) - nextAmount - addedAmount).toFixed(8)
-        //   );
-        // });
+
+        it('subtract the amount from the original sender output amount', () => {
+          expect(transaction.output[senderWallet.address]).toEqual(
+            (
+              (origSenderOutput as number) -
+              costOfMessage({ message }) -
+              nextAmount -
+              addedAmount
+            ).toFixed(8)
+          );
+        });
       });
     });
     // END UPDATE()
