@@ -14,3 +14,21 @@ export function transactionVolume({ transactions }: { transactions: TTransaction
 
   return totalTransactionsAmount.toFixed(8);
 }
+
+export function totalMsgReward({ transactions }: { transactions: TTransactions }): string {
+  let totalMsgReward = 0;
+
+  for (let i = 0; i < transactions.length; i++) {
+    const transaction = transactions[i];
+
+    for (const prop in transaction['output']) {
+      if (
+        prop.substring(0, 8) ==
+        'msg-fee-' /** example - "msg-fee-0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD" */
+      )
+        totalMsgReward += Number(transaction['output'][prop]);
+    }
+  }
+
+  return totalMsgReward.toFixed(8);
+}

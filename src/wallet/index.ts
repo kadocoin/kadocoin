@@ -30,6 +30,7 @@ class Wallet {
     publicKey,
     address,
     message,
+    sendFee,
   }: {
     recipient: string;
     amount: number;
@@ -37,6 +38,7 @@ class Wallet {
     publicKey?: string;
     address?: string;
     message?: string;
+    sendFee: string;
   }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) this.balance = Wallet.calculateBalance({ chain, address: address });
@@ -54,6 +56,7 @@ class Wallet {
       balance: this.balance,
       localWallet: this,
       message,
+      sendFee,
     });
   }
 

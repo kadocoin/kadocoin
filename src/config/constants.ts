@@ -17,6 +17,7 @@ const GENESIS_DATA = {
   transactionVolume: '',
   blockReward: '',
   blockchainHeight: 1,
+  msgReward: '',
 };
 
 const genesisBlockSize = size(GENESIS_DATA);

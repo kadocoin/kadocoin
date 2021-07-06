@@ -4,7 +4,7 @@ import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Mining_Reward from '../util/coin-supply_&_mining-reward';
-import { transactionVolume } from '../util/transaction-metrics';
+import { totalMsgReward, transactionVolume } from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
@@ -17,6 +17,7 @@ class Block {
   public transactionVolume: string;
   public blockReward: string;
   public blockchainHeight: number;
+  public msgReward: string;
 
   constructor({
     timestamp,
@@ -29,6 +30,7 @@ class Block {
     transactionVolume,
     blockReward,
     blockchainHeight,
+    msgReward,
   }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
@@ -40,6 +42,7 @@ class Block {
     this.transactionVolume = transactionVolume;
     this.blockReward = blockReward;
     this.blockchainHeight = blockchainHeight;
+    this.msgReward = msgReward;
   }
 
   static genesis(): Block {
@@ -82,6 +85,7 @@ class Block {
       transactionVolume: transactionVolume({ transactions }),
       blockReward: new Mining_Reward({ chainLength: chain.length }).MINING_REWARD,
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
+      msgReward: totalMsgReward({ transactions }),
     });
   }
 

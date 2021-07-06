@@ -94,6 +94,7 @@ export interface ITransaction {
   balance?: string;
   localWallet?: Wallet;
   message?: string;
+  sendFee?: string;
 }
 
 /** COMMON TYPES createInput() */
@@ -123,6 +124,7 @@ export interface ICOutput {
   amount: number;
   balance: string;
   message: string;
+  sendFee: string;
 }
 /** createOutput() RETURN type  */
 export interface ICOutput_R {
@@ -138,6 +140,7 @@ export interface IUpdate {
   balance: string;
   localWallet: Wallet;
   message: string;
+  sendFee: string;
 }
 
 /**
