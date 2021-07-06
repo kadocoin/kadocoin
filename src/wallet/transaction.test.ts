@@ -117,6 +117,7 @@ describe('Transaction', () => {
               publicKey: senderWallet.publicKey,
               balance: '300.00000000',
               message: 'Hello from transaction test',
+              sendFee: '2',
             });
           }
         }).toThrow('Insufficient balance');
@@ -140,6 +141,7 @@ describe('Transaction', () => {
             publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
             message,
+            sendFee: '2',
           });
         }
       });
@@ -150,7 +152,7 @@ describe('Transaction', () => {
 
       it('subtracts the amount from the original sender output amount', () => {
         expect(transaction.output[senderWallet.address]).toEqual(
-          ((origSenderOutput as number) - costOfMessage({ message }) - nextAmount).toFixed(8)
+          ((origSenderOutput as number) - costOfMessage({ message }) - nextAmount - 2).toFixed(8)
         );
       });
 
@@ -179,6 +181,7 @@ describe('Transaction', () => {
               balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
               message: 'Hello from transaction test',
+              sendFee: '2',
             });
         });
 
@@ -192,7 +195,8 @@ describe('Transaction', () => {
               (origSenderOutput as number) -
               costOfMessage({ message }) -
               nextAmount -
-              addedAmount
+              addedAmount -
+              2
             ).toFixed(8)
           );
         });
@@ -210,6 +214,7 @@ describe('Transaction', () => {
         minerPublicKey: minerWallet.publicKey,
         message: '',
         chainLength: 999,
+        msgReward: '22',
       });
     });
 
@@ -218,7 +223,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50).toFixed(8));
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50 + 22).toFixed(8));
     });
   });
 
