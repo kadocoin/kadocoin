@@ -122,6 +122,7 @@ export interface ICOutput {
   recipient: string;
   amount: number;
   balance: string;
+  message: string;
 }
 /** createOutput() RETURN type  */
 export interface ICOutput_R {

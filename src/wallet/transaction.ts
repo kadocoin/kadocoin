@@ -1,5 +1,6 @@
+// Copyright (c) 2009-2010 Adamu Muhammad Dankore
 import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT } from '../config/constants';
+import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -11,7 +12,9 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
-import Mining_Reward from '../util/supply_&_mining-reward';
+import Mining_Reward from '../util/coin-supply_&_mining-reward';
+import costOfMessage from '../util/text-2-coins';
+import { filterAddress } from '../util/address-filter';
 
 class Transaction {
   public id: string;
@@ -30,7 +33,7 @@ class Transaction {
     message,
   }: ITransaction) {
     this.id = uuidv1();
-    this.output = output || this.createOutputMap({ address, recipient, amount, balance });
+    this.output = output || this.createOutputMap({ address, recipient, amount, balance, message });
     this.input =
       input ||
       this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
@@ -48,11 +51,14 @@ class Transaction {
     };
   }
 
-  createOutputMap({ address, recipient, amount, balance }: ICOutput): ICOutput_R {
+  createOutputMap({ address, recipient, amount, balance, message }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
+    const msg_fee = costOfMessage({ message });
+    const totalAmount = amount + msg_fee;
 
-    output[address] = (Number(balance) - amount).toFixed(8);
+    output[address] = (Number(balance) - totalAmount).toFixed(8);
     output[recipient] = amount.toFixed(8);
+    if (message) output[`msg-fee-${address}`] = msg_fee;
 
     return output;
   }
@@ -79,8 +85,17 @@ class Transaction {
 
     // CHECK FOR ADDRESS VALIDITY VIA CHECKSUM
     Object.keys(output).map((address: string): boolean => {
-      if (!isValidChecksumAddress(address)) {
-        console.error(`Invalid address => ${address}`);
+      if (address.length == 42) {
+        if (!isValidChecksumAddress(address)) {
+          console.error(`Invalid address => ${address}`);
+          return false;
+        }
+      } else if (address.length > 42) {
+        if (!isValidChecksumAddress(filterAddress(address))) {
+          console.error(`Invalid address => ${address}`);
+          return false;
+        }
+      } else {
         return false;
       }
     });
@@ -96,11 +111,10 @@ class Transaction {
   }
 
   update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
-    // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
+    console.log({ message });
+    const totalAmount = amount + costOfMessage({ message });
 
-    if (amount > Number(this.output[address])) {
-      throw new Error('Insufficient balance');
-    }
+    if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
     // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
     if (!this.output[recipient]) {
@@ -109,7 +123,32 @@ class Transaction {
       this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
     }
 
-    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+    if (message) {
+      const msg_fee = costOfMessage({ message });
+
+      if (this.output[`msg-fee-${address}`]) {
+        const value = this.output[`msg-fee-${address}`];
+
+        if (msg_fee < value) {
+          console.log('refund');
+          const refund = Number(value) - msg_fee;
+          this.output[address] = (Number(this.output[address]) + refund - amount).toFixed(8);
+        } else if (msg_fee === value) {
+          console.log('no change in message');
+          this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+        } else {
+          console.log('excess');
+          const remove = msg_fee - Number(value);
+          this.output[address] = (Number(this.output[address]) - remove - amount).toFixed(8);
+        }
+      } else {
+        this.output[address] = (Number(this.output[address]) - msg_fee - amount).toFixed(8);
+      }
+
+      this.output[`msg-fee-${address}`] = msg_fee.toFixed(8);
+    } else {
+      this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+    }
 
     this.input = this.createInput({
       publicKey,
@@ -117,7 +156,7 @@ class Transaction {
       balance,
       localWallet,
       output: this.output,
-      message,
+      ...(message ? { message } : { message: this.input['message'] }),
     });
   }
 

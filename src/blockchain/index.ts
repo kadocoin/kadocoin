@@ -4,7 +4,7 @@ import { REWARD_INPUT } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
-import Mining_Reward from '../util/supply_&_mining-reward';
+import Mining_Reward from '../util/coin-supply_&_mining-reward';
 
 class Blockchain {
   public chain: IChain;

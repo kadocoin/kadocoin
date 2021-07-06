@@ -3,7 +3,7 @@ import { GENESIS_DATA, MINE_RATE } from '../config/constants';
 import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
-import Mining_Reward from '../util/supply_&_mining-reward';
+import Mining_Reward from '../util/coin-supply_&_mining-reward';
 import { transactionVolume } from '../util/transaction-metrics';
 
 class Block {

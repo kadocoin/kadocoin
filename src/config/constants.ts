@@ -94,3 +94,5 @@ export const sampleDataForTests = {
     signature: '7fd13c4a4175fda39615766a5f0bfce40c0aeccd1d38c5f9e2ab7f8744ac26e2',
   },
 };
+
+export const NOT_ENOUGH = 'Insufficient balance';

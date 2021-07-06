@@ -13,7 +13,7 @@ import isEmptyObject from '../util/isEmptyObject';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
-import Mining_Reward from '../util/supply_&_mining-reward';
+import Mining_Reward from '../util/coin-supply_&_mining-reward';
 
 export default class TransactionController {
   /**
@@ -60,10 +60,11 @@ export default class TransactionController {
       allowedTags: [],
       allowedAttributes: {},
     });
-    message = sanitizeHTML(message, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
+    message &&
+      (message = sanitizeHTML(message, {
+        allowedTags: [],
+        allowedAttributes: {},
+      }));
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))

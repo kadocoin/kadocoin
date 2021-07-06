@@ -1,3 +1,4 @@
+// Copyright (c) 2009-2010 Adamu Muhammad Dankore
 import app from './app';
 import request from 'request';
 import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
@@ -16,7 +17,7 @@ import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerOptions } from './config/constants';
-import Mining_Reward from './util/supply_&_mining-reward';
+import Mining_Reward from './util/coin-supply_&_mining-reward';
 
 const swaggerSpecification = swaggerJsdoc(swaggerOptions);
 

@@ -1,9 +1,10 @@
 import Transaction from './transaction';
-import { STARTING_BALANCE } from '../config/constants';
+import { NOT_ENOUGH, STARTING_BALANCE } from '../config/constants';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
 import { IChain, ICOutput_R, TTransactionChild } from '../types';
+import costOfMessage from '../util/text-2-coins';
 
 class Wallet {
   public balance: string;
@@ -38,16 +39,12 @@ class Wallet {
     message?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
-    if (chain) {
-      this.balance = Wallet.calculateBalance({
-        chain,
-        address: address,
-      });
-    }
+    if (chain) this.balance = Wallet.calculateBalance({ chain, address: address });
 
-    if (amount > Number(this.balance)) {
-      throw new Error('Insufficient balance');
-    }
+    const totalAmount = amount + costOfMessage({ message });
+
+    // CHECK TO MAKE SURE SENDER HAS ENOUGH COINS
+    if (totalAmount > Number(this.balance)) throw new Error(NOT_ENOUGH);
 
     return new Transaction({
       recipient,
