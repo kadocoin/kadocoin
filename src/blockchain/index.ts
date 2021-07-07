@@ -113,6 +113,8 @@ class Blockchain {
       const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
       const lastDifficulty = chain[i - 1].difficulty;
 
+      console.log({ lastDifficulty, difficulty, previousHash, lastHash, validatedHash, hash });
+
       if (previousHash !== lastHash) return false;
 
       if (hash !== validatedHash) return false;

@@ -1,3 +1,4 @@
+import { number } from 'joi';
 import Blockchain from '../blockchain';
 import Block from '../blockchain/block';
 import { sampleDataForTests } from '../config/constants';
@@ -16,10 +17,12 @@ import { MINE_RATE } from '../config/constants';
     nextTimestamp: number,
     nextBlock: Block,
     timeDiff: number,
-    average: number;
+    average: number,
+    prevDifficulty: number;
 
   for (let i = 0; i < 10000; i++) {
     prevTimestamp = blockchain.chain[blockchain.chain.length - 1].timestamp;
+    prevDifficulty = blockchain.chain[blockchain.chain.length - 1].difficulty;
 
     blockchain.addBlock({ transactions: [sampleDataForTests] });
     nextBlock = blockchain.chain[blockchain.chain.length - 1];
@@ -32,7 +35,7 @@ import { MINE_RATE } from '../config/constants';
     average = times.reduce((total, num) => total + num) / times.length;
 
     console.log(
-      `Time to mine block: ${timeDiff}ms. Difficulty: ${nextBlock.difficulty}. Average time: ${average}ms. Iteration ${i}`
+      `Time to mine block: ${timeDiff}ms. PrevDifficulty: ${prevDifficulty} Difficulty: ${nextBlock.difficulty}. Average time: ${average}ms. Iteration ${i}`
     );
   }
 })();
