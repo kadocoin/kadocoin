@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2010 Adamu Muhammad Dankore
+// Copyright (c) Adamu Muhammad Dankore
 import app from './app';
 import request from 'request';
 import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';

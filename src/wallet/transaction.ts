@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2010 Adamu Muhammad Dankore
+// Copyright (c) Adamu Muhammad Dankore
 import { v1 as uuidv1 } from 'uuid';
 import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';

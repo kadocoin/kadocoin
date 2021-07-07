@@ -19,7 +19,7 @@ describe('Mining_reward', () => {
     blocks_at_max_supply = 169999999; // 169,999,999
   });
 
-  describe('calc()', () => {
+  describe('calc() - COINS SUPPLY', () => {
     describe('testBeginning', () => {
       it('1 block a.k.a first block/genesis', () =>
         expect(mining_reward.calc({ chainLength: 0 }).SUPPLY).toEqual((50).toFixed(8)));
@@ -239,5 +239,228 @@ describe('Mining_reward', () => {
         ));
     });
     // END CALC()
+  });
+
+  describe('calc() - MINING_REWARD', () => {
+    describe('testBeginning', () => {
+      it('1 block a.k.a first block/genesis', () =>
+        expect(mining_reward.calc({ chainLength: 0 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('2 blocks', () =>
+        expect(mining_reward.calc({ chainLength: 1 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('3 blocks', () =>
+        expect(mining_reward.calc({ chainLength: 2 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('4 blocks', () =>
+        expect(mining_reward.calc({ chainLength: 3 }).MINING_REWARD).toEqual((50).toFixed(8)));
+    });
+
+    describe('test1stHalving', () => {
+      it('2 blocks to 1st halving', () =>
+        expect(mining_reward.calc({ chainLength: halving - 2 }).MINING_REWARD).toEqual(
+          (50).toFixed(8)
+        ));
+      it('1 block to 1st halving', () =>
+        expect(mining_reward.calc({ chainLength: halving - 1 }).MINING_REWARD).toEqual(
+          (50).toFixed(8)
+        ));
+      it('1st halving', () =>
+        expect(mining_reward.calc({ chainLength: halving }).MINING_REWARD).toEqual(
+          (25).toFixed(8)
+        ));
+      it('1 block after halving', () =>
+        expect(mining_reward.calc({ chainLength: halving + 1 }).MINING_REWARD).toEqual(
+          (25).toFixed(8)
+        ));
+      it('2 blocks after halving', () =>
+        expect(mining_reward.calc({ chainLength: halving + 2 }).MINING_REWARD).toEqual(
+          (25).toFixed(8)
+        ));
+    });
+
+    describe('test2ndHalving', () => {
+      it('2 blocks before 2nd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_2 - 2 }).MINING_REWARD).toEqual(
+          (25).toFixed(8)
+        ));
+      it('1 block before 2nd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_2 - 1 }).MINING_REWARD).toEqual(
+          (25).toFixed(8)
+        ));
+      it('2nd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_2 }).MINING_REWARD).toEqual(
+          (12.5).toFixed(8)
+        ));
+      it('1 block after 2nd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_2 + 1 }).MINING_REWARD).toEqual(
+          (12.5).toFixed(8)
+        ));
+      it('2 blocks after 2nd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_2 + 2 }).MINING_REWARD).toEqual(
+          (12.5).toFixed(8)
+        ));
+    });
+
+    describe('test3rdHalving', () => {
+      it('2 blocks before 3rd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_3 - 2 }).MINING_REWARD).toEqual(
+          (12.5).toFixed(8)
+        ));
+      it('1 block before 3rd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_3 - 1 }).MINING_REWARD).toEqual(
+          (12.5).toFixed(8)
+        ));
+      it('3rd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_3 }).MINING_REWARD).toEqual(
+          (6.25).toFixed(8)
+        ));
+      it('1 block after 3rd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_3 + 1 }).MINING_REWARD).toEqual(
+          (6.25).toFixed(8)
+        ));
+      it('2 blocks after 3rd halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_3 + 2 }).MINING_REWARD).toEqual(
+          (6.25).toFixed(8)
+        ));
+    });
+
+    describe('test4thHalving', () => {
+      it('2 blocks before 4th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_4 - 2 }).MINING_REWARD).toEqual(
+          (6.25).toFixed(8)
+        ));
+      it('1 block before 4th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_4 - 1 }).MINING_REWARD).toEqual(
+          (6.25).toFixed(8)
+        ));
+      it('4th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_4 }).MINING_REWARD).toEqual(
+          (3.125).toFixed(8)
+        ));
+      it('1 block after 4th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_4 + 1 }).MINING_REWARD).toEqual(
+          (3.125).toFixed(8)
+        ));
+      it('2 blocks after 4th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_4 + 2 }).MINING_REWARD).toEqual(
+          (3.125).toFixed(8)
+        ));
+    });
+
+    describe('test5thHalving', () => {
+      it('2 blocks before 5th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_5 - 2 }).MINING_REWARD).toEqual(
+          (3.125).toFixed(8)
+        ));
+      it('1 block before 5th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_5 - 1 }).MINING_REWARD).toEqual(
+          (3.125).toFixed(8)
+        ));
+      it('5th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_5 }).MINING_REWARD).toEqual(
+          (1.5625).toFixed(8)
+        ));
+      it('1 block after 5th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_5 + 1 }).MINING_REWARD).toEqual(
+          (1.5625).toFixed(8)
+        ));
+      it('2 blocks after 5th halving', () =>
+        expect(mining_reward.calc({ chainLength: halving_5 + 2 }).MINING_REWARD).toEqual(
+          (1.5625).toFixed(8)
+        ));
+    });
+
+    describe('testOverTime', () => {
+      it('10', () =>
+        expect(mining_reward.calc({ chainLength: 10 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('100', () =>
+        expect(mining_reward.calc({ chainLength: 100 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('1000', () =>
+        expect(mining_reward.calc({ chainLength: 1000 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('10000', () =>
+        expect(mining_reward.calc({ chainLength: 10000 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('100000', () =>
+        expect(mining_reward.calc({ chainLength: 100000 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('250000', () =>
+        expect(mining_reward.calc({ chainLength: 250000 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('500000', () =>
+        expect(mining_reward.calc({ chainLength: 500000 }).MINING_REWARD).toEqual((50).toFixed(8)));
+      it('1000000', () =>
+        expect(mining_reward.calc({ chainLength: 1000000 }).MINING_REWARD).toEqual(
+          (50).toFixed(8)
+        ));
+      it('5000000', () =>
+        expect(mining_reward.calc({ chainLength: 5000000 }).MINING_REWARD).toEqual(
+          (25).toFixed(8)
+        ));
+      it('15000000', () =>
+        expect(mining_reward.calc({ chainLength: 15000000 }).MINING_REWARD).toEqual(
+          (6.25).toFixed(8)
+        ));
+    });
+
+    describe('testEndOfHalvings', () => {
+      it('5 blocks before MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply - 5 }).MINING_REWARD).toEqual(
+          (0.00000001).toFixed(8)
+        ));
+      it('4 blocks before MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply - 4 }).MINING_REWARD).toEqual(
+          (0.00000001).toFixed(8)
+        ));
+      it('3 blocks before MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply - 3 }).MINING_REWARD).toEqual(
+          (0.00000001).toFixed(8)
+        ));
+      it('2 blocks before MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply - 2 }).MINING_REWARD).toEqual(
+          (0.00000001).toFixed(8)
+        ));
+      it('1 block before MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply - 1 }).MINING_REWARD).toEqual(
+          (0.00000001).toFixed(8)
+        ));
+      it('MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply - 5 }).MINING_REWARD).toEqual(
+          (0.00000001).toFixed(8)
+        ));
+      it('1 block after MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply + 1 }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('2 blocks after MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply + 2 }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('3 blocks after MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply + 3 }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('4 blocks after MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply + 4 }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('5 blocks after MAX SUPPLY', () =>
+        expect(mining_reward.calc({ chainLength: blocks_at_max_supply + 5 }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+    });
+
+    describe('testFarInTheFuture', () => {
+      it('10 to the power 10', () =>
+        expect(mining_reward.calc({ chainLength: Math.pow(10, 10) }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('10 to the power 50', () =>
+        expect(mining_reward.calc({ chainLength: Math.pow(10, 50) }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('10 to the power 100', () =>
+        expect(mining_reward.calc({ chainLength: Math.pow(10, 100) }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+      it('10 to the power 1000', () =>
+        expect(mining_reward.calc({ chainLength: Math.pow(10, 1000) }).MINING_REWARD).toEqual(
+          (0).toFixed(8)
+        ));
+    });
   });
 });
