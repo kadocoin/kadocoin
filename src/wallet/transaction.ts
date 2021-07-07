@@ -62,8 +62,8 @@ class Transaction {
     output[address] = (Number(balance) - totalAmount).toFixed(8);
     output[recipient] = amount.toFixed(8);
 
-    if (message) output[`msg-fee-${address}`] = msg_fee.toFixed(8);
-    if (sendFee) output[`send-fee-${address}`] = send_fee.toFixed(8);
+    if (message) output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
+    if (sendFee) output[`send-fee-${recipient}`] = send_fee.toFixed(8);
 
     return output;
   }
@@ -75,7 +75,7 @@ class Transaction {
     } = transaction;
 
     let outputTotal = Object.values(output).reduce(
-      (total: any, outputAmount: any) => Number(total) + Number(outputAmount),
+      (total, outputAmount) => Number(total) + Number(outputAmount),
       0
     );
 
@@ -131,7 +131,6 @@ class Transaction {
 
     if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
-    // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
     } else {
@@ -142,19 +141,15 @@ class Transaction {
       // MESSAGE LOGIC
       if (message) {
         const msg_fee = costOfMessage({ message });
-
-        if (this.output[`msg-fee-${address}`]) {
-          const value = this.output[`msg-fee-${address}`];
+        if (this.output[`msg-fee-${recipient}`]) {
+          const value = this.output[`msg-fee-${recipient}`];
 
           if (msg_fee < value) {
-            console.log('refund');
             const refund = Number(value) - msg_fee;
             this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-          } else if (msg_fee === value) {
-            console.log('no change in message');
-            // this.output[address] = (Number(this.output[address])).toFixed(8);
-          } else {
-            console.log('excess');
+          }
+
+          if (msg_fee > value) {
             const remove = msg_fee - Number(value);
             this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
           }
@@ -162,26 +157,22 @@ class Transaction {
           this.output[address] = (Number(this.output[address]) - msg_fee).toFixed(8);
         }
 
-        this.output[`msg-fee-${address}`] = msg_fee.toFixed(8);
+        this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
       }
 
       // SEND FEE LOGIC
       if (sendFee) {
         const send_fee = Number(sendFee);
 
-        if (this.output[`send-fee-${address}`]) {
-          const value = Number(this.output[`send-fee-${address}`]);
-          console.log({ send_fee, value });
+        if (this.output[`send-fee-${recipient}`]) {
+          const value = Number(this.output[`send-fee-${recipient}`]);
 
           if (send_fee < value) {
-            console.log('refund');
             const refund = value - send_fee;
             this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-          } else if (send_fee === value) {
-            console.log('No change');
-            // this.output[address] = (Number(this.output[address])).toFixed(8);
-          } else {
-            console.log('send fee more than the previous');
+          }
+
+          if (send_fee > value) {
             const remove = send_fee - value;
             this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
           }
@@ -189,12 +180,11 @@ class Transaction {
           this.output[address] = (Number(this.output[address]) - send_fee).toFixed(8);
         }
 
-        this.output[`send-fee-${address}`] = send_fee.toFixed(8);
+        this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
       }
       // COMMON
       this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
     } else {
-      console.log('No message or send fee');
       this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
     }
 
