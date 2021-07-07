@@ -3,7 +3,7 @@ import { GENESIS_DATA, MINE_RATE } from '../config/constants';
 import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
-import Mining_Reward from '../util/coin-supply_&_mining-reward';
+import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward, totalMsgReward, transactionVolume } from '../util/transaction-metrics';
 
 class Block {
@@ -86,7 +86,7 @@ class Block {
       hash,
       blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
       transactionVolume: transactionVolume({ transactions }),
-      blockReward: new Mining_Reward({ chainLength: chain.length }).MINING_REWARD,
+      blockReward: new Mining_Reward().calc({ chainLength: chain.length }).MINING_REWARD,
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
       msgReward: totalMsgReward({ transactions }),
       feeReward: totalFeeReward({ transactions }),

@@ -12,7 +12,7 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
-import Mining_Reward from '../util/coin-supply_&_mining-reward';
+import Mining_Reward from '../util/supply_reward';
 import costOfMessage from '../util/text-2-coins';
 import { filterAddress } from '../util/address-filter';
 
@@ -211,7 +211,7 @@ class Transaction {
     msgReward: string;
     feeReward: string;
   }): Transaction {
-    const { MINING_REWARD } = new Mining_Reward({ chainLength });
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength });
     const totalMiningReward = (
       Number(MINING_REWARD) +
       Number(msgReward) +

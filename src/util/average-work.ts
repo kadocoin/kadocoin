@@ -1,4 +1,3 @@
-import { number } from 'joi';
 import Blockchain from '../blockchain';
 import Block from '../blockchain/block';
 import { sampleDataForTests } from '../config/constants';

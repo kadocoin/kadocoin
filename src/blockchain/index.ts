@@ -4,7 +4,7 @@ import { REWARD_INPUT } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
-import Mining_Reward from '../util/coin-supply_&_mining-reward';
+import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 
 class Blockchain {
@@ -64,7 +64,7 @@ class Blockchain {
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
       const totalMiningReward = (
-        Number(new Mining_Reward({ chainLength: this.chain.length }).MINING_REWARD) +
+        Number(new Mining_Reward().calc({ chainLength: this.chain.length }).MINING_REWARD) +
         Number(totalMsgReward({ transactions: block.transactions })) +
         Number(totalFeeReward({ transactions: block.transactions }))
       ).toFixed(8);
@@ -112,8 +112,6 @@ class Blockchain {
       const previousHash = chain[i - 1].hash;
       const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
       const lastDifficulty = chain[i - 1].difficulty;
-
-      console.log({ lastDifficulty, difficulty, previousHash, lastHash, validatedHash, hash });
 
       if (previousHash !== lastHash) return false;
 
