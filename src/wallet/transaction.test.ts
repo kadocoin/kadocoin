@@ -215,6 +215,7 @@ describe('Transaction', () => {
         message: '',
         chainLength: 999,
         msgReward: '22',
+        feeReward: '2',
       });
     });
 
@@ -223,7 +224,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50 + 22).toFixed(8));
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50 + 22 + 2).toFixed(8));
     });
   });
 

@@ -211,15 +211,21 @@ class Transaction {
     message,
     chainLength,
     msgReward,
+    feeReward,
   }: {
     minerPublicKey: string;
     message?: string;
     chainLength: number;
     msgReward: string;
+    feeReward: string;
   }): Transaction {
     const { MINING_REWARD } = new Mining_Reward({ chainLength });
-    const totalMiningReward = (Number(MINING_REWARD) + Number(msgReward)).toFixed(8);
-    console.log({ message });
+    const totalMiningReward = (
+      Number(MINING_REWARD) +
+      Number(msgReward) +
+      Number(feeReward)
+    ).toFixed(8);
+
     REWARD_INPUT.recipient = minerPublicKey;
     message && (REWARD_INPUT.message = message); // OPTIONAL
     REWARD_INPUT.amount = totalMiningReward;

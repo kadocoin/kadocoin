@@ -52,6 +52,7 @@ describe('Blockchain', () => {
           blockReward: (50).toFixed(8),
           blockchainHeight: newChain.chain.length,
           msgReward: '22',
+          feeReward: '2',
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -103,6 +104,7 @@ describe('Blockchain', () => {
             blockReward: (50).toFixed(8),
             blockchainHeight: newChain.chain.length,
             msgReward: '22',
+            feeReward: '2',
           });
 
           blockchain.chain.push(badBlock);
@@ -144,6 +146,7 @@ describe('Blockchain', () => {
           blockReward: (50).toFixed(8),
           blockchainHeight: newChain.chain.length,
           msgReward: '22',
+          feeReward: '2',
         };
 
         blockchain.replaceChain(newChain.chain);
@@ -219,6 +222,7 @@ describe('Blockchain', () => {
         address: wallet.address,
         publicKey: wallet.publicKey,
         message,
+        sendFee: '2',
       });
 
       rewardTransaction = Transaction.rewardTransaction({
@@ -226,6 +230,7 @@ describe('Blockchain', () => {
         message: '',
         chainLength: 99,
         msgReward: costOfMessage({ message }).toFixed(8),
+        feeReward: '2',
       });
     });
 

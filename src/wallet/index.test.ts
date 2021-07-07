@@ -193,6 +193,7 @@ describe('Wallet', () => {
               message: '',
               chainLength: 999,
               msgReward: '12',
+              feeReward: '2',
             });
 
             blockchain.addBlock({

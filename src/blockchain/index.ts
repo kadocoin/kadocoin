@@ -5,7 +5,7 @@ import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/coin-supply_&_mining-reward';
-import { totalMsgReward } from '../util/transaction-metrics';
+import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;
@@ -65,9 +65,10 @@ class Blockchain {
       let rewardTransactionCount = 0;
       const totalMiningReward = (
         Number(new Mining_Reward({ chainLength: this.chain.length }).MINING_REWARD) +
-        Number(totalMsgReward({ transactions: block.transactions }))
+        Number(totalMsgReward({ transactions: block.transactions })) +
+        Number(totalFeeReward({ transactions: block.transactions }))
       ).toFixed(8);
-      console.log('____________');
+
       for (const transaction of block.transactions) {
         if (transaction.input.address === REWARD_INPUT.address) {
           rewardTransactionCount += 1;
