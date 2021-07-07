@@ -5,6 +5,7 @@ import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactionChild } from '../types';
+import costOfMessage from '../util/text-2-coins';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
@@ -206,31 +207,31 @@ describe('Blockchain', () => {
   });
 
   describe('validTransactionData()', () => {
-    let transaction: Transaction, rewardTransaction: Transaction, wallet: Wallet;
+    let transaction: Transaction, rewardTransaction: Transaction, wallet: Wallet, message: string;
 
     beforeEach(() => {
       wallet = new Wallet();
+      message = 'Muhammad Bello Dankore Dec 10, 2018 - Rest in Aljannatul Firdaus';
 
       transaction = wallet.createTransaction({
         recipient: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD',
         amount: 65,
         address: wallet.address,
         publicKey: wallet.publicKey,
-        sendFee: '2',
+        message,
       });
 
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: wallet.publicKey,
-        message: 'hello',
-        chainLength: 999,
-        msgReward: '22',
+        minerPublicKey: wallet.address,
+        message: '',
+        chainLength: 99,
+        msgReward: costOfMessage({ message }).toFixed(8),
       });
     });
 
     describe('and transaction transactions is valid', () => {
       it('returns true', () => {
-        // TODO - FAILING WITH REWARD TRANSACTIONS
-        newChain.addBlock({ transactions: [transaction] });
+        newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
         expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(true);
         expect(errorMock).not.toHaveBeenCalled();
@@ -261,7 +262,7 @@ describe('Blockchain', () => {
 
       describe('and the transaction is a reward transaction', () => {
         it('returns false and logs and error', () => {
-          rewardTransaction.output[wallet.publicKey] = 999999;
+          rewardTransaction.output[wallet.address] = '999999';
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 

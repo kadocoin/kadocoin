@@ -213,15 +213,15 @@ class Transaction {
     msgReward,
   }: {
     minerPublicKey: string;
-    message: string;
+    message?: string;
     chainLength: number;
     msgReward: string;
   }): Transaction {
     const { MINING_REWARD } = new Mining_Reward({ chainLength });
     const totalMiningReward = (Number(MINING_REWARD) + Number(msgReward)).toFixed(8);
-
+    console.log({ message });
     REWARD_INPUT.recipient = minerPublicKey;
-    REWARD_INPUT.message = message;
+    message && (REWARD_INPUT.message = message); // OPTIONAL
     REWARD_INPUT.amount = totalMiningReward;
 
     return new Transaction({

@@ -38,10 +38,10 @@ class Wallet {
     publicKey?: string;
     address?: string;
     message?: string;
-    sendFee: string;
+    sendFee?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
-    if (chain) this.balance = Wallet.calculateBalance({ chain, address: address });
+    if (chain) this.balance = Wallet.calculateBalance({ chain, address });
 
     const totalAmount = amount + costOfMessage({ message });
 

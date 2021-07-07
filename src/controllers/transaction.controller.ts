@@ -177,10 +177,12 @@ export default class TransactionController {
         allowedTags: [],
         allowedAttributes: {},
       });
-      message = sanitizeHTML(message, {
-        allowedTags: [],
-        allowedAttributes: {},
-      });
+      message &&
+        (message = sanitizeHTML(message, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }));
+
       // GRAB NECESSARY MIDDLEWARES
       const { transactionPool, blockchain, pubSub } = req;
 

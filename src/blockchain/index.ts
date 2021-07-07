@@ -5,6 +5,7 @@ import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/coin-supply_&_mining-reward';
+import { totalMsgReward } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;
@@ -43,7 +44,7 @@ class Blockchain {
     }
 
     if (validateTransactions && !this.validTransactionData({ chain: incomingChain })) {
-      console.error('The incoming chain has an invalid transactions');
+      console.error('The incoming chain has an invalid transaction');
       return;
     }
 
@@ -62,7 +63,11 @@ class Blockchain {
       const block = chain[i];
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
-
+      const totalMiningReward = (
+        Number(new Mining_Reward({ chainLength: this.chain.length }).MINING_REWARD) +
+        Number(totalMsgReward({ transactions: block.transactions }))
+      ).toFixed(8);
+      console.log('____________');
       for (const transaction of block.transactions) {
         if (transaction.input.address === REWARD_INPUT.address) {
           rewardTransactionCount += 1;
@@ -72,10 +77,9 @@ class Blockchain {
             return false;
           }
 
-          if (
-            Object.values(transaction.output)[0] !==
-            new Mining_Reward({ chainLength: this.chain.length }).MINING_REWARD
-          ) {
+          console.log(Object.values(transaction.output)[0], totalMiningReward);
+
+          if (Object.values(transaction.output)[0] !== totalMiningReward) {
             console.error('Miner reward amount is invalid');
             return false;
           }
@@ -93,7 +97,6 @@ class Blockchain {
           }
         }
       }
-
       // END FOR LOOP
     }
 
