@@ -55,7 +55,7 @@ class Transaction {
 
   createOutputMap({ address, recipient, amount, balance, message, sendFee }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
-    const msg_fee = costOfMessage({ message });
+    const msg_fee = message ? costOfMessage({ message }) : 0;
     const send_fee = sendFee ? Number(sendFee) : 0;
     const totalAmount = amount + msg_fee + send_fee;
 
@@ -125,7 +125,9 @@ class Transaction {
     message,
     sendFee,
   }: IUpdate): void {
-    const totalAmount = amount + costOfMessage({ message });
+    const send_fee = sendFee ? Number(sendFee) : 0;
+    const msg_fee = message ? costOfMessage({ message }) : 0;
+    const totalAmount = amount + msg_fee + send_fee;
 
     if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 

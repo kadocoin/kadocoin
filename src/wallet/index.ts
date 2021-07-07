@@ -42,8 +42,10 @@ class Wallet {
   }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) this.balance = Wallet.calculateBalance({ chain, address });
+    const send_fee = sendFee ? Number(sendFee) : 0;
+    const msg_fee = message ? costOfMessage({ message }) : 0;
 
-    const totalAmount = amount + costOfMessage({ message });
+    const totalAmount = amount + msg_fee + send_fee;
 
     // CHECK TO MAKE SURE SENDER HAS ENOUGH COINS
     if (totalAmount > Number(this.balance)) throw new Error(NOT_ENOUGH);
