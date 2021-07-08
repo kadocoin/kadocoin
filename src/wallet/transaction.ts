@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Adamu Muhammad Dankore
+ * Distributed under the MIT software license, see the accompanying
+ * file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+ */
 // Copyright (c) Adamu Muhammad Dankore
 import { v1 as uuidv1 } from 'uuid';
 import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
