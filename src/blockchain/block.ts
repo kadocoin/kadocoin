@@ -81,16 +81,8 @@ class Block {
         originalBlock: lastBlock,
         timestamp,
       });
-      hash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
 
-      console.log('Block.ts', {
-        timestamp,
-        lastHash,
-        transactions: JSON.stringify(transactions),
-        nonce,
-        difficulty,
-        hash,
-      });
+      hash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
     return new Block({

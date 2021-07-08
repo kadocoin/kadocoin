@@ -53,8 +53,6 @@ class Blockchain {
       return;
     }
 
-    incomingChain = this.sort({ chain: incomingChain });
-
     if (!Blockchain.isValidChain(incomingChain)) {
       console.error('The incoming chain must be valid.');
       return;
@@ -136,6 +134,10 @@ class Blockchain {
         transactions: JSON.stringify(transactions),
         nonce,
         difficulty,
+        hash,
+      });
+      console.log('Blockchain/index.ts', {
+        validatedHash,
         hash,
       });
 
