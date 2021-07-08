@@ -45,7 +45,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
       
       - name: Display outputs object
-        run: echo ${ steps.meta.outputs }
+        run: echo ${ steps.meta.outputs.tags }
         shell: bash
       
       - name: Deploy to Caprover Using GitHub Actions
@@ -54,7 +54,7 @@ jobs:
           server: "${{ secrets.CAPROVER_URL }}"
           password: "${{ secrets.CAPROVER_PASSWORD }}"
           appName: "${{ secrets.CAPROVER_APP }}"
-          image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:master
+          image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:main
       
       - name: get-npm-version
         id: package-version
