@@ -7,7 +7,7 @@
  */
 import { TTransactions } from '../types';
 
-export function transactionVolume({ transactions }: { transactions: TTransactions }): string {
+export function transactionDataVolume({ transactions }: { transactions: TTransactions }): string {
   let totalTransactionsAmount = 0;
 
   for (let i = 0; i < transactions.length; i++) {

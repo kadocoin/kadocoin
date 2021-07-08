@@ -12,7 +12,7 @@ import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
-import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
+import { totalFeeReward, totalMsgReward, transactionDataVolume } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;
@@ -125,21 +125,41 @@ class Blockchain {
     for (let i = 1; i < chain.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
-      const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
+
       const lastDifficulty = chain[i - 1].difficulty;
 
-      console.log('Blockchain/index.ts', {
+      const msgReward = totalMsgReward({ transactions });
+      const feeReward = totalFeeReward({ transactions });
+      const transactionVolume = transactionDataVolume({ transactions });
+      const blockReward = new Mining_Reward().calc({ chainLength: chain.length }).MINING_REWARD;
+      const blockchainHeight = chain.length + 1; /** 1 is the GENESIS BLOCK*/
+      const blockSize = size(
         timestamp,
         lastHash,
-        transactions: JSON.stringify(transactions),
+        transactions,
+        difficulty,
+        nonce,
+        hash,
+        msgReward,
+        feeReward,
+        transactionVolume,
+        blockReward,
+        blockchainHeight
+      );
+
+      const validatedHash = cryptoHash(
+        timestamp,
+        lastHash,
+        transactions,
         nonce,
         difficulty,
-        hash,
-      });
-      console.log('Blockchain/index.ts', {
-        validatedHash,
-        hash,
-      });
+        msgReward,
+        feeReward,
+        blockSize,
+        transactionVolume,
+        blockReward,
+        blockchainHeight
+      );
 
       if (previousHash !== lastHash) return false;
 

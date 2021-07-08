@@ -117,6 +117,16 @@ export default class TransactionController {
         });
 
         if (transaction instanceof Transaction) {
+          console.log({
+            publicKey,
+            address,
+            recipient,
+            amount: Number(amount),
+            balance,
+            localWallet,
+            message,
+            sendFee,
+          });
           transaction.update({
             publicKey,
             address,
@@ -130,6 +140,15 @@ export default class TransactionController {
         }
       } else {
         console.log('New transaction');
+        console.log({
+          recipient,
+          amount: Number(amount),
+          chain: blockchain.chain,
+          publicKey,
+          address,
+          message,
+          sendFee,
+        });
         transaction = localWallet.createTransaction({
           recipient,
           amount: Number(amount),
