@@ -193,7 +193,7 @@ describe('Blockchain', () => {
           blockchain.replaceChain(newChain.chain);
         });
         it('replaces the chain', () => {
-          expect(blockchain.chain).toEqual(newChain.chain);
+          expect(blockchain.sort({ chain: blockchain.chain })).toEqual(newChain.chain);
         });
 
         it('logs about the chain replacement', () => {

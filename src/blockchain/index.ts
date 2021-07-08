@@ -31,6 +31,14 @@ class Blockchain {
     this.chain.push(newBlock);
   }
 
+  sort({ chain }: { chain: IChain }): IChain {
+    return chain.sort((a, b) => {
+      if (a.timestamp > b.timestamp) return 1;
+      if (a.timestamp < b.timestamp) return -1;
+      return 0;
+    });
+  }
+
   replaceChain(
     incomingChain: IChain,
     validateTransactions?: boolean,
@@ -44,6 +52,8 @@ class Blockchain {
       console.error('The incoming chain must be longer.');
       return;
     }
+
+    incomingChain = this.sort({ chain: incomingChain });
 
     if (!Blockchain.isValidChain(incomingChain)) {
       console.error('The incoming chain must be valid.');
