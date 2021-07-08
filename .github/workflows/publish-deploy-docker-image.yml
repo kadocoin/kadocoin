@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Log in to GitHub Container registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v1 
         with:
           registry: ghcr.io
@@ -43,6 +43,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      
+      - name: Display outputs object
+        run: echo ${ steps.meta.outputs }
+        shell: bash
       
       - name: Deploy to Caprover Using GitHub Actions
         uses: dankore/github-to-caprover@v.1.0.6
