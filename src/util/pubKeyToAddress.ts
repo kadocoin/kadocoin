@@ -11,7 +11,6 @@ const web3 = new Web3();
 
 export function pubKeyToAddress(publicKey: string): string {
   const address = trimFirst12Bytes(web3.utils.keccak256(publicKey));
-  // console.log({ address, publicKey });
   return web3.utils.toChecksumAddress(address);
 }
 

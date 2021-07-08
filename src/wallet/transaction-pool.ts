@@ -6,6 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { IChain, TTransactionChild } from '../types';
+import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 import Transaction from './transaction';
 
 class TransactionPool {
@@ -17,6 +18,28 @@ class TransactionPool {
 
   clear(): void {
     this.transactionMap = {};
+  }
+
+  /**
+   * Sort in descending order - transactions with fatter reward first
+   * @method Sort()
+   * @param Array of transactions
+   */
+  sort({ transactions }: { transactions: Array<TTransactionChild> }): Array<TTransactionChild> {
+    return transactions.sort((a, b) => {
+      const msg_fee_A = totalMsgReward({ transactions: [a] });
+      const send_fee_A = totalFeeReward({ transactions: [a] });
+
+      const msg_fee_B = totalMsgReward({ transactions: [b] });
+      const send_fee_B = totalFeeReward({ transactions: [b] });
+
+      const total_reward_A = Number(msg_fee_A) + Number(send_fee_A);
+      const total_reward_B = Number(msg_fee_B) + Number(send_fee_B);
+
+      if (total_reward_A < total_reward_B) return 1;
+      if (total_reward_A > total_reward_B) return -1;
+      return 0;
+    });
   }
 
   setTransaction(transaction: TTransactionChild | Transaction): void {
@@ -38,7 +61,7 @@ class TransactionPool {
   }
 
   validTransactions(): Array<Transaction | TTransactionChild> {
-    return Object.values(this.transactionMap).filter(transaction =>
+    return this.sort({ transactions: Object.values(this.transactionMap) }).filter(transaction =>
       Transaction.validTransaction(transaction as TTransactionChild)
     );
   }

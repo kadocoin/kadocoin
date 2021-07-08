@@ -32,7 +32,6 @@ class TransactionMiner {
     const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
-      // ITERATE OVER VALID TRANSACTIONS AND RETRIEVE TOTAL MESSAGE MONEY
       // GENERATE MINER'S REWARD
       validTransactions.push(
         Transaction.rewardTransaction({
