@@ -25,6 +25,13 @@ export default class TransactionController {
    * @return a transaction object
    */
   make = async (req: Request, res: Response): Promise<Response> => {
+    // VALIDATE OTHER USER INPUTS
+    const { error } = transactValidation(req.body);
+    if (error)
+      return res
+        .status(INCORRECT_VALIDATION)
+        .json({ type: 'error', message: error.details[0].message });
+
     // ENFORCE 8 DECIMAL PLACES
     if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -32,13 +39,6 @@ export default class TransactionController {
         message:
           'You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin',
       });
-
-    // VALIDATE OTHER USER INPUTS
-    const { error } = transactValidation(req.body);
-    if (error)
-      return res
-        .status(INCORRECT_VALIDATION)
-        .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
     let { amount, recipient, publicKey, address, message } = req.body;

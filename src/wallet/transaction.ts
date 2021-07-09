@@ -64,13 +64,30 @@ class Transaction {
     // const send_fee = sendFee ? Number(sendFee) : 0;
     const msg_fee = Number(costOfMessage({ message }));
     const totalAmount = amount + msg_fee; //+ send_fee;
+    const currentSenderBalance = Number(this.output[address]);
+    const currentSendingAmount = amount;
 
-    if (totalAmount > Number(this.output[address])) throw new Error('Insufficient balance');
+    if (totalAmount > currentSenderBalance) throw new Error('Insufficient balance');
 
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
     } else {
-      this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
+      const recipientOldAmount = Number(this.output[recipient]);
+
+      if (currentSendingAmount > recipientOldAmount) {
+        this.output[address] = (
+          currentSenderBalance +
+          recipientOldAmount -
+          currentSendingAmount
+        ).toFixed(8);
+        this.output[recipient] = currentSendingAmount.toFixed(8);
+      }
+
+      if (currentSendingAmount < recipientOldAmount) {
+        const refund = recipientOldAmount - currentSendingAmount;
+        this.output[address] = (currentSenderBalance + refund).toFixed(8);
+        this.output[recipient] = currentSendingAmount.toFixed(8);
+      }
     }
 
     if (message) {
@@ -104,8 +121,6 @@ class Transaction {
         this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
       }
     }
-
-    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,
