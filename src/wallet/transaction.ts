@@ -55,22 +55,54 @@ class Transaction {
 
     output[address] = (Number(balance) - amount - msg_fee).toFixed(8);
     output[recipient] = amount.toFixed(8);
-
-    output[`msg-fee-${recipient}`] = costOfMessage({ message });
+    message && (output[`msg-fee-${recipient}`] = costOfMessage({ message }));
 
     return output;
   }
 
   update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
-    // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
+    // const send_fee = sendFee ? Number(sendFee) : 0;
+    const msg_fee = Number(costOfMessage({ message }));
+    const totalAmount = amount + msg_fee; //+ send_fee;
 
-    if (amount > Number(this.output[address])) throw new Error('Insufficient balance');
+    if (totalAmount > Number(this.output[address])) throw new Error('Insufficient balance');
 
-    // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
     } else {
       this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
+    }
+
+    if (message) {
+      if (this.output[`msg-fee-${recipient}`]) {
+        const value = Number(this.output[`msg-fee-${recipient}`]);
+
+        if (msg_fee < value) {
+          const refund = value - msg_fee;
+          this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+        }
+
+        if (msg_fee > value) {
+          const remove = msg_fee - value;
+          this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
+        }
+      }
+
+      if (!this.output[`msg-fee-${recipient}`]) {
+        this.output[address] = (Number(this.output[address]) - msg_fee).toFixed(8);
+      }
+
+      // SET NEW MESSAGE FEE
+      this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
+    } else {
+      // NO MESSAGE - REMOVE PROPERTY AND REFUND
+      if (this.output[`msg-fee-${recipient}`]) {
+        const value = Number(this.output[`msg-fee-${recipient}`]);
+        const refund = value - msg_fee;
+
+        delete this.output[`msg-fee-${recipient}`];
+        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+      }
     }
 
     this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
