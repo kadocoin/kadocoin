@@ -1,18 +1,10 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
-import { sampleDataForTests } from '../config/constants';
+import { MINING_REWARD, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
 import Block from './block';
 import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactionChild } from '../types';
-import costOfMessage from '../util/text-2-coins';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
@@ -56,10 +48,8 @@ describe('Blockchain', () => {
           difficulty: 1,
           blockSize: '999',
           transactionVolume: '999',
-          blockReward: (50).toFixed(8),
+          blockReward: MINING_REWARD,
           blockchainHeight: newChain.chain.length,
-          msgReward: '22',
-          feeReward: '2',
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -108,10 +98,8 @@ describe('Blockchain', () => {
             transactions,
             blockSize: '999',
             transactionVolume: '999',
-            blockReward: (50).toFixed(8),
+            blockReward: MINING_REWARD,
             blockchainHeight: newChain.chain.length,
-            msgReward: '22',
-            feeReward: '2',
           });
 
           blockchain.chain.push(badBlock);
@@ -120,11 +108,11 @@ describe('Blockchain', () => {
         });
       });
 
-      // describe('and the chain does not contain any invalid blocks', () => {
-      //   it('returns true', () => {
-      //     expect(Blockchain.isValidChain(blockchain.chain)).toBe(true);
-      //   });
-      // });
+      describe('and the chain does not contain any invalid blocks', () => {
+        it('returns true', () => {
+          expect(Blockchain.isValidChain(blockchain.chain)).toBe(true);
+        });
+      });
       // END starts with the genesis block and has multiple blocks
     });
 
@@ -150,10 +138,8 @@ describe('Blockchain', () => {
           difficulty: 3,
           blockSize: '999',
           transactionVolume: '999',
-          blockReward: (50).toFixed(8),
+          blockReward: MINING_REWARD,
           blockchainHeight: newChain.chain.length,
-          msgReward: '22',
-          feeReward: '2',
         };
 
         blockchain.replaceChain(newChain.chain);
@@ -189,15 +175,16 @@ describe('Blockchain', () => {
         });
       });
       describe('and the chain is valid', () => {
-        // beforeEach(() => {
-        //   blockchain.replaceChain(newChain.chain);
-        // });
-        // it('replaces the chain', () => {
-        //   expect(blockchain.sort({ chain: blockchain.chain })).toEqual(newChain.chain);
-        // });
-        // it('logs about the chain replacement', () => {
-        //   expect(logMock).toHaveBeenCalled();
-        // });
+        beforeEach(() => {
+          blockchain.replaceChain(newChain.chain);
+        });
+        it('replaces the chain', () => {
+          expect(blockchain.chain).toEqual(newChain.chain);
+        });
+
+        it('logs about the chain replacement', () => {
+          expect(logMock).toHaveBeenCalled();
+        });
       });
     });
 
@@ -210,33 +197,27 @@ describe('Blockchain', () => {
         newChain.addBlock({ transactions: [sampleDataForTests] });
         blockchain.replaceChain(newChain.chain, true);
 
-        // expect(validateTransactionDataMock).toHaveBeenCalled();
+        expect(validateTransactionDataMock).toHaveBeenCalled();
       });
     });
   });
 
   describe('validTransactionData()', () => {
-    let transaction: Transaction, rewardTransaction: Transaction, wallet: Wallet, message: string;
+    let transaction: Transaction, rewardTransaction: Transaction, wallet: Wallet;
 
     beforeEach(() => {
       wallet = new Wallet();
-      message = 'Muhammad Bello Dankore Dec 10, 2018 - Rest in Aljannatul Firdaus';
 
       transaction = wallet.createTransaction({
         recipient: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD',
         amount: 65,
         address: wallet.address,
         publicKey: wallet.publicKey,
-        message,
-        sendFee: '2',
       });
 
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: wallet.address,
+        minerPublicKey: wallet.publicKey,
         message: '',
-        chainLength: 99,
-        msgReward: costOfMessage({ message }).toFixed(8),
-        feeReward: '2',
       });
     });
 
@@ -273,7 +254,7 @@ describe('Blockchain', () => {
 
       describe('and the transaction is a reward transaction', () => {
         it('returns false and logs and error', () => {
-          rewardTransaction.output[wallet.address] = '999999';
+          rewardTransaction.output[wallet.publicKey] = 999999;
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 

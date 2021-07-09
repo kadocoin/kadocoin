@@ -1,18 +1,9 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { REWARD_INPUT } from '../config/constants';
+import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
-import Mining_Reward from '../util/supply_reward';
-import { totalFeeReward, totalMsgReward, transactionDataVolume } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;
@@ -29,14 +20,6 @@ class Blockchain {
     });
 
     this.chain.push(newBlock);
-  }
-
-  sort({ chain }: { chain: IChain }): IChain {
-    return chain.sort((a, b) => {
-      if (a.timestamp > b.timestamp) return 1;
-      if (a.timestamp < b.timestamp) return -1;
-      return 0;
-    });
   }
 
   replaceChain(
@@ -59,7 +42,7 @@ class Blockchain {
     }
 
     if (validateTransactions && !this.validTransactionData({ chain: incomingChain })) {
-      console.error('The incoming chain has an invalid transaction');
+      console.error('The incoming chain has an invalid transactions');
       return;
     }
 
@@ -78,11 +61,6 @@ class Blockchain {
       const block = chain[i];
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
-      const totalMiningReward = (
-        Number(new Mining_Reward().calc({ chainLength: this.chain.length }).MINING_REWARD) +
-        Number(totalMsgReward({ transactions: block.transactions })) +
-        Number(totalFeeReward({ transactions: block.transactions }))
-      ).toFixed(8);
 
       for (const transaction of block.transactions) {
         if (transaction.input.address === REWARD_INPUT.address) {
@@ -93,9 +71,7 @@ class Blockchain {
             return false;
           }
 
-          console.log(Object.values(transaction.output)[0], totalMiningReward);
-
-          if (Object.values(transaction.output)[0] !== totalMiningReward) {
+          if (Object.values(transaction.output)[0] !== MINING_REWARD) {
             console.error('Miner reward amount is invalid');
             return false;
           }
@@ -113,6 +89,7 @@ class Blockchain {
           }
         }
       }
+
       // END FOR LOOP
     }
 
@@ -125,41 +102,8 @@ class Blockchain {
     for (let i = 1; i < chain.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
-
+      const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
       const lastDifficulty = chain[i - 1].difficulty;
-
-      const msgReward = totalMsgReward({ transactions });
-      const feeReward = totalFeeReward({ transactions });
-      const transactionVolume = transactionDataVolume({ transactions });
-      const blockReward = new Mining_Reward().calc({ chainLength: chain.length }).MINING_REWARD;
-      const blockchainHeight = chain.length + 1; /** 1 is the GENESIS BLOCK*/
-      const blockSize = size(
-        timestamp,
-        lastHash,
-        transactions,
-        difficulty,
-        nonce,
-        hash,
-        msgReward,
-        feeReward,
-        transactionVolume,
-        blockReward,
-        blockchainHeight
-      );
-
-      const validatedHash = cryptoHash(
-        timestamp,
-        lastHash,
-        transactions,
-        nonce,
-        difficulty,
-        msgReward,
-        feeReward,
-        blockSize,
-        transactionVolume,
-        blockReward,
-        blockchainHeight
-      );
 
       if (previousHash !== lastHash) return false;
 

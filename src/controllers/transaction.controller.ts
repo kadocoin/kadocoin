@@ -1,10 +1,3 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import { Request, Response } from 'express';
 import { mineValidation, transactValidation } from '../validation/transaction.validation';
 import {
@@ -20,7 +13,7 @@ import isEmptyObject from '../util/isEmptyObject';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
-import Mining_Reward from '../util/supply_reward';
+import Mining_Reward from '../util/supply_&_mining-reward';
 
 export default class TransactionController {
   /**
@@ -48,7 +41,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    let { amount, recipient, publicKey, address, message, sendFee } = req.body;
+    let { amount, recipient, publicKey, address, message } = req.body;
 
     // SANITIZE - REMOVE SCRIPTS/HTML TAGS
     amount = sanitizeHTML(amount, {
@@ -67,16 +60,10 @@ export default class TransactionController {
       allowedTags: [],
       allowedAttributes: {},
     });
-    message &&
-      (message = sanitizeHTML(message, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
-    sendFee &&
-      (sendFee = sanitizeHTML(sendFee, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
+    message = sanitizeHTML(message, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -117,16 +104,6 @@ export default class TransactionController {
         });
 
         if (transaction instanceof Transaction) {
-          console.log({
-            publicKey,
-            address,
-            recipient,
-            amount: Number(amount),
-            balance,
-            localWallet,
-            message,
-            sendFee,
-          });
           transaction.update({
             publicKey,
             address,
@@ -135,20 +112,10 @@ export default class TransactionController {
             balance,
             localWallet,
             message,
-            sendFee,
           });
         }
       } else {
         console.log('New transaction');
-        console.log({
-          recipient,
-          amount: Number(amount),
-          chain: blockchain.chain,
-          publicKey,
-          address,
-          message,
-          sendFee,
-        });
         transaction = localWallet.createTransaction({
           recipient,
           amount: Number(amount),
@@ -156,7 +123,6 @@ export default class TransactionController {
           publicKey,
           address,
           message,
-          sendFee,
         });
       }
     } catch (error) {
@@ -203,12 +169,10 @@ export default class TransactionController {
         allowedTags: [],
         allowedAttributes: {},
       });
-      message &&
-        (message = sanitizeHTML(message, {
-          allowedTags: [],
-          allowedAttributes: {},
-        }));
-
+      message = sanitizeHTML(message, {
+        allowedTags: [],
+        allowedAttributes: {},
+      });
       // GRAB NECESSARY MIDDLEWARES
       const { transactionPool, blockchain, pubSub } = req;
 
@@ -228,10 +192,10 @@ export default class TransactionController {
           return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
         // UPDATE MINING_REWARD
-        const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+        const { MINING_REWARD, COINS_IN_CIRCULATION } = new Mining_Reward({
           chainLength: blockchain.chain.length,
         });
-        console.log({ MINING_REWARD, SUPPLY });
+        console.log({ MINING_REWARD, COINS_IN_CIRCULATION });
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }
       // NOTHING TO MINE

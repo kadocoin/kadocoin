@@ -1,10 +1,3 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import { Db, MongoClient } from 'mongodb';
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
@@ -101,7 +94,6 @@ export interface ITransaction {
   balance?: string;
   localWallet?: Wallet;
   message?: string;
-  sendFee?: string;
 }
 
 /** COMMON TYPES createInput() */
@@ -130,8 +122,6 @@ export interface ICOutput {
   recipient: string;
   amount: number;
   balance: string;
-  message: string;
-  sendFee: string;
 }
 /** createOutput() RETURN type  */
 export interface ICOutput_R {
@@ -147,7 +137,6 @@ export interface IUpdate {
   balance: string;
   localWallet: Wallet;
   message: string;
-  sendFee: string;
 }
 
 /**

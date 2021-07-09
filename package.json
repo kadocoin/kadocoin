@@ -8,8 +8,7 @@
     "test-watch": "jest --colors --watch",
     "test-watchAll": "jest --colors --watchAll",
     "average-work": "nodemon --watch src/ --exec ts-node src/util/average-work.ts",
-    "test-a-file": "nodemon --watch src/ --exec ts-node src/test.ts",
-    "supply": "nodemon --watch src/ --exec ts-node src/util/supply_reward/index.ts",
+    "supply": "nodemon --watch src/ --exec ts-node src/util/kadocoin-supply/index.ts",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "lint": "eslint",
     "lint:fix": "eslint . --fix",
@@ -17,8 +16,7 @@
     "build": "tsc --build",
     "test": "jest --passWithNoTests --bail",
     "prepare-husky": "husky install",
-    "format": "prettier --write",
-    "license": "license-check-and-add add -f license.config.json"
+    "format": "prettier --write"
   },
   "keywords": [
     "kadocoin",
@@ -94,7 +92,6 @@
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^6.0.0",
     "jest": "^27.0.6",
-    "license-check-and-add": "^4.0.2",
     "lint-staged": "^11.0.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.1",

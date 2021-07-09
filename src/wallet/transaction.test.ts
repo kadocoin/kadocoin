@@ -1,15 +1,12 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
-import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/constants';
+import {
+  MINING_REWARD,
+  REWARD_INPUT,
+  sampleDataForTests,
+  STARTING_BALANCE,
+} from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
-import costOfMessage from '../util/text-2-coins';
 
 describe('Transaction', () => {
   let transaction: InstanceType<typeof Transaction>,
@@ -109,8 +106,7 @@ describe('Transaction', () => {
     let origSignature: string,
       origSenderOutput: string | number | Wallet,
       nextRecipient: string,
-      nextAmount: number,
-      message: string;
+      nextAmount: number;
 
     describe('and amount is invalid', () => {
       it('throws an error', () => {
@@ -123,8 +119,7 @@ describe('Transaction', () => {
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
               balance: '300.00000000',
-              message: 'Hello from transaction test',
-              sendFee: '2',
+              message: ' Hello from transaction test',
             });
           }
         }).toThrow('Insufficient balance');
@@ -137,7 +132,6 @@ describe('Transaction', () => {
         origSenderOutput = transaction.output[senderWallet.address];
         nextRecipient = 'next-recipient';
         nextAmount = 50;
-        message = 'Hello from transaction test';
 
         if (transaction instanceof Transaction) {
           transaction.update({
@@ -147,8 +141,7 @@ describe('Transaction', () => {
             address: senderWallet.address,
             publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
-            message,
-            sendFee: '2',
+            message: 'Hello from transaction test',
           });
         }
       });
@@ -159,7 +152,7 @@ describe('Transaction', () => {
 
       it('subtracts the amount from the original sender output amount', () => {
         expect(transaction.output[senderWallet.address]).toEqual(
-          ((origSenderOutput as number) - costOfMessage({ message }) - nextAmount - 2).toFixed(8)
+          ((origSenderOutput as number) - nextAmount).toFixed(8)
         );
       });
 
@@ -188,7 +181,6 @@ describe('Transaction', () => {
               balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
               message: 'Hello from transaction test',
-              sendFee: '2',
             });
         });
 
@@ -198,13 +190,7 @@ describe('Transaction', () => {
 
         it('subtract the amount from the original sender output amount', () => {
           expect(transaction.output[senderWallet.address]).toEqual(
-            (
-              (origSenderOutput as number) -
-              costOfMessage({ message }) -
-              nextAmount -
-              addedAmount -
-              2
-            ).toFixed(8)
+            ((origSenderOutput as number) - nextAmount - addedAmount).toFixed(8)
           );
         });
       });
@@ -220,9 +206,6 @@ describe('Transaction', () => {
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: minerWallet.publicKey,
         message: '',
-        chainLength: 999,
-        msgReward: '22',
-        feeReward: '2',
       });
     });
 
@@ -231,7 +214,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50 + 22 + 2).toFixed(8));
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(MINING_REWARD);
     });
   });
 

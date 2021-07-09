@@ -1,11 +1,3 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
-// Copyright (c) Adamu Muhammad Dankore
 import app from './app';
 import request from 'request';
 import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
@@ -24,7 +16,7 @@ import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerOptions } from './config/constants';
-import Mining_Reward from './util/supply_reward';
+import Mining_Reward from './util/supply_&_mining-reward';
 
 const swaggerSpecification = swaggerJsdoc(swaggerOptions);
 
@@ -69,12 +61,12 @@ const syncWithRootState = () => {
       blockchain.replaceChain(rootChain);
 
       // UPDATE MINING_REWARD
-      const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+      const { MINING_REWARD, COINS_IN_CIRCULATION } = new Mining_Reward({
         chainLength: blockchain.chain.length,
       });
-      console.log({ MINING_REWARD, SUPPLY });
+      console.log({ MINING_REWARD, COINS_IN_CIRCULATION });
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error, response.statusCode);
+      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
     }
   });
 
@@ -93,7 +85,7 @@ const syncWithRootState = () => {
         console.log('Done!');
       }
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error, response.statusCode);
+      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error);
     }
   });
 };

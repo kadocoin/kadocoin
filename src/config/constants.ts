@@ -1,10 +1,3 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import { TTransactionChild } from '../types';
 import size from '../util/size';
 
@@ -24,8 +17,6 @@ const GENESIS_DATA = {
   transactionVolume: '',
   blockReward: '',
   blockchainHeight: 1,
-  msgReward: '',
-  feeReward: '',
 };
 
 const genesisBlockSize = size(GENESIS_DATA);
@@ -35,9 +26,10 @@ GENESIS_DATA.blockSize = genesisBlockSize;
 export { GENESIS_DATA };
 
 export const STARTING_BALANCE = 1000;
+export const MINING_REWARD = (50).toFixed(8);
 export const REWARD_INPUT = {
   timestamp: 1624848894788,
-  amount: '',
+  amount: MINING_REWARD,
   address: '',
   publicKey: '',
   localPublicKey: '',
@@ -103,5 +95,3 @@ export const sampleDataForTests = {
     signature: '7fd13c4a4175fda39615766a5f0bfce40c0aeccd1d38c5f9e2ab7f8744ac26e2',
   },
 };
-
-export const NOT_ENOUGH = 'Insufficient balance';
