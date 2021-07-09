@@ -11,6 +11,8 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
+import costOfMessage from '../util/costOfMessage';
+import { filterAddress } from '../util/get-only-address';
 
 class Transaction {
   public id: string;
@@ -29,7 +31,7 @@ class Transaction {
     message,
   }: ITransaction) {
     this.id = uuidv1();
-    this.output = output || this.createOutputMap({ address, recipient, amount, balance });
+    this.output = output || this.createOutputMap({ address, recipient, amount, balance, message });
     this.input =
       input ||
       this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
@@ -43,17 +45,44 @@ class Transaction {
       publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
-      message,
+      ...(message && { message }),
     };
   }
 
-  createOutputMap({ address, recipient, amount, balance }: ICOutput): ICOutput_R {
+  createOutputMap({ address, recipient, amount, balance, message }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
+    const msg_fee = Number(costOfMessage({ message }));
 
-    output[address] = (Number(balance) - amount).toFixed(8);
+    output[address] = (Number(balance) - amount - msg_fee).toFixed(8);
     output[recipient] = amount.toFixed(8);
 
+    output[`msg-fee-${recipient}`] = costOfMessage({ message });
+
     return output;
+  }
+
+  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
+    // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
+
+    if (amount > Number(this.output[address])) throw new Error('Insufficient balance');
+
+    // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
+    if (!this.output[recipient]) {
+      this.output[recipient] = amount.toFixed(8);
+    } else {
+      this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
+    }
+
+    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+
+    this.input = this.createInput({
+      publicKey,
+      address,
+      balance,
+      localWallet,
+      output: this.output,
+      message,
+    });
   }
 
   static validTransaction(transaction: TTransactionChild): boolean {
@@ -78,8 +107,17 @@ class Transaction {
 
     // CHECK FOR ADDRESS VALIDITY VIA CHECKSUM
     Object.keys(output).map((address: string): boolean => {
-      if (!isValidChecksumAddress(address)) {
-        console.error(`Invalid address => ${address}`);
+      if (address.length == 42) {
+        if (!isValidChecksumAddress(address)) {
+          console.error(`Invalid address => ${address}`);
+          return false;
+        }
+      } else if (address.length > 42) {
+        if (!isValidChecksumAddress(filterAddress(address))) {
+          console.error(`Invalid address => ${address}`);
+          return false;
+        }
+      } else {
         return false;
       }
     });
@@ -92,32 +130,6 @@ class Transaction {
     }
 
     return true;
-  }
-
-  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
-    // CONVERT THE NUMBERS IN STRING FORM TO NUMBERS
-
-    if (amount > Number(this.output[address])) {
-      throw new Error('Insufficient balance');
-    }
-
-    // MAKE SURE TO CONVERT THE NUMBERS BACK TO THEIR STRING FORM
-    if (!this.output[recipient]) {
-      this.output[recipient] = amount.toFixed(8);
-    } else {
-      this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
-    }
-
-    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
-
-    this.input = this.createInput({
-      publicKey,
-      address,
-      balance,
-      localWallet,
-      output: this.output,
-      message,
-    });
   }
 
   static rewardTransaction({

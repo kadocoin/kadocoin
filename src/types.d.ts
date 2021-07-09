@@ -100,7 +100,7 @@ export interface ITransaction {
 interface ICommon_Address_PublicKey {
   address: string;
   publicKey: string;
-  message: string;
+  message?: string;
 }
 /** createInput() PARAM type */
 export interface ICInput extends ICommon_Address_PublicKey {
@@ -122,6 +122,7 @@ export interface ICOutput {
   recipient: string;
   amount: number;
   balance: string;
+  message?: string;
 }
 /** createOutput() RETURN type  */
 export interface ICOutput_R {

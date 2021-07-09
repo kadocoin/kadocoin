@@ -13,7 +13,7 @@ import isEmptyObject from '../util/isEmptyObject';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
-import Mining_Reward from '../util/supply_&_mining-reward';
+import Mining_Reward from '../util/supply_reward';
 
 export default class TransactionController {
   /**
@@ -60,10 +60,11 @@ export default class TransactionController {
       allowedTags: [],
       allowedAttributes: {},
     });
-    message = sanitizeHTML(message, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
+    message &&
+      (message = sanitizeHTML(message, {
+        allowedTags: [],
+        allowedAttributes: {},
+      }));
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -169,10 +170,12 @@ export default class TransactionController {
         allowedTags: [],
         allowedAttributes: {},
       });
-      message = sanitizeHTML(message, {
-        allowedTags: [],
-        allowedAttributes: {},
-      });
+      message &&
+        (message = sanitizeHTML(message, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }));
+
       // GRAB NECESSARY MIDDLEWARES
       const { transactionPool, blockchain, pubSub } = req;
 
@@ -192,10 +195,11 @@ export default class TransactionController {
           return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
         // UPDATE MINING_REWARD
-        const { MINING_REWARD, COINS_IN_CIRCULATION } = new Mining_Reward({
+        const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
           chainLength: blockchain.chain.length,
         });
-        console.log({ MINING_REWARD, COINS_IN_CIRCULATION });
+        console.log({ MINING_REWARD, SUPPLY });
+
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }
       // NOTHING TO MINE
