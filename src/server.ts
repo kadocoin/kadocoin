@@ -1,6 +1,6 @@
 import app from './app';
 import request from 'request';
-import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
+import { DEFAULT_PORT, ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/userRouter.router';
@@ -95,6 +95,6 @@ app.use(initializeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
 
 app.listen(PORT, () => {
-  syncWithRootState();
+  if (PORT !== DEFAULT_PORT) syncWithRootState();
   console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
 });
