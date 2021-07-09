@@ -1,18 +1,13 @@
 {
   "files.autoSave": "afterDelay",
   "editor.codeActionsOnSave": {
-    // For ESLint
-    "source.fixAll.eslint": true,
-    // For TSLint
-    "source.fixAll.tslint": true
+    "source.fixAll.eslint": true
   },
-   "editor.formatOnSave": true,
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-  "eslint.validate": ["typescript", "javascript"],
+  "editor.formatOnSave": true,
+  "eslint.validate": [
+    "typescript",
+    "javascript"
+  ],
   "editor.autoClosingBrackets": "always",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnPaste": true,
-    "editor.formatOnType": true,
+  "editor.formatOnType": true,
 }

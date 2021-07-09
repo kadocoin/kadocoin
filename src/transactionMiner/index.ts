@@ -1,14 +1,6 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
 import { ITMinerConstructorParams } from '../types';
-import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -34,13 +26,7 @@ class TransactionMiner {
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
       validTransactions.push(
-        Transaction.rewardTransaction({
-          minerPublicKey: this.address,
-          message: this.message,
-          chainLength: this.blockchain.chain.length,
-          msgReward: totalMsgReward({ transactions: validTransactions }),
-          feeReward: totalFeeReward({ transactions: validTransactions }),
-        })
+        Transaction.rewardTransaction({ minerPublicKey: this.address, message: this.message })
       );
 
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK

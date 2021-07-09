@@ -1,17 +1,9 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import hexToBinary from 'hex-to-bin';
-import { GENESIS_DATA, MINE_RATE } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE, MINING_REWARD } from '../config/constants';
 import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
-import Mining_Reward from '../util/supply_reward';
-import { totalFeeReward, totalMsgReward, transactionDataVolume } from '../util/transaction-metrics';
+import { transactionVolume } from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
@@ -24,8 +16,6 @@ class Block {
   public transactionVolume: string;
   public blockReward: string;
   public blockchainHeight: number;
-  public msgReward: string;
-  public feeReward: string;
 
   constructor({
     timestamp,
@@ -38,8 +28,6 @@ class Block {
     transactionVolume,
     blockReward,
     blockchainHeight,
-    msgReward,
-    feeReward,
   }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
@@ -51,8 +39,6 @@ class Block {
     this.transactionVolume = transactionVolume;
     this.blockReward = blockReward;
     this.blockchainHeight = blockchainHeight;
-    this.msgReward = msgReward;
-    this.feeReward = feeReward;
   }
 
   static genesis(): Block {
@@ -74,25 +60,6 @@ class Block {
       { difficulty } = lastBlock;
     const lastHash = lastBlock.hash;
 
-    const msgReward = totalMsgReward({ transactions });
-    const feeReward = totalFeeReward({ transactions });
-    const transactionVolume = transactionDataVolume({ transactions });
-    const blockReward = new Mining_Reward().calc({ chainLength: chain.length }).MINING_REWARD;
-    const blockchainHeight = chain.length + 1; /** 1 is the GENESIS BLOCK*/
-    const blockSize = size(
-      timestamp,
-      lastHash,
-      transactions,
-      difficulty,
-      nonce,
-      hash,
-      msgReward,
-      feeReward,
-      transactionVolume,
-      blockReward,
-      blockchainHeight
-    );
-
     do {
       nonce++;
       timestamp = Date.now();
@@ -100,20 +67,7 @@ class Block {
         originalBlock: lastBlock,
         timestamp,
       });
-
-      hash = cryptoHash(
-        timestamp,
-        lastHash,
-        transactions,
-        nonce,
-        difficulty,
-        msgReward,
-        feeReward,
-        blockSize,
-        transactionVolume,
-        blockReward,
-        blockchainHeight
-      );
+      hash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
     return new Block({
@@ -123,12 +77,10 @@ class Block {
       difficulty,
       nonce,
       hash,
-      blockSize,
-      transactionVolume,
-      blockReward,
-      blockchainHeight,
-      msgReward,
-      feeReward,
+      blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
+      transactionVolume: transactionVolume({ transactions }),
+      blockReward: MINING_REWARD,
+      blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
     });
   }
 

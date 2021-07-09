@@ -1,13 +1,6 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
 import hexToBinary from 'hex-to-bin';
 import Block from './block';
-import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE, MINING_REWARD, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
 
 describe('Block', () => {
@@ -26,10 +19,8 @@ describe('Block', () => {
     difficulty,
     blockSize: '999',
     transactionVolume: '999',
-    blockReward: (50).toFixed(8),
+    blockReward: MINING_REWARD,
     blockchainHeight: 1,
-    msgReward: '22',
-    feeReward: '2',
   });
 
   it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, transactionVolume, blockReward, & blockchainHeight properties.', () => {
@@ -78,17 +69,17 @@ describe('Block', () => {
       expect(mineBlock.timestamp).not.toEqual(undefined);
     });
 
-    // it('creates a SHA-256 `hash` based on the proper inputs', () => {
-    //   expect(mineBlock.hash).toEqual(
-    //     cryptoHash(
-    //       mineBlock.timestamp,
-    //       mineBlock.nonce,
-    //       mineBlock.difficulty,
-    //       lastBlock.hash,
-    //       transactions
-    //     )
-    //   );
-    // });
+    it('creates a SHA-256 `hash` based on the proper inputs', () => {
+      expect(mineBlock.hash).toEqual(
+        cryptoHash(
+          mineBlock.timestamp,
+          mineBlock.nonce,
+          mineBlock.difficulty,
+          lastBlock.hash,
+          transactions
+        )
+      );
+    });
 
     it('sets of `hash` that matches the difficulty criteria', () => {
       expect(hexToBinary(mineBlock.hash).substring(0, mineBlock.difficulty)).toEqual(
@@ -120,10 +111,10 @@ describe('Block', () => {
       ).toEqual(block.difficulty - 1);
     });
 
-    // it('has a lower limit of 1', () => {
-    //   block.difficulty = -1;
-    //   expect(Block.adjustDifficulty({ originalBlock: block, timestamp })).toEqual(1);
-    // });
+    it('has a lower limit of 1', () => {
+      block.difficulty = -1;
+      expect(Block.adjustDifficulty({ originalBlock: block, timestamp })).toEqual(1);
+    });
   });
 
   // END BLOCK
