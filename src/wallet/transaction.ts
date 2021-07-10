@@ -85,6 +85,7 @@ class Transaction {
     if (!this.output[recipient]) {
       console.log('d');
       this.output[recipient] = amount.toFixed(8);
+      this.output[address] = (currentSenderBalance - amount).toFixed(8);
     }
 
     if (this.output[recipient]) {
@@ -181,6 +182,7 @@ class Transaction {
     if (typeof outputTotal == 'number') outputTotal = outputTotal.toFixed(8);
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
+    console.log(Number(amount), Number(outputTotal));
     if (Number(amount) !== Number(outputTotal)) {
       console.error(`Invalid transaction from ${address} ${publicKey}`);
       return false;
