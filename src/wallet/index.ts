@@ -56,13 +56,6 @@ class Wallet {
       if (totalAmount > Number(this.balance)) throw new Error(NOT_ENOUGH);
     }
 
-    console.log('Wallet/index', {
-      totalAmount,
-      thisBalance: Number(this.balance),
-      balanceRepeat: balance,
-      chainLen: chain.length,
-    });
-
     return new Transaction({
       recipient,
       publicKey,

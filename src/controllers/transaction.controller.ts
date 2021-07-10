@@ -7,11 +7,9 @@ import {
   SUCCESS,
   INCORRECT_VALIDATION,
 } from '../statusCode/statusCode';
-import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
 import isEmptyObject from '../util/isEmptyObject';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
-import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
 import getBalance from '../util/getBalance';
@@ -104,9 +102,8 @@ export default class TransactionController {
     let balance: string;
 
     try {
-      if (transaction) {
+      if (transaction)
         balance = getBalance({ transactionsPoolMap: transactionPool.transactionMap, address });
-      }
 
       transaction = localWallet.createTransaction({
         recipient,
