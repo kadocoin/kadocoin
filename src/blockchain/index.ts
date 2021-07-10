@@ -121,9 +121,6 @@ class Blockchain {
         blockchainHeight
       );
 
-      // console.log({ timestamp, lastHash, difficulty, nonce, hash })
-      // console.log({ hash, validatedHash })
-
       if (previousHash !== lastHash) return false;
 
       if (hash !== validatedHash) return false;
