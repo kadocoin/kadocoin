@@ -1,6 +1,7 @@
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
 import { ITMinerConstructorParams } from '../types';
+import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -26,7 +27,13 @@ class TransactionMiner {
     if (validTransactions.length) {
       // GENERATE MINER'S REWARD
       validTransactions.push(
-        Transaction.rewardTransaction({ minerPublicKey: this.address, message: this.message })
+        Transaction.rewardTransaction({
+          minerPublicKey: this.address,
+          message: this.message,
+          chainLength: this.blockchain.chain.length,
+          msgReward: totalMsgReward({ transactions: validTransactions }),
+          feeReward: totalFeeReward({ transactions: validTransactions }),
+        })
       );
 
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK

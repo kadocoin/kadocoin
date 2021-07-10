@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT, MINING_REWARD, NOT_ENOUGH } from '../config/constants';
+import { REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -8,11 +8,11 @@ import {
   ICOutput,
   ICOutput_R,
   ITransaction,
-  IUpdate,
   TTransactionChild,
 } from '../types';
 import costOfMessage from '../util/costOfMessage';
 import { filterAddress } from '../util/get-only-address';
+import Mining_Reward from '../util/supply_reward';
 
 class Transaction {
   public id: string;
@@ -62,123 +62,6 @@ class Transaction {
     sendFee && (output[`send-fee-${recipient}`] = send_fee.toFixed(8));
 
     return output;
-  }
-
-  update({
-    publicKey,
-    recipient,
-    amount,
-    balance,
-    address,
-    localWallet,
-    message,
-    sendFee,
-  }: IUpdate): void {
-    const send_fee = sendFee ? Number(sendFee) : 0;
-    const msg_fee = Number(costOfMessage({ message }));
-    const totalAmount = amount + msg_fee + send_fee;
-    const currentSendingAmount = amount;
-
-    if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
-
-    if (!this.output[recipient]) {
-      this.output[recipient] = amount.toFixed(8);
-      this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
-    }
-
-    if (this.output[recipient]) {
-      const recipientOldAmount = Number(this.output[recipient]);
-
-      if (currentSendingAmount > recipientOldAmount) {
-        this.output[address] = (
-          Number(this.output[address]) +
-          recipientOldAmount -
-          currentSendingAmount
-        ).toFixed(8);
-        this.output[recipient] = currentSendingAmount.toFixed(8);
-      }
-
-      if (currentSendingAmount < recipientOldAmount) {
-        const refund = recipientOldAmount - currentSendingAmount;
-        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-        this.output[recipient] = currentSendingAmount.toFixed(8);
-      }
-    }
-
-    //  WARNING! THE VALUE OF Number(this.output[address]) COULD CHANGE SO DON'T STORE IT IN A VARIABLE. USE AS IS
-
-    if (message) {
-      if (this.output[`msg-fee-${recipient}`]) {
-        const value = Number(this.output[`msg-fee-${recipient}`]);
-
-        if (msg_fee < value) {
-          const refund = value - msg_fee;
-          this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-        }
-
-        if (msg_fee > value) {
-          const remove = msg_fee - value;
-          this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
-        }
-      }
-
-      if (!this.output[`msg-fee-${recipient}`]) {
-        this.output[address] = (Number(this.output[address]) - msg_fee).toFixed(8);
-      }
-
-      // SET NEW MESSAGE FEE
-      this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
-    }
-
-    if (sendFee) {
-      if (this.output[`send-fee-${recipient}`]) {
-        const value = Number(this.output[`send-fee-${recipient}`]);
-
-        if (send_fee < value) {
-          const refund = value - send_fee;
-          this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-        }
-
-        if (send_fee > value) {
-          const remove = send_fee - value;
-          this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
-        }
-      }
-
-      if (!this.output[`send-fee-${recipient}`]) {
-        this.output[address] = (Number(this.output[address]) - send_fee).toFixed(8);
-      }
-
-      // SET NEW SEND FEE
-      this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
-    }
-
-    // NO MESSAGE - REMOVE PROPERTY AND REFUND
-    if (!message && this.output[`msg-fee-${recipient}`]) {
-      const value = Number(this.output[`msg-fee-${recipient}`]);
-      const refund = value - msg_fee;
-
-      delete this.output[`msg-fee-${recipient}`];
-      this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-    }
-
-    // NO SEND FEE - REMOVE PROPERTY AND REFUND
-    if (!sendFee && this.output[`send-fee-${recipient}`]) {
-      const value = Number(this.output[`send-fee-${recipient}`]);
-      const refund = value - send_fee;
-
-      delete this.output[`send-fee-${recipient}`];
-      this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-    }
-
-    this.input = this.createInput({
-      publicKey,
-      address,
-      balance,
-      localWallet,
-      output: this.output,
-      message,
-    });
   }
 
   static validTransaction(transaction: TTransactionChild): boolean {
@@ -232,16 +115,32 @@ class Transaction {
   static rewardTransaction({
     minerPublicKey,
     message,
+    chainLength,
+    msgReward,
+    feeReward,
   }: {
     minerPublicKey: string;
     message: string;
+    chainLength: number;
+    msgReward: string;
+    feeReward: string;
   }): Transaction {
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength });
+    const totalMiningReward = (
+      Number(MINING_REWARD) +
+      Number(msgReward) +
+      Number(feeReward)
+    ).toFixed(8);
+
+    console.log('rewardTransaction', { totalMiningReward });
+
     REWARD_INPUT.recipient = minerPublicKey;
     REWARD_INPUT.message = message;
+    REWARD_INPUT.amount = totalMiningReward;
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: MINING_REWARD },
+      output: { [minerPublicKey]: totalMiningReward },
     });
   }
 

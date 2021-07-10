@@ -95,44 +95,18 @@ export default class TransactionController {
         message: 'Sender and receiver address cannot be the same.',
       });
 
-    // CHECK FOR EXISTING TRANSACTION
-    let transaction = transactionPool.existingTransactionPool({
-      inputAddress: address,
-    });
+    let transaction;
 
     try {
-      if (transaction) {
-        console.log('Update transaction');
-        // GET UP TO DATE USER BALANCE
-        const balance = Wallet.calculateBalance({
-          address: address,
-          chain: blockchain.chain,
-        });
-
-        if (transaction instanceof Transaction) {
-          transaction.update({
-            publicKey,
-            address,
-            recipient,
-            amount: Number(amount),
-            balance,
-            localWallet,
-            message,
-            sendFee,
-          });
-        }
-      } else {
-        console.log('New transaction');
-        transaction = localWallet.createTransaction({
-          recipient,
-          amount: Number(amount),
-          chain: blockchain.chain,
-          publicKey,
-          address,
-          message,
-          sendFee,
-        });
-      }
+      transaction = localWallet.createTransaction({
+        recipient,
+        amount: Number(amount),
+        chain: blockchain.chain,
+        publicKey,
+        address,
+        message,
+        sendFee,
+      });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(NOT_FOUND).json({ type: 'error', message: error.message });

@@ -4,7 +4,11 @@ import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
-import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
+import {
+  totalFeeReward,
+  totalMsgReward,
+  totalTransactionsAmountInBlock,
+} from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
@@ -17,6 +21,7 @@ class Block {
   public totalTransactionsAmount: string;
   public blockReward: string;
   public msgReward: string;
+  public feeReward: string;
   public blockchainHeight: number;
 
   constructor({
@@ -30,6 +35,7 @@ class Block {
     totalTransactionsAmount,
     blockReward,
     msgReward,
+    feeReward,
     blockchainHeight,
   }: Block) {
     this.timestamp = timestamp;
@@ -42,6 +48,7 @@ class Block {
     this.totalTransactionsAmount = totalTransactionsAmount;
     this.blockReward = blockReward;
     this.msgReward = msgReward;
+    this.feeReward = feeReward;
     this.blockchainHeight = blockchainHeight;
   }
 
@@ -64,9 +71,9 @@ class Block {
       { difficulty } = lastBlock;
     const lastHash = lastBlock.hash;
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: chain.length });
-
     const totalTransactionsAmount = totalTransactionsAmountInBlock({ transactions });
     const msgReward = totalMsgReward({ transactions });
+    const feeReward = totalFeeReward({ transactions });
     const blockchainHeight = chain.length + 1; /** 1 is the GENESIS BLOCK*/
     const blockSize = size(
       timestamp,
@@ -110,6 +117,7 @@ class Block {
       totalTransactionsAmount,
       blockReward: MINING_REWARD,
       msgReward,
+      feeReward,
       blockchainHeight,
     });
   }

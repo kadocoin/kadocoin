@@ -1,10 +1,14 @@
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import { REWARD_INPUT } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
-import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
+import {
+  totalFeeReward,
+  totalMsgReward,
+  totalTransactionsAmountInBlock,
+} from '../util/transaction-metrics';
 import Mining_Reward from '../util/supply_reward';
 // import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
 
@@ -69,6 +73,15 @@ class Blockchain {
       let rewardTransactionCount = 0;
 
       for (const transaction of block.transactions) {
+        const { MINING_REWARD } = new Mining_Reward().calc({
+          chainLength: chain.length,
+        });
+        const totalMiningReward = (
+          Number(MINING_REWARD) +
+          Number(totalMsgReward({ transactions: block.transactions })) +
+          Number(totalFeeReward({ transactions: block.transactions }))
+        ).toFixed(8);
+
         if (transaction.input.address === REWARD_INPUT.address) {
           rewardTransactionCount += 1;
 
@@ -77,11 +90,11 @@ class Blockchain {
             return false;
           }
 
-          const { MINING_REWARD } = new Mining_Reward().calc({
-            chainLength: chain.length,
+          console.log('validTransactionData', Object.values(transaction.output), {
+            totalMiningReward,
           });
 
-          if (Object.values(transaction.output)[0] !== MINING_REWARD) {
+          if (Object.values(transaction.output)[0] !== totalMiningReward) {
             console.error('Miner reward amount is invalid');
             return false;
           }
@@ -111,11 +124,14 @@ class Blockchain {
 
     // ONLY VALIDATE THE NEW BLOCKS
     const chainToValidate = chain.slice(new Blockchain().chain.length - 1);
+    // console.log("_______________start________________")
+    // console.log(JSON.stringify(chainToValidate))
+    // console.log("_______________end________________")
 
     for (let i = 1; i < chainToValidate.length; i++) {
-      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
-      const previousHash = chain[i - 1].hash;
-      const lastDifficulty = chain[i - 1].difficulty;
+      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chainToValidate[i];
+      const previousHash = chainToValidate[i - 1].hash;
+      const lastDifficulty = chainToValidate[i - 1].difficulty;
       const totalTransactionsAmount = totalTransactionsAmountInBlock({ transactions });
       const msgReward = totalMsgReward({ transactions });
 
@@ -128,6 +144,16 @@ class Blockchain {
         timestamp,
         msgReward
       );
+
+      console.log({
+        lastHash,
+        totalTransactionsAmount,
+        difficulty,
+        nonce,
+        timestamp,
+        msgReward,
+      });
+      console.log({ hash, validatedHash });
 
       if (previousHash !== lastHash) return false;
 

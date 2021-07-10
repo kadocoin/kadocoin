@@ -14,9 +14,10 @@ const GENESIS_DATA = {
   nonce: 0,
   transactions,
   blockSize: '',
-  totalTransactionsAmount: (0).toFixed(0),
-  blockReward: (0).toFixed(0),
-  msgReward: (0).toFixed(0),
+  totalTransactionsAmount: (0).toFixed(8),
+  blockReward: (0).toFixed(8),
+  msgReward: (0).toFixed(8),
+  feeReward: (0).toFixed(8),
   blockchainHeight: 1,
 };
 
@@ -27,10 +28,10 @@ GENESIS_DATA.blockSize = genesisBlockSize;
 export { GENESIS_DATA };
 
 export const STARTING_BALANCE = 1000;
-export const MINING_REWARD = (50).toFixed(8);
+// const MINING_REWARD = (50).toFixed(8);
 export const REWARD_INPUT = {
   timestamp: 1624848894788,
-  amount: MINING_REWARD,
+  amount: '',
   address: '',
   publicKey: '',
   localPublicKey: '',

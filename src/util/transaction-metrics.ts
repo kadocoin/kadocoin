@@ -11,7 +11,10 @@ export function totalTransactionsAmountInBlock({
     const transaction = transactions[i];
 
     for (const prop in transaction['output']) {
-      if (prop !== transaction['input'].address /** sender address*/)
+      if (
+        prop !== transaction['input'].address /** sender address*/ &&
+        prop.length === 42 /** address length */
+      )
         totalTransactionsAmount += Number(transaction['output'][prop]);
     }
   }
