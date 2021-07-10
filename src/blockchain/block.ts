@@ -90,13 +90,12 @@ class Block {
 
       hash = cryptoHash(
         lastHash,
-        difficulty,
         totalTransactionsAmount,
         transactions,
+        difficulty,
         nonce,
         timestamp,
-        msgReward,
-        blockchainHeight
+        msgReward
       );
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 

@@ -29,9 +29,11 @@ class Transaction {
     balance,
     localWallet,
     message,
+    sendFee,
   }: ITransaction) {
     this.id = uuidv1();
-    this.output = output || this.createOutputMap({ address, recipient, amount, balance, message });
+    this.output =
+      output || this.createOutputMap({ address, recipient, amount, balance, message, sendFee });
     this.input =
       input ||
       this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
@@ -49,19 +51,30 @@ class Transaction {
     };
   }
 
-  createOutputMap({ address, recipient, amount, balance, message }: ICOutput): ICOutput_R {
+  createOutputMap({ address, recipient, amount, balance, message, sendFee }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
     const msg_fee = Number(costOfMessage({ message }));
+    const send_fee = sendFee ? Number(sendFee) : 0;
 
-    output[address] = (Number(balance) - amount - msg_fee).toFixed(8);
+    output[address] = (Number(balance) - amount - msg_fee - send_fee).toFixed(8);
     output[recipient] = amount.toFixed(8);
-    message && (output[`msg-fee-${recipient}`] = costOfMessage({ message }));
+    message && (output[`msg-fee-${recipient}`] = msg_fee.toFixed(8));
+    sendFee && (output[`send-fee-${recipient}`] = send_fee.toFixed(8));
 
     return output;
   }
 
-  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
-    // const send_fee = sendFee ? Number(sendFee) : 0;
+  update({
+    publicKey,
+    recipient,
+    amount,
+    balance,
+    address,
+    localWallet,
+    message,
+    sendFee,
+  }: IUpdate): void {
+    const send_fee = sendFee ? Number(sendFee) : 0;
     const msg_fee = Number(costOfMessage({ message }));
     const totalAmount = amount + msg_fee; //+ send_fee;
     const currentSenderBalance = Number(this.output[address]);
@@ -70,8 +83,12 @@ class Transaction {
     if (totalAmount > currentSenderBalance) throw new Error('Insufficient balance');
 
     if (!this.output[recipient]) {
+      console.log('d');
       this.output[recipient] = amount.toFixed(8);
-    } else {
+    }
+
+    if (this.output[recipient]) {
+      console.log('e');
       const recipientOldAmount = Number(this.output[recipient]);
 
       if (currentSendingAmount > recipientOldAmount) {
@@ -91,6 +108,7 @@ class Transaction {
     }
 
     if (message) {
+      console.log('f', message);
       if (this.output[`msg-fee-${recipient}`]) {
         const value = Number(this.output[`msg-fee-${recipient}`]);
 
@@ -111,15 +129,31 @@ class Transaction {
 
       // SET NEW MESSAGE FEE
       this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
-    } else {
-      // NO MESSAGE - REMOVE PROPERTY AND REFUND
-      if (this.output[`msg-fee-${recipient}`]) {
-        const value = Number(this.output[`msg-fee-${recipient}`]);
-        const refund = value - msg_fee;
+    }
 
-        delete this.output[`msg-fee-${recipient}`];
-        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+    if (sendFee) {
+      console.log('g', 'sendFee');
+
+      if (this.output[`send-fee-${recipient}`]) {
+        const value = Number(this.output[`send-fee-${recipient}`]);
+
+        if (send_fee < value) {
+          const refund = value - send_fee;
+          this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+        }
+
+        if (send_fee > value) {
+          const remove = send_fee - value;
+          this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
+        }
       }
+
+      if (!this.output[`send-fee-${recipient}`]) {
+        this.output[address] = (Number(this.output[address]) - send_fee).toFixed(8);
+      }
+
+      // SET NEW SEND FEE
+      this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
     }
 
     this.input = this.createInput({

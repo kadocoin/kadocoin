@@ -36,3 +36,21 @@ export function totalMsgReward({ transactions }: { transactions: TTransactions }
 
   return totalMsgReward.toFixed(8);
 }
+
+export function totalFeeReward({ transactions }: { transactions: TTransactions }): string {
+  let totalFeeReward = 0;
+
+  for (let i = 0; i < transactions.length; i++) {
+    const transaction = transactions[i];
+
+    for (const prop in transaction['output']) {
+      if (
+        prop.substring(0, 9) ==
+        'send-fee-' /** example - "send-fee-0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD" */
+      )
+        totalFeeReward += Number(transaction['output'][prop]);
+    }
+  }
+
+  return totalFeeReward.toFixed(8);
+}

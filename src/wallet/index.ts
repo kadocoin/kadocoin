@@ -29,6 +29,7 @@ class Wallet {
     publicKey,
     address,
     message,
+    sendFee,
   }: {
     recipient: string;
     amount: number;
@@ -36,18 +37,12 @@ class Wallet {
     publicKey?: string;
     address?: string;
     message?: string;
+    sendFee?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
-    if (chain) {
-      this.balance = Wallet.calculateBalance({
-        chain,
-        address: address,
-      });
-    }
+    if (chain) this.balance = Wallet.calculateBalance({ chain, address: address });
 
-    if (amount > Number(this.balance)) {
-      throw new Error('Insufficient balance');
-    }
+    if (amount > Number(this.balance)) throw new Error('Insufficient balance');
 
     return new Transaction({
       recipient,
@@ -57,6 +52,7 @@ class Wallet {
       balance: this.balance,
       localWallet: this,
       message,
+      sendFee,
     });
   }
 

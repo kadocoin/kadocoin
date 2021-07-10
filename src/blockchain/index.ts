@@ -105,10 +105,8 @@ class Blockchain {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
       const lastDifficulty = chain[i - 1].difficulty;
-
       const totalTransactionsAmount = totalTransactionsAmountInBlock({ transactions });
       const msgReward = totalMsgReward({ transactions });
-      const blockchainHeight = chain.length; // GENESIS IS ALREADY INCLUDED
 
       const validatedHash = cryptoHash(
         lastHash,
@@ -117,8 +115,7 @@ class Blockchain {
         difficulty,
         nonce,
         timestamp,
-        msgReward,
-        blockchainHeight
+        msgReward
       );
 
       if (previousHash !== lastHash) return false;

@@ -1,7 +1,7 @@
 import { TTransactionChild } from '../types';
 import size from '../util/size';
 
-const INITIAL_DIFFICULTY = 1;
+const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 1000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
 
@@ -96,3 +96,5 @@ export const sampleDataForTests = {
     signature: '7fd13c4a4175fda39615766a5f0bfce40c0aeccd1d38c5f9e2ab7f8744ac26e2',
   },
 };
+
+export const NOT_ENOUGH = 'Insufficient balance';
