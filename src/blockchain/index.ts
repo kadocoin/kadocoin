@@ -5,6 +5,7 @@ import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
+import Mining_Reward from '../util/supply_reward';
 // import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
 
 class Blockchain {
@@ -44,7 +45,7 @@ class Blockchain {
     }
 
     if (validateTransactions && !this.validTransactionData({ chain: incomingChain })) {
-      console.error('The incoming chain has an invalid transactions');
+      console.error('The incoming chain has an invalid transaction');
       return;
     }
 
@@ -59,8 +60,11 @@ class Blockchain {
   }
 
   validTransactionData({ chain }: { chain: IChain }): boolean {
-    for (let i = 1; i < chain.length; i++) {
-      const block = chain[i];
+    // ONLY VALIDATE THE NEW BLOCKS
+    const chainToValidate = chain.slice(new Blockchain().chain.length - 1);
+
+    for (let i = 1; i < chainToValidate.length; i++) {
+      const block = chainToValidate[i];
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
 
@@ -72,6 +76,10 @@ class Blockchain {
             console.error('Miner rewards exceed limit');
             return false;
           }
+
+          const { MINING_REWARD } = new Mining_Reward().calc({
+            chainLength: chain.length,
+          });
 
           if (Object.values(transaction.output)[0] !== MINING_REWARD) {
             console.error('Miner reward amount is invalid');
@@ -101,7 +109,10 @@ class Blockchain {
   static isValidChain(chain: IChain): boolean {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
 
-    for (let i = 1; i < chain.length; i++) {
+    // ONLY VALIDATE THE NEW BLOCKS
+    const chainToValidate = chain.slice(new Blockchain().chain.length - 1);
+
+    for (let i = 1; i < chainToValidate.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
       const lastDifficulty = chain[i - 1].difficulty;
