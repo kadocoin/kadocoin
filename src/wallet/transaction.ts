@@ -76,7 +76,7 @@ class Transaction {
   }: IUpdate): void {
     const send_fee = sendFee ? Number(sendFee) : 0;
     const msg_fee = Number(costOfMessage({ message }));
-    const totalAmount = amount + msg_fee; //+ send_fee;
+    const totalAmount = amount + msg_fee + send_fee;
     const currentSenderBalance = Number(this.output[address]);
     const currentSendingAmount = amount;
 
