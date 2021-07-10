@@ -14,6 +14,7 @@ import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
+import getBalance from '../util/getBalance';
 
 export default class TransactionController {
   /**
@@ -95,9 +96,18 @@ export default class TransactionController {
         message: 'Sender and receiver address cannot be the same.',
       });
 
-    let transaction;
+    // CHECK FOR EXISTING TRANSACTION
+    let transaction = transactionPool.existingTransactionPool({
+      inputAddress: address,
+    });
+
+    let balance: string;
 
     try {
+      if (transaction) {
+        balance = getBalance({ transactionsPoolMap: transactionPool.transactionMap, address });
+      }
+
       transaction = localWallet.createTransaction({
         recipient,
         amount: Number(amount),
@@ -106,6 +116,7 @@ export default class TransactionController {
         address,
         message,
         sendFee,
+        balance,
       });
     } catch (error) {
       if (error instanceof Error) {

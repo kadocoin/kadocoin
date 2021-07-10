@@ -90,10 +90,6 @@ class Blockchain {
             return false;
           }
 
-          console.log('validTransactionData', Object.values(transaction.output), {
-            totalMiningReward,
-          });
-
           if (Object.values(transaction.output)[0] !== totalMiningReward) {
             console.error('Miner reward amount is invalid');
             return false;
@@ -124,9 +120,6 @@ class Blockchain {
 
     // ONLY VALIDATE THE NEW BLOCKS
     const chainToValidate = chain.slice(new Blockchain().chain.length - 1);
-    // console.log("_______________start________________")
-    // console.log(JSON.stringify(chainToValidate))
-    // console.log("_______________end________________")
 
     for (let i = 1; i < chainToValidate.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chainToValidate[i];
@@ -144,16 +137,6 @@ class Blockchain {
         timestamp,
         msgReward
       );
-
-      console.log({
-        lastHash,
-        totalTransactionsAmount,
-        difficulty,
-        nonce,
-        timestamp,
-        msgReward,
-      });
-      console.log({ hash, validatedHash });
 
       if (previousHash !== lastHash) return false;
 

@@ -1,9 +1,10 @@
 import Transaction from './transaction';
-import { STARTING_BALANCE } from '../config/constants';
+import { NOT_ENOUGH, STARTING_BALANCE } from '../config/constants';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
 import { IChain, ICOutput_R, TTransactionChild } from '../types';
+import costOfMessage from '../util/costOfMessage';
 
 class Wallet {
   public balance: string;
@@ -30,6 +31,7 @@ class Wallet {
     address,
     message,
     sendFee,
+    balance,
   }: {
     recipient: string;
     amount: number;
@@ -38,18 +40,35 @@ class Wallet {
     address?: string;
     message?: string;
     sendFee?: string;
+    balance?: string;
   }): Transaction {
-    // IF CHAIN IS PASSED
-    if (chain) this.balance = Wallet.calculateBalance({ chain, address: address });
+    const send_fee = sendFee ? Number(sendFee) : 0;
+    const msg_fee = Number(costOfMessage({ message }));
+    let totalAmount;
 
-    if (amount > Number(this.balance)) throw new Error('Insufficient balance');
+    if (balance) {
+      totalAmount = amount + msg_fee + send_fee;
+      if (totalAmount > Number(balance)) throw new Error(NOT_ENOUGH);
+    } else {
+      // IF CHAIN IS PASSED
+      if (chain) this.balance = Wallet.calculateBalance({ chain, address: address });
+      totalAmount = amount + msg_fee + send_fee;
+      if (totalAmount > Number(this.balance)) throw new Error(NOT_ENOUGH);
+    }
+
+    console.log('Wallet/index', {
+      totalAmount,
+      thisBalance: Number(this.balance),
+      balanceRepeat: balance,
+      chainLen: chain.length,
+    });
 
     return new Transaction({
       recipient,
       publicKey,
       address,
       amount,
-      balance: this.balance,
+      balance: balance ? balance : this.balance,
       localWallet: this,
       message,
       sendFee,
