@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
+import { REWARD_INPUT, MINING_REWARD, NOT_ENOUGH } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -77,24 +77,21 @@ class Transaction {
     const send_fee = sendFee ? Number(sendFee) : 0;
     const msg_fee = Number(costOfMessage({ message }));
     const totalAmount = amount + msg_fee + send_fee;
-    const currentSenderBalance = Number(this.output[address]);
     const currentSendingAmount = amount;
 
-    if (totalAmount > currentSenderBalance) throw new Error('Insufficient balance');
+    if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
     if (!this.output[recipient]) {
-      console.log('d');
       this.output[recipient] = amount.toFixed(8);
-      this.output[address] = (currentSenderBalance - amount).toFixed(8);
+      this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
     }
 
     if (this.output[recipient]) {
-      console.log('e');
       const recipientOldAmount = Number(this.output[recipient]);
 
       if (currentSendingAmount > recipientOldAmount) {
         this.output[address] = (
-          currentSenderBalance +
+          Number(this.output[address]) +
           recipientOldAmount -
           currentSendingAmount
         ).toFixed(8);
@@ -103,13 +100,14 @@ class Transaction {
 
       if (currentSendingAmount < recipientOldAmount) {
         const refund = recipientOldAmount - currentSendingAmount;
-        this.output[address] = (currentSenderBalance + refund).toFixed(8);
+        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
         this.output[recipient] = currentSendingAmount.toFixed(8);
       }
     }
 
+    //  WARNING! THE VALUE OF Number(this.output[address]) COULD CHANGE SO DON'T STORE IT IN A VARIABLE. USE AS IS
+
     if (message) {
-      console.log('f', message);
       if (this.output[`msg-fee-${recipient}`]) {
         const value = Number(this.output[`msg-fee-${recipient}`]);
 
@@ -133,8 +131,6 @@ class Transaction {
     }
 
     if (sendFee) {
-      console.log('g', 'sendFee');
-
       if (this.output[`send-fee-${recipient}`]) {
         const value = Number(this.output[`send-fee-${recipient}`]);
 
@@ -155,6 +151,24 @@ class Transaction {
 
       // SET NEW SEND FEE
       this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
+    }
+
+    // NO MESSAGE - REMOVE PROPERTY AND REFUND
+    if (!message && this.output[`msg-fee-${recipient}`]) {
+      const value = Number(this.output[`msg-fee-${recipient}`]);
+      const refund = value - msg_fee;
+
+      delete this.output[`msg-fee-${recipient}`];
+      this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+    }
+
+    // NO SEND FEE - REMOVE PROPERTY AND REFUND
+    if (!sendFee && this.output[`send-fee-${recipient}`]) {
+      const value = Number(this.output[`send-fee-${recipient}`]);
+      const refund = value - send_fee;
+
+      delete this.output[`send-fee-${recipient}`];
+      this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
     }
 
     this.input = this.createInput({
