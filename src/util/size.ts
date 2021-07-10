@@ -1,5 +1,8 @@
 export default function size(...inputs: any[]): string {
-  const chainLength = JSON.stringify(inputs).replace(/[\[\]\,\"{}]/g, '').length;
+  const chainLength = inputs
+    .map(input => JSON.stringify(input))
+    .join('')
+    .replace(/[\[\]\,\"{}]/g, '').length;
 
   return chainLength.toLocaleString('en-US');
 }

@@ -195,10 +195,9 @@ export default class TransactionController {
           return res.status(NOT_FOUND).json({ type: 'error', message: 'No valid transactions' });
 
         // UPDATE MINING_REWARD
-        const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+        new Mining_Reward().calc({
           chainLength: blockchain.chain.length,
         });
-        console.log({ MINING_REWARD, SUPPLY });
 
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });
       }

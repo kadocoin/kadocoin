@@ -1,9 +1,10 @@
 import hexToBinary from 'hex-to-bin';
-import { GENESIS_DATA, MINE_RATE, MINING_REWARD } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE } from '../config/constants';
 import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
-import { transactionVolume } from '../util/transaction-metrics';
+import Mining_Reward from '../util/supply_reward';
+import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
@@ -13,8 +14,9 @@ class Block {
   public nonce: number;
   public difficulty: number;
   public blockSize: string;
-  public transactionVolume: string;
+  public totalTransactionsAmount: string;
   public blockReward: string;
+  public msgReward: string;
   public blockchainHeight: number;
 
   constructor({
@@ -25,8 +27,9 @@ class Block {
     nonce,
     difficulty,
     blockSize,
-    transactionVolume,
+    totalTransactionsAmount,
     blockReward,
+    msgReward,
     blockchainHeight,
   }: Block) {
     this.timestamp = timestamp;
@@ -36,8 +39,9 @@ class Block {
     this.nonce = nonce;
     this.difficulty = difficulty;
     this.blockSize = blockSize;
-    this.transactionVolume = transactionVolume;
+    this.totalTransactionsAmount = totalTransactionsAmount;
     this.blockReward = blockReward;
+    this.msgReward = msgReward;
     this.blockchainHeight = blockchainHeight;
   }
 
@@ -59,6 +63,22 @@ class Block {
       nonce = 0,
       { difficulty } = lastBlock;
     const lastHash = lastBlock.hash;
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: chain.length });
+
+    const totalTransactionsAmount = totalTransactionsAmountInBlock({ transactions });
+    const msgReward = totalMsgReward({ transactions });
+    const blockchainHeight = chain.length + 1; /** 1 is the GENESIS BLOCK*/
+    const blockSize = size(
+      timestamp,
+      lastHash,
+      transactions,
+      difficulty,
+      nonce,
+      hash,
+      totalTransactionsAmount,
+      msgReward,
+      blockchainHeight
+    );
 
     do {
       nonce++;
@@ -67,7 +87,17 @@ class Block {
         originalBlock: lastBlock,
         timestamp,
       });
-      hash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
+
+      hash = cryptoHash(
+        lastHash,
+        difficulty,
+        totalTransactionsAmount,
+        transactions,
+        nonce,
+        timestamp,
+        msgReward,
+        blockchainHeight
+      );
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
     return new Block({
@@ -77,10 +107,11 @@ class Block {
       difficulty,
       nonce,
       hash,
-      blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
-      transactionVolume: transactionVolume({ transactions }),
+      blockSize,
+      totalTransactionsAmount,
       blockReward: MINING_REWARD,
-      blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
+      msgReward,
+      blockchainHeight,
     });
   }
 

@@ -1,8 +1,8 @@
 import { TTransactionChild } from '../types';
 import size from '../util/size';
 
-const INITIAL_DIFFICULTY = 10;
-export const MINE_RATE = 5000;
+const INITIAL_DIFFICULTY = 1;
+export const MINE_RATE = 1000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
 
 const transactions: Array<TTransactionChild> = [];
@@ -14,8 +14,9 @@ const GENESIS_DATA = {
   nonce: 0,
   transactions,
   blockSize: '',
-  transactionVolume: '',
-  blockReward: '',
+  totalTransactionsAmount: (0).toFixed(0),
+  blockReward: (0).toFixed(0),
+  msgReward: (0).toFixed(0),
   blockchainHeight: 1,
 };
 

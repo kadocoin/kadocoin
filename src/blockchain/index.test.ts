@@ -47,7 +47,7 @@ describe('Blockchain', () => {
           nonce: 2,
           difficulty: 1,
           blockSize: '999',
-          transactionVolume: '999',
+          totalTransactionsAmount: '999',
           blockReward: MINING_REWARD,
           blockchainHeight: newChain.chain.length,
         };
@@ -97,7 +97,7 @@ describe('Blockchain', () => {
             difficulty,
             transactions,
             blockSize: '999',
-            transactionVolume: '999',
+            totalTransactionsAmount: '999',
             blockReward: MINING_REWARD,
             blockchainHeight: newChain.chain.length,
           });
@@ -137,7 +137,7 @@ describe('Blockchain', () => {
           nonce: 0,
           difficulty: 3,
           blockSize: '999',
-          transactionVolume: '999',
+          totalTransactionsAmount: '999',
           blockReward: MINING_REWARD,
           blockchainHeight: newChain.chain.length,
         };

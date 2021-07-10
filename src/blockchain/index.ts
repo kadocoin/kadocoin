@@ -4,6 +4,8 @@ import { REWARD_INPUT, MINING_REWARD } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
+import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
+// import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;
@@ -102,8 +104,25 @@ class Blockchain {
     for (let i = 1; i < chain.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
       const previousHash = chain[i - 1].hash;
-      const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
       const lastDifficulty = chain[i - 1].difficulty;
+
+      const totalTransactionsAmount = totalTransactionsAmountInBlock({ transactions });
+      const msgReward = totalMsgReward({ transactions });
+      const blockchainHeight = chain.length; // GENESIS IS ALREADY INCLUDED
+
+      const validatedHash = cryptoHash(
+        lastHash,
+        totalTransactionsAmount,
+        transactions,
+        difficulty,
+        nonce,
+        timestamp,
+        msgReward,
+        blockchainHeight
+      );
+
+      // console.log({ timestamp, lastHash, difficulty, nonce, hash })
+      // console.log({ hash, validatedHash })
 
       if (previousHash !== lastHash) return false;
 

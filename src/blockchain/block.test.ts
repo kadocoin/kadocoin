@@ -18,12 +18,12 @@ describe('Block', () => {
     nonce,
     difficulty,
     blockSize: '999',
-    transactionVolume: '999',
+    totalTransactionsAmount: '999',
     blockReward: MINING_REWARD,
     blockchainHeight: 1,
   });
 
-  it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, transactionVolume, blockReward, & blockchainHeight properties.', () => {
+  it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, totalTransactionsAmount, blockReward, & blockchainHeight properties.', () => {
     expect(block).toHaveProperty('timestamp');
     expect(block).toHaveProperty('lastHash');
     expect(block).toHaveProperty('hash');
@@ -31,7 +31,7 @@ describe('Block', () => {
     expect(block).toHaveProperty('nonce');
     expect(block).toHaveProperty('difficulty');
     expect(block).toHaveProperty('blockSize');
-    expect(block).toHaveProperty('transactionVolume');
+    expect(block).toHaveProperty('totalTransactionsAmount');
     expect(block).toHaveProperty('blockReward');
     expect(block).toHaveProperty('blockchainHeight');
   });
