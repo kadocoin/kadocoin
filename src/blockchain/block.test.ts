@@ -1,7 +1,8 @@
 import hexToBinary from 'hex-to-bin';
 import Block from './block';
-import { GENESIS_DATA, MINE_RATE, MINING_REWARD, sampleDataForTests } from '../config/constants';
+import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
+import { totalMsgReward, totalTransactionsAmountInBlock } from '../util/transaction-metrics';
 
 describe('Block', () => {
   const timestamp = 2000;
@@ -19,8 +20,10 @@ describe('Block', () => {
     difficulty,
     blockSize: '999',
     totalTransactionsAmount: '999',
-    blockReward: MINING_REWARD,
+    blockReward: '9',
     blockchainHeight: 1,
+    msgReward: '5',
+    feeReward: '6',
   });
 
   it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, totalTransactionsAmount, blockReward, & blockchainHeight properties.', () => {
@@ -50,8 +53,10 @@ describe('Block', () => {
 
   describe('mineBlock', () => {
     const lastBlock = Block.genesis();
-    const transactions = [sampleDataForTests];
+    const transactions = [sampleDataForTests, sampleDataForTests];
     const mineBlock = Block.mineBlock({ lastBlock, transactions, chain: [] });
+    const totalTransactionsAmount = totalTransactionsAmountInBlock({ transactions });
+    const msgReward = totalMsgReward({ transactions });
 
     it('returns a Block instance', () => {
       expect(mineBlock instanceof Block).toBe(true);
@@ -76,7 +81,9 @@ describe('Block', () => {
           mineBlock.nonce,
           mineBlock.difficulty,
           lastBlock.hash,
-          transactions
+          transactions,
+          totalTransactionsAmount,
+          msgReward
         )
       );
     });

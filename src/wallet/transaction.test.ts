@@ -1,9 +1,4 @@
-import {
-  MINING_REWARD,
-  REWARD_INPUT,
-  sampleDataForTests,
-  STARTING_BALANCE,
-} from '../config/constants';
+import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
@@ -102,102 +97,6 @@ describe('Transaction', () => {
     // END VALID-TRANSACTION()
   });
 
-  describe('update()', () => {
-    let origSignature: string,
-      origSenderOutput: string | number | Wallet,
-      nextRecipient: string,
-      nextAmount: number;
-
-    describe('and amount is invalid', () => {
-      it('throws an error', () => {
-        expect(() => {
-          if (transaction instanceof Transaction) {
-            transaction.update({
-              localWallet,
-              recipient: 'Kado',
-              amount: 999999,
-              address: senderWallet.address,
-              publicKey: senderWallet.publicKey,
-              balance: '300.00000000',
-              message: ' Hello from transaction test',
-            });
-          }
-        }).toThrow('Insufficient balance');
-      });
-    });
-
-    describe('and the amount is valid', () => {
-      beforeEach(() => {
-        origSignature = transaction.input.signature;
-        origSenderOutput = transaction.output[senderWallet.address];
-        nextRecipient = 'next-recipient';
-        nextAmount = 50;
-
-        if (transaction instanceof Transaction) {
-          transaction.update({
-            localWallet,
-            recipient: nextRecipient,
-            amount: nextAmount,
-            address: senderWallet.address,
-            publicKey: senderWallet.publicKey,
-            balance: STARTING_BALANCE.toFixed(8),
-            message: 'Hello from transaction test',
-          });
-        }
-      });
-
-      it('outputs the amount to the next recipient', () => {
-        expect(transaction.output[nextRecipient]).toEqual(nextAmount.toFixed(8));
-      });
-
-      it('subtracts the amount from the original sender output amount', () => {
-        expect(transaction.output[senderWallet.address]).toEqual(
-          ((origSenderOutput as number) - nextAmount).toFixed(8)
-        );
-      });
-
-      it('maintains a total output that matches the input amount', () => {
-        const total = Object.values(transaction.output).reduce(
-          (total, outputAmount) => Number(total) + Number(outputAmount)
-        );
-        expect((total as number).toFixed(8)).toEqual(transaction.input.amount);
-      });
-
-      it('re-signs the transaction', () => {
-        expect(transaction.input.signature).not.toEqual(origSignature);
-      });
-
-      describe('and another update for the same recipient', () => {
-        let addedAmount: number;
-
-        beforeEach(() => {
-          addedAmount = 80;
-          transaction instanceof Transaction &&
-            transaction.update({
-              localWallet,
-              recipient: nextRecipient,
-              address: senderWallet.address,
-              publicKey: senderWallet.publicKey,
-              balance: STARTING_BALANCE.toFixed(8),
-              amount: addedAmount,
-              message: 'Hello from transaction test',
-            });
-        });
-
-        it('adds to the recipient amount', () => {
-          expect(transaction.output[nextRecipient]).toEqual((nextAmount + addedAmount).toFixed(8));
-        });
-
-        it('subtract the amount from the original sender output amount', () => {
-          expect(transaction.output[senderWallet.address]).toEqual(
-            ((origSenderOutput as number) - nextAmount - addedAmount).toFixed(8)
-          );
-        });
-      });
-    });
-    // END UPDATE()
-  });
-
   describe('rewardTransaction()', () => {
     let rewardTransaction: Transaction, minerWallet: Wallet;
 
@@ -206,6 +105,9 @@ describe('Transaction', () => {
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: minerWallet.publicKey,
         message: '',
+        chainLength: 3,
+        feeReward: '3',
+        msgReward: '4',
       });
     });
 
@@ -214,7 +116,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(MINING_REWARD);
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((57).toFixed(8));
     });
   });
 
