@@ -37,9 +37,6 @@ class TransactionMiner {
         Transaction.rewardTransaction({
           minerPublicKey: this.address,
           message: this.message,
-          chainLength: this.blockchain.chain.length,
-          msgReward: totalMsgReward({ transactions: validTransactions }),
-          feeReward: totalFeeReward({ transactions: validTransactions }),
         })
       );
 

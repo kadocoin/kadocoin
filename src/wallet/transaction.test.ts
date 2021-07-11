@@ -9,7 +9,7 @@ import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/co
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
-import costOfMessage from '../util/text-2-coins';
+import costOfMessage from '../util/costOfMessage';
 
 describe('Transaction', () => {
   let transaction: InstanceType<typeof Transaction>,
@@ -220,9 +220,6 @@ describe('Transaction', () => {
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: minerWallet.publicKey,
         message: '',
-        chainLength: 999,
-        msgReward: '22',
-        feeReward: '2',
       });
     });
 

@@ -1,13 +1,5 @@
-/*
- * # Kadocoin License
- *
- * Copyright (c) 2021 Adamu Muhammad Dankore
- * Distributed under the MIT software license, see the accompanying
- * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
- */
-// Copyright (c) Adamu Muhammad Dankore
 import { v1 as uuidv1 } from 'uuid';
-import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
+import { REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -19,9 +11,9 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
-import Mining_Reward from '../util/supply_reward';
-import costOfMessage from '../util/text-2-coins';
-import { filterAddress } from '../util/address-filter';
+import costOfMessage from '../util/costOfMessage';
+import { filterAddress } from '../util/get-only-address';
+import { totalFeeReward } from '../util/transaction-metrics';
 
 class Transaction {
   public id: string;
@@ -56,23 +48,171 @@ class Transaction {
       publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
-      message,
+      ...(message && { message }),
     };
   }
 
   createOutputMap({ address, recipient, amount, balance, message, sendFee }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
-    const msg_fee = message ? costOfMessage({ message }) : 0;
+    const msg_fee = Number(costOfMessage({ message }));
     const send_fee = sendFee ? Number(sendFee) : 0;
-    const totalAmount = amount + msg_fee + send_fee;
 
-    output[address] = (Number(balance) - totalAmount).toFixed(8);
+    output[address] = (Number(balance) - amount - msg_fee - send_fee).toFixed(8);
     output[recipient] = amount.toFixed(8);
-
-    if (message) output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
-    if (sendFee) output[`send-fee-${recipient}`] = send_fee.toFixed(8);
+    message && (output[`msg-fee-${recipient}`] = msg_fee.toFixed(8));
+    sendFee && (output[`send-fee-${recipient}`] = send_fee.toFixed(8));
 
     return output;
+  }
+
+  update({
+    publicKey,
+    recipient,
+    amount,
+    balance,
+    address,
+    localWallet,
+    message,
+    sendFee,
+  }: IUpdate): void {
+    const send_fee = sendFee ? Number(sendFee) : 0;
+    const msg_fee = Number(costOfMessage({ message }));
+    const totalAmount = amount + msg_fee; //+ send_fee;
+    const currentSenderBalance = Number(this.output[address]);
+    const currentSendingAmount = amount;
+
+    if (totalAmount > currentSenderBalance) throw new Error('Insufficient balance');
+
+    if (message || sendFee) {
+      if (!this.output[recipient]) {
+        console.log('d');
+        this.output[recipient] = amount.toFixed(8);
+      }
+
+      if (this.output[recipient]) {
+        console.log('e');
+        const recipientOldAmount = Number(this.output[recipient]);
+
+        if (currentSendingAmount > recipientOldAmount) {
+          this.output[address] = (
+            currentSenderBalance +
+            recipientOldAmount -
+            currentSendingAmount
+          ).toFixed(8);
+          this.output[recipient] = currentSendingAmount.toFixed(8);
+        }
+
+        if (currentSendingAmount < recipientOldAmount) {
+          const refund = recipientOldAmount - currentSendingAmount;
+          this.output[address] = (currentSenderBalance + refund).toFixed(8);
+          this.output[recipient] = currentSendingAmount.toFixed(8);
+        }
+      }
+
+      if (message) {
+        console.log('f', message);
+        if (this.output[`msg-fee-${recipient}`]) {
+          const value = Number(this.output[`msg-fee-${recipient}`]);
+
+          if (msg_fee < value) {
+            const refund = value - msg_fee;
+            this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+          }
+
+          if (msg_fee > value) {
+            const remove = msg_fee - value;
+            this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
+          }
+        }
+
+        if (!this.output[`msg-fee-${recipient}`]) {
+          this.output[address] = (Number(this.output[address]) - msg_fee).toFixed(8);
+        }
+
+        // SET NEW MESSAGE FEE
+        this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
+      }
+
+      if (sendFee) {
+        console.log('g', 'sendFee');
+
+        if (this.output[`send-fee-${recipient}`]) {
+          const value = Number(this.output[`send-fee-${recipient}`]);
+
+          if (send_fee < value) {
+            const refund = value - send_fee;
+            this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+          }
+
+          if (send_fee > value) {
+            const remove = send_fee - value;
+            this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
+          }
+        }
+
+        if (!this.output[`send-fee-${recipient}`]) {
+          this.output[address] = (Number(this.output[address]) - send_fee).toFixed(8);
+        }
+
+        // SET NEW SEND FEE
+        this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
+      }
+
+      // NO MESSAGE - REMOVE PROPERTY AND REFUND
+      if (this.output[`msg-fee-${recipient}`]) {
+        console.log('b');
+
+        const value = Number(this.output[`msg-fee-${recipient}`]);
+        const refund = value - msg_fee;
+        console.log({ value, msg_fee });
+        delete this.output[`msg-fee-${recipient}`];
+        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+      }
+
+      // NO SEND FEE - REMOVE PROPERTY AND REFUND
+      if (this.output[`send-fee-${recipient}`]) {
+        console.log('c');
+        const value = Number(this.output[`send-fee-${recipient}`]);
+        const refund = value - send_fee;
+
+        delete this.output[`send-fee-${recipient}`];
+        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
+      }
+    } else {
+      if (!this.output[recipient]) {
+        console.log('d2');
+        this.output[recipient] = amount.toFixed(8);
+      }
+
+      if (this.output[recipient]) {
+        console.log('e2');
+        const recipientOldAmount = Number(this.output[recipient]);
+
+        if (currentSendingAmount > recipientOldAmount) {
+          this.output[address] = (
+            currentSenderBalance +
+            recipientOldAmount -
+            currentSendingAmount
+          ).toFixed(8);
+          this.output[recipient] = currentSendingAmount.toFixed(8);
+        }
+
+        if (currentSendingAmount < recipientOldAmount) {
+          const refund = recipientOldAmount - currentSendingAmount;
+          this.output[address] = (currentSenderBalance + refund).toFixed(8);
+          this.output[recipient] = currentSendingAmount.toFixed(8);
+        }
+      }
+    }
+
+    this.input = this.createInput({
+      publicKey,
+      address,
+      balance,
+      localWallet,
+      output: this.output,
+      message,
+    });
   }
 
   static validTransaction(transaction: TTransactionChild): boolean {
@@ -82,7 +222,7 @@ class Transaction {
     } = transaction;
 
     let outputTotal = Object.values(output).reduce(
-      (total, outputAmount) => Number(total) + Number(outputAmount),
+      (total: any, outputAmount: any) => Number(total) + Number(outputAmount),
       0
     );
 
@@ -122,116 +262,19 @@ class Transaction {
     return true;
   }
 
-  update({
-    publicKey,
-    recipient,
-    amount,
-    balance,
-    address,
-    localWallet,
-    message,
-    sendFee,
-  }: IUpdate): void {
-    const send_fee = sendFee ? Number(sendFee) : 0;
-    const msg_fee = message ? costOfMessage({ message }) : 0;
-    const totalAmount = amount + msg_fee + send_fee;
-
-    if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
-
-    if (!this.output[recipient]) {
-      this.output[recipient] = amount.toFixed(8);
-    } else {
-      this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
-    }
-
-    if (message || sendFee) {
-      // MESSAGE LOGIC
-      if (message) {
-        const msg_fee = costOfMessage({ message });
-        if (this.output[`msg-fee-${recipient}`]) {
-          const value = this.output[`msg-fee-${recipient}`];
-
-          if (msg_fee < value) {
-            const refund = Number(value) - msg_fee;
-            this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-          }
-
-          if (msg_fee > value) {
-            const remove = msg_fee - Number(value);
-            this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
-          }
-        } else {
-          this.output[address] = (Number(this.output[address]) - msg_fee).toFixed(8);
-        }
-
-        this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
-      }
-
-      // SEND FEE LOGIC
-      if (sendFee) {
-        const send_fee = Number(sendFee);
-
-        if (this.output[`send-fee-${recipient}`]) {
-          const value = Number(this.output[`send-fee-${recipient}`]);
-
-          if (send_fee < value) {
-            const refund = value - send_fee;
-            this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-          }
-
-          if (send_fee > value) {
-            const remove = send_fee - value;
-            this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
-          }
-        } else {
-          this.output[address] = (Number(this.output[address]) - send_fee).toFixed(8);
-        }
-
-        this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
-      }
-      // COMMON
-      this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
-    } else {
-      this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
-    }
-
-    this.input = this.createInput({
-      publicKey,
-      address,
-      balance,
-      localWallet,
-      output: this.output,
-      ...(message ? { message } : { message: this.input['message'] }),
-    });
-  }
-
   static rewardTransaction({
     minerPublicKey,
     message,
-    chainLength,
-    msgReward,
-    feeReward,
   }: {
     minerPublicKey: string;
-    message?: string;
-    chainLength: number;
-    msgReward: string;
-    feeReward: string;
+    message: string;
   }): Transaction {
-    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength });
-    const totalMiningReward = (
-      Number(MINING_REWARD) +
-      Number(msgReward) +
-      Number(feeReward)
-    ).toFixed(8);
-
     REWARD_INPUT.recipient = minerPublicKey;
-    message && (REWARD_INPUT.message = message); // OPTIONAL
-    REWARD_INPUT.amount = totalMiningReward;
+    REWARD_INPUT.message = message;
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: totalMiningReward },
+      output: { [minerPublicKey]: (50).toFixed(8) },
     });
   }
 

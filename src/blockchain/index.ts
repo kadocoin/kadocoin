@@ -93,8 +93,6 @@ class Blockchain {
             return false;
           }
 
-          console.log(Object.values(transaction.output)[0], totalMiningReward);
-
           if (Object.values(transaction.output)[0] !== totalMiningReward) {
             console.error('Miner reward amount is invalid');
             return false;

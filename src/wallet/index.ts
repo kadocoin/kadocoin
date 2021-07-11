@@ -11,7 +11,7 @@ import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
 import { IChain, ICOutput_R, TTransactionChild } from '../types';
-import costOfMessage from '../util/text-2-coins';
+import costOfMessage from '../util/costOfMessage';
 
 class Wallet {
   public balance: string;

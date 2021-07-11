@@ -12,7 +12,7 @@ import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactionChild } from '../types';
-import costOfMessage from '../util/text-2-coins';
+import costOfMessage from '../util/costOfMessage';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
@@ -235,9 +235,6 @@ describe('Blockchain', () => {
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: wallet.address,
         message: '',
-        chainLength: 99,
-        msgReward: costOfMessage({ message }).toFixed(8),
-        feeReward: '2',
       });
     });
 
