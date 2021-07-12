@@ -11,7 +11,7 @@ import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
-import { totalFeeReward, totalMsgReward, transactionVolume } from '../util/transaction-metrics';
+import { transactionVolume } from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
