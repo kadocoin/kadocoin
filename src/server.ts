@@ -8,7 +8,7 @@
 // Copyright (c) Adamu Muhammad Dankore
 import app from './app';
 import request from 'request';
-import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
+import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS, ROOT_NODE_ADDRESS_DEV } from './config/secret';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/userRouter.router';
@@ -60,7 +60,7 @@ const initializeMiddleWares = (_: Request, __: Response, next: NextFunction) => 
 };
 
 const syncWithRootState = () => {
-  request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (error, response, body) => {
+  request({ url: `${ROOT_NODE_ADDRESS_DEV}/api/blocks` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const rootChain = JSON.parse(body);
 
@@ -74,11 +74,11 @@ const syncWithRootState = () => {
       });
       console.log({ MINING_REWARD, SUPPLY });
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
+      console.log(`${ROOT_NODE_ADDRESS_DEV}/api/blocks`, error);
     }
   });
 
-  request({ url: `${ROOT_NODE_ADDRESS}/api/transaction-pool-map` }, (error, response, body) => {
+  request({ url: `${ROOT_NODE_ADDRESS_DEV}/api/transaction-pool-map` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const rootTransactionPoolMap = JSON.parse(body);
 
@@ -93,7 +93,7 @@ const syncWithRootState = () => {
         console.log('Done!');
       }
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error);
+      console.log(`${ROOT_NODE_ADDRESS_DEV}/api/transaction-pool-map`, error);
     }
   });
 };

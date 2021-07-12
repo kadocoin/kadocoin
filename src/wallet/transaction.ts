@@ -29,18 +29,38 @@ class Transaction {
     balance,
     message,
     localWallet,
+    sendFee,
   }: ITransaction) {
     this.id = uuidv1();
-    this.output = output || this.createOutputMap({ address, recipient, amount, balance });
+    this.output = output || this.createOutputMap({ address, recipient, amount, balance, sendFee });
     this.input =
       input ||
-      this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
+      this.createInput({
+        publicKey,
+        address,
+        balance,
+        localWallet,
+        output: this.output,
+        message,
+        sendFee,
+      });
   }
 
-  createInput({ publicKey, balance, address, localWallet, output, message }: ICInput): ICInput_R {
+  createInput({
+    publicKey,
+    balance,
+    address,
+    localWallet,
+    output,
+    message,
+    sendFee,
+  }: ICInput): ICInput_R {
+    const send_fee = sendFee ? Number(sendFee) : 0;
+
     return {
       timestamp: Date.now(),
-      amount: balance,
+      amount: (Number(balance) - send_fee).toFixed(8),
+      ...(sendFee && { sendFee: Number(sendFee).toFixed(8) }),
       address,
       publicKey,
       localPublicKey: localWallet.publicKey,
@@ -49,19 +69,58 @@ class Transaction {
     };
   }
 
-  createOutputMap({ address, recipient, amount, balance }: ICOutput): ICOutput_R {
+  createOutputMap({ address, recipient, amount, balance, sendFee }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
+    const send_fee = sendFee ? Number(sendFee) : 0;
 
-    output[address] = (Number(balance) - amount).toFixed(8);
+    output[address] = (Number(balance) - amount - send_fee).toFixed(8);
     output[recipient] = amount.toFixed(8);
 
     return output;
   }
 
-  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
-    if (amount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
+  update({
+    publicKey,
+    recipient,
+    amount,
+    balance,
+    address,
+    localWallet,
+    message,
+    sendFee,
+  }: IUpdate): void {
+    const send_fee = sendFee ? Number(sendFee) : 0;
+    const totalAmount = amount + send_fee;
 
-    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+    if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
+
+    if (!sendFee) {
+      if (!this.input['sendFee']) {
+        this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+      } else {
+        const prev_sendFee = Number(this.input['sendFee']);
+        this.output[address] = (Number(this.output[address]) + prev_sendFee - amount).toFixed(8);
+      }
+    } else {
+      const prev_sendFee = Number(this.input['sendFee']);
+      const current_sendFee = Number(sendFee);
+
+      if (prev_sendFee < current_sendFee) {
+        this.output[address] = (Number(this.output[address]) - totalAmount + prev_sendFee).toFixed(
+          8
+        );
+      }
+
+      if (prev_sendFee > current_sendFee) {
+        this.output[address] = (Number(this.output[address]) - totalAmount + prev_sendFee).toFixed(
+          8
+        );
+      }
+
+      if (prev_sendFee === current_sendFee) {
+        this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+      }
+    }
 
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
@@ -76,6 +135,7 @@ class Transaction {
       localWallet,
       output: this.output,
       ...(message && { message }),
+      ...(sendFee && { sendFee: Number(sendFee).toFixed(8) }),
     });
   }
 

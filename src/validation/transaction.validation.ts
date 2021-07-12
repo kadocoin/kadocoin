@@ -13,6 +13,7 @@ export const transactValidation = (body: {
   publicKey: string;
   address: string;
   message: string;
+  sendFee: string;
 }): ValidationResult => {
   const transactSchema = Joi.object().keys({
     amount: Joi.number().positive().required(),
@@ -20,6 +21,7 @@ export const transactValidation = (body: {
     publicKey: Joi.string().trim().required(),
     address: Joi.string().trim().required(),
     token: Joi.string().trim().required(),
+    sendFee: Joi.number().positive(),
     message: Joi.string().trim().max(160),
   });
 
