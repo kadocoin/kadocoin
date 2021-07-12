@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT } from '../config/constants';
+import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -27,15 +27,17 @@ class Transaction {
     output,
     input,
     balance,
+    message,
     localWallet,
   }: ITransaction) {
     this.id = uuidv1();
     this.output = output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
-      input || this.createInput({ publicKey, address, balance, localWallet, output: this.output });
+      input ||
+      this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
   }
 
-  createInput({ publicKey, balance, address, localWallet, output }: ICInput): ICInput_R {
+  createInput({ publicKey, balance, address, localWallet, output, message }: ICInput): ICInput_R {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -43,6 +45,7 @@ class Transaction {
       publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
+      ...(message && { message }),
     };
   }
 
@@ -55,10 +58,8 @@ class Transaction {
     return output;
   }
 
-  update({ publicKey, recipient, amount, balance, address, localWallet }: IUpdate): void {
-    amount = Number(amount);
-
-    if (amount > Number(this.output[address])) throw new Error('Insufficient balance');
+  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
+    if (amount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
@@ -74,6 +75,7 @@ class Transaction {
       balance,
       localWallet,
       output: this.output,
+      ...(message && { message }),
     });
   }
 

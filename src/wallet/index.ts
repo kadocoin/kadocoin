@@ -37,7 +37,6 @@ class Wallet {
     publicKey,
     address,
     message,
-    sendFee,
   }: {
     recipient: string;
     amount: number;
@@ -45,17 +44,12 @@ class Wallet {
     publicKey?: string;
     address?: string;
     message?: string;
-    sendFee?: string;
   }): Transaction {
     // IF CHAIN IS PASSED
     if (chain) this.balance = Wallet.calculateBalance({ chain, address });
-    const send_fee = sendFee ? Number(sendFee) : 0;
-    const msg_fee = message ? costOfMessage({ message }) : 0;
-
-    const totalAmount = amount + msg_fee + send_fee;
 
     // CHECK TO MAKE SURE SENDER HAS ENOUGH COINS
-    if (totalAmount > Number(this.balance)) throw new Error(NOT_ENOUGH);
+    if (amount > Number(this.balance)) throw new Error(NOT_ENOUGH);
 
     return new Transaction({
       recipient,
@@ -65,7 +59,6 @@ class Wallet {
       balance: this.balance,
       localWallet: this,
       message,
-      sendFee,
     });
   }
 

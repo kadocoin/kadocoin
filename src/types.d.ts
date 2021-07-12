@@ -101,7 +101,6 @@ export interface ITransaction {
   balance?: string;
   localWallet?: Wallet;
   message?: string;
-  sendFee?: string;
 }
 
 /** COMMON TYPES createInput() */
@@ -114,6 +113,7 @@ export interface ICInput extends ICommon_Address_PublicKey {
   balance: string;
   localWallet: Wallet;
   output: ICOutput_R;
+  message?: string;
 }
 /** createInput() RETURN type  */
 export interface ICInput_R extends ICommon_Address_PublicKey {
@@ -142,6 +142,7 @@ export interface IUpdate {
   recipient: string;
   amount: number;
   balance: string;
+  message?: string;
   localWallet: Wallet;
 }
 
