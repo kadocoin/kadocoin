@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { ICInput_R, TTransactionChild, TTransactions } from '../types';
+import { TTransactions } from '../types';
 
 export function transactionVolume({ transactions }: { transactions: TTransactions }): string {
   let totalTransactionsAmount = 0;

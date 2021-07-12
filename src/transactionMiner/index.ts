@@ -8,7 +8,6 @@
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
 import { ITMinerConstructorParams } from '../types';
-import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 

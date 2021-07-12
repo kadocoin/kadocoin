@@ -9,7 +9,6 @@ import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/co
 import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
-import costOfMessage from '../util/costOfMessage';
 import { calcOutputTotal } from '../util/transaction-metrics';
 
 describe('Transaction', () => {
@@ -110,8 +109,7 @@ describe('Transaction', () => {
     let origSignature: string,
       origSenderOutput: string | number | Wallet,
       nextRecipient: string,
-      nextAmount: number,
-      message: string;
+      nextAmount: number;
 
     describe('and amount is invalid', () => {
       it('throws an error', () => {
@@ -136,7 +134,6 @@ describe('Transaction', () => {
         origSenderOutput = transaction.output[senderWallet.address];
         nextRecipient = 'next-recipient';
         nextAmount = 50;
-        message = 'Hello from transaction test';
 
         if (transaction instanceof Transaction) {
           transaction.update({

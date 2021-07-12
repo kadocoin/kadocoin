@@ -12,7 +12,6 @@ import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
 import { IChain, TTransactionChild } from '../types';
-import costOfMessage from '../util/costOfMessage';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
@@ -58,8 +57,6 @@ describe('Blockchain', () => {
           transactionVolume: '999',
           blockReward: (50).toFixed(8),
           blockchainHeight: newChain.chain.length,
-          msgReward: '22',
-          feeReward: '2',
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -110,8 +107,6 @@ describe('Blockchain', () => {
             transactionVolume: '999',
             blockReward: (50).toFixed(8),
             blockchainHeight: newChain.chain.length,
-            msgReward: '22',
-            feeReward: '2',
           });
 
           blockchain.chain.push(badBlock);
@@ -152,8 +147,6 @@ describe('Blockchain', () => {
           transactionVolume: '999',
           blockReward: (50).toFixed(8),
           blockchainHeight: newChain.chain.length,
-          msgReward: '22',
-          feeReward: '2',
         };
 
         blockchain.replaceChain(newChain.chain);

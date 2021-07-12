@@ -24,8 +24,6 @@ class Block {
   public transactionVolume: string;
   public blockReward: string;
   public blockchainHeight: number;
-  public msgReward: string;
-  public feeReward: string;
 
   constructor({
     timestamp,
@@ -38,8 +36,6 @@ class Block {
     transactionVolume,
     blockReward,
     blockchainHeight,
-    msgReward,
-    feeReward,
   }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
@@ -51,8 +47,6 @@ class Block {
     this.transactionVolume = transactionVolume;
     this.blockReward = blockReward;
     this.blockchainHeight = blockchainHeight;
-    this.msgReward = msgReward;
-    this.feeReward = feeReward;
   }
 
   static genesis(): Block {
@@ -96,8 +90,6 @@ class Block {
       transactionVolume: transactionVolume({ transactions }),
       blockReward: new Mining_Reward().calc({ chainLength: chain.length }).MINING_REWARD,
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
-      msgReward: totalMsgReward({ transactions }),
-      feeReward: totalFeeReward({ transactions }),
     });
   }
 

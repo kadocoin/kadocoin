@@ -28,8 +28,6 @@ describe('Block', () => {
     transactionVolume: '999',
     blockReward: (50).toFixed(8),
     blockchainHeight: 1,
-    msgReward: '22',
-    feeReward: '2',
   });
 
   it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, transactionVolume, blockReward, & blockchainHeight properties.', () => {
