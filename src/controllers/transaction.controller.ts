@@ -48,7 +48,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    let { amount, recipient, publicKey, address, message } = req.body;
+    let { amount, recipient, publicKey, address, message, sendFee } = req.body;
 
     // SANITIZE - REMOVE SCRIPTS/HTML TAGS
     amount = sanitizeHTML(amount, {
@@ -69,6 +69,11 @@ export default class TransactionController {
     });
     message &&
       (message = sanitizeHTML(message, {
+        allowedTags: [],
+        allowedAttributes: {},
+      }));
+    sendFee &&
+      (sendFee = sanitizeHTML(sendFee, {
         allowedTags: [],
         allowedAttributes: {},
       }));
@@ -122,6 +127,7 @@ export default class TransactionController {
             balance,
             localWallet,
             message,
+            sendFee,
           });
         }
       } else {
@@ -133,6 +139,7 @@ export default class TransactionController {
           publicKey,
           address,
           message,
+          sendFee,
         });
       }
     } catch (error) {

@@ -8,6 +8,7 @@
 import Blockchain from '../blockchain';
 import PubSub from '../pubSub';
 import { ITMinerConstructorParams } from '../types';
+import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -31,12 +32,15 @@ class TransactionMiner {
     const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
+      const feeReward = totalFeeReward({ transactions: validTransactions });
+
       // GENERATE MINER'S REWARD
       validTransactions.push(
         Transaction.rewardTransaction({
           minerPublicKey: this.address,
           ...(this.message && { message: this.message }),
           blockchainLen: this.blockchain.chain.length,
+          feeReward,
         })
       );
 

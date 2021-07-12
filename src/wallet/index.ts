@@ -36,12 +36,15 @@ class Wallet {
     publicKey,
     address,
     message,
+    sendFee,
   }: ICreateTransactionParams): Transaction {
+    const send_fee = sendFee ? Number(sendFee) : 0;
+    const totalAmount = send_fee + amount;
     // IF CHAIN IS PASSED
     if (chain) this.balance = Wallet.calculateBalance({ chain, address });
 
     // CHECK TO MAKE SURE SENDER HAS ENOUGH COINS
-    if (amount > Number(this.balance)) throw new Error(NOT_ENOUGH);
+    if (totalAmount > Number(this.balance)) throw new Error(NOT_ENOUGH);
 
     return new Transaction({
       recipient,
@@ -51,6 +54,7 @@ class Wallet {
       balance: this.balance,
       localWallet: this,
       message,
+      sendFee,
     });
   }
 

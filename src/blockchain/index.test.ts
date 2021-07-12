@@ -228,6 +228,7 @@ describe('Blockchain', () => {
         minerPublicKey: wallet.address,
         message: '',
         blockchainLen: 10,
+        feeReward: '0',
       });
     });
 
