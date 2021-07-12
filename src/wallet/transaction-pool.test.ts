@@ -105,7 +105,6 @@ describe('TransactionPool', () => {
         const transaction = new Wallet().createTransaction({
           recipient: 'Kado',
           amount: 20,
-          sendFee: '2',
         });
         transactionPool.setTransaction(transaction);
 

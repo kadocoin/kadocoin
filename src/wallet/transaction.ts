@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { REWARD_INPUT } from '../config/constants';
+import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { filterAddress } from '../util/get-only-address';
 import { calcOutputTotal } from '../util/transaction-metrics';
+import Mining_Reward from '../util/supply_reward';
 
 class Transaction {
   public id: string;
@@ -27,15 +28,17 @@ class Transaction {
     output,
     input,
     balance,
+    message,
     localWallet,
   }: ITransaction) {
     this.id = uuidv1();
     this.output = output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
-      input || this.createInput({ publicKey, address, balance, localWallet, output: this.output });
+      input ||
+      this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
   }
 
-  createInput({ publicKey, balance, address, localWallet, output }: ICInput): ICInput_R {
+  createInput({ publicKey, balance, address, localWallet, output, message }: ICInput): ICInput_R {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -43,6 +46,7 @@ class Transaction {
       publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
+      ...(message && { message }),
     };
   }
 
@@ -55,10 +59,8 @@ class Transaction {
     return output;
   }
 
-  update({ publicKey, recipient, amount, balance, address, localWallet }: IUpdate): void {
-    amount = Number(amount);
-
-    if (amount > Number(this.output[address])) throw new Error('Insufficient balance');
+  update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
+    if (amount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
@@ -74,6 +76,7 @@ class Transaction {
       balance,
       localWallet,
       output: this.output,
+      ...(message && { message }),
     });
   }
 
@@ -91,16 +94,9 @@ class Transaction {
 
     // CHECK FOR ADDRESS VALIDITY VIA CHECKSUM
     Object.keys(output).map((address: string): boolean => {
-      if (address.length == 42) {
-        if (!isValidChecksumAddress(address)) {
-          console.error(`Invalid address => ${address}`);
-          return false;
-        }
-      } else if (address.length > 42) {
-        if (!isValidChecksumAddress(filterAddress(address))) {
-          console.error(`Invalid address => ${address}`);
-          return false;
-        }
+      if (address.length == 42 && !isValidChecksumAddress(address)) {
+        console.error(`Invalid address => ${address}`);
+        return false;
       } else {
         return false;
       }
@@ -119,16 +115,19 @@ class Transaction {
   static rewardTransaction({
     minerPublicKey,
     message,
+    blockchainLen,
   }: {
     minerPublicKey: string;
-    message: string;
+    message?: string;
+    blockchainLen: number;
   }): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
-    REWARD_INPUT.message = message;
+    message && (REWARD_INPUT.message = message);
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: (50).toFixed(8) },
+      output: { [minerPublicKey]: MINING_REWARD },
     });
   }
 

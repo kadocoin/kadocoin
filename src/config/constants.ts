@@ -14,9 +14,9 @@ export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.
 
 const transactions: Array<TTransactionChild> = [];
 const GENESIS_DATA = {
-  timestamp: 1,
-  lastHash: '____',
-  hash: 'hash-one',
+  timestamp: 1626071497054,
+  lastHash: '*None*',
+  hash: '*None*',
   difficulty: INITIAL_DIFFICULTY,
   nonce: 0,
   transactions,

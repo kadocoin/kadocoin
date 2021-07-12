@@ -10,6 +10,7 @@ import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
 import { calcOutputTotal } from '../util/transaction-metrics';
+import Mining_Reward from '../util/supply_reward';
 
 describe('Transaction', () => {
   let transaction: InstanceType<typeof Transaction>,
@@ -198,13 +199,15 @@ describe('Transaction', () => {
   });
 
   describe('rewardTransaction()', () => {
-    let rewardTransaction: Transaction, minerWallet: Wallet;
+    let rewardTransaction: Transaction, minerWallet: Wallet, chainLength: number;
 
     beforeEach(() => {
       minerWallet = new Wallet();
+      chainLength = 10;
       rewardTransaction = Transaction.rewardTransaction({
         minerPublicKey: minerWallet.publicKey,
         message: '',
+        blockchainLen: chainLength,
       });
     });
 
@@ -213,7 +216,9 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50).toFixed(8));
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(
+        new Mining_Reward().calc({ chainLength }).MINING_REWARD
+      );
     });
   });
 
