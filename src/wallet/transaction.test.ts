@@ -10,6 +10,7 @@ import verifySignature from '../util/verifySignature';
 import Wallet from '.';
 import Transaction from './transaction';
 import costOfMessage from '../util/costOfMessage';
+import { calcOutputTotal } from '../util/transaction-metrics';
 
 describe('Transaction', () => {
   let transaction: InstanceType<typeof Transaction>,
@@ -123,8 +124,6 @@ describe('Transaction', () => {
               address: senderWallet.address,
               publicKey: senderWallet.publicKey,
               balance: '300.00000000',
-              message: 'Hello from transaction test',
-              sendFee: '2',
             });
           }
         }).toThrow('Insufficient balance');
@@ -147,8 +146,6 @@ describe('Transaction', () => {
             address: senderWallet.address,
             publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
-            message,
-            sendFee: '2',
           });
         }
       });
@@ -159,15 +156,14 @@ describe('Transaction', () => {
 
       it('subtracts the amount from the original sender output amount', () => {
         expect(transaction.output[senderWallet.address]).toEqual(
-          ((origSenderOutput as number) - costOfMessage({ message }) - nextAmount - 2).toFixed(8)
+          ((origSenderOutput as number) - nextAmount).toFixed(8)
         );
       });
 
       it('maintains a total output that matches the input amount', () => {
-        const total = Object.values(transaction.output).reduce(
-          (total, outputAmount) => Number(total) + Number(outputAmount)
+        expect(Number(calcOutputTotal(transaction.output)).toFixed(8)).toEqual(
+          transaction.input.amount
         );
-        expect((total as number).toFixed(8)).toEqual(transaction.input.amount);
       });
 
       it('re-signs the transaction', () => {
@@ -187,8 +183,6 @@ describe('Transaction', () => {
               publicKey: senderWallet.publicKey,
               balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
-              message: 'Hello from transaction test',
-              sendFee: '2',
             });
         });
 
@@ -198,13 +192,7 @@ describe('Transaction', () => {
 
         it('subtract the amount from the original sender output amount', () => {
           expect(transaction.output[senderWallet.address]).toEqual(
-            (
-              (origSenderOutput as number) -
-              costOfMessage({ message }) -
-              nextAmount -
-              addedAmount -
-              2
-            ).toFixed(8)
+            ((origSenderOutput as number) - nextAmount - addedAmount).toFixed(8)
           );
         });
       });
@@ -228,7 +216,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50 + 22 + 2).toFixed(8));
+      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual((50).toFixed(8));
     });
   });
 

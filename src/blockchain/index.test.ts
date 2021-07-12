@@ -260,7 +260,7 @@ describe('Blockchain', () => {
     describe('and the transaction transactions has at least one malformed output', () => {
       describe('and the transaction is not a reward transaction', () => {
         it('returns false and logs and error', () => {
-          transaction.output[wallet.address] = 999999;
+          transaction.output[wallet.address] = (999999).toFixed(8);
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
