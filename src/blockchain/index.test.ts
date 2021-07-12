@@ -222,7 +222,6 @@ describe('Blockchain', () => {
         address: wallet.address,
         publicKey: wallet.publicKey,
         message,
-        sendFee: '2',
       });
 
       rewardTransaction = Transaction.rewardTransaction({

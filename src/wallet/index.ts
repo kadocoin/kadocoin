@@ -10,8 +10,7 @@ import { NOT_ENOUGH, STARTING_BALANCE } from '../config/constants';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
-import { IChain, ICOutput_R, TTransactionChild } from '../types';
-import costOfMessage from '../util/costOfMessage';
+import { IChain, ICOutput_R, ICreateTransactionParams, TTransactionChild } from '../types';
 
 class Wallet {
   public balance: string;
@@ -37,14 +36,7 @@ class Wallet {
     publicKey,
     address,
     message,
-  }: {
-    recipient: string;
-    amount: number;
-    chain?: IChain;
-    publicKey?: string;
-    address?: string;
-    message?: string;
-  }): Transaction {
+  }: ICreateTransactionParams): Transaction {
     // IF CHAIN IS PASSED
     if (chain) this.balance = Wallet.calculateBalance({ chain, address });
 
@@ -74,9 +66,7 @@ class Wallet {
 
         const addressOutput = Number(transaction.output[address]);
 
-        if (addressOutput) {
-          outputsTotal += addressOutput;
-        }
+        if (addressOutput) outputsTotal += addressOutput;
       }
 
       if (hasConductedTransaction) break;

@@ -146,6 +146,15 @@ export interface IUpdate {
   localWallet: Wallet;
 }
 
+export interface ICreateTransactionParams {
+  recipient: string;
+  amount: number;
+  chain?: IChain;
+  publicKey?: string;
+  address?: string;
+  message?: string;
+}
+
 /**
  * SAMPLE OF A DATA ARRAY CHILD
  */
