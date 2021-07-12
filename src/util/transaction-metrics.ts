@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { TTransactions } from '../types';
+import { ICInput_R, TTransactionChild, TTransactions } from '../types';
 
 export function transactionVolume({ transactions }: { transactions: TTransactions }): string {
   let totalTransactionsAmount = 0;
@@ -56,4 +56,18 @@ export function totalFeeReward({ transactions }: { transactions: TTransactions }
   }
 
   return totalFeeReward.toFixed(8);
+}
+
+export function calcOutputTotal(output: { [key: string]: string }): string {
+  let total = 0;
+
+  const arr = Object.values(output);
+
+  for (let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+
+    total += Number(element);
+  }
+
+  return total.toFixed(8);
 }

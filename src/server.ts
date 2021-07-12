@@ -74,7 +74,7 @@ const syncWithRootState = () => {
       });
       console.log({ MINING_REWARD, SUPPLY });
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error, response.statusCode);
+      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
     }
   });
 
@@ -93,7 +93,7 @@ const syncWithRootState = () => {
         console.log('Done!');
       }
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error, response.statusCode);
+      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error);
     }
   });
 };

@@ -48,7 +48,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    let { amount, recipient, publicKey, address, message, sendFee } = req.body;
+    let { amount, recipient, publicKey, address } = req.body;
 
     // SANITIZE - REMOVE SCRIPTS/HTML TAGS
     amount = sanitizeHTML(amount, {
@@ -67,16 +67,6 @@ export default class TransactionController {
       allowedTags: [],
       allowedAttributes: {},
     });
-    message &&
-      (message = sanitizeHTML(message, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
-    sendFee &&
-      (sendFee = sanitizeHTML(sendFee, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -124,8 +114,6 @@ export default class TransactionController {
             amount: Number(amount),
             balance,
             localWallet,
-            message,
-            sendFee,
           });
         }
       } else {
@@ -136,8 +124,6 @@ export default class TransactionController {
           chain: blockchain.chain,
           publicKey,
           address,
-          message,
-          sendFee,
         });
       }
     } catch (error) {

@@ -8,7 +8,7 @@
     "test-watch": "jest --colors --watch",
     "test-watchAll": "jest --colors --watchAll",
     "average-work": "nodemon --watch src/ --exec ts-node src/util/average-work.ts",
-    "test-a-file": "nodemon --watch src/ --exec ts-node src/test.ts",
+    "tinker": "nodemon --watch src/ --exec ts-node src/tinker.ts",
     "supply": "nodemon --watch src/ --exec ts-node src/util/supply_reward/index.ts",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "lint": "eslint",

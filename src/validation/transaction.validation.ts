@@ -20,8 +20,6 @@ export const transactValidation = (body: {
     publicKey: Joi.string().trim().required(),
     address: Joi.string().trim().required(),
     token: Joi.string().trim().required(),
-    message: Joi.string().trim().max(160),
-    sendFee: Joi.number().positive(),
   });
 
   return transactSchema.validate(body, { convert: true });

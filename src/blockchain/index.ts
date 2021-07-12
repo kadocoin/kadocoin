@@ -12,7 +12,6 @@ import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
-import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;
@@ -78,11 +77,6 @@ class Blockchain {
       const block = chain[i];
       const transactionSet = new Set();
       let rewardTransactionCount = 0;
-      const totalMiningReward = (
-        Number(new Mining_Reward().calc({ chainLength: this.chain.length }).MINING_REWARD) +
-        Number(totalMsgReward({ transactions: block.transactions })) +
-        Number(totalFeeReward({ transactions: block.transactions }))
-      ).toFixed(8);
 
       for (const transaction of block.transactions) {
         if (transaction.input.address === REWARD_INPUT.address) {
@@ -93,7 +87,10 @@ class Blockchain {
             return false;
           }
 
-          if (Object.values(transaction.output)[0] !== totalMiningReward) {
+          if (
+            Object.values(transaction.output)[0] !==
+            new Mining_Reward().calc({ chainLength: this.chain.length }).MINING_REWARD
+          ) {
             console.error('Miner reward amount is invalid');
             return false;
           }

@@ -51,7 +51,7 @@ export type TTransactions = Array<TTransactionChild>;
  */
 export type TTransactionChild = {
   id: string;
-  output: { [key: string]: string | number };
+  output: { [key: string]: string };
   input: IInput;
 };
 
@@ -108,7 +108,6 @@ export interface ITransaction {
 interface ICommon_Address_PublicKey {
   address: string;
   publicKey: string;
-  message: string;
 }
 /** createInput() PARAM type */
 export interface ICInput extends ICommon_Address_PublicKey {
@@ -130,12 +129,10 @@ export interface ICOutput {
   recipient: string;
   amount: number;
   balance: string;
-  message: string;
-  sendFee: string;
 }
 /** createOutput() RETURN type  */
 export interface ICOutput_R {
-  [key: string]: string | number;
+  [key: string]: string;
 }
 
 /** update() PARAMS type  */
@@ -146,8 +143,6 @@ export interface IUpdate {
   amount: number;
   balance: string;
   localWallet: Wallet;
-  message: string;
-  sendFee: string;
 }
 
 /**

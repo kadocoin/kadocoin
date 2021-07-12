@@ -11,9 +11,8 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
-import costOfMessage from '../util/costOfMessage';
 import { filterAddress } from '../util/get-only-address';
-import { totalFeeReward } from '../util/transaction-metrics';
+import { calcOutputTotal } from '../util/transaction-metrics';
 
 class Transaction {
   public id: string;
@@ -29,18 +28,14 @@ class Transaction {
     input,
     balance,
     localWallet,
-    message,
-    sendFee,
   }: ITransaction) {
     this.id = uuidv1();
-    this.output =
-      output || this.createOutputMap({ address, recipient, amount, balance, message, sendFee });
+    this.output = output || this.createOutputMap({ address, recipient, amount, balance });
     this.input =
-      input ||
-      this.createInput({ publicKey, address, balance, localWallet, output: this.output, message });
+      input || this.createInput({ publicKey, address, balance, localWallet, output: this.output });
   }
 
-  createInput({ publicKey, balance, address, localWallet, output, message }: ICInput): ICInput_R {
+  createInput({ publicKey, balance, address, localWallet, output }: ICInput): ICInput_R {
     return {
       timestamp: Date.now(),
       amount: balance,
@@ -48,162 +43,30 @@ class Transaction {
       publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
-      ...(message && { message }),
     };
   }
 
-  createOutputMap({ address, recipient, amount, balance, message, sendFee }: ICOutput): ICOutput_R {
+  createOutputMap({ address, recipient, amount, balance }: ICOutput): ICOutput_R {
     const output: ICOutput_R = {} as ICOutput_R;
-    const msg_fee = Number(costOfMessage({ message }));
-    const send_fee = sendFee ? Number(sendFee) : 0;
 
-    output[address] = (Number(balance) - amount - msg_fee - send_fee).toFixed(8);
+    output[address] = (Number(balance) - amount).toFixed(8);
     output[recipient] = amount.toFixed(8);
-    message && (output[`msg-fee-${recipient}`] = msg_fee.toFixed(8));
-    sendFee && (output[`send-fee-${recipient}`] = send_fee.toFixed(8));
 
     return output;
   }
 
-  update({
-    publicKey,
-    recipient,
-    amount,
-    balance,
-    address,
-    localWallet,
-    message,
-    sendFee,
-  }: IUpdate): void {
-    const send_fee = sendFee ? Number(sendFee) : 0;
-    const msg_fee = Number(costOfMessage({ message }));
-    const totalAmount = amount + msg_fee; //+ send_fee;
-    const currentSenderBalance = Number(this.output[address]);
-    const currentSendingAmount = amount;
+  update({ publicKey, recipient, amount, balance, address, localWallet }: IUpdate): void {
+    amount = Number(amount);
 
-    if (totalAmount > currentSenderBalance) throw new Error('Insufficient balance');
+    if (amount > Number(this.output[address])) throw new Error('Insufficient balance');
 
-    if (message || sendFee) {
-      if (!this.output[recipient]) {
-        console.log('d');
-        this.output[recipient] = amount.toFixed(8);
-      }
-
-      if (this.output[recipient]) {
-        console.log('e');
-        const recipientOldAmount = Number(this.output[recipient]);
-
-        if (currentSendingAmount > recipientOldAmount) {
-          this.output[address] = (
-            currentSenderBalance +
-            recipientOldAmount -
-            currentSendingAmount
-          ).toFixed(8);
-          this.output[recipient] = currentSendingAmount.toFixed(8);
-        }
-
-        if (currentSendingAmount < recipientOldAmount) {
-          const refund = recipientOldAmount - currentSendingAmount;
-          this.output[address] = (currentSenderBalance + refund).toFixed(8);
-          this.output[recipient] = currentSendingAmount.toFixed(8);
-        }
-      }
-
-      if (message) {
-        console.log('f', message);
-        if (this.output[`msg-fee-${recipient}`]) {
-          const value = Number(this.output[`msg-fee-${recipient}`]);
-
-          if (msg_fee < value) {
-            const refund = value - msg_fee;
-            this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-          }
-
-          if (msg_fee > value) {
-            const remove = msg_fee - value;
-            this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
-          }
-        }
-
-        if (!this.output[`msg-fee-${recipient}`]) {
-          this.output[address] = (Number(this.output[address]) - msg_fee).toFixed(8);
-        }
-
-        // SET NEW MESSAGE FEE
-        this.output[`msg-fee-${recipient}`] = msg_fee.toFixed(8);
-      }
-
-      if (sendFee) {
-        console.log('g', 'sendFee');
-
-        if (this.output[`send-fee-${recipient}`]) {
-          const value = Number(this.output[`send-fee-${recipient}`]);
-
-          if (send_fee < value) {
-            const refund = value - send_fee;
-            this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-          }
-
-          if (send_fee > value) {
-            const remove = send_fee - value;
-            this.output[address] = (Number(this.output[address]) - remove).toFixed(8);
-          }
-        }
-
-        if (!this.output[`send-fee-${recipient}`]) {
-          this.output[address] = (Number(this.output[address]) - send_fee).toFixed(8);
-        }
-
-        // SET NEW SEND FEE
-        this.output[`send-fee-${recipient}`] = send_fee.toFixed(8);
-      }
-
-      // NO MESSAGE - REMOVE PROPERTY AND REFUND
-      if (this.output[`msg-fee-${recipient}`]) {
-        console.log('b');
-
-        const value = Number(this.output[`msg-fee-${recipient}`]);
-        const refund = value - msg_fee;
-        console.log({ value, msg_fee });
-        delete this.output[`msg-fee-${recipient}`];
-        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-      }
-
-      // NO SEND FEE - REMOVE PROPERTY AND REFUND
-      if (this.output[`send-fee-${recipient}`]) {
-        console.log('c');
-        const value = Number(this.output[`send-fee-${recipient}`]);
-        const refund = value - send_fee;
-
-        delete this.output[`send-fee-${recipient}`];
-        this.output[address] = (Number(this.output[address]) + refund).toFixed(8);
-      }
+    if (!this.output[recipient]) {
+      this.output[recipient] = amount.toFixed(8);
     } else {
-      if (!this.output[recipient]) {
-        console.log('d2');
-        this.output[recipient] = amount.toFixed(8);
-      }
-
-      if (this.output[recipient]) {
-        console.log('e2');
-        const recipientOldAmount = Number(this.output[recipient]);
-
-        if (currentSendingAmount > recipientOldAmount) {
-          this.output[address] = (
-            currentSenderBalance +
-            recipientOldAmount -
-            currentSendingAmount
-          ).toFixed(8);
-          this.output[recipient] = currentSendingAmount.toFixed(8);
-        }
-
-        if (currentSendingAmount < recipientOldAmount) {
-          const refund = recipientOldAmount - currentSendingAmount;
-          this.output[address] = (currentSenderBalance + refund).toFixed(8);
-          this.output[recipient] = currentSendingAmount.toFixed(8);
-        }
-      }
+      this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
     }
+
+    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,
@@ -211,27 +74,18 @@ class Transaction {
       balance,
       localWallet,
       output: this.output,
-      message,
     });
   }
 
   static validTransaction(transaction: TTransactionChild): boolean {
     const {
-      input: { address, publicKey, amount, signature, localPublicKey },
+      input: { address, amount, signature, localPublicKey },
       output,
     } = transaction;
 
-    let outputTotal = Object.values(output).reduce(
-      (total: any, outputAmount: any) => Number(total) + Number(outputAmount),
-      0
-    );
-
-    // CONVERT THE SUM TO 8 DECIMAL PLACES
-    if (typeof outputTotal == 'number') outputTotal = outputTotal.toFixed(8);
-
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
-    if (Number(amount) !== Number(outputTotal)) {
-      console.error(`Invalid transaction from ${address} ${publicKey}`);
+    if (Number(amount) !== Number(calcOutputTotal(output))) {
+      console.error(`Invalid transaction from ${address} `);
       return false;
     }
 
