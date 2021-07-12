@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { filterAddress } from '../util/get-only-address';
 import { calcOutputTotal } from '../util/transaction-metrics';
+import Mining_Reward from '../util/supply_reward';
 
 class Transaction {
   public id: string;
@@ -93,16 +94,9 @@ class Transaction {
 
     // CHECK FOR ADDRESS VALIDITY VIA CHECKSUM
     Object.keys(output).map((address: string): boolean => {
-      if (address.length == 42) {
-        if (!isValidChecksumAddress(address)) {
-          console.error(`Invalid address => ${address}`);
-          return false;
-        }
-      } else if (address.length > 42) {
-        if (!isValidChecksumAddress(filterAddress(address))) {
-          console.error(`Invalid address => ${address}`);
-          return false;
-        }
+      if (address.length == 42 && !isValidChecksumAddress(address)) {
+        console.error(`Invalid address => ${address}`);
+        return false;
       } else {
         return false;
       }
@@ -121,16 +115,19 @@ class Transaction {
   static rewardTransaction({
     minerPublicKey,
     message,
+    blockchainLen,
   }: {
     minerPublicKey: string;
-    message: string;
+    message?: string;
+    blockchainLen: number;
   }): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
-    REWARD_INPUT.message = message;
+    message && (REWARD_INPUT.message = message);
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: (50).toFixed(8) },
+      output: { [minerPublicKey]: MINING_REWARD },
     });
   }
 

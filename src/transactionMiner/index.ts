@@ -36,6 +36,7 @@ class TransactionMiner {
         Transaction.rewardTransaction({
           minerPublicKey: this.address,
           message: this.message,
+          blockchainLen: this.blockchain.chain.length,
         })
       );
 

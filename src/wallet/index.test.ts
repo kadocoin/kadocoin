@@ -57,9 +57,9 @@ describe('Wallet', () => {
   describe('createTransaction()', () => {
     describe('and the amount exceeds the balance', () => {
       it('throws an error', () =>
-        expect(() =>
-          wallet.createTransaction({ amount: 1001, recipient: 'anyone', sendFee: '2' })
-        ).toThrow('Insufficient balance'));
+        expect(() => wallet.createTransaction({ amount: 1001, recipient: 'anyone' })).toThrow(
+          'Insufficient balance'
+        ));
     });
 
     describe('and the amount is valid', () => {
@@ -68,7 +68,7 @@ describe('Wallet', () => {
       beforeEach(() => {
         amount = 50;
         recipient = 'kadocoin user address';
-        transaction = wallet.createTransaction({ amount, recipient, sendFee: '2' });
+        transaction = wallet.createTransaction({ amount, recipient });
       });
 
       it('creates an instance of `Transaction`', () => {
@@ -95,7 +95,6 @@ describe('Wallet', () => {
           recipient: 'kadocoin user address',
           amount: 10,
           chain: new Blockchain().chain,
-          sendFee: '2',
         });
 
         expect(calculateBalanceMock).toHaveBeenCalled();
@@ -131,13 +130,11 @@ describe('Wallet', () => {
         transactionOne = new Wallet().createTransaction({
           recipient: wallet.address,
           amount: 50,
-          sendFee: '2',
         });
 
         transactionTwo = new Wallet().createTransaction({
           recipient: wallet.address,
           amount: 60,
-          sendFee: '2',
         });
 
         blockchain.addBlock({ transactions: [transactionOne, transactionTwo] });
@@ -167,7 +164,6 @@ describe('Wallet', () => {
             amount: 30,
             publicKey: wallet.publicKey,
             address: wallet.address,
-            sendFee: '2',
           });
 
           blockchain.addBlock({ transactions: [recentTransaction] });
@@ -192,12 +188,12 @@ describe('Wallet', () => {
               amount: 60,
               publicKey: wallet.address,
               address: wallet.address,
-              sendFee: '2',
             });
 
             sampleBlockTransaction = Transaction.rewardTransaction({
               minerPublicKey: wallet.address,
               message: '',
+              blockchainLen: 0,
             });
 
             blockchain.addBlock({
@@ -209,7 +205,6 @@ describe('Wallet', () => {
               amount: 75,
               publicKey: senderWallet.address,
               address: senderWallet.address,
-              sendFee: '2',
             });
 
             blockchain.addBlock({ transactions: [nextBlockTransaction] });
