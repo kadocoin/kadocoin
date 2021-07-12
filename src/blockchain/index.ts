@@ -12,7 +12,7 @@ import Transaction from '../wallet/transaction';
 import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
-import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
+import { totalFeeReward } from '../util/transaction-metrics';
 
 class Blockchain {
   public chain: IChain;

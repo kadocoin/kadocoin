@@ -205,9 +205,10 @@ describe('Transaction', () => {
       minerWallet = new Wallet();
       chainLength = 10;
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: minerWallet.publicKey,
+        minerPublicKey: minerWallet.address,
         message: '',
         blockchainLen: chainLength,
+        feeReward: '0',
       });
     });
 
@@ -216,7 +217,7 @@ describe('Transaction', () => {
     });
 
     it('creates one transaction for the miner with the `MINING_REWARD`', () => {
-      expect(rewardTransaction.output[minerWallet.publicKey]).toEqual(
+      expect(rewardTransaction.output[minerWallet.address]).toEqual(
         new Mining_Reward().calc({ chainLength }).MINING_REWARD
       );
     });

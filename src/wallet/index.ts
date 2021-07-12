@@ -38,7 +38,7 @@ class Wallet {
     message,
     sendFee,
   }: ICreateTransactionParams): Transaction {
-    const send_fee = Number(sendFee);
+    const send_fee = sendFee ? Number(sendFee) : 0;
     const totalAmount = send_fee + amount;
     // IF CHAIN IS PASSED
     if (chain) this.balance = Wallet.calculateBalance({ chain, address });

@@ -194,6 +194,7 @@ describe('Wallet', () => {
               minerPublicKey: wallet.address,
               message: '',
               blockchainLen: 0,
+              feeReward: '0',
             });
 
             blockchain.addBlock({
