@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { TTransactionChild } from '../types';
+import { REWARD_INPUT, TTransactionChild } from '../types';
 import size from '../util/size';
 
 const INITIAL_DIFFICULTY = 10;
@@ -33,7 +33,7 @@ GENESIS_DATA.blockSize = genesisBlockSize;
 export { GENESIS_DATA };
 
 export const STARTING_BALANCE = 1000;
-export const REWARD_INPUT = {
+const REWARD_INPUT: REWARD_INPUT = {
   timestamp: 1624848894788,
   amount: '',
   address: '',
@@ -41,8 +41,9 @@ export const REWARD_INPUT = {
   localPublicKey: '',
   recipient: '',
   signature: '',
-  message: '',
 };
+
+export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 
 export const swaggerOptions = {

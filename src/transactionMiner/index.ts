@@ -16,7 +16,7 @@ class TransactionMiner {
   public transactionPool: TransactionPool;
   public pubSub: PubSub;
   public address: string;
-  public message: string;
+  public message?: string;
 
   constructor({ blockchain, transactionPool, address, pubSub, message }: ITMinerConstructorParams) {
     this.blockchain = blockchain;
@@ -35,7 +35,7 @@ class TransactionMiner {
       validTransactions.push(
         Transaction.rewardTransaction({
           minerPublicKey: this.address,
-          message: this.message,
+          ...(this.message && { message: this.message }),
           blockchainLen: this.blockchain.chain.length,
         })
       );

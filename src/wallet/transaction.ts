@@ -11,7 +11,6 @@ import {
   IUpdate,
   TTransactionChild,
 } from '../types';
-import { filterAddress } from '../util/get-only-address';
 import { calcOutputTotal } from '../util/transaction-metrics';
 import Mining_Reward from '../util/supply_reward';
 
@@ -62,13 +61,13 @@ class Transaction {
   update({ publicKey, recipient, amount, balance, address, localWallet, message }: IUpdate): void {
     if (amount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
+    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
+
     if (!this.output[recipient]) {
       this.output[recipient] = amount.toFixed(8);
     } else {
       this.output[recipient] = (Number(this.output[recipient]) + amount).toFixed(8);
     }
-
-    this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
 
     this.input = this.createInput({
       publicKey,
