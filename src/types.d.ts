@@ -30,6 +30,7 @@ export interface IInput {
   address: string;
   timestamp: number;
   amount: string;
+  sendFee?: string;
   localPublicKey: string;
   signature: string;
 }

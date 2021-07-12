@@ -11,7 +11,7 @@ import { IChain, TTransactionChild, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
-import { transactionVolume } from '../util/transaction-metrics';
+import { totalFeeReward, transactionVolume } from '../util/transaction-metrics';
 
 class Block {
   public timestamp: number;
@@ -67,6 +67,9 @@ class Block {
       nonce = 0,
       { difficulty } = lastBlock;
     const lastHash = lastBlock.hash;
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: chain.length });
+    const feeReward = totalFeeReward({ transactions });
+    const totalBlockReward = Number(MINING_REWARD) + Number(feeReward);
 
     do {
       nonce++;
@@ -88,7 +91,7 @@ class Block {
       hash,
       blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
       transactionVolume: transactionVolume({ transactions }),
-      blockReward: new Mining_Reward().calc({ chainLength: chain.length }).MINING_REWARD,
+      blockReward: totalBlockReward.toFixed(8),
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
     });
   }

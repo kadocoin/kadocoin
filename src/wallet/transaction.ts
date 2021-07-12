@@ -153,10 +153,8 @@ class Transaction {
 
     // CHECK FOR ADDRESS VALIDITY VIA CHECKSUM
     Object.keys(output).map((address: string): boolean => {
-      if (address.length == 42 && !isValidChecksumAddress(address)) {
+      if (!isValidChecksumAddress(address)) {
         console.error(`Invalid address => ${address}`);
-        return false;
-      } else {
         return false;
       }
     });
@@ -175,18 +173,21 @@ class Transaction {
     minerPublicKey,
     message,
     blockchainLen,
+    feeReward,
   }: {
     minerPublicKey: string;
     message?: string;
+    feeReward?: string;
     blockchainLen: number;
   }): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
     message && (REWARD_INPUT.message = message);
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });
+    const rewardTotal = Number(MINING_REWARD) + Number(feeReward);
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: MINING_REWARD },
+      output: { [minerPublicKey]: rewardTotal.toFixed(8) },
     });
   }
 

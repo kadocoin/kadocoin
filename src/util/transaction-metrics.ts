@@ -46,12 +46,8 @@ export function totalFeeReward({ transactions }: { transactions: TTransactions }
   for (let i = 0; i < transactions.length; i++) {
     const transaction = transactions[i];
 
-    for (const prop in transaction['output']) {
-      if (
-        prop.substring(0, 9) ==
-        'send-fee-' /** example - "send-fee-0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD" */
-      )
-        totalFeeReward += Number(transaction['output'][prop]);
+    for (const prop in transaction['input']) {
+      if (prop === 'sendFee') totalFeeReward += Number(transaction['input'][prop]);
     }
   }
 
