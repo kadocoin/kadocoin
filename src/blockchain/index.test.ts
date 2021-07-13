@@ -236,7 +236,9 @@ describe('Blockchain', () => {
       it('returns true', () => {
         newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
-        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(true);
+        expect(
+          blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
+        ).toBe(true);
         expect(errorMock).not.toHaveBeenCalled();
       });
     });
@@ -246,7 +248,9 @@ describe('Blockchain', () => {
         newChain.addBlock({
           transactions: [transaction, rewardTransaction, rewardTransaction],
         });
-        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+        expect(
+          blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
+        ).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });
@@ -258,7 +262,9 @@ describe('Blockchain', () => {
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
-          expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+          expect(
+            blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
+          ).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
       });
@@ -269,7 +275,9 @@ describe('Blockchain', () => {
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
-          expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+          expect(
+            blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
+          ).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
       });
@@ -281,7 +289,9 @@ describe('Blockchain', () => {
           transactions: [transaction, transaction, transaction],
         });
 
-        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+        expect(
+          blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
+        ).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });
