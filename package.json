@@ -11,11 +11,11 @@
     "tinker": "nodemon --watch src/ --exec ts-node src/tinker.ts",
     "supply": "nodemon --watch src/ --exec ts-node src/util/supply_reward/index.ts",
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
-    "lint": "eslint",
+    "lint": "eslint --ext .ts --fix",
     "lint:fix": "eslint . --fix",
     "start": "node dist/server.js",
     "build": "tsc --build",
-    "test": "jest --passWithNoTests --bail",
+    "test": "jest --bail --findRelatedTests",
     "prepare-husky": "husky install",
     "format": "prettier --write",
     "license": "license-check-and-add add -f license.config.json"
