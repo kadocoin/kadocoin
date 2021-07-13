@@ -10,7 +10,7 @@ import size from '../util/size';
 
 const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 5000;
-export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.com';
+export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.org';
 
 const transactions: Array<TTransactionChild> = [];
 const GENESIS_DATA = {
@@ -46,6 +46,10 @@ const REWARD_INPUT: REWARD_INPUT = {
 export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 
+const ENVIRONMENT = process.env.NODE_ENV || 'development';
+const prod = ENVIRONMENT === 'production';
+const HOST = prod ? 'kadocoin.org' : 'localhost:2000';
+
 export const swaggerOptions = {
   swaggerDefinition: {
     info: {
@@ -59,11 +63,11 @@ export const swaggerOptions = {
       },
       license: {
         name: 'MIT',
-        url: 'https://kadocoin.com/license',
+        url: 'https://kadocoin.org/license',
       },
     },
     externalDocs: {
-      url: 'https://kadocoin.com/terms',
+      url: 'https://kadocoin.org/terms',
       description: 'Terms of Use',
     },
     consumes: ['application/json'],
@@ -76,13 +80,17 @@ export const swaggerOptions = {
       deepLinking: false,
     },
     staticCSP: true,
-    host: 'localhost:2000',
+    host: HOST,
     basePath: '/',
     produces: ['application/json', 'application/xml'],
     schemes: ['http', 'https'],
   },
   basedir: __dirname,
-  apis: ['./src/routes/userRouter.router.ts'], //Path to the API route handle folder
+  apis: [
+    './src/routes/user.router.ts',
+    './src/routes/block.router.ts',
+    './src/routes/transaction.router.ts',
+  ], //Path to the API route handle folder
 };
 
 export const sampleDataForTests = {

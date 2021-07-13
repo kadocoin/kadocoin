@@ -44,6 +44,60 @@ export default class TransactionRouter {
   }
 
   initRoute(): void {
+    /**
+     * @swagger
+     * /api/transact:
+     *  post:
+     *    description: API for making a transaction
+     *    tags:
+     *     - Transact
+     *    consumes:
+     *    - application/json
+     *    produces:
+     *    - application/json
+     *    parameters:
+     *    - in: body
+     *      name: Transaction API
+     *      schema:
+     *        $ref: '#/definitions/Transact'
+     *    responses:
+     *        200:
+     *            description: success
+     *        400:
+     *            description: bad request
+     *        500:
+     *            description: internal server error
+     * definitions:
+     *    Transact:
+     *        type: object
+     *        required:
+     *        - amount
+     *        - recipient
+     *        - publicKey
+     *        - address
+     *        - message
+     *        - sendFee
+     *        properties:
+     *            amount:
+     *                type: string
+     *                example: '50'
+     *             recipient:
+     *                type: string
+     *                example: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD'
+     *             publicKey:
+     *                type: string
+     *                example: '0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4'
+     *             address:
+     *                type: string
+     *                example: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD'
+     *             message:
+     *                type: string
+     *                example: 'Hello, World!'
+     *             sendFee:
+     *                type: string
+     *                example: '0.001'
+     *
+     */
     this.app.post(
       '/api/transact',
       /**mustBeLoggedIn, */ walletMiddleWare(this.localWallet),
