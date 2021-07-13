@@ -50,7 +50,12 @@ class PubSub {
 
     switch (channel) {
       case CHANNELS.BLOCKCHAIN:
-        this.blockchain.replaceChain(parsedMessage, true, () => {
+        console.log({
+          parsedMessageLen: parsedMessage.length,
+          blockchainLen: this.blockchain.chain.length,
+        });
+
+        this.blockchain.replaceChain(parsedMessage, true, this.blockchain.chain.length, () => {
           this.transactionPool.clearBlockchainTransactions({
             chain: parsedMessage,
           });

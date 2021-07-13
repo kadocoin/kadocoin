@@ -42,6 +42,7 @@ class Blockchain {
   replaceChain(
     incomingChain: IChain,
     validateTransactions?: boolean,
+    localBlockchainLen?: number,
     onSuccess?: () => void
   ): void {
     if (
@@ -53,12 +54,15 @@ class Blockchain {
       return;
     }
 
-    if (!Blockchain.isValidChain(incomingChain)) {
+    if (!Blockchain.isValidChain(incomingChain, localBlockchainLen)) {
       console.error('The incoming chain must be valid.');
       return;
     }
 
-    if (validateTransactions && !this.validTransactionData({ chain: incomingChain })) {
+    if (
+      validateTransactions &&
+      !this.validTransactionData({ chain: incomingChain, localBlockchainLen })
+    ) {
       console.error('The incoming chain has an invalid transaction');
       return;
     }
@@ -73,11 +77,23 @@ class Blockchain {
     );
   }
 
-  validTransactionData({ chain }: { chain: IChain }): boolean {
-    for (let i = 1; i < chain.length; i++) {
-      const block = chain[i];
-      const transactionSet = new Set();
+  validTransactionData({
+    chain,
+    localBlockchainLen,
+  }: {
+    chain: IChain;
+    localBlockchainLen: number;
+  }): boolean {
+    const blocksToValidated = chain.slice(localBlockchainLen - 1);
+    console.log('----validTransactionData', {
+      blocksToValidatedLen: blocksToValidated.length,
+      localBlockchainLen,
+    });
+
+    for (let i = 1; i < blocksToValidated.length; i++) {
       let rewardTransactionCount = 0;
+      const block = blocksToValidated[i];
+      const transactionSet = new Set();
       const feeReward = totalFeeReward({ transactions: block.transactions });
       const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: this.chain.length });
       const totalReward = (Number(MINING_REWARD) + Number(feeReward)).toFixed(8);
@@ -115,14 +131,20 @@ class Blockchain {
     return true;
   }
 
-  static isValidChain(chain: IChain): boolean {
+  static isValidChain(chain: IChain, localBlockchainLen?: number): boolean {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
 
-    for (let i = 1; i < chain.length; i++) {
-      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
-      const previousHash = chain[i - 1].hash;
+    const blocksToValidated = chain.slice(localBlockchainLen - 1);
+    console.log('----isValidChain', {
+      blocksToValidatedLen: blocksToValidated.length,
+      localBlockchainLen,
+    });
+
+    for (let i = 1; i < blocksToValidated.length; i++) {
+      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = blocksToValidated[i];
+      const previousHash = blocksToValidated[i - 1].hash;
       const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
-      const lastDifficulty = chain[i - 1].difficulty;
+      const lastDifficulty = blocksToValidated[i - 1].difficulty;
 
       if (previousHash !== lastHash) return false;
 

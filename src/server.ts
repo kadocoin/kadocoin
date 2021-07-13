@@ -66,7 +66,8 @@ const syncWithRootState = () => {
 
       console.log('Replacing your LOCAL blockchain with the consensus blockchain');
       console.log('working on it.................');
-      blockchain.replaceChain(rootChain);
+
+      blockchain.replaceChain(rootChain, undefined, blockchain.chain.length);
 
       // UPDATE MINING_REWARD
       const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
@@ -87,7 +88,7 @@ const syncWithRootState = () => {
         console.log('No new transaction coming in from the network');
       // NOT EMPTY
       if (!isEmptyObject(rootTransactionPoolMap)) {
-        console.log('Adding latest unconfirmed TRANSACTIONS to your node', rootTransactionPoolMap);
+        console.log('Adding latest unconfirmed TRANSACTIONS to your node');
         console.log('working on it.................');
         transactionPool.setMap(rootTransactionPoolMap);
         console.log('Done!');
