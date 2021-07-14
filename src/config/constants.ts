@@ -59,7 +59,7 @@ export const swaggerOptions = {
       contact: {
         name: 'Adamu Muhammad Dankore',
         url: 'https://dankore.com',
-        email: 'adamu@kadocoin.com',
+        email: 'adamu.dankore@gmail.com',
       },
       license: {
         name: 'MIT',
@@ -71,10 +71,6 @@ export const swaggerOptions = {
       description: 'Terms of Use',
     },
     consumes: ['application/json'],
-    tags: [
-      { name: 'Registration', description: 'API' },
-      { name: 'Login', description: 'API' },
-    ],
     uiConfig: {
       docExpansion: 'full',
       deepLinking: false,
@@ -83,14 +79,9 @@ export const swaggerOptions = {
     host: HOST,
     basePath: '/',
     produces: ['application/json', 'application/xml'],
-    schemes: ['http', 'https'],
   },
   basedir: __dirname,
-  apis: [
-    './src/routes/*.ts',
-    // './src/routes/block.router.ts',
-    // './src/routes/transaction.router.ts',
-  ], //Path to the API route handle folder
+  apis: ['./src/routes/*.ts'], //Path to the API route handle folder
 };
 
 export const sampleDataForTests = {

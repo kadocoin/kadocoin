@@ -58,7 +58,7 @@ export default class TransactionRouter {
      *    - in: body
      *      name: Transaction API
      *      schema:
-     *        $ref: '#/definitions/transaction'
+     *        $ref: '#/definitions/Transaction'
      *    responses:
      *        201:
      *            description: success
@@ -67,7 +67,7 @@ export default class TransactionRouter {
      *        500:
      *            description: internal server error
      * definitions:
-     *    transaction:
+     *    Transaction:
      *        type: object
      *        required:
      *        - amount
@@ -139,7 +139,7 @@ export default class TransactionRouter {
      *    - in: body
      *      name: Transactions Validation API
      *      schema:
-     *        $ref: '#/definitions/mine-transactions'
+     *        $ref: '#/definitions/Validate Transactions - AKA Mining'
      *    responses:
      *        200:
      *            description: success
@@ -148,7 +148,7 @@ export default class TransactionRouter {
      *        500:
      *            description: internal server error
      * definitions:
-     *    mine-transactions:
+     *    Validate Transactions - AKA Mining:
      *        type: object
      *        required:
      *        - address
