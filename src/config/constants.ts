@@ -87,9 +87,9 @@ export const swaggerOptions = {
   },
   basedir: __dirname,
   apis: [
-    './src/routes/user.router.ts',
-    './src/routes/block.router.ts',
-    './src/routes/transaction.router.ts',
+    './src/routes/*.ts',
+    // './src/routes/block.router.ts',
+    // './src/routes/transaction.router.ts',
   ], //Path to the API route handle folder
 };
 

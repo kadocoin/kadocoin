@@ -50,7 +50,7 @@ export default class TransactionRouter {
      *  post:
      *    description: API for making a transaction
      *    tags:
-     *     - Transact
+     *     - Transaction
      *    consumes:
      *    - application/json
      *    produces:
@@ -59,7 +59,61 @@ export default class TransactionRouter {
      *    - in: body
      *      name: Transaction API
      *      schema:
-     *        $ref: '#/definitions/Transact'
+     *        $ref: '#/definitions/transaction'
+     *    responses:
+     *        201:
+     *            description: success
+     *        400:
+     *            description: bad request
+     *        500:
+     *            description: internal server error
+     * definitions:
+     *    transaction:
+     *        type: object
+     *        required:
+     *        - amount
+     *        - recipient
+     *        - publicKey
+     *        - address
+     *        properties:
+     *            amount:
+     *                type: string
+     *                example: 50
+     *            recipient:
+     *                type: string
+     *                example: '0xf13C09968D48271991018A956C49940c41eCb1c3'
+     *            publicKey:
+     *                type: string
+     *                example: '0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4'
+     *            address:
+     *                type: string
+     *                example: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD'
+     *            message:
+     *                type: string
+     *                example: 'Hello World'
+     *            sendFee:
+     *                type: string
+     *                example: '0.0003'
+     */
+    this.app.post(
+      '/api/transact',
+      walletMiddleWare(this.localWallet),
+      transactionPoolMiddleWare(this.transactionPool),
+      blockchainMiddleWare(this.blockchain),
+      pubSubMiddleWare(this.pubSub),
+      this.transactionController.make
+    );
+    /**
+     * @swagger
+     * /api/transaction-pool-map:
+     *  get:
+     *    description: Get all transactions in the transaction pool
+     *    tags:
+     *     - Transaction Pool
+     *    consumes:
+     *    - application/json
+     *    produces:
+     *    - application/json
      *    responses:
      *        200:
      *            description: success
@@ -68,52 +122,61 @@ export default class TransactionRouter {
      *        500:
      *            description: internal server error
      * definitions:
-     *    Transact:
+     *    transaction-pool:
      *        type: object
      *        required:
-     *        - amount
-     *        - recipient
-     *        - publicKey
      *        - address
-     *        - message
-     *        - sendFee
      *        properties:
-     *            amount:
+     *            address:
      *                type: string
-     *                example: '50'
-     *             recipient:
+     *                example: '0xf13C09968D48271991018A956C49940c41eCb1c3'
+     *            message:
      *                type: string
-     *                example: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD'
-     *             publicKey:
-     *                type: string
-     *                example: '0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4'
-     *             address:
-     *                type: string
-     *                example: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD'
-     *             message:
-     *                type: string
-     *                example: 'Hello, World!'
-     *             sendFee:
-     *                type: string
-     *                example: '0.001'
-     *
+     *                example: 'Kadocoin to the Galaxies!'
      */
-    this.app.post(
-      '/api/transact',
-      /**mustBeLoggedIn, */ walletMiddleWare(this.localWallet),
-      transactionPoolMiddleWare(this.transactionPool),
-      blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
-      this.transactionController.make
-    );
     this.app.get(
       '/api/transaction-pool-map',
       transactionPoolMiddleWare(this.transactionPool),
       this.transactionController.poolMap
     );
+    /**
+     * @swagger
+     * /api/mine-transactions:
+     *  post:
+     *    description: Validate transactions in the transaction pool A.K.A. mining
+     *    tags:
+     *     - Mine Transactions
+     *    consumes:
+     *    - application/json
+     *    produces:
+     *    - application/json
+     *    parameters:
+     *    - in: body
+     *      name: Transactions Validation API
+     *      schema:
+     *        $ref: '#/definitions/mine-transactions'
+     *    responses:
+     *        200:
+     *            description: success
+     *        400:
+     *            description: bad request
+     *        500:
+     *            description: internal server error
+     * definitions:
+     *    mine-transactions:
+     *        type: object
+     *        required:
+     *        - address
+     *        properties:
+     *            address:
+     *                type: string
+     *                example: '0xf13C09968D48271991018A956C49940c41eCb1c3'
+     *            message:
+     *                type: string
+     *                example: 'Kadocoin to the Galaxies!'
+     */
     this.app.post(
       '/api/mine-transactions',
-      mustBeLoggedIn,
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
       pubSubMiddleWare(this.pubSub),
