@@ -71,16 +71,12 @@ export const swaggerOptions = {
       description: 'Terms of Use',
     },
     consumes: ['application/json'],
-    uiConfig: {
-      docExpansion: 'full',
-      deepLinking: false,
-    },
+    schemes: ['http', 'https'],
     host: HOST,
     basePath: '/',
     produces: ['application/json', 'application/xml'],
   },
   basedir: __dirname,
-  schemes: ['http', 'https'],
   apis: ['./src/routes/*.ts', './dist/routes/*.js'], //Path to the API route handle folder
 };
 
