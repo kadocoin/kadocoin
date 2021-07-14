@@ -14,7 +14,6 @@ import {
   transactionPoolMiddleWare,
   walletMiddleWare,
 } from '../middleware/cryptoMiddleWare';
-import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 import PubSub from '../pubSub';
 import Wallet from '../wallet';
 import TransactionPool from '../wallet/transaction-pool';
@@ -50,7 +49,7 @@ export default class TransactionRouter {
      *  post:
      *    description: API for making a transaction
      *    tags:
-     *     - Transaction
+     *     - Make a Transaction
      *    consumes:
      *    - application/json
      *    produces:
@@ -105,7 +104,7 @@ export default class TransactionRouter {
     );
     /**
      * @swagger
-     * /api/transaction-pool-map:
+     * /api/transaction-pool:
      *  get:
      *    description: Get all transactions in the transaction pool
      *    tags:
@@ -117,27 +116,13 @@ export default class TransactionRouter {
      *    responses:
      *        200:
      *            description: success
-     *        400:
-     *            description: bad request
      *        500:
      *            description: internal server error
-     * definitions:
-     *    transaction-pool:
-     *        type: object
-     *        required:
-     *        - address
-     *        properties:
-     *            address:
-     *                type: string
-     *                example: '0xf13C09968D48271991018A956C49940c41eCb1c3'
-     *            message:
-     *                type: string
-     *                example: 'Kadocoin to the Galaxies!'
      */
     this.app.get(
-      '/api/transaction-pool-map',
+      '/api/transaction-pool',
       transactionPoolMiddleWare(this.transactionPool),
-      this.transactionController.poolMap
+      this.transactionController.transactionPool
     );
     /**
      * @swagger

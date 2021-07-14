@@ -155,7 +155,7 @@ export default class TransactionController {
     return res.status(CREATED).json({ type: 'success', transaction });
   };
 
-  poolMap = (req: Request, res: Response): Response | undefined => {
+  transactionPool = (req: Request, res: Response): Response | undefined => {
     try {
       const { transactionPool } = req;
 
