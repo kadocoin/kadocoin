@@ -50,6 +50,7 @@ export default class TransactionRouter {
      *    description: API for making a transaction
      *    tags:
      *     - Make a Transaction
+     *    summary: "Sends Kadocoin to the recipient address"
      *    consumes:
      *    - application/json
      *    produces:
@@ -109,6 +110,7 @@ export default class TransactionRouter {
      *    description: Get all transactions in the transaction pool
      *    tags:
      *     - Transaction Pool
+     *    summary: "Get all transactions in the transaction pool"
      *    consumes:
      *    - application/json
      *    produces:
@@ -131,6 +133,7 @@ export default class TransactionRouter {
      *    description: Validate transactions in the transaction pool A.K.A. mining
      *    tags:
      *     - Mine Transactions
+     *    summary: "Validate transactions in the transaction pool"
      *    consumes:
      *    - application/json
      *    produces:

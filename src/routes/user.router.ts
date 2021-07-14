@@ -33,6 +33,7 @@ export default class UserRouter {
      *    description: API for registering users
      *    tags:
      *     - Registration
+     *    summary: "Adds a new user"
      *    consumes:
      *    - application/json
      *    produces:
@@ -74,6 +75,7 @@ export default class UserRouter {
      *    description: API for wallet information
      *    tags:
      *     - Wallet
+     *    summary: "Returns wallet information e.g balance"
      *    consumes:
      *    - application/json
      *    produces:
@@ -116,6 +118,7 @@ export default class UserRouter {
      *    description: API for authenticating users
      *    tags:
      *     - Login
+     *    summary: "Logs in a user"
      *    consumes:
      *    - application/json
      *    produces:
