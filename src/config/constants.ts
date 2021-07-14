@@ -76,7 +76,6 @@ export const swaggerOptions = {
       deepLinking: false,
     },
     staticCSP: true,
-    host: HOST,
     basePath: '/',
     produces: ['application/json', 'application/xml'],
   },
