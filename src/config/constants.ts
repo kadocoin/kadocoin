@@ -48,7 +48,7 @@ export const COINS_IN_CIRCULATION = 0;
 
 const ENVIRONMENT = process.env.NODE_ENV || 'development';
 const prod = ENVIRONMENT === 'production';
-const HOST = prod ? 'kadocoin.org' : 'localhost:2000';
+const HOST = prod ? 'api.kadocoin.org' : 'localhost:2000';
 
 export const swaggerOptions = {
   swaggerDefinition: {
