@@ -75,12 +75,12 @@ export const swaggerOptions = {
       docExpansion: 'full',
       deepLinking: false,
     },
-    staticCSP: true,
     host: HOST,
     basePath: '/',
     produces: ['application/json', 'application/xml'],
   },
   basedir: __dirname,
+  schemes: ['http', 'https'],
   apis: ['./src/routes/*.ts', './dist/routes/*.js'], //Path to the API route handle folder
 };
 

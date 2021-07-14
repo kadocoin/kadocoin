@@ -2,7 +2,7 @@ name: Publish and Deploy Docker image to Caprover
 
 on:
   push:
-    branches: ['main']
+    branches: ['development']
 
 jobs:
   deploy_to_caprover:
