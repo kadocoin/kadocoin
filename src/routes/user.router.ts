@@ -44,11 +44,11 @@ export default class UserRouter {
      *        $ref: '#/definitions/Register'
      *    responses:
      *        200:
-     *            description: It's ok and user logged successfully
+     *            description: success
      *        400:
-     *            description: It's bad request
+     *            description: bad request
      *        500:
-     *            description: It's internal server error
+     *            description: internal server error
      * definitions:
      *    Register:
      *        type: object
@@ -66,6 +66,42 @@ export default class UserRouter {
      *
      */
     this.app.post('/api/register', this.UserController.register);
+
+    /**
+     * @swagger
+     * /api/wallet-info:
+     *  post:
+     *    description: API for wallet information
+     *    tags:
+     *     - Wallet
+     *    consumes:
+     *    - application/json
+     *    produces:
+     *    - application/json
+     *    parameters:
+     *    - in: body
+     *      name: Wallet API
+     *      schema:
+     *        $ref: '#/definitions/Wallet'
+     *    responses:
+     *        200:
+     *            description: ok
+     *        400:
+     *            description: bad request
+     *        500:
+     *            description: internal server error
+     * definitions:
+     *    Wallet:
+     *        type: object
+     *        required:
+     *        - address
+     *        properties:
+     *            address:
+     *                type: string
+     *                example: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD'
+     *
+     *
+     */
     this.app.post(
       '/api/wallet-info',
       mustBeLoggedIn,
@@ -91,11 +127,11 @@ export default class UserRouter {
      *        $ref: '#/definitions/Login'
      *    responses:
      *        200:
-     *            description: It's ok and user logged successfully
+     *            description: success
      *        400:
-     *            description: It's bad request
+     *            description: bad request
      *        500:
-     *            description: It's internal server error
+     *            description: internal server error
      * definitions:
      *    Login:
      *        type: object

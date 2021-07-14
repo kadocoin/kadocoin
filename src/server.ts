@@ -11,9 +11,9 @@ import request from 'request';
 import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
 import 'dotenv/config';
 import { Request, Response, NextFunction } from 'express';
-import UserRouter from './routes/userRouter.router';
+import UserRouter from './routes/user.router';
 import ExpressMiddleWares from './middleware/expressMiddlewares';
-import TransactionRouter from './routes/transactionRouter.router';
+import TransactionRouter from './routes/transaction.router';
 import Database from './middleware/database';
 import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
@@ -79,7 +79,7 @@ const syncWithRootState = () => {
     }
   });
 
-  request({ url: `${ROOT_NODE_ADDRESS}/api/transaction-pool-map` }, (error, response, body) => {
+  request({ url: `${ROOT_NODE_ADDRESS}/api/transaction-pool` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const rootTransactionPoolMap = JSON.parse(body);
 
@@ -94,7 +94,7 @@ const syncWithRootState = () => {
         console.log('Done!');
       }
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool-map`, error);
+      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool`, error);
     }
   });
 };

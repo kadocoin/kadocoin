@@ -20,7 +20,6 @@ export const transactValidation = (body: {
     recipient: Joi.string().trim().required(),
     publicKey: Joi.string().trim().required(),
     address: Joi.string().trim().required(),
-    token: Joi.string().trim().required(),
     sendFee: Joi.number().positive(),
     message: Joi.string().trim().max(160),
   });
@@ -32,7 +31,6 @@ export const mineValidation = (body: { address: string; message: string }): Vali
   const mineSchema = Joi.object().keys({
     address: Joi.string().trim().required(),
     message: Joi.string().trim().max(160),
-    token: Joi.string().trim().required(),
   });
 
   return mineSchema.validate(body);
