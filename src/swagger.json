@@ -32,11 +32,11 @@
       }
     },
     {
-      "name": "blockchain",
+      "name": "Blockchain",
       "description": "Access to blockchain"
     },
     {
-      "name": "user",
+      "name": "User",
       "description": "Operations about user",
       "externalDocs": {
         "description": "Find out more about our store",
@@ -51,7 +51,6 @@
           "Transaction"
         ],
         "summary": "Add a new pet to the store",
-        "operationId": "addPet",
         "requestBody": {
           "description": "Transaction object that needs to be added to the blockchain",
           "content": {
@@ -139,7 +138,7 @@
     "/api/register": {
       "post": {
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Create user",
         "description": "This can only be done by the logged in user.",
@@ -168,15 +167,14 @@
     "/user/login": {
       "get": {
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Logs user into the system",
-        "operationId": "loginUser",
         "parameters": [
           {
-            "name": "username",
-            "in": "query",
-            "description": "The user name for login",
+            "name": "email",
+            "in": "path",
+            "description": "The email for login",
             "required": true,
             "schema": {
               "type": "string"
@@ -184,7 +182,7 @@
           },
           {
             "name": "password",
-            "in": "query",
+            "in": "path",
             "description": "The password for login in clear text",
             "required": true,
             "schema": {
@@ -194,39 +192,13 @@
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
-            "headers": {
-              "X-Rate-Limit": {
-                "description": "calls per hour allowed by the user",
-                "schema": {
-                  "type": "integer",
-                  "format": "int32"
-                }
-              },
-              "X-Expires-After": {
-                "description": "date in UTC when token expires",
-                "schema": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              }
-            },
-            "content": {
-              "application/xml": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "success"
           },
           "400": {
-            "description": "Invalid username/password supplied",
-            "content": {}
+            "description": "bad request"
+          },
+          "500": {
+            "description": "internal server error"
           }
         },
         "x-swagger-router-controller": "User"
@@ -256,17 +228,16 @@
       "User": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "username": {
+          "_id": {
             "type": "string"
           },
-          "firstName": {
+          "address": {
             "type": "string"
           },
-          "lastName": {
+          "publicKey": {
+            "type": "string"
+          },
+          "bio": {
             "type": "string"
           },
           "email": {
@@ -275,24 +246,21 @@
           "password": {
             "type": "string"
           },
-          "phone": {
-            "type": "string"
+          "scope": {
+            "type": "array"
           },
-          "userStatus": {
-            "type": "integer",
-            "description": "User Status",
-            "format": "int32"
+          "registrationMethod": {
+            "type": "string",
+            "description": "Example - email/password, Google, Facebook etc"
           }
         },
         "example": {
-          "firstName": "firstName",
-          "lastName": "lastName",
-          "password": "password",
-          "userStatus": 6,
-          "phone": "phone",
-          "id": 0,
-          "email": "email",
-          "username": "username"
+          "_id": "sOUiiU_Ol9ma",
+          "name": "Name",
+          "address": "0xf13C09968D48271991018A956C49940c41eCb1c3",
+          "publicKey": "0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4",
+          "bio": "Kadocoin is a peer-2-peer digital currencies",
+          "scope": "admin"
         },
         "xml": {
           "name": "User"

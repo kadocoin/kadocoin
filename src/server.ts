@@ -22,12 +22,10 @@ import Wallet from './wallet';
 import isEmptyObject from './util/isEmptyObject';
 import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
-import { swaggerOptions } from './config/constants';
+// import swaggerJsdoc from 'swagger-jsdoc';
+// import { swaggerOptions } from './config/constants';
 import Mining_Reward from './util/supply_reward';
 import * as swaggerDocument from './swagger.json';
-
-const swaggerSpecification = swaggerJsdoc(swaggerOptions);
 
 /**
  * @var localWallet - signs and verifies transactions on this node
