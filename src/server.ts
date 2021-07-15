@@ -25,6 +25,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import { swaggerOptions } from './config/constants';
 import Mining_Reward from './util/supply_reward';
+import * as swaggerDocument from './swagger.json';
 
 const swaggerSpecification = swaggerJsdoc(swaggerOptions);
 
@@ -101,7 +102,7 @@ const syncWithRootState = () => {
 
 app.use(initializeMiddleWares);
 app.use(initializeRoutes);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(PORT, () => {
   syncWithRootState();
