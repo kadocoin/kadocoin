@@ -50,7 +50,6 @@
     "redis": "^3.1.2",
     "request": "^2.88.2",
     "sanitize-html": "^2.4.0",
-    "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.1.6",
     "typescript": "^3.7.4",
     "uuid": "^8.3.2",
