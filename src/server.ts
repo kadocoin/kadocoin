@@ -37,7 +37,6 @@ const blockchain = new Blockchain();
 /**
  * @var transactionPool app wide variable
  */
-// TODO - SORT BY MOST REWARD
 const transactionPool = new TransactionPool();
 /**
  * @var pubSub app wide variable

@@ -6,11 +6,11 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { createClient } from 'redis';
-import { REDIS_URL, REDIS_PASSWORD } from './secret';
+import { REDIS_URL, REDIS_PASSWORD, REDIS_PORT } from './secret';
 
-export const redisClientPub = createClient(6379, REDIS_URL, {
+export const redisClientPub = createClient(REDIS_PORT, REDIS_URL, {
   password: REDIS_PASSWORD as string,
 });
-export const redisClientSub = createClient(6379, REDIS_URL, {
+export const redisClientSub = createClient(REDIS_PORT, REDIS_URL, {
   password: REDIS_PASSWORD as string,
 });
