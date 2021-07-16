@@ -30,6 +30,7 @@ export class BlockRouter {
      *    description: Get all blocks in the blockchain. The blockchain consists of blocks.
      *    tags:
      *     - Blocks in the blockchain
+     *    summary: "Returns the blockchain which contain all validated blocks"
      *    consumes:
      *    - application/json
      *    produces:
@@ -53,6 +54,7 @@ export class BlockRouter {
      *    description: Get a specific block in the blockchain using its hash.
      *    tags:
      *     - Get a Specific Block in the Blockchain
+     *    summary: "Returns a specific block in the blockchain"
      *    consumes:
      *    - application/json
      *    produces:
