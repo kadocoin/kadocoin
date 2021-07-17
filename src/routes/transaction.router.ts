@@ -44,7 +44,7 @@ export default class TransactionRouter {
 
   initRoute(): void {
     this.app.post(
-      '/api/transact',
+      '/transact',
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
@@ -53,13 +53,13 @@ export default class TransactionRouter {
     );
 
     this.app.get(
-      '/api/transaction-pool',
+      '/transaction-pool',
       transactionPoolMiddleWare(this.transactionPool),
       this.transactionController.transactionPool
     );
 
     this.app.post(
-      '/api/mine-transactions',
+      '/mine-transactions',
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
       pubSubMiddleWare(this.pubSub),
