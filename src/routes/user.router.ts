@@ -24,17 +24,17 @@ export default class UserRouter {
   }
 
   initRoute(): void {
-    this.app.post('/api/doesEmailExists', this.UserController.doesEmailExists);
+    this.app.post('/doesEmailExists', this.UserController.doesEmailExists);
 
-    this.app.post('/api/register', this.UserController.register);
+    this.app.post('/register', this.UserController.register);
 
     this.app.post(
-      '/api/wallet-info',
+      '/wallet-info',
       mustBeLoggedIn,
       blockchainMiddleWare(this.blockchain),
       this.UserController.walletInfo
     );
 
-    this.app.post('/api/login', this.UserController.login);
+    this.app.post('/login', this.UserController.login);
   }
 }

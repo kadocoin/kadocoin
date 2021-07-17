@@ -23,59 +23,10 @@ export class BlockRouter {
   }
 
   initRoute(): void {
-    /**
-     * @swagger
-     * /api/blocks:
-     *  get:
-     *    description: Get all blocks in the blockchain. The blockchain consists of blocks.
-     *    tags:
-     *     - Blocks in the blockchain
-     *    summary: "Returns the blockchain which contain all validated blocks"
-     *    consumes:
-     *    - application/json
-     *    produces:
-     *    - application/json
-     *    responses:
-     *        200:
-     *            description: success
-     *        500:
-     *            description: internal server error
-     */
-    this.app.get(
-      '/api/blocks',
-      blockchainMiddleWare(this.blockchain),
-      this.blockController.getBlocks
-    );
-
-    /**
-     * @swagger
-     * /api/block/:blockHash:
-     *  get:
-     *    description: Get a specific block in the blockchain using its hash.
-     *    tags:
-     *     - Get a Specific Block in the Blockchain
-     *    summary: "Returns a specific block in the blockchain"
-     *    consumes:
-     *    - application/json
-     *    produces:
-     *    - application/json
-     *    parameters:
-     *    - in: path
-     *    name: blockHash
-     *    required: true
-     *    schema:
-     *     type: string
-     *    responses:
-     *        200:
-     *            description: success
-     *        400:
-     *            description: not found
-     *        500:
-     *            description: internal server error
-     */
+    this.app.get('/blocks', blockchainMiddleWare(this.blockchain), this.blockController.getBlocks);
 
     this.app.get(
-      '/api/block/:blockHash',
+      '/block/:blockHash',
       blockchainMiddleWare(this.blockchain),
       this.blockController.getABlock
     );

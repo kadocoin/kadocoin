@@ -33,7 +33,7 @@
     },
     {
       "name": "Blockchain",
-      "description": "Access to blockchain"
+      "description": "Provides access to Kadocoin blockchain"
     },
     {
       "name": "User",
@@ -45,14 +45,14 @@
     }
   ],
   "paths": {
-    "/api/transact": {
+    "/transact": {
       "post": {
         "tags": [
           "Transaction"
         ],
-        "summary": "Add a new pet to the store",
+        "summary": "Adds or update a new transaction to the transaction pool",
         "requestBody": {
-          "description": "Transaction object that needs to be added to the blockchain",
+          "description": "Adds or update a new transaction to the transaction pool",
           "content": {
             "application/json": {
               "schema": {
@@ -81,14 +81,13 @@
         "x-swagger-router-controller": "Transaction"
       }
     },
-    "/api/transaction-pool": {
+    "/transaction-pool": {
       "get": {
         "tags": [
           "Transaction"
         ],
         "summary": "Returns unconfirmed transactions by most transactions fees",
         "description": "Returns an object with the successful transaction",
-        "operationId": "getInventory",
         "responses": {
           "200": {
             "description": "success"
@@ -103,7 +102,7 @@
         "x-swagger-router-controller": "Transaction"
       }
     },
-    "/api/mine-transactions": {
+    "/mine-transactions": {
       "post": {
         "tags": [
           "Transaction"
@@ -115,7 +114,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mine-transactions"
+                "$ref": "#/components/schemas/Mine Transactions"
               }
             }
           },
@@ -135,7 +134,55 @@
         "x-swagger-router-controller": "Transaction"
       }
     },
-    "/api/register": {
+    "/blocks": {
+      "get": {
+        "tags": [
+          "Blockchain"
+        ],
+        "summary": "Get all blocks in the blockchain. The blockchain consists of blocks",
+        "description": "Returns an array of validated blocks",
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/block/{blockHash}": {
+      "get": {
+        "tags": [
+          "Blockchain"
+        ],
+        "summary": "Find a block by their hash",
+        "description": "Returns an object containing the block",
+        "parameters": [
+          {
+            "name": "blockHash",
+            "in": "path",
+            "description": "Hash of the block to return",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "500": {
+            "description": "internal server error"
+          }
+        }
+      }
+    },
+    "/register": {
       "post": {
         "tags": [
           "User"
@@ -160,8 +207,7 @@
             "content": {}
           }
         },
-        "x-swagger-router-controller": "User",
-        "x-codegen-request-body-name": "body"
+        "x-swagger-router-controller": "User"
       }
     },
     "/user/login": {
@@ -207,7 +253,7 @@
   },
   "components": {
     "schemas": {
-      "mine-transactions": {
+      "Mine Transactions": {
         "type": "object",
         "properties": {
           "address": {
@@ -222,7 +268,7 @@
           "message": "Kadocoin to the Galaxies!"
         },
         "xml": {
-          "name": "mine-transactions"
+          "name": "Mine Transactions"
         }
       },
       "User": {
@@ -302,21 +348,6 @@
         },
         "xml": {
           "name": "Transaction"
-        }
-      },
-      "ApiResponse": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        },
-        "example": {
-          "type": "type",
-          "message": "message"
         }
       }
     },

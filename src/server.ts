@@ -57,7 +57,7 @@ const initializeMiddleWares = (_: Request, __: Response, next: NextFunction) => 
 };
 
 const syncWithRootState = () => {
-  request({ url: `${ROOT_NODE_ADDRESS}/api/blocks` }, (error, response, body) => {
+  request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const rootChain = JSON.parse(body);
 
@@ -72,11 +72,11 @@ const syncWithRootState = () => {
       });
       console.log({ MINING_REWARD, SUPPLY });
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/blocks`, error);
+      console.log(`${ROOT_NODE_ADDRESS}/blocks`, error);
     }
   });
 
-  request({ url: `${ROOT_NODE_ADDRESS}/api/transaction-pool` }, (error, response, body) => {
+  request({ url: `${ROOT_NODE_ADDRESS}/transaction-pool` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const rootTransactionPoolMap = JSON.parse(body);
 
@@ -91,7 +91,7 @@ const syncWithRootState = () => {
         console.log('Done!');
       }
     } else {
-      console.log(`${ROOT_NODE_ADDRESS}/api/transaction-pool`, error);
+      console.log(`${ROOT_NODE_ADDRESS}/transaction-pool`, error);
     }
   });
 };
