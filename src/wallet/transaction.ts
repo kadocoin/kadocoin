@@ -95,6 +95,7 @@ class Transaction {
     if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
     if (!sendFee) {
+      console.log('no send fee', { sendFee });
       if (!this.input['sendFee']) {
         this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
       } else {
@@ -102,7 +103,7 @@ class Transaction {
         this.output[address] = (Number(this.output[address]) + prev_sendFee - amount).toFixed(8);
       }
     } else {
-      const prev_sendFee = Number(this.input['sendFee']);
+      const prev_sendFee = this.input['sendFee'] ? Number(this.input['sendFee']) : 0;
       const current_sendFee = Number(sendFee);
 
       if (prev_sendFee < current_sendFee) {
@@ -146,6 +147,7 @@ class Transaction {
     } = transaction;
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
+    console.log(Number(amount), Number(calcOutputTotal(output)));
     if (Number(amount) !== Number(calcOutputTotal(output))) {
       console.error(`Invalid transaction from ${address} `);
       return false;
