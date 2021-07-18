@@ -2,22 +2,14 @@ import { v1 as uuidv1 } from 'uuid';
 import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
 import verifySignature from '../util/verifySignature';
 import { isValidChecksumAddress } from '../util/pubKeyToAddress';
-import {
-  ICInput,
-  ICInput_R,
-  ICOutput,
-  ICOutput_R,
-  ITransaction,
-  IUpdate,
-  TTransactionChild,
-} from '../types';
+import { ICInput, ICInput_R, ICOutput, ICOutput_R, ITransaction, IUpdate } from '../types';
 import { calcOutputTotal } from '../util/transaction-metrics';
 import Mining_Reward from '../util/supply_reward';
 
 class Transaction {
   public id: string;
-  input: ICInput_R;
-  output: ICOutput_R;
+  public input: ICInput_R;
+  public output: ICOutput_R;
 
   constructor({
     publicKey,
@@ -30,8 +22,9 @@ class Transaction {
     message,
     localWallet,
     sendFee,
+    id,
   }: ITransaction) {
-    this.id = uuidv1();
+    this.id = id || uuidv1();
     this.output = output || this.createOutputMap({ address, recipient, amount, balance, sendFee });
     this.input =
       input ||
@@ -95,7 +88,6 @@ class Transaction {
     if (totalAmount > Number(this.output[address])) throw new Error(NOT_ENOUGH);
 
     if (!sendFee) {
-      console.log('no send fee', { sendFee });
       if (!this.input['sendFee']) {
         this.output[address] = (Number(this.output[address]) - amount).toFixed(8);
       } else {
@@ -140,14 +132,13 @@ class Transaction {
     });
   }
 
-  static validTransaction(transaction: TTransactionChild): boolean {
+  static validTransaction(transaction: Transaction): boolean {
     const {
       input: { address, amount, signature, localPublicKey },
       output,
     } = transaction;
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
-    console.log(Number(amount), Number(calcOutputTotal(output)));
     if (Number(amount) !== Number(calcOutputTotal(output))) {
       console.error(`Invalid transaction from ${address} `);
       return false;

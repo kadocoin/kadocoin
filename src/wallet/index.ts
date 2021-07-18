@@ -25,7 +25,7 @@ class Wallet {
     this.address = pubKeyToAddress(this.publicKey);
   }
 
-  sign(transactions: Array<TTransactionChild> | ICOutput_R): string {
+  sign(transactions: ICOutput_R): string {
     return this.keyPair.sign(cryptoHash(transactions));
   }
 

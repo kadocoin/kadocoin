@@ -7,17 +7,18 @@
  */
 import hexToBinary from 'hex-to-bin';
 import { GENESIS_DATA, MINE_RATE } from '../config/constants';
-import { IChain, TTransactionChild, TTransactions } from '../types';
+import { IChain, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward, transactionVolume } from '../util/transaction-metrics';
+import Transaction from '../wallet/transaction';
 
 class Block {
   public timestamp: number;
   public lastHash: string;
   public hash: string;
-  public transactions: Array<TTransactionChild>;
+  public transactions: Array<Transaction>;
   public nonce: number;
   public difficulty: number;
   public blockSize: string;

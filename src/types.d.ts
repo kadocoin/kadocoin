@@ -10,6 +10,7 @@ import Blockchain from './blockchain';
 import Block from './blockchain/block';
 import PubSub from './pubSub';
 import Wallet from './wallet';
+import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
 
 export interface ITMinerConstructorParams {
@@ -40,11 +41,11 @@ export interface IInput {
  */
 export interface IVerifySignatureProps {
   publicKey: string;
-  transactions: Array<TTransactionChild>;
+  transactions: Array<Transaction>;
   signature: string;
 }
 
-export type TTransactions = Array<TTransactionChild>;
+export type TTransactions = Array<Transaction>;
 
 /**
  * Signature type for the Data children
@@ -103,6 +104,7 @@ export interface ITransaction {
   localWallet?: Wallet;
   message?: string;
   sendFee?: string;
+  id?: string;
 }
 
 /** COMMON TYPES createInput() */
