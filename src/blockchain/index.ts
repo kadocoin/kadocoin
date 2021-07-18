@@ -13,6 +13,7 @@ import { IChain, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward } from '../util/transaction-metrics';
+import { cleanUpTransaction } from '../util/clean-up-transaction';
 
 class Blockchain {
   public chain: IChain;
@@ -85,10 +86,6 @@ class Blockchain {
     localBlockchainLen: number;
   }): boolean {
     const blocksToValidated = chain.slice(localBlockchainLen - 1);
-    console.log('----validTransactionData', {
-      blocksToValidatedLen: blocksToValidated.length,
-      localBlockchainLen,
-    });
 
     for (let i = 1; i < blocksToValidated.length; i++) {
       let rewardTransactionCount = 0;
@@ -138,11 +135,10 @@ class Blockchain {
 
     for (let i = 1; i < blocksToValidated.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = blocksToValidated[i];
+      const cleanedTransactions = cleanUpTransaction({ transactions });
       const previousHash = blocksToValidated[i - 1].hash;
-      const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
+      const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
       const lastDifficulty = blocksToValidated[i - 1].difficulty;
-
-      console.log({ hash, validatedHash });
 
       if (previousHash !== lastHash) return false;
 
