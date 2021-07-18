@@ -65,7 +65,7 @@ describe('Transaction', () => {
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
-          transactions: transaction.output,
+          output: transaction.output,
           signature: transaction.input.signature,
         })
       ).toBe(true));
@@ -97,7 +97,7 @@ describe('Transaction', () => {
 
       describe('and the transaction input signature value is invalid', () => {
         it('returns false and logs an error', () => {
-          transaction.input.signature = new Wallet().sign([sampleDataForTests]);
+          transaction.input.signature = new Wallet().sign(sampleDataForTests.output);
           expect(Transaction.validTransaction(transaction)).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
