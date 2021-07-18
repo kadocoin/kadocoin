@@ -9,13 +9,20 @@ import Blockchain from '../blockchain';
 import Block from '../blockchain/block';
 import { sampleDataForTests } from '../config/constants';
 import { MINE_RATE } from '../config/constants';
+import Transaction from '../wallet/transaction';
 
 (function averageWork(): void {
   const blockchain = new Blockchain(),
     times: Array<number> = [];
 
+  const sampleData = new Transaction({
+    id: sampleDataForTests.id,
+    output: sampleDataForTests.output,
+    input: sampleDataForTests.input,
+  });
+
   // ADD FIRST BLOCK
-  blockchain.addBlock({ transactions: [sampleDataForTests] });
+  blockchain.addBlock({ transactions: [sampleData] });
   console.log('first block', blockchain.chain[blockchain.chain.length - 1]);
   console.log({ MINE_RATE });
 
@@ -30,7 +37,7 @@ import { MINE_RATE } from '../config/constants';
     prevTimestamp = blockchain.chain[blockchain.chain.length - 1].timestamp;
     prevDifficulty = blockchain.chain[blockchain.chain.length - 1].difficulty;
 
-    blockchain.addBlock({ transactions: [sampleDataForTests] });
+    blockchain.addBlock({ transactions: [sampleData] });
     nextBlock = blockchain.chain[blockchain.chain.length - 1];
 
     nextTimestamp = nextBlock.timestamp;
