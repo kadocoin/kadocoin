@@ -9,6 +9,7 @@ import hexToBinary from 'hex-to-bin';
 import { GENESIS_DATA, MINE_RATE } from '../config/constants';
 import { IChain, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
+import { cleanUpTransaction } from '../util/clean-up-transaction';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward, transactionVolume } from '../util/transaction-metrics';
@@ -71,6 +72,7 @@ class Block {
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: chain.length });
     const feeReward = totalFeeReward({ transactions });
     const totalBlockReward = Number(MINING_REWARD) + Number(feeReward);
+    const cleanedTransactions = cleanUpTransaction({ transactions });
 
     do {
       nonce++;
@@ -80,7 +82,7 @@ class Block {
         timestamp,
       });
 
-      hash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
+      hash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
     return new Block({
