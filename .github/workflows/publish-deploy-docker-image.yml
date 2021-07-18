@@ -49,7 +49,7 @@ jobs:
         with:
           server: "${{ secrets.CAPROVER_URL }}"
           password: "${{ secrets.CAPROVER_PASSWORD }}"
-          appName: "${{ secrets.CAPROVER_APP_DEV }}"
+          appName: "${{ secrets.CAPROVER_AP }}"
           image: ghcr.io/kado-coin/kadocoin-multi-wallet-api:main
       
       - name: get-npm-version
