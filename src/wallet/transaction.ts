@@ -153,7 +153,7 @@ class Transaction {
     });
 
     // VERIFY THAT THE SENDER CORRECTLY SIGNED THE TRANSACTION
-    if (!verifySignature({ publicKey: localPublicKey, transactions: output, signature })) {
+    if (!verifySignature({ publicKey: localPublicKey, output, signature })) {
       console.error(`Invalid signature from ${localPublicKey}`);
 
       return false;

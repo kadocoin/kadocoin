@@ -9,12 +9,19 @@ import hexToBinary from 'hex-to-bin';
 import Block from './block';
 import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../config/constants';
 import cryptoHash from '../util/crypto-hash';
+import Transaction from '../wallet/transaction';
+import { cleanUpTransaction } from '../util/clean-up-transaction';
 
 describe('Block', () => {
   const timestamp = 2000;
   const lastHash = 'foo-last-hash';
   const hash = 'foo-hash';
-  const transactions = [sampleDataForTests];
+  const sampleData = new Transaction({
+    id: sampleDataForTests.id,
+    output: sampleDataForTests.output,
+    input: sampleDataForTests.input,
+  });
+  const transactions = [sampleData];
   const nonce = 1;
   const difficulty = 1;
   const block = new Block({
@@ -57,7 +64,13 @@ describe('Block', () => {
 
   describe('mineBlock', () => {
     const lastBlock = Block.genesis();
-    const transactions = [sampleDataForTests];
+    const sampleData = new Transaction({
+      id: sampleDataForTests.id,
+      output: sampleDataForTests.output,
+      input: sampleDataForTests.input,
+    });
+    const transactions = [sampleData];
+
     const mineBlock = Block.mineBlock({ lastBlock, transactions, chain: [] });
 
     it('returns a Block instance', () => {
@@ -80,10 +93,10 @@ describe('Block', () => {
       expect(mineBlock.hash).toEqual(
         cryptoHash(
           mineBlock.timestamp,
+          mineBlock.lastHash,
+          cleanUpTransaction({ transactions }),
           mineBlock.nonce,
-          mineBlock.difficulty,
-          lastBlock.hash,
-          transactions
+          mineBlock.difficulty
         )
       );
     });

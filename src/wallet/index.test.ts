@@ -33,14 +33,19 @@ describe('Wallet', () => {
    */
 
   describe('signing transactions', () => {
-    const transactions = [sampleDataForTests];
+    const sampleData = new Transaction({
+      id: sampleDataForTests.id,
+      output: sampleDataForTests.output,
+      input: sampleDataForTests.input,
+    });
+    const transactions = [sampleData];
 
     it('verifies a signature', () =>
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
-          transactions: transactions,
-          signature: localWallet.sign(transactions),
+          output: transactions[0].output,
+          signature: localWallet.sign(transactions[0].output),
         })
       ).toBe(true));
 
@@ -48,8 +53,8 @@ describe('Wallet', () => {
       expect(
         verifySignature({
           publicKey: localWallet.publicKey,
-          transactions: transactions,
-          signature: new Wallet().sign(transactions),
+          output: transactions[0].output,
+          signature: new Wallet().sign(transactions[0].output),
         })
       ).toBe(false));
   });

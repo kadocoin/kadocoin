@@ -11,14 +11,14 @@ import newEc from './secp256k1';
 
 export default function verifySignature({
   publicKey,
-  transactions,
+  output,
   signature,
 }: {
   publicKey: string;
-  transactions: ICOutput_R;
+  output: ICOutput_R;
   signature: string;
 }): boolean {
   const keyFromPublic = newEc.keyFromPublic(publicKey, 'hex');
 
-  return keyFromPublic.verify(cryptoHash(transactions), signature);
+  return keyFromPublic.verify(cryptoHash(output), signature);
 }

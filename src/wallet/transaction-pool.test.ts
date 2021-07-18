@@ -43,7 +43,7 @@ describe('TransactionPool', () => {
         transactionPool.existingTransactionPool({
           inputAddress: senderWallet.address,
         })
-      ).toBe(transaction);
+      ).toStrictEqual(transaction);
     });
   });
 
@@ -69,7 +69,7 @@ describe('TransactionPool', () => {
         if (i % 3 === 0) {
           transaction.input.amount = '999999';
         } else if (i % 3 === 1) {
-          transaction.input.signature = new Wallet().sign([sampleDataForTests]);
+          transaction.input.signature = new Wallet().sign(sampleDataForTests.output);
         } else {
           validTransactions.push(transaction);
         }

@@ -11,19 +11,24 @@ import Block from './block';
 import Blockchain from '.';
 import Wallet from '../wallet';
 import Transaction from '../wallet/transaction';
-import { IChain, TTransactionChild } from '../types';
+import { IChain } from '../types';
 
 describe('Blockchain', () => {
   let blockchain: Blockchain,
     newChain: Blockchain,
     originalChain: IChain,
+    sampleData: Transaction,
     errorMock: jest.Mock<any, any>;
 
   beforeEach(() => {
     blockchain = new Blockchain();
     newChain = new Blockchain();
+    sampleData = new Transaction({
+      id: sampleDataForTests.id,
+      output: sampleDataForTests.output,
+      input: sampleDataForTests.input,
+    });
     errorMock = jest.fn();
-
     originalChain = blockchain.chain;
     global.console.error = errorMock;
   });
@@ -37,7 +42,7 @@ describe('Blockchain', () => {
   });
 
   it('adds a new block to the chain', () => {
-    const newData = [sampleDataForTests];
+    const newData = [sampleData];
     blockchain.addBlock({ transactions: newData });
 
     expect(blockchain.chain[blockchain.chain.length - 1].transactions).toEqual(newData);
@@ -65,9 +70,9 @@ describe('Blockchain', () => {
 
     describe('when the chain starts with the genesis block and has multiple blocks', () => {
       beforeEach(() => {
-        blockchain.addBlock({ transactions: [sampleDataForTests] });
-        blockchain.addBlock({ transactions: [sampleDataForTests] });
-        blockchain.addBlock({ transactions: [sampleDataForTests] });
+        blockchain.addBlock({ transactions: [sampleData] });
+        blockchain.addBlock({ transactions: [sampleData] });
+        blockchain.addBlock({ transactions: [sampleData] });
       });
 
       describe('and a lastHash reference has changed.', () => {
@@ -80,8 +85,8 @@ describe('Blockchain', () => {
 
       describe('and the chain contains a block with an invalid field', () => {
         it('returns false', () => {
-          sampleDataForTests.id = 'bad id';
-          blockchain.chain[2].transactions = [sampleDataForTests];
+          sampleData.id = 'bad id';
+          blockchain.chain[2].transactions = [sampleData];
 
           expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
         });
@@ -93,7 +98,7 @@ describe('Blockchain', () => {
           const lastHash = lastBlock.hash;
           const timestamp = Date.now();
           const nonce = 0;
-          const transactions: Array<TTransactionChild> = [];
+          const transactions: Array<Transaction> = [];
           const difficulty = lastBlock.difficulty - 3;
           const hash = cryptoHash(timestamp, lastHash, difficulty, nonce, transactions);
           const badBlock = new Block({
@@ -163,9 +168,9 @@ describe('Blockchain', () => {
 
     describe('when the chain is longer', () => {
       beforeEach(() => {
-        newChain.addBlock({ transactions: [sampleDataForTests] });
-        newChain.addBlock({ transactions: [sampleDataForTests] });
-        newChain.addBlock({ transactions: [sampleDataForTests] });
+        newChain.addBlock({ transactions: [sampleData] });
+        newChain.addBlock({ transactions: [sampleData] });
+        newChain.addBlock({ transactions: [sampleData] });
       });
       describe('and the chain is invalid', () => {
         beforeEach(() => {
@@ -201,7 +206,7 @@ describe('Blockchain', () => {
 
         blockchain.validTransactionData = validateTransactionDataMock;
 
-        newChain.addBlock({ transactions: [sampleDataForTests] });
+        newChain.addBlock({ transactions: [sampleData] });
         blockchain.replaceChain(newChain.chain, true);
 
         expect(validateTransactionDataMock).toHaveBeenCalled();
