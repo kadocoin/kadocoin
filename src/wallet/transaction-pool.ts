@@ -5,12 +5,11 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { IChain, TTransactionChild } from '../types';
-import { totalFeeReward, totalMsgReward } from '../util/transaction-metrics';
+import { IChain } from '../types';
 import Transaction from './transaction';
 
 class TransactionPool {
-  transactionMap: Record<string, Transaction | TTransactionChild>;
+  transactionMap: Record<string, Transaction>;
 
   constructor() {
     this.transactionMap = {};
@@ -20,50 +19,54 @@ class TransactionPool {
     this.transactionMap = {};
   }
 
-  /**
-   * Sort in descending order - transactions with fatter reward first
-   * @method Sort()
-   * @param Array of transactions
-   */
-  sort({ transactions }: { transactions: Array<TTransactionChild> }): Array<TTransactionChild> {
-    return transactions.sort((a, b) => {
-      const msg_fee_A = totalMsgReward({ transactions: [a] });
-      const send_fee_A = totalFeeReward({ transactions: [a] });
-
-      const msg_fee_B = totalMsgReward({ transactions: [b] });
-      const send_fee_B = totalFeeReward({ transactions: [b] });
-
-      const total_reward_A = Number(msg_fee_A) + Number(send_fee_A);
-      const total_reward_B = Number(msg_fee_B) + Number(send_fee_B);
-
-      if (total_reward_A < total_reward_B) return 1;
-      if (total_reward_A > total_reward_B) return -1;
-      return 0;
-    });
-  }
-
-  setTransaction(transaction: TTransactionChild | Transaction): void {
+  setTransaction(transaction: Transaction): void {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  setMap(transactionMap: Record<string, TTransactionChild | Transaction>): void {
-    this.transactionMap = transactionMap;
+  setMap(transactionMap: Record<string, Transaction>): void {
+    const transactions = Object.values(transactionMap);
+
+    transactions.forEach(transaction => {
+      transaction = new Transaction({
+        id: transaction.id,
+        output: transaction.output,
+        input: transaction.input,
+      });
+
+      this.setTransaction(transaction);
+    });
   }
 
-  existingTransactionPool({
-    inputAddress,
-  }: {
-    inputAddress: string;
-  }): Transaction | TTransactionChild {
+  existingTransactionPool({ inputAddress }: { inputAddress: string }): Transaction {
     const transactions = Object.values(this.transactionMap);
 
-    return transactions.find(transaction => transaction.input.address === inputAddress);
+    let transaction = transactions.find(transaction => transaction.input.address === inputAddress);
+
+    if (transaction) {
+      return (transaction = new Transaction({
+        id: transaction.id,
+        output: transaction.output,
+        input: transaction.input,
+      }));
+    } else {
+      return null;
+    }
   }
 
-  validTransactions(): Array<Transaction | TTransactionChild> {
-    return this.sort({ transactions: Object.values(this.transactionMap) }).filter(transaction =>
-      Transaction.validTransaction(transaction as TTransactionChild)
-    );
+  validTransactions(): Array<Transaction> {
+    return Object.values(this.transactionMap).filter(transaction => {
+      const isValid = Transaction.validTransaction(transaction);
+
+      if (isValid) {
+        transaction = new Transaction({
+          id: transaction.id,
+          output: transaction.output,
+          input: transaction.input,
+        });
+
+        return transaction;
+      }
+    });
   }
 
   clearBlockchainTransactions({ chain }: { chain: IChain }): void {

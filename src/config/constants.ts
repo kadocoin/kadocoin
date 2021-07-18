@@ -5,14 +5,15 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { REWARD_INPUT, TTransactionChild } from '../types';
+import { REWARD_INPUT } from '../types';
 import size from '../util/size';
+import Transaction from '../wallet/transaction';
 
 const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 5000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.org';
 
-const transactions: Array<TTransactionChild> = [];
+const transactions: Array<Transaction> = [];
 const GENESIS_DATA = {
   timestamp: 1626071497054,
   lastHash: '*None*',

@@ -135,16 +135,14 @@ class Blockchain {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
 
     const blocksToValidated = chain.slice(localBlockchainLen - 1);
-    console.log('----isValidChain', {
-      blocksToValidatedLen: blocksToValidated.length,
-      localBlockchainLen,
-    });
 
     for (let i = 1; i < blocksToValidated.length; i++) {
       const { timestamp, lastHash, hash, transactions, nonce, difficulty } = blocksToValidated[i];
       const previousHash = blocksToValidated[i - 1].hash;
       const validatedHash = cryptoHash(timestamp, lastHash, transactions, nonce, difficulty);
       const lastDifficulty = blocksToValidated[i - 1].difficulty;
+
+      console.log({ hash, validatedHash });
 
       if (previousHash !== lastHash) return false;
 

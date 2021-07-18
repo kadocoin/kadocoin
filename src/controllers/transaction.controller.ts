@@ -118,18 +118,16 @@ export default class TransactionController {
 
         console.log('instance of Transaction', transaction instanceof Transaction);
 
-        if (transaction instanceof Transaction) {
-          transaction.update({
-            publicKey,
-            address,
-            recipient,
-            amount: Number(amount),
-            balance,
-            localWallet,
-            message,
-            sendFee,
-          });
-        }
+        transaction.update({
+          publicKey,
+          address,
+          recipient,
+          amount: Number(amount),
+          balance,
+          localWallet,
+          message,
+          sendFee,
+        });
       } else {
         console.log('New transaction');
         transaction = localWallet.createTransaction({

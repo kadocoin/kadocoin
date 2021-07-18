@@ -8,7 +8,6 @@
 import { RedisClient } from 'redis';
 import Blockchain from '../blockchain';
 import { redisClientPub, redisClientSub } from '../config/redis';
-import { TTransactionChild } from '../types';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -50,11 +49,6 @@ class PubSub {
 
     switch (channel) {
       case CHANNELS.BLOCKCHAIN:
-        console.log({
-          parsedMessageLen: parsedMessage.length,
-          blockchainLen: this.blockchain.chain.length,
-        });
-
         this.blockchain.replaceChain(parsedMessage, true, this.blockchain.chain.length, () => {
           this.transactionPool.clearBlockchainTransactions({
             chain: parsedMessage,
@@ -91,7 +85,7 @@ class PubSub {
     });
   }
 
-  broadcastTransaction(transaction: Transaction | TTransactionChild): void {
+  broadcastTransaction(transaction: Transaction): void {
     this.publish({
       channel: CHANNELS.TRANSACTION,
       message: JSON.stringify(transaction),
