@@ -16,6 +16,7 @@ export function removeSensitiveProps(user: IUserModel): IUserModel {
     publicKey: user.publicKey,
     address: user.address,
     name: user.name,
+    email: user.email,
     bio: user.bio,
     scope: user.scope,
     registrationMethod: user.registrationMethod,

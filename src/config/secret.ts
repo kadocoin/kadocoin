@@ -46,9 +46,10 @@ export const PORT = PEER_PORT || DEFAULT_PORT;
 
 export const JWTSECRET = process.env['JWTSECRET'];
 
-export const ROOT_NODE_ADDRESS = prod
-  ? process.env['ROOT_NODE_ADDRESS']
-  : process.env['ROOT_NODE_ADDRESS_DEV'];
+export const ROOT_NODE_ADDRESS = process.env['ROOT_NODE_ADDRESS'];
+// export const ROOT_NODE_ADDRESS = prod
+//   ? process.env['ROOT_NODE_ADDRESS']
+//   : process.env['ROOT_NODE_ADDRESS_DEV'];
 
 export const REDIS_URL = process.env['REDIS_URL'];
 export const REDIS_PASSWORD = process.env['REDIS_PASSWORD'];
