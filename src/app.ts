@@ -5,7 +5,6 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import bodyParser from 'body-parser';
 import express, { Application, Request, Response, Router } from 'express';
 import { DEFAULT_MESSAGE } from './config/constants';
 class App {
