@@ -215,8 +215,8 @@ export default class UserController {
         }));
 
       const user = await this.userModel.updateUserById(req.db, userId, {
-        name,
-        bio,
+        name: name || '',
+        bio: bio || '',
         ...(email && { email }),
         ...(profilePicture && { profilePicture }),
       });
@@ -228,6 +228,7 @@ export default class UserController {
         currentProfilePicture.split('res.cloudinary.com/dankoresoftware').length > 1
       ) {
         const imagePublicId = getCloudinaryImagePublicId(currentProfilePicture, 'profilePictures'); // returns e.g 'dankoresoft/profilePictures/rjzuxzicrcszoqjjowln'
+        console.log(imagePublicId);
         await cloudinary.uploader.destroy(imagePublicId, {
           invalidate: true,
           resource_type: 'image',
