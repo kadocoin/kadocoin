@@ -215,12 +215,16 @@ export default class UserController {
           allowedAttributes: {},
         }));
 
-      const user = await this.userModel.updateUserById(req.db, userId, {
-        ...(name && { name }),
-        ...(bio && { bio }),
+      const updater = {
+        name,
+        bio,
         ...(email && { email }),
         ...(profilePicture && { profilePicture }),
-      });
+      };
+
+      console.log({ name, bio, email, updater });
+
+      const user = await this.userModel.updateUserById(req.db, userId, updater);
 
       // DELETE OLD PROFILE PICTURE(currentProfilePicture)
       if (
@@ -235,7 +239,7 @@ export default class UserController {
         });
       }
 
-      return res.status(UPDATED).json({ user });
+      return res.status(SUCCESS).json({ user });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
