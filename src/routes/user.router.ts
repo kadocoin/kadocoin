@@ -10,6 +10,8 @@ import Blockchain from '../blockchain';
 import UserController from '../controllers/user.controller';
 import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
 import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
+import multer from 'multer';
+const upload = multer({ dest: '/tem' });
 
 export default class UserRouter {
   private app: Application;
@@ -36,5 +38,10 @@ export default class UserRouter {
     );
 
     this.app.post('/login', this.UserController.login);
+    this.app.put(
+      '/editProfileInfo',
+      upload.single('profilePicture'),
+      this.UserController.editProfileInfo
+    );
   }
 }

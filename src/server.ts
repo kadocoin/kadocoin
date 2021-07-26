@@ -22,7 +22,6 @@ import Wallet from './wallet';
 import isEmptyObject from './util/isEmptyObject';
 import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
-// import { swaggerOptions } from './config/constants';
 import Mining_Reward from './util/supply_reward';
 import * as swaggerDocument from './swagger.json';
 

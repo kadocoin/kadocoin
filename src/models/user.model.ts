@@ -37,4 +37,19 @@ export default class UserModel {
       throw new Error(`register, ${error}`);
     }
   }
+
+  async updateUserById(
+    db: Db,
+    userId: string,
+    update: { name: string; bio: string; email: string; profilePicture: string }
+  ): Promise<IUserModel> {
+    try {
+      return db
+        .collection('users')
+        .findOneAndUpdate({ _id: userId }, { $set: update }, { returnOriginal: false })
+        .then(({ value }) => value);
+    } catch (error) {
+      throw new Error(`updateUserById, ${error}`);
+    }
+  }
 }

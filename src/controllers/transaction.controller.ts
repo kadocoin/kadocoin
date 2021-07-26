@@ -55,14 +55,14 @@ export default class TransactionController {
       allowedTags: [],
       allowedAttributes: {},
     });
-    (recipient = sanitizeHTML(recipient, {
+    recipient = sanitizeHTML(recipient, {
       allowedTags: [],
       allowedAttributes: {},
-    })),
-      (publicKey = sanitizeHTML(publicKey, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
+    });
+    publicKey = sanitizeHTML(publicKey, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
     address = sanitizeHTML(address, {
       allowedTags: [],
       allowedAttributes: {},
