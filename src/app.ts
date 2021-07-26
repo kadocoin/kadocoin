@@ -13,15 +13,6 @@ class App {
 
   constructor() {
     this.app = express();
-    // this.app.use(express.json());
-    // this.app.use(
-    //   express.json({
-    //     type: function (req: Request) {
-    //       return req.get('content-type').indexOf('multipart/form-data') !== 0;
-    //     },
-    //   })
-    // );
-    // this.app.use(express.urlencoded({ extended: true }));
     this.router = express.Router();
     this.bootstrap();
   }
