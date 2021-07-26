@@ -19,7 +19,6 @@ import {
   INTERNAL_SERVER_ERROR,
   ALREADY_EXISTS,
   CREATED,
-  UPDATED,
   NOT_FOUND,
   SUCCESS,
 } from '../statusCode/statusCode';
@@ -215,16 +214,12 @@ export default class UserController {
           allowedAttributes: {},
         }));
 
-      const updater = {
+      const user = await this.userModel.updateUserById(req.db, userId, {
         name,
         bio,
         ...(email && { email }),
         ...(profilePicture && { profilePicture }),
-      };
-
-      console.log({ name, bio, email, updater });
-
-      const user = await this.userModel.updateUserById(req.db, userId, updater);
+      });
 
       // DELETE OLD PROFILE PICTURE(currentProfilePicture)
       if (
