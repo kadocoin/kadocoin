@@ -31,11 +31,32 @@ export const loginValidation = (user: IUserModel): ValidationResult => {
   return loginSchema.validate(user);
 };
 
-export const walletInfoValidation = (address: string): ValidationResult => {
+export const walletInfoValidation = (reqBody: {
+  address: string;
+  token: string;
+}): ValidationResult => {
   const walletInfoSchema = Joi.object({
     address: Joi.string().required(),
     token: Joi.string().required(),
   });
 
-  return walletInfoSchema.validate(address);
+  return walletInfoSchema.validate(reqBody);
+};
+
+export const editProfileInfoValidation = (reqBody: {
+  name: string;
+  bio: string;
+  email: string;
+  userId: string;
+  currentProfilePicture: Blob;
+}): ValidationResult => {
+  const editProfileInfoSchema = Joi.object({
+    userId: Joi.string().required(),
+    name: Joi.string(),
+    bio: Joi.string(),
+    email: Joi.string().email(),
+    currentProfilePicture: Joi.string(),
+  });
+
+  return editProfileInfoSchema.validate(reqBody);
 };

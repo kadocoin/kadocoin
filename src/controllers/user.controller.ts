@@ -13,11 +13,13 @@ import {
   registerValidation,
   loginValidation,
   walletInfoValidation,
+  editProfileInfoValidation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
   ALREADY_EXISTS,
   CREATED,
+  UPDATED,
   NOT_FOUND,
   SUCCESS,
 } from '../statusCode/statusCode';
@@ -26,16 +28,19 @@ import jwt from 'jsonwebtoken';
 import { JWTSECRET } from '../config/secret';
 import Wallet from '../wallet';
 import { removeSensitiveProps } from '../util/removeSensitiveProps';
+import { v2 as cloudinary } from 'cloudinary';
+import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
+import sanitizeHTML from 'sanitize-html';
 
 const tokenLasts = '30d';
 
 export default class UserController {
   private commonModel: CommonModel;
-  private userService: UserModel;
+  private userModel: UserModel;
 
   constructor() {
     this.commonModel = new CommonModel();
-    this.userService = new UserModel();
+    this.userModel = new UserModel();
   }
 
   register = async (req: Request, res: Response): Promise<Response> => {
@@ -54,7 +59,7 @@ export default class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      let user = await this.userService.register(req.db, {
+      let user = await this.userModel.register(req.db, {
         email,
         hashedPassword,
         userCreationDate,
@@ -156,6 +161,81 @@ export default class UserController {
           address: req.body.address,
         }),
       });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  editProfileInfo = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = editProfileInfoValidation(req.body);
+
+      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+      const {
+        hostname: cloud_name,
+        username: api_key,
+        password: api_secret,
+      } = new URL(process.env.CLOUDINARY_URL);
+
+      cloudinary.config({ cloud_name, api_key, api_secret });
+
+      let profilePicture;
+      if (req.file) {
+        const image = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'kadocoin/profilePictures',
+          width: 512,
+          height: 512,
+          crop: 'fill',
+        });
+
+        profilePicture = image.secure_url;
+      }
+
+      let { name, bio, email } = req.body;
+      const { currentProfilePicture, userId } = req.body;
+
+      // SANITIZE - REMOVE SCRIPTS/HTML TAGS
+      name &&
+        (name = sanitizeHTML(name, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }));
+      bio &&
+        (bio = sanitizeHTML(bio, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }));
+      email &&
+        (email = sanitizeHTML(email, {
+          allowedTags: [],
+          allowedAttributes: {},
+        }));
+
+      const user = await this.userModel.updateUserById(req.db, userId, {
+        ...(name && { name }),
+        ...(bio && { bio }),
+        ...(email && { email }),
+        ...(profilePicture && { profilePicture }),
+      });
+
+      // DELETE OLD PROFILE PICTURE(currentProfilePicture)
+      if (
+        req.file &&
+        currentProfilePicture != 'NotSet' &&
+        currentProfilePicture.split('res.cloudinary.com/dankoresoftware').length > 1
+      ) {
+        const imagePublicId = getCloudinaryImagePublicId(currentProfilePicture, 'profilePictures'); // returns e.g 'dankoresoft/profilePictures/rjzuxzicrcszoqjjowln'
+        await cloudinary.uploader.destroy(imagePublicId, {
+          invalidate: true,
+          resource_type: 'image',
+        });
+      }
+
+      return res.status(UPDATED).json({ user });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

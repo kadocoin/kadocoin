@@ -5,6 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
+import bodyParser from 'body-parser';
 import express, { Application, Request, Response, Router } from 'express';
 import { DEFAULT_MESSAGE } from './config/constants';
 class App {
@@ -13,6 +14,15 @@ class App {
 
   constructor() {
     this.app = express();
+    // this.app.use(express.json());
+    // this.app.use(
+    //   express.json({
+    //     type: function (req: Request) {
+    //       return req.get('content-type').indexOf('multipart/form-data') !== 0;
+    //     },
+    //   })
+    // );
+    // this.app.use(express.urlencoded({ extended: true }));
     this.router = express.Router();
     this.bootstrap();
   }
