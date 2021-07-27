@@ -30,17 +30,16 @@ import { removeSensitiveProps } from '../util/removeSensitiveProps';
 import { v2 as cloudinary } from 'cloudinary';
 import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
 import sanitizeHTML from 'sanitize-html';
-import isEmptyObject from '../util/isEmptyObject';
-
-const tokenLasts = '30d';
 
 export default class UserController {
   private commonModel: CommonModel;
   private userModel: UserModel;
+  tokenLasts: string;
 
   constructor() {
     this.commonModel = new CommonModel();
     this.userModel = new UserModel();
+    this.tokenLasts = '30d';
   }
 
   register = async (req: Request, res: Response): Promise<Response> => {
@@ -76,7 +75,7 @@ export default class UserController {
         },
         JWTSECRET,
         {
-          expiresIn: tokenLasts,
+          expiresIn: this.tokenLasts,
         }
       );
 
@@ -137,7 +136,7 @@ export default class UserController {
         },
         JWTSECRET,
         {
-          expiresIn: tokenLasts,
+          expiresIn: this.tokenLasts,
         }
       );
 
@@ -183,7 +182,7 @@ export default class UserController {
 
       cloudinary.config({ cloud_name, api_key, api_secret });
 
-      let profilePicture;
+      let profilePicture: string;
       if (req.file) {
         const image = await cloudinary.uploader.upload(req.file.path, {
           folder: 'kadocoin/profilePictures',
@@ -238,7 +237,7 @@ export default class UserController {
         currentProfilePicture.split('res.cloudinary.com/dankoresoftware').length > 1
       ) {
         const imagePublicId = getCloudinaryImagePublicId(currentProfilePicture, 'profilePictures'); // returns e.g 'dankoresoft/profilePictures/rjzuxzicrcszoqjjowln'
-        console.log(imagePublicId);
+
         await cloudinary.uploader.destroy(imagePublicId, {
           invalidate: true,
           resource_type: 'image',
