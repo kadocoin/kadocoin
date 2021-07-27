@@ -30,6 +30,7 @@ import { removeSensitiveProps } from '../util/removeSensitiveProps';
 import { v2 as cloudinary } from 'cloudinary';
 import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
 import sanitizeHTML from 'sanitize-html';
+import uploadToCloudinary from '../util/upload-to-cloudinary';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -174,25 +175,8 @@ export default class UserController {
 
       if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
-      const {
-        hostname: cloud_name,
-        username: api_key,
-        password: api_secret,
-      } = new URL(process.env.CLOUDINARY_URL);
-
-      cloudinary.config({ cloud_name, api_key, api_secret });
-
       let profilePicture: string;
-      if (req.file) {
-        const image = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'kadocoin/profilePictures',
-          width: 512,
-          height: 512,
-          crop: 'fill',
-        });
-
-        profilePicture = image.secure_url;
-      }
+      if (req.file) profilePicture = await uploadToCloudinary(req.file);
 
       let { name, bio, email } = req.body;
       const { currentProfilePicture, userId } = req.body;
