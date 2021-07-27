@@ -30,6 +30,7 @@ import { removeSensitiveProps } from '../util/removeSensitiveProps';
 import { v2 as cloudinary } from 'cloudinary';
 import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
 import sanitizeHTML from 'sanitize-html';
+import isEmptyObject from '../util/isEmptyObject';
 
 const tokenLasts = '30d';
 
@@ -214,12 +215,21 @@ export default class UserController {
           allowedAttributes: {},
         }));
 
-      const user = await this.userModel.updateUserById(req.db, userId, {
-        name: name || '',
-        bio: bio || '',
+      const update = {
+        ...(name && { name }),
+        ...(bio && { bio }),
         ...(email && { email }),
         ...(profilePicture && { profilePicture }),
-      });
+      };
+
+      const user =
+        Object.keys(update).length &&
+        (await this.userModel.updateUserById(req.db, userId, {
+          ...(name && { name }),
+          ...(bio && { bio }),
+          ...(email && { email }),
+          ...(profilePicture && { profilePicture }),
+        }));
 
       // DELETE OLD PROFILE PICTURE(currentProfilePicture)
       if (
