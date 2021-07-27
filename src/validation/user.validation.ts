@@ -53,7 +53,7 @@ export const editProfileInfoValidation = (reqBody: {
   const editProfileInfoSchema = Joi.object({
     userId: Joi.string().required(),
     name: Joi.string().allow(''),
-    bio: Joi.string().allow(''),
+    bio: Joi.string().allow('').max(160),
     email: Joi.string().email(),
     currentProfilePicture: Joi.string().allow(''),
   });
