@@ -84,3 +84,15 @@ export const change_password_validation = (reqBody: {
 
   return change_password_schema.validate(reqBody);
 };
+
+export const delete_account_validation = (reqBody: {
+  user_id: string;
+  token: string;
+}): ValidationResult => {
+  const delete_account_schema = Joi.object({
+    user_id: Joi.string().required(),
+    token: Joi.string().required(),
+  });
+
+  return delete_account_schema.validate(reqBody);
+};

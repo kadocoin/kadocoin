@@ -15,6 +15,7 @@ import {
   walletInfoValidation,
   editProfileInfoValidation,
   change_password_validation,
+  delete_account_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -225,7 +226,7 @@ export default class UserController {
         currentProfilePicture != 'NotSet' &&
         currentProfilePicture.split('res.cloudinary.com/dankoresoftware').length > 1
       ) {
-        const imagePublicId = getCloudinaryImagePublicId(currentProfilePicture, 'profilePictures'); // returns e.g 'dankoresoft/profilePictures/rjzuxzicrcszoqjjowln'
+        const imagePublicId = getCloudinaryImagePublicId(currentProfilePicture, 'profilePictures'); // returns e.g 'kadocoin/profilePictures/rjzuxzicrcszoqjjowln'
 
         await cloudinary.uploader.destroy(imagePublicId, {
           invalidate: true,
@@ -233,7 +234,6 @@ export default class UserController {
         });
       }
 
-      // TODO - RESIGN TOKEN
       // ADD SIGNED TOKEN TO USER OBJECT
       user.token = jwt.sign(
         {
@@ -288,6 +288,42 @@ export default class UserController {
       }
 
       return res.status(NOT_FOUND).json({ message: 'No user exists with this user ID' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+  delete_account = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = delete_account_validation(req.body);
+
+      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+      const { user_id } = req.body;
+
+      // GET USER DOCUMENT
+      const userAccountToDelete = await this.userModel.delete_account(req.db, user_id);
+
+      // DELETE PROFILE PICTURE IF IT EXISTS
+      if (
+        userAccountToDelete.profilePicture &&
+        userAccountToDelete.profilePicture.split('res.cloudinary.com/dankoresoftware').length > 1
+      ) {
+        const imagePublicId = getCloudinaryImagePublicId(
+          userAccountToDelete.profilePicture,
+          'profilePictures'
+        );
+
+        // returns e.g 'kadocoin/profilePictures/rjzuxzicrcszoqjjowln'
+        await cloudinary.uploader.destroy(imagePublicId, {
+          invalidate: true,
+          resource_type: 'image',
+        });
+      }
+
+      return res.status(SUCCESS).json({ message: 'success' });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

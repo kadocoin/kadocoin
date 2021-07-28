@@ -58,4 +58,12 @@ export default class UserModel {
       throw new Error(`updateUserById, ${error}`);
     }
   }
+
+  async delete_account(db: Db, userId: string): Promise<any> {
+    try {
+      return await db.collection('users').findOneAndDelete({ _id: userId });
+    } catch (error) {
+      throw new Error(`delete_account", ${error}`);
+    }
+  }
 }
