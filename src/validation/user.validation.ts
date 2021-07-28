@@ -25,7 +25,7 @@ export const emailValidation = (email: string): ValidationResult => {
 export const loginValidation = (user: IUserModel): ValidationResult => {
   const loginSchema = Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
+    password: Joi.string().min(6).max(128).required(),
   });
 
   return loginSchema.validate(user);
@@ -62,14 +62,17 @@ export const editProfileInfoValidation = (reqBody: {
 };
 
 export const change_password_validation = (reqBody: {
+  userId: string;
+  token: string;
   current_password: string;
   new_password: string;
   re_entered_new_password: string;
 }): ValidationResult => {
   const change_password_schema = Joi.object({
     userId: Joi.string().required(),
-    current_password: Joi.string().required().min(6).max(100).label('Current Password'),
-    new_password: Joi.string().required().min(6).max(100).label('New Password'),
+    token: Joi.string().required(),
+    current_password: Joi.string().required().min(6).max(128).label('Current Password'),
+    new_password: Joi.string().required().min(6).max(128).label('New Password'),
     re_entered_new_password: Joi.any()
       .equal(Joi.ref('new_password'))
       .required()

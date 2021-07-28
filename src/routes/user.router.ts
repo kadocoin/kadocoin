@@ -44,6 +44,6 @@ export default class UserRouter {
       upload.single('profilePicture'),
       this.UserController.editProfileInfo
     );
-    this.app.post('/change_password', /** mustBeLoggedIn,*/ this.UserController.change_password);
+    this.app.post('/change_password', this.UserController.change_password);
   }
 }

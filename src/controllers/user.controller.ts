@@ -260,7 +260,9 @@ export default class UserController {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(new_password, salt);
 
-        await this.userModel.updateUserById(req.db, user._id, { password: hashedPassword });
+        await this.userModel.updateUserById(req.db, user._id, {
+          password: hashedPassword,
+        });
 
         return res.status(SUCCESS).json({ message: 'success' });
       }
