@@ -60,3 +60,22 @@ export const editProfileInfoValidation = (reqBody: {
 
   return editProfileInfoSchema.validate(reqBody);
 };
+
+export const change_password_validation = (reqBody: {
+  current_password: string;
+  new_password: string;
+  re_entered_new_password: string;
+}): ValidationResult => {
+  const change_password_schema = Joi.object({
+    userId: Joi.string().required(),
+    current_password: Joi.string().required().min(6).max(100).label('Current Password'),
+    new_password: Joi.string().required().min(6).max(100).label('New Password'),
+    re_entered_new_password: Joi.any()
+      .equal(Joi.ref('new_password'))
+      .required()
+      .label('Re-entered New Password')
+      .messages({ 'any.only': 'New passwords do not match' }),
+  });
+
+  return change_password_schema.validate(reqBody);
+};

@@ -15,8 +15,8 @@ export default async function uploadToCloudinary(
 
   const image = await cloudinary.uploader.upload(file.path, {
     folder: 'kadocoin/profilePictures',
-    width: 512,
-    height: 512,
+    width: 200,
+    height: 200,
     crop: 'fill',
   });
 

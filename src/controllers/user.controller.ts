@@ -14,6 +14,7 @@ import {
   loginValidation,
   walletInfoValidation,
   editProfileInfoValidation,
+  change_password_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -228,7 +229,43 @@ export default class UserController {
         });
       }
 
+      // TODO - RESIGN TOKEN
+
       return res.status(SUCCESS).json({ user });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  change_password = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = change_password_validation(req.body);
+
+      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+      const { current_password, new_password, userId } = req.body;
+
+      // GET USER DOCUMENT
+      const user = await this.commonModel.findById(req.db, userId);
+
+      if (user) {
+        // CHECK PASSWORD
+        if (!(await bcrypt.compare(current_password, user.password)))
+          return res.status(NOT_FOUND).json({ message: 'Incorrect email or password' });
+
+        // HASH PASSWORD
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(new_password, salt);
+
+        await this.userModel.updateUserById(req.db, user._id, { password: hashedPassword });
+
+        return res.status(SUCCESS).json({ message: 'success' });
+      }
+
+      return res.status(NOT_FOUND).json({ message: 'No user exists with this user ID' });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

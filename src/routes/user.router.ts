@@ -40,8 +40,10 @@ export default class UserRouter {
     this.app.post('/login', this.UserController.login);
     this.app.put(
       '/editProfileInfo',
+      /** mustBeLoggedIn,*/
       upload.single('profilePicture'),
       this.UserController.editProfileInfo
     );
+    this.app.post('/change_password', /** mustBeLoggedIn,*/ this.UserController.change_password);
   }
 }

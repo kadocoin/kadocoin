@@ -41,12 +41,18 @@ export default class UserModel {
   async updateUserById(
     db: Db,
     userId: string,
-    update: { name: string; bio: string; email: string; profilePicture: string }
+    update: {
+      name?: string;
+      bio?: string;
+      email?: string;
+      profilePicture?: string;
+      password?: string;
+    }
   ): Promise<IUserModel> {
     try {
       return db
         .collection('users')
-        .findOneAndUpdate({ _id: userId }, { $set: update }, { returnOriginal: false })
+        .findOneAndUpdate({ _id: userId }, { $set: update }, { returnDocument: 'after' })
         .then(({ value }) => value);
     } catch (error) {
       throw new Error(`updateUserById, ${error}`);
