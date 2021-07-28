@@ -72,6 +72,8 @@ export default class UserController {
       user.token = jwt.sign(
         {
           id: user._id,
+          name: user.name,
+          bio: user.bio,
           email: user.email,
           userCreationDate: user.userCreationDate,
         },
@@ -133,6 +135,8 @@ export default class UserController {
       user.token = jwt.sign(
         {
           id: user._id,
+          name: user.name,
+          bio: user.bio,
           email: user.email,
           userCreationDate: user.userCreationDate,
         },
@@ -206,7 +210,7 @@ export default class UserController {
         ...(profilePicture && { profilePicture }),
       };
 
-      const user =
+      let user =
         Object.keys(update).length &&
         (await this.userModel.updateUserById(req.db, userId, {
           ...(name && { name }),
@@ -230,6 +234,22 @@ export default class UserController {
       }
 
       // TODO - RESIGN TOKEN
+      // ADD SIGNED TOKEN TO USER OBJECT
+      user.token = jwt.sign(
+        {
+          id: user._id,
+          name: user.name,
+          bio: user.bio,
+          email: user.email,
+          userCreationDate: user.userCreationDate,
+        },
+        JWTSECRET,
+        {
+          expiresIn: this.tokenLasts,
+        }
+      );
+
+      user = removeSensitiveProps(user);
 
       return res.status(SUCCESS).json({ user });
     } catch (error) {

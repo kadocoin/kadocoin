@@ -39,11 +39,11 @@ export default class UserRouter {
 
     this.app.post('/login', this.UserController.login);
     this.app.put(
-      '/editProfileInfo',
-      /** mustBeLoggedIn,*/
+      '/edit-profile-info',
       upload.single('profilePicture'),
+      mustBeLoggedIn,
       this.UserController.editProfileInfo
     );
-    this.app.post('/change_password', this.UserController.change_password);
+    this.app.post('/change-password', mustBeLoggedIn, this.UserController.change_password);
   }
 }

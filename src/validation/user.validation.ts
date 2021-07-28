@@ -44,14 +44,16 @@ export const walletInfoValidation = (reqBody: {
 };
 
 export const editProfileInfoValidation = (reqBody: {
+  userId: string;
+  token: string;
   name: string;
   bio: string;
   email: string;
-  userId: string;
   currentProfilePicture: Blob;
 }): ValidationResult => {
   const editProfileInfoSchema = Joi.object({
     userId: Joi.string().required(),
+    token: Joi.string().required(),
     name: Joi.string().allow(''),
     bio: Joi.string().allow('').max(160),
     email: Joi.string().email(),
