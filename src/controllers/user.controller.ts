@@ -295,6 +295,7 @@ export default class UserController {
       throw new Error(error.message);
     }
   };
+
   delete_account = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = delete_account_validation(req.body);

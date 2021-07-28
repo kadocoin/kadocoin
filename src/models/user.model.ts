@@ -61,7 +61,9 @@ export default class UserModel {
 
   async delete_account(db: Db, userId: string): Promise<any> {
     try {
-      return await db.collection('users').findOneAndDelete({ _id: userId });
+      return await (
+        await db.collection('users').findOneAndDelete({ _id: userId })
+      ).value;
     } catch (error) {
       throw new Error(`delete_account", ${error}`);
     }
