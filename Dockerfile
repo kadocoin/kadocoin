@@ -19,7 +19,7 @@ COPY . .
 COPY --from=deps /app/node_modules ./node_modules
 RUN yarn build
 
-# Production image, copy all the files and run next!
+# Production image, copy all the files and run the server!
 FROM node:alpine AS runner
 WORKDIR /app
 
@@ -29,6 +29,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
+RUN mkdir -p ./app/temp
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S kado -u 1001
 RUN chown -R kado:nodejs /app/dist
