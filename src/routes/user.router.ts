@@ -11,7 +11,7 @@ import UserController from '../controllers/user.controller';
 import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
 import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 import multer from 'multer';
-const upload = multer({ dest: '/temp' });
+const upload = multer({ dest: '/app/dist/temp' });
 
 export default class UserRouter {
   private app: Application;

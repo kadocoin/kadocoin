@@ -29,7 +29,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-RUN mkdir -p ./temp
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S kado -u 1001
 RUN chown -R kado:nodejs /app/dist
