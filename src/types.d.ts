@@ -62,7 +62,7 @@ export type IChain = Array<Block>;
 export interface IUserModel {
   _id?: string;
   emailVerified?: boolean;
-  profilePicture?: null;
+  profilePicture?: string;
   userCreationDate?: string;
   email?: string;
   password?: string;
