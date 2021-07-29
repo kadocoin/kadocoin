@@ -51,6 +51,10 @@ export const ROOT_NODE_ADDRESS = prod
   ? process.env['ROOT_NODE_ADDRESS']
   : process.env['ROOT_NODE_ADDRESS_DEV'];
 
+export const NEXT_JS_APP_ADDRESS = prod
+  ? process.env['NEXT_JS_APP_ADDRESS']
+  : process.env['NEXT_JS_APP_ADDRESS_DEV'];
+
 export const REDIS_URL = process.env['REDIS_URL'];
 export const REDIS_PASSWORD = process.env['REDIS_PASSWORD'];
 export const REDIS_PORT = Number(process.env['REDIS_PORT']);

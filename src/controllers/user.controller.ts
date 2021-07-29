@@ -87,7 +87,7 @@ export default class UserController {
         to: email,
         from: `Kadocoin <${process.env.EMAIL_FROM}>`,
         subject: '[One More Step] Verify Your Registration Email',
-        html: RegistrationWelcomeEmailPreVerification(verification_token, 'New Customer', email),
+        html: RegistrationWelcomeEmailPreVerification(verification_token, email),
       };
 
       // SEND EMAIL

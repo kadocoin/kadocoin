@@ -1,4 +1,4 @@
-import { ROOT_NODE_ADDRESS } from '../config/secret';
+import { NEXT_JS_APP_ADDRESS } from '../config/secret';
 import emailFooter from './emailFooter';
 import emailHeader from './emailHeader';
 import { tableRow, tableRowAlwaysHappy, tableRowCheers, tableRowHeadline } from './table';
@@ -30,7 +30,7 @@ export function registrationWelcomeEmailPostVerification({ email }: { email: str
                                     )}
 
                                     ${tableRow(
-                                      `We welcome you to follow our <a href="${ROOT_NODE_ADDRESS}/blog">Blog</a> for the latest press releases, updates regarding Kadocoin services and products updates.`
+                                      `We welcome you to follow our <a href="${NEXT_JS_APP_ADDRESS}/blog">Blog</a> for the latest press releases, updates regarding Kadocoin services and products updates.`
                                     )}
                                     ${tableRow(
                                       'Make sure you follow us on social media. See footer for links.'
