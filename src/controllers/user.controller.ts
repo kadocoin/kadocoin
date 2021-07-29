@@ -33,6 +33,9 @@ import { v2 as cloudinary } from 'cloudinary';
 import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
 import sanitizeHTML from 'sanitize-html';
 import uploadToCloudinary from '../util/upload-to-cloudinary';
+import { sendMailNodemailer } from '../util/mail';
+import { RegistrationWelcomeEmailPreVerification } from '../emailTemplates/registrationWelcomeEmailPreVerification';
+import { generate_verification_token, token_expiry_ms } from '../util/generate_verification_token';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -61,13 +64,34 @@ export default class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      let user = await this.userModel.register(req.db, {
-        email,
-        hashedPassword,
-        userCreationDate,
-        address: wallet.address,
-        publicKey: wallet.publicKey,
-      });
+      const verification_token = await generate_verification_token();
+      const token_expiry = token_expiry_ms();
+
+      let user = await this.userModel.register(
+        req.db,
+        {
+          email,
+          hashedPassword,
+          userCreationDate,
+          address: wallet.address,
+          publicKey: wallet.publicKey,
+        },
+        {
+          verification_token,
+          token_expiry,
+        }
+      );
+
+      // EMAIL OPTIONS
+      const msg = {
+        to: email,
+        from: `Kadocoin <${process.env.EMAIL_FROM}>`,
+        subject: '[One More Step] Verify Your Registration Email',
+        html: RegistrationWelcomeEmailPreVerification(verification_token, 'New Customer', email),
+      };
+
+      // SEND EMAIL
+      await sendMailNodemailer(msg);
 
       // ADD SIGNED TOKEN TO USER OBJECT
       user.token = jwt.sign(

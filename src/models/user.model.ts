@@ -13,7 +13,8 @@ import { Db } from 'mongodb';
 export default class UserModel {
   async register(
     db: Db,
-    { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel
+    { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel,
+    { verification_token, token_expiry }: { verification_token: string; token_expiry: number }
   ): Promise<IUserModel> {
     try {
       return db
@@ -31,6 +32,8 @@ export default class UserModel {
           bio: '',
           ...(email == `${ADMIN_EMAIL}` ? { scope: ['user', 'admin'] } : { scope: ['user'] }),
           registrationMethod: 'email_password',
+          verification_token,
+          token_expiry,
         })
         .then(({ ops }) => ops[0]);
     } catch (error) {
