@@ -111,7 +111,7 @@ export default class UserController {
       user = removeSensitiveProps(user);
 
       return res.status(CREATED).json({
-        user,
+        message: user,
       });
     } catch (error) {
       if (error instanceof Error) {
