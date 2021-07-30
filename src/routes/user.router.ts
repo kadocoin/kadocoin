@@ -46,5 +46,6 @@ export default class UserRouter {
     );
     this.app.post('/change-password', mustBeLoggedIn, this.UserController.change_password);
     this.app.post('/delete-account', mustBeLoggedIn, this.UserController.delete_account);
+    this.app.post('/verify-email', mustBeLoggedIn, this.UserController.send_verification_email);
   }
 }

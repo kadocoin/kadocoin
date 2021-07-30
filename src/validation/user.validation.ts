@@ -96,3 +96,17 @@ export const delete_account_validation = (reqBody: {
 
   return delete_account_schema.validate(reqBody);
 };
+
+export const send_verification_email_validation = (reqBody: {
+  user_id: string;
+  email: string;
+  token: string;
+}): ValidationResult => {
+  const send_verification_email_schema = Joi.object({
+    user_id: Joi.string().required(),
+    email: Joi.string().email().required(),
+    token: Joi.string().required(),
+  });
+
+  return send_verification_email_schema.validate(reqBody);
+};

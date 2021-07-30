@@ -12,6 +12,6 @@ export function generate_verification_token(): Promise<string> {
   });
 }
 
-export function token_expiry_ms(): number {
+export function generate_token_expiry(): number {
   return Date.now() + 60 * 60 * 1000; // 1 hour
 }

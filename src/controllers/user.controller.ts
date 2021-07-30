@@ -16,6 +16,7 @@ import {
   editProfileInfoValidation,
   change_password_validation,
   delete_account_validation,
+  send_verification_email_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -35,7 +36,10 @@ import sanitizeHTML from 'sanitize-html';
 import uploadToCloudinary from '../util/upload-to-cloudinary';
 import { sendMailNodemailer } from '../util/mail';
 import { RegistrationWelcomeEmailPreVerification } from '../emailTemplates/registrationWelcomeEmailPreVerification';
-import { generate_verification_token, token_expiry_ms } from '../util/generate_verification_token';
+import {
+  generate_verification_token,
+  generate_token_expiry,
+} from '../util/generate_verification_token';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -65,7 +69,7 @@ export default class UserController {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const verification_token = await generate_verification_token();
-      const token_expiry = token_expiry_ms();
+      const token_expiry = generate_token_expiry();
 
       let user = await this.userModel.register(
         req.db,
@@ -347,6 +351,46 @@ export default class UserController {
           resource_type: 'image',
         });
       }
+
+      return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  send_verification_email = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = send_verification_email_validation(req.body);
+
+      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+      const { email, userId } = req.body;
+
+      const verification_token = await generate_verification_token();
+      const token_expiry = generate_token_expiry();
+
+      await this.userModel.updateUserById(req.db, userId, {
+        verification_token,
+        token_expiry,
+      });
+
+      // EMAIL OPTIONS
+      const msg = {
+        to: email,
+        from: `Kadocoin <${process.env.EMAIL_FROM}>`,
+        subject: '[One More Step] Verify Your Registration Email',
+        html: RegistrationWelcomeEmailPreVerification(
+          verification_token,
+          email,
+          'USER_REQUESTED_THIS_EMAIL'
+        ),
+      };
+
+      // SEND EMAIL
+      await sendMailNodemailer(msg);
 
       return res.status(SUCCESS).json({ message: 'success' });
     } catch (error) {
