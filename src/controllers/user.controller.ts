@@ -60,7 +60,10 @@ export default class UserController {
 
       const wallet = new Wallet();
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const emailExist = await this.commonModel.findByEmail(req.db, email);
       if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
@@ -131,7 +134,10 @@ export default class UserController {
       const { email } = req.body;
 
       const { error } = emailValidation(email);
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const emailExist = await this.commonModel.findByEmail(req.db, email);
 
@@ -150,7 +156,10 @@ export default class UserController {
     try {
       const { error } = loginValidation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const user = await this.commonModel.findByEmail(req.db, req.body.email);
 
@@ -188,7 +197,10 @@ export default class UserController {
   walletInfo = (req: Request, res: Response): Response => {
     try {
       const { error } = walletInfoValidation(req.body);
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       return res.status(SUCCESS).json({
         balance: Wallet.calculateBalance({
@@ -208,13 +220,16 @@ export default class UserController {
     try {
       const { error } = editProfileInfoValidation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       let profilePicture: string;
       if (req.file) profilePicture = await uploadToCloudinary(req.file);
 
       let { name, bio, email } = req.body;
-      const { currentProfilePicture, userId } = req.body;
+      const { currentProfilePicture, user_id } = req.body;
 
       // SANITIZE - REMOVE SCRIPTS/HTML TAGS
       name &&
@@ -242,7 +257,7 @@ export default class UserController {
 
       let user =
         Object.keys(update).length &&
-        (await this.userModel.updateUserById(req.db, userId, {
+        (await this.userModel.updateUserById(req.db, user_id, {
           ...(name && { name }),
           ...(bio && { bio }),
           ...(email && { email }),
@@ -280,7 +295,7 @@ export default class UserController {
 
       user = removeSensitiveProps(user);
 
-      return res.status(SUCCESS).json({ user });
+      return res.status(SUCCESS).json({ type: 'success', user });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
@@ -293,7 +308,10 @@ export default class UserController {
     try {
       const { error } = change_password_validation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const { current_password, new_password, userId } = req.body;
 
@@ -329,7 +347,10 @@ export default class UserController {
     try {
       const { error } = delete_account_validation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const { user_id } = req.body;
 
@@ -366,7 +387,10 @@ export default class UserController {
     try {
       const { error } = send_verification_email_validation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const { email, user_id } = req.body;
 
@@ -407,7 +431,10 @@ export default class UserController {
     try {
       const { error } = verify_token_validation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const { verification_token } = req.body;
 
