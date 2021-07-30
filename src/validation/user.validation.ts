@@ -110,3 +110,13 @@ export const send_verification_email_validation = (reqBody: {
 
   return send_verification_email_schema.validate(reqBody);
 };
+
+export const verify_token_validation = (reqBody: {
+  verification_token: string;
+}): ValidationResult => {
+  const verify_token_email_schema = Joi.object({
+    verification_token: Joi.string().required(),
+  });
+
+  return verify_token_email_schema.validate(reqBody);
+};

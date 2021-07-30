@@ -17,6 +17,7 @@ import {
   change_password_validation,
   delete_account_validation,
   send_verification_email_validation,
+  verify_token_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -367,12 +368,13 @@ export default class UserController {
 
       if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
 
-      const { email, userId } = req.body;
+      const { email, user_id } = req.body;
 
       const verification_token = await generate_verification_token();
       const token_expiry = generate_token_expiry();
 
-      await this.userModel.updateUserById(req.db, userId, {
+      // ADD TO DB
+      await this.userModel.updateUserById(req.db, user_id, {
         verification_token,
         token_expiry,
       });
@@ -391,6 +393,37 @@ export default class UserController {
 
       // SEND EMAIL
       await sendMailNodemailer(msg);
+
+      return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  verify_token = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = verify_token_validation(req.body);
+
+      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+
+      const { verification_token } = req.body;
+
+      const user = await this.userModel.find_by_verification_token(req.db, verification_token);
+
+      if (!user)
+        return res.status(NOT_FOUND).json({
+          error: 'Email verification token is invalid or has expired',
+        });
+
+      // SET RESET TOKEN AND EXPIRY TO UNDEFINED
+      await this.userModel.updateUserById(req.db, user._id, {
+        verification_token: null,
+        token_expiry: null,
+        emailVerified: true,
+      });
 
       return res.status(SUCCESS).json({ message: 'success' });
     } catch (error) {

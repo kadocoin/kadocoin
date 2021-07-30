@@ -52,6 +52,7 @@ export default class UserModel {
       password?: string;
       verification_token?: string;
       token_expiry?: number;
+      emailVerified?: boolean;
     }
   ): Promise<IUserModel> {
     try {
@@ -70,7 +71,19 @@ export default class UserModel {
         await db.collection('users').findOneAndDelete({ _id: userId })
       ).value;
     } catch (error) {
-      throw new Error(`delete_account", ${error}`);
+      throw new Error(`delete_account, ${error}`);
     }
   }
+
+  async find_by_verification_token(db: Db, verification_token: string): Promise<IUserModel> {
+    try {
+      return await db
+        .collection('users')
+        .findOne({ verification_token, token_expiry: { $gt: Date.now() } });
+    } catch (error) {
+      throw new Error(`find_by_verification_token, ${error}`);
+    }
+  }
+
+  //
 }
