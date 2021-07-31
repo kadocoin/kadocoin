@@ -8,6 +8,7 @@
 import Joi, { ValidationResult } from 'joi';
 
 export const transactValidation = (body: {
+  user_id: string;
   amount: string;
   recipient: string;
   publicKey: string;
@@ -16,6 +17,7 @@ export const transactValidation = (body: {
   sendFee: string;
 }): ValidationResult => {
   const transactSchema = Joi.object().keys({
+    user_id: Joi.string().required(),
     amount: Joi.number().positive().required(),
     recipient: Joi.string().trim().required(),
     publicKey: Joi.string().trim().required(),

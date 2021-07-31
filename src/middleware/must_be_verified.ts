@@ -38,7 +38,7 @@ export async function must_be_verified(
 
     next();
   } catch (error) {
-    log_err_to_file.error(error);
+    log_err_to_file?.error(error);
     return res
       .status(NOT_FOUND)
       .json({ type: 'error', message: 'Email has not been verified. Please verify your email.' });

@@ -14,6 +14,7 @@ import {
   transactionPoolMiddleWare,
   walletMiddleWare,
 } from '../middleware/cryptoMiddleWare';
+import { must_be_verified } from '../middleware/must_be_verified';
 import PubSub from '../pubSub';
 import Wallet from '../wallet';
 import TransactionPool from '../wallet/transaction-pool';
@@ -45,6 +46,7 @@ export default class TransactionRouter {
   initRoute(): void {
     this.app.post(
       '/transact',
+      must_be_verified,
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
