@@ -44,7 +44,7 @@ export const walletInfoValidation = (reqBody: {
 };
 
 export const editProfileInfoValidation = (reqBody: {
-  userId: string;
+  user_id: string;
   token: string;
   name: string;
   bio: string;
@@ -52,7 +52,7 @@ export const editProfileInfoValidation = (reqBody: {
   currentProfilePicture: Blob;
 }): ValidationResult => {
   const editProfileInfoSchema = Joi.object({
-    userId: Joi.string().required(),
+    user_id: Joi.string().required(),
     token: Joi.string().required(),
     name: Joi.string().allow(''),
     bio: Joi.string().allow('').max(160),
@@ -95,4 +95,28 @@ export const delete_account_validation = (reqBody: {
   });
 
   return delete_account_schema.validate(reqBody);
+};
+
+export const send_verification_email_validation = (reqBody: {
+  user_id: string;
+  email: string;
+  token: string;
+}): ValidationResult => {
+  const send_verification_email_schema = Joi.object({
+    user_id: Joi.string().required(),
+    email: Joi.string().email().required(),
+    token: Joi.string().required(),
+  });
+
+  return send_verification_email_schema.validate(reqBody);
+};
+
+export const verify_token_validation = (reqBody: {
+  verification_token: string;
+}): ValidationResult => {
+  const verify_token_email_schema = Joi.object({
+    verification_token: Joi.string().required(),
+  });
+
+  return verify_token_email_schema.validate(reqBody);
 };

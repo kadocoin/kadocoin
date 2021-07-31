@@ -13,7 +13,8 @@ import { Db } from 'mongodb';
 export default class UserModel {
   async register(
     db: Db,
-    { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel
+    { email, hashedPassword, address, userCreationDate, publicKey }: IUserModel,
+    { verification_token, token_expiry }: { verification_token: string; token_expiry: number }
   ): Promise<IUserModel> {
     try {
       return db
@@ -31,6 +32,8 @@ export default class UserModel {
           bio: '',
           ...(email == `${ADMIN_EMAIL}` ? { scope: ['user', 'admin'] } : { scope: ['user'] }),
           registrationMethod: 'email_password',
+          verification_token,
+          token_expiry,
         })
         .then(({ ops }) => ops[0]);
     } catch (error) {
@@ -47,6 +50,9 @@ export default class UserModel {
       email?: string;
       profilePicture?: string;
       password?: string;
+      verification_token?: string;
+      token_expiry?: number;
+      emailVerified?: boolean;
     }
   ): Promise<IUserModel> {
     try {
@@ -65,7 +71,19 @@ export default class UserModel {
         await db.collection('users').findOneAndDelete({ _id: userId })
       ).value;
     } catch (error) {
-      throw new Error(`delete_account", ${error}`);
+      throw new Error(`delete_account, ${error}`);
     }
   }
+
+  async find_by_verification_token(db: Db, verification_token: string): Promise<IUserModel> {
+    try {
+      return await db
+        .collection('users')
+        .findOne({ verification_token, token_expiry: { $gt: Date.now() } });
+    } catch (error) {
+      throw new Error(`find_by_verification_token, ${error}`);
+    }
+  }
+
+  //
 }

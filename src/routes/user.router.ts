@@ -11,6 +11,7 @@ import UserController from '../controllers/user.controller';
 import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
 import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 import multer from 'multer';
+import { must_be_verified } from '../middleware/must_be_verified';
 const upload = multer({ dest: '/app/dist/temp' });
 
 export default class UserRouter {
@@ -41,10 +42,23 @@ export default class UserRouter {
     this.app.put(
       '/edit-profile-info',
       upload.single('profilePicture'),
+      must_be_verified,
       mustBeLoggedIn,
       this.UserController.editProfileInfo
     );
-    this.app.post('/change-password', mustBeLoggedIn, this.UserController.change_password);
-    this.app.post('/delete-account', mustBeLoggedIn, this.UserController.delete_account);
+    this.app.post(
+      '/change-password',
+      must_be_verified,
+      mustBeLoggedIn,
+      this.UserController.change_password
+    );
+    this.app.post(
+      '/delete-account',
+      must_be_verified,
+      mustBeLoggedIn,
+      this.UserController.delete_account
+    );
+    this.app.post('/verify-email', mustBeLoggedIn, this.UserController.send_verification_email);
+    this.app.post('/verify-token', this.UserController.verify_token);
   }
 }

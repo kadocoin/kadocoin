@@ -16,6 +16,8 @@ import {
   editProfileInfoValidation,
   change_password_validation,
   delete_account_validation,
+  send_verification_email_validation,
+  verify_token_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -33,6 +35,12 @@ import { v2 as cloudinary } from 'cloudinary';
 import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
 import sanitizeHTML from 'sanitize-html';
 import uploadToCloudinary from '../util/upload-to-cloudinary';
+import { sendMailNodemailer } from '../util/mail';
+import { RegistrationWelcomeEmailPreVerification } from '../emailTemplates/registrationWelcomeEmailPreVerification';
+import {
+  generate_verification_token,
+  generate_token_expiry,
+} from '../util/generate_verification_token';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -52,7 +60,10 @@ export default class UserController {
 
       const wallet = new Wallet();
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const emailExist = await this.commonModel.findByEmail(req.db, email);
       if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
@@ -61,13 +72,34 @@ export default class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      let user = await this.userModel.register(req.db, {
-        email,
-        hashedPassword,
-        userCreationDate,
-        address: wallet.address,
-        publicKey: wallet.publicKey,
-      });
+      const verification_token = await generate_verification_token();
+      const token_expiry = generate_token_expiry();
+
+      let user = await this.userModel.register(
+        req.db,
+        {
+          email,
+          hashedPassword,
+          userCreationDate,
+          address: wallet.address,
+          publicKey: wallet.publicKey,
+        },
+        {
+          verification_token,
+          token_expiry,
+        }
+      );
+
+      // EMAIL OPTIONS
+      const msg = {
+        to: email,
+        from: `Kadocoin <${process.env.EMAIL_FROM}>`,
+        subject: '[One More Step] Verify Your Registration Email',
+        html: RegistrationWelcomeEmailPreVerification(verification_token, email),
+      };
+
+      // SEND EMAIL
+      await sendMailNodemailer(msg);
 
       // ADD SIGNED TOKEN TO USER OBJECT
       user.token = jwt.sign(
@@ -87,7 +119,7 @@ export default class UserController {
       user = removeSensitiveProps(user);
 
       return res.status(CREATED).json({
-        user,
+        message: user,
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -102,7 +134,10 @@ export default class UserController {
       const { email } = req.body;
 
       const { error } = emailValidation(email);
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const emailExist = await this.commonModel.findByEmail(req.db, email);
 
@@ -121,7 +156,10 @@ export default class UserController {
     try {
       const { error } = loginValidation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const user = await this.commonModel.findByEmail(req.db, req.body.email);
 
@@ -159,7 +197,10 @@ export default class UserController {
   walletInfo = (req: Request, res: Response): Response => {
     try {
       const { error } = walletInfoValidation(req.body);
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       return res.status(SUCCESS).json({
         balance: Wallet.calculateBalance({
@@ -179,13 +220,16 @@ export default class UserController {
     try {
       const { error } = editProfileInfoValidation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       let profilePicture: string;
       if (req.file) profilePicture = await uploadToCloudinary(req.file);
 
       let { name, bio, email } = req.body;
-      const { currentProfilePicture, userId } = req.body;
+      const { currentProfilePicture, user_id } = req.body;
 
       // SANITIZE - REMOVE SCRIPTS/HTML TAGS
       name &&
@@ -213,7 +257,7 @@ export default class UserController {
 
       let user =
         Object.keys(update).length &&
-        (await this.userModel.updateUserById(req.db, userId, {
+        (await this.userModel.updateUserById(req.db, user_id, {
           ...(name && { name }),
           ...(bio && { bio }),
           ...(email && { email }),
@@ -251,7 +295,7 @@ export default class UserController {
 
       user = removeSensitiveProps(user);
 
-      return res.status(SUCCESS).json({ user });
+      return res.status(SUCCESS).json({ type: 'success', user });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
@@ -264,7 +308,10 @@ export default class UserController {
     try {
       const { error } = change_password_validation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const { current_password, new_password, userId } = req.body;
 
@@ -300,7 +347,10 @@ export default class UserController {
     try {
       const { error } = delete_account_validation(req.body);
 
-      if (error) return res.status(INTERNAL_SERVER_ERROR).json({ error: error.details[0].message });
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
 
       const { user_id } = req.body;
 
@@ -323,6 +373,84 @@ export default class UserController {
           resource_type: 'image',
         });
       }
+
+      return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  send_verification_email = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = send_verification_email_validation(req.body);
+
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      const { email, user_id } = req.body;
+
+      const verification_token = await generate_verification_token();
+      const token_expiry = generate_token_expiry();
+
+      // ADD TO DB
+      await this.userModel.updateUserById(req.db, user_id, {
+        verification_token,
+        token_expiry,
+      });
+
+      // EMAIL OPTIONS
+      const msg = {
+        to: email,
+        from: `Kadocoin <${process.env.EMAIL_FROM}>`,
+        subject: '[One More Step] Verify Your Registration Email',
+        html: RegistrationWelcomeEmailPreVerification(
+          verification_token,
+          email,
+          'USER_REQUESTED_THIS_EMAIL'
+        ),
+      };
+
+      // SEND EMAIL
+      await sendMailNodemailer(msg);
+
+      return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  verify_token = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = verify_token_validation(req.body);
+
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      const { verification_token } = req.body;
+
+      const user = await this.userModel.find_by_verification_token(req.db, verification_token);
+
+      if (!user)
+        return res.status(NOT_FOUND).json({
+          error: 'Email verification token is invalid or has expired',
+        });
+
+      // SET RESET TOKEN AND EXPIRY TO UNDEFINED
+      await this.userModel.updateUserById(req.db, user._id, {
+        verification_token: null,
+        token_expiry: null,
+        emailVerified: true,
+      });
 
       return res.status(SUCCESS).json({ message: 'success' });
     } catch (error) {
