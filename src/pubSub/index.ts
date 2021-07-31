@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { RedisClient } from 'redis';
+import { Redis } from 'ioredis';
 import Blockchain from '../blockchain';
 import { redisClientPub, redisClientSub } from '../config/redis';
 import Transaction from '../wallet/transaction';
@@ -19,8 +19,8 @@ const CHANNELS = {
 class PubSub {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
-  publisher: RedisClient;
-  subscriber: RedisClient;
+  publisher: Redis;
+  subscriber: Redis;
 
   constructor({
     blockchain,

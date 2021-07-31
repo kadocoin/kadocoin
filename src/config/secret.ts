@@ -59,5 +59,9 @@ export const REDIS_URL = process.env['REDIS_URL'];
 export const REDIS_PASSWORD = process.env['REDIS_PASSWORD'];
 export const REDIS_PORT = Number(process.env['REDIS_PORT']);
 
+export const REDIS_URL_CACHING = process.env['REDIS_URL_CACHING'];
+export const REDIS_PASSWORD_CACHING = process.env['REDIS_PASSWORD_CACHING'];
+export const REDIS_PORT_CACHING = Number(process.env['REDIS_PORT_CACHING']);
+
 export const SESSION_SECRET = process.env['SESSION_SECRET'];
 export const ADMIN_EMAIL = process.env['ADMIN_EMAIL'];

@@ -5,12 +5,28 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { createClient } from 'redis';
-import { REDIS_URL, REDIS_PASSWORD, REDIS_PORT } from './secret';
+import Redis from 'ioredis';
+import {
+  REDIS_URL,
+  REDIS_PASSWORD,
+  REDIS_PORT,
+  REDIS_PORT_CACHING,
+  REDIS_URL_CACHING,
+  REDIS_PASSWORD_CACHING,
+} from './secret';
 
-export const redisClientPub = createClient(REDIS_PORT, REDIS_URL, {
-  password: REDIS_PASSWORD as string,
+export const redisClientPub = new Redis({
+  port: REDIS_PORT,
+  host: REDIS_URL,
+  password: REDIS_PASSWORD,
 });
-export const redisClientSub = createClient(REDIS_PORT, REDIS_URL, {
-  password: REDIS_PASSWORD as string,
+export const redisClientSub = new Redis({
+  port: REDIS_PORT,
+  host: REDIS_URL,
+  password: REDIS_PASSWORD,
+});
+export const redisClientCaching = new Redis({
+  port: REDIS_PORT_CACHING,
+  host: REDIS_URL_CACHING,
+  password: REDIS_PASSWORD_CACHING,
 });

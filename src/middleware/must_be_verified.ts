@@ -8,6 +8,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { NOT_FOUND } from '../statusCode/statusCode';
 import CommonModel from '../models/common.model';
+import { redisClientCaching } from '../config/redis';
 
 export async function must_be_verified(
   req: Request,
@@ -17,9 +18,22 @@ export async function must_be_verified(
   try {
     const commonModel = new CommonModel();
 
+    /* CHECK REDIS FOR CACHED ENTRY FIRST */
+    const cacheEntry = await redisClientCaching.get(`user:${req.body.user_id}`);
+
+    /* IF REDIS RETURNS A CACHE HIT */
+    if (cacheEntry) {
+      next();
+      return;
+    }
+
+    /* IF REDIS RETURNS A CACHE MISS, MAKE A TRIP TO THE DATABASE */
     const { emailVerified } = await commonModel.findById(req.db, req.body.user_id);
 
     if (!emailVerified) throw new Error(); // ERROR IS SENT TO CATCH BLOCK
+
+    /* ADD THE ENTRY TO REDIS FOR NEXT TIME AND SET AN EXPIRY OF ONE HOUR */
+    redisClientCaching.set(`user:${req.body.user_id}`, 'true', 'EX', 3600);
 
     next();
   } catch (error) {
