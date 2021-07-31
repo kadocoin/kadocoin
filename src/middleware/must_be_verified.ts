@@ -9,6 +9,7 @@ import { Request, Response, NextFunction } from 'express';
 import { NOT_FOUND } from '../statusCode/statusCode';
 import CommonModel from '../models/common.model';
 import { redisClientCaching } from '../config/redis';
+import log_err_to_file from '../util/log_err_to_file';
 
 export async function must_be_verified(
   req: Request,
@@ -37,6 +38,7 @@ export async function must_be_verified(
 
     next();
   } catch (error) {
+    log_err_to_file.error(error);
     return res
       .status(NOT_FOUND)
       .json({ type: 'error', message: 'Email has not been verified. Please verify your email.' });
