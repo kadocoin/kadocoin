@@ -16,8 +16,8 @@ import {
   editProfileInfoValidation,
   change_password_validation,
   delete_account_validation,
-  send_verification_email_validation,
   verify_token_validation,
+  userId_email_token_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -41,6 +41,7 @@ import {
   generate_verification_token,
   generate_token_expiry,
 } from '../util/generate_verification_token';
+import { ResetPasswordEmail } from '../emailTemplates/resetPasswordEmail';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -385,7 +386,7 @@ export default class UserController {
 
   send_verification_email = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { error } = send_verification_email_validation(req.body);
+      const { error } = userId_email_token_validation(req.body);
 
       if (error)
         return res
@@ -394,13 +395,13 @@ export default class UserController {
 
       const { email, user_id } = req.body;
 
-      const verification_token = await generate_verification_token();
-      const token_expiry = generate_token_expiry();
+      const verification_token_registration_email = await generate_verification_token();
+      const token_expiry_registration_email = generate_token_expiry();
 
       // ADD TO DB
       await this.userModel.updateUserById(req.db, user_id, {
-        verification_token,
-        token_expiry,
+        verification_token_registration_email,
+        token_expiry_registration_email,
       });
 
       // EMAIL OPTIONS
@@ -409,7 +410,7 @@ export default class UserController {
         from: `Kadocoin <${process.env.EMAIL_FROM}>`,
         subject: '[One More Step] Verify Your Registration Email',
         html: RegistrationWelcomeEmailPreVerification(
-          verification_token,
+          verification_token_registration_email,
           email,
           'USER_REQUESTED_THIS_EMAIL'
         ),
@@ -447,10 +448,54 @@ export default class UserController {
 
       // SET RESET TOKEN AND EXPIRY TO UNDEFINED
       await this.userModel.updateUserById(req.db, user._id, {
-        verification_token: null,
-        token_expiry: null,
+        verification_token_registration_email: null,
+        token_expiry_registration_email: null,
         emailVerified: true,
       });
+
+      return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  forgot_password_step_1 = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = emailValidation(req.body.email);
+
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      const { email } = req.body;
+
+      const verification_token_reset_password = await generate_verification_token();
+      const token_expiry__reset_password = generate_token_expiry();
+
+      // GET THE USER DOCUMENT TO USE THE ID
+      // TODO: CACHING?
+      const userDoc = await this.commonModel.findByEmail(req.db, email);
+
+      // ADD TO DB
+      const user = await this.userModel.updateUserById(req.db, userDoc._id, {
+        verification_token_reset_password,
+        token_expiry__reset_password,
+      });
+
+      // EMAIL OPTIONS
+      const msg = {
+        to: email,
+        from: `Kadocoin <${process.env.EMAIL_FROM}>`,
+        subject: '[Next Step] Reset Your Password',
+        html: ResetPasswordEmail(verification_token_reset_password, email, user.name),
+      };
+
+      // SEND EMAIL
+      await sendMailNodemailer(msg);
 
       return res.status(SUCCESS).json({ message: 'success' });
     } catch (error) {

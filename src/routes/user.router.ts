@@ -60,5 +60,6 @@ export default class UserRouter {
     );
     this.app.post('/verify-email', mustBeLoggedIn, this.UserController.send_verification_email);
     this.app.post('/verify-token', this.UserController.verify_token);
+    this.app.post('/forgot-password-step-1', this.UserController.forgot_password_step_1);
   }
 }

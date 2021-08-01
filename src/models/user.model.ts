@@ -50,8 +50,10 @@ export default class UserModel {
       email?: string;
       profilePicture?: string;
       password?: string;
-      verification_token?: string;
-      token_expiry?: number;
+      verification_token_registration_email?: string;
+      token_expiry_registration_email?: number;
+      verification_token_reset_password?: string;
+      token_expiry__reset_password?: number;
       emailVerified?: boolean;
     }
   ): Promise<IUserModel> {
