@@ -77,11 +77,26 @@ export default class UserModel {
     }
   }
 
-  async find_by_verification_token(db: Db, verification_token: string): Promise<IUserModel> {
+  async find_by_verification_token(
+    db: Db,
+    verification_token: string,
+    from: string
+  ): Promise<IUserModel> {
     try {
-      return await db
-        .collection('users')
-        .findOne({ verification_token, token_expiry: { $gt: Date.now() } });
+      let filter;
+      if (from === 'registration_email') {
+        filter = {
+          verification_token_registration_email: verification_token,
+          token_expiry_registration_email: { $gt: Date.now() },
+        };
+      }
+      if (from === 'reset_password') {
+        filter = {
+          verification_token_reset_password: verification_token,
+          token_expiry__reset_password: { $gt: Date.now() },
+        };
+      }
+      return await db.collection('users').findOne(filter);
     } catch (error) {
       throw new Error(`find_by_verification_token, ${error}`);
     }

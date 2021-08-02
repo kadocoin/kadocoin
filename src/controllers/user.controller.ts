@@ -440,7 +440,11 @@ export default class UserController {
 
       const { verification_token } = req.body;
 
-      const user = await this.userModel.find_by_verification_token(req.db, verification_token);
+      const user = await this.userModel.find_by_verification_token(
+        req.db,
+        verification_token,
+        'registration_email'
+      );
 
       if (!user)
         return res.status(NOT_FOUND).json({
@@ -520,7 +524,8 @@ export default class UserController {
 
       const user = await this.userModel.find_by_verification_token(
         req.db,
-        verification_token_reset_password
+        verification_token_reset_password,
+        'reset_password'
       );
 
       if (!user)
