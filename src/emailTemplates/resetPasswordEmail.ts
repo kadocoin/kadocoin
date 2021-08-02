@@ -3,7 +3,12 @@ import emailFooter from './emailFooter';
 import emailHeader from './emailHeader';
 import { tableRow } from './table';
 
-export function ResetPasswordEmail(token: string, email: string, name?: string): string {
+export function ResetPasswordEmail(
+  token: string,
+  email: string,
+  userId: string,
+  name?: string
+): string {
   return ` ${emailHeader()}
    <table class="es-content" cellspacing="0" cellpadding="0" align="center"
          style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;table-layout:fixed !important;width:100%">
@@ -45,7 +50,7 @@ export function ResetPasswordEmail(token: string, email: string, name?: string):
                                           style="Margin:0;padding-left:10px;padding-right:10px;padding-top:15px;padding-bottom:25px">
                                           <span class="es-button-border"
                                              style="border-style:solid;border-color:#4f46e5;background-color:#4f46e5;border-width:1px;display:inline-block;border-radius:28px;width:auto"><a
-                                               href="${NEXT_JS_APP_ADDRESS}/forgot-password/${token}" class="es-button" target="_blank"
+                                               href="${NEXT_JS_APP_ADDRESS}/forgot-password/${token}?user_id=${userId}" class="es-button" target="_blank"
                                                 style="mso-style-priority:100 !important;text-decoration:none;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;color:#FFFFFF;font-size:16px;border-style:solid;border-color:#4f46e5;border-width:15px 25px 15px 25px;display:inline-block;background:#4f46e5;border-radius:28px;font-family:'open sans', 'helvetica neue', helvetica, arial, sans-serif;font-weight:normal;font-style:normal;line-height:19px;width:auto;text-align:center">
                                                 Reset Your Password 
                                       </a></span></td>
@@ -60,7 +65,7 @@ export function ResetPasswordEmail(token: string, email: string, name?: string):
                                           style="Margin:0;padding-top:10px;padding-bottom:15px;padding-left:20px;padding-right:20px">
                                           <p
                                              style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:'open sans', 'helvetica neue', helvetica, arial, sans-serif;line-height:24px;color:#999999;font-size:16px">
-                                             <a target="_blank" href="${NEXT_JS_APP_ADDRESS}/forgot-password/${token}" style="color: #4f46e5;">${NEXT_JS_APP_ADDRESS}/forgot-password/${token}</a>
+                                             <a target="_blank" href="${NEXT_JS_APP_ADDRESS}/forgot-password/${token}?user_id=${userId}" style="color: #4f46e5;">${NEXT_JS_APP_ADDRESS}/forgot-password/${token}?user_id=${userId}</a>
                                           </p>
                                        </td>
                                     </tr>

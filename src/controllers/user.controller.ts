@@ -19,6 +19,7 @@ import {
   verify_token_validation,
   userId_email_token_validation,
   tokenValidation,
+  forgot_password_step_2_validation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -43,6 +44,7 @@ import {
   generate_token_expiry,
 } from '../util/generate_verification_token';
 import { ResetPasswordEmail } from '../emailTemplates/resetPasswordEmail';
+import { ResetPasswordEmailSuccess } from '../emailTemplates/resetPasswordEmailSuccess';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -496,7 +498,7 @@ export default class UserController {
         to: email,
         from: `Kadocoin <${process.env.EMAIL_FROM}>`,
         subject: '[Next Step] Reset Your Password',
-        html: ResetPasswordEmail(verification_token_reset_password, email, user.name),
+        html: ResetPasswordEmail(verification_token_reset_password, email, user._id, user.name),
       };
 
       // SEND EMAIL
@@ -540,6 +542,53 @@ export default class UserController {
       });
 
       return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  forgot_password_step_2 = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = forgot_password_step_2_validation(req.body);
+
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      const { user_id, new_password } = req.body;
+
+      // GET USER DOCUMENT
+      const user = await this.commonModel.findById(req.db, user_id);
+
+      if (!user)
+        return res
+          .status(NOT_FOUND)
+          .json({ message: 'Your account was not found. Did you recently deleted it?' });
+
+      // HASH PASSWORD
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(new_password, salt);
+
+      await this.userModel.updateUserById(req.db, user._id, {
+        password: hashedPassword,
+      });
+
+      // EMAIL OPTIONS
+      const msg = {
+        to: user.email,
+        from: `Kadocoin <${process.env.EMAIL_FROM}>`,
+        subject: '[Success] Reset Password Success',
+        html: ResetPasswordEmailSuccess(user.name, user.email),
+      };
+
+      // SEND EMAIL
+      await sendMailNodemailer(msg);
+
+      return res.status(SUCCESS).json({ message: user });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
