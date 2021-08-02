@@ -18,6 +18,7 @@ import {
   delete_account_validation,
   verify_token_validation,
   userId_email_token_validation,
+  tokenValidation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -496,6 +497,42 @@ export default class UserController {
 
       // SEND EMAIL
       await sendMailNodemailer(msg);
+
+      return res.status(SUCCESS).json({ message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  check_reset_password_token = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = tokenValidation(req.body.verification_token_reset_password);
+
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      const { verification_token_reset_password } = req.body;
+
+      const user = await this.userModel.find_by_verification_token(
+        req.db,
+        verification_token_reset_password
+      );
+
+      if (!user)
+        return res.status(NOT_FOUND).json({
+          error: 'verification token is invalid or has expired',
+        });
+
+      // SET RESET TOKEN AND EXPIRY TO UNDEFINED
+      await this.userModel.updateUserById(req.db, user._id, {
+        verification_token_reset_password: null,
+        token_expiry__reset_password: null,
+      });
 
       return res.status(SUCCESS).json({ message: 'success' });
     } catch (error) {

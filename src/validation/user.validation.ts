@@ -22,6 +22,10 @@ export const emailValidation = (email: string): ValidationResult => {
   return Joi.string().required().email().label('Email').validate(email);
 };
 
+export const tokenValidation = (verification_token_reset_password: string): ValidationResult => {
+  return Joi.string().required().label('token').validate(verification_token_reset_password);
+};
+
 export const loginValidation = (user: IUserModel): ValidationResult => {
   const loginSchema = Joi.object({
     email: Joi.string().email().required(),
