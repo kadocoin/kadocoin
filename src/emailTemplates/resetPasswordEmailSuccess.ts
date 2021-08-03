@@ -33,7 +33,7 @@ export function ResetPasswordEmailSuccess(name: string, email: string): string {
                                       ${tableRow('You have successfully reset your password')}
                                      
                                      ${tableRow(
-                                       'If you did not make this request, please contact support@kadocoin.org IMMEDIATELY'
+                                       'If you did not make this request, please contact support@kadocoin.org IMMEDIATELY!'
                                      )}
 
                                     ${tableRow(

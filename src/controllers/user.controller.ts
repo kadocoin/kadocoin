@@ -588,6 +588,21 @@ export default class UserController {
       // SEND EMAIL
       await sendMailNodemailer(msg);
 
+      // ADD SIGNED TOKEN TO USER OBJECT
+      user.token = jwt.sign(
+        {
+          id: user._id,
+          name: user.name,
+          bio: user.bio,
+          email: user.email,
+          userCreationDate: user.userCreationDate,
+        },
+        JWTSECRET,
+        {
+          expiresIn: this.tokenLasts,
+        }
+      );
+
       return res.status(SUCCESS).json({ message: user });
     } catch (error) {
       if (error instanceof Error) {
