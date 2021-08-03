@@ -6,9 +6,12 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Joi, { ValidationResult } from 'joi';
-import { IUserModel } from '../types';
 
-export const registerValidation = (user: IUserModel): ValidationResult => {
+export const registerValidation = (user: {
+  email: string;
+  password: string;
+  userCreationDate: string;
+}): ValidationResult => {
   const regSchema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
@@ -19,10 +22,14 @@ export const registerValidation = (user: IUserModel): ValidationResult => {
 };
 
 export const emailValidation = (email: string): ValidationResult => {
-  return Joi.string().email().label('Email').validate(email);
+  return Joi.string().required().email().label('Email').validate(email);
 };
 
-export const loginValidation = (user: IUserModel): ValidationResult => {
+export const tokenValidation = (verification_token_reset_password: string): ValidationResult => {
+  return Joi.string().required().label('token').validate(verification_token_reset_password);
+};
+
+export const loginValidation = (user: { email: string; password: string }): ValidationResult => {
   const loginSchema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(128).required(),
@@ -79,7 +86,7 @@ export const change_password_validation = (reqBody: {
       .equal(Joi.ref('new_password'))
       .required()
       .label('Re-entered New Password')
-      .messages({ 'any.only': 'New passwords do not match' }),
+      .messages({ 'any.only': 'Passwords do not match' }),
   });
 
   return change_password_schema.validate(reqBody);
@@ -97,20 +104,6 @@ export const delete_account_validation = (reqBody: {
   return delete_account_schema.validate(reqBody);
 };
 
-export const send_verification_email_validation = (reqBody: {
-  user_id: string;
-  email: string;
-  token: string;
-}): ValidationResult => {
-  const send_verification_email_schema = Joi.object({
-    user_id: Joi.string().required(),
-    email: Joi.string().email().required(),
-    token: Joi.string().required(),
-  });
-
-  return send_verification_email_schema.validate(reqBody);
-};
-
 export const verify_token_validation = (reqBody: {
   verification_token: string;
 }): ValidationResult => {
@@ -119,4 +112,36 @@ export const verify_token_validation = (reqBody: {
   });
 
   return verify_token_email_schema.validate(reqBody);
+};
+
+export const userId_email_token_validation = (reqBody: {
+  user_id: string;
+  email: string;
+  token: string;
+}): ValidationResult => {
+  const userId_email_token_schema = Joi.object({
+    user_id: Joi.string().required(),
+    email: Joi.string().email().required(),
+    token: Joi.string().required(),
+  });
+
+  return userId_email_token_schema.validate(reqBody);
+};
+
+export const forgot_password_step_2_validation = (reqBody: {
+  user_id: string;
+  new_password: string;
+  re_entered_new_password: string;
+}): ValidationResult => {
+  const forgot_password_step_2_schema = Joi.object({
+    user_id: Joi.string().required(),
+    new_password: Joi.string().required().min(6).max(128).label('New Password'),
+    re_entered_new_password: Joi.any()
+      .equal(Joi.ref('new_password'))
+      .required()
+      .label('Re-entered New Password')
+      .messages({ 'any.only': 'Passwords do not match' }),
+  });
+
+  return forgot_password_step_2_schema.validate(reqBody);
 };

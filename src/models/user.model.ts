@@ -50,8 +50,10 @@ export default class UserModel {
       email?: string;
       profilePicture?: string;
       password?: string;
-      verification_token?: string;
-      token_expiry?: number;
+      verification_token_registration_email?: string;
+      token_expiry_registration_email?: number;
+      verification_token_reset_password?: string;
+      token_expiry__reset_password?: number;
       emailVerified?: boolean;
     }
   ): Promise<IUserModel> {
@@ -75,11 +77,38 @@ export default class UserModel {
     }
   }
 
-  async find_by_verification_token(db: Db, verification_token: string): Promise<IUserModel> {
+  async find_by_verification_token(
+    db: Db,
+    verification_token: string,
+    from: string
+  ): Promise<IUserModel> {
     try {
-      return await db
-        .collection('users')
-        .findOne({ verification_token, token_expiry: { $gt: Date.now() } });
+      interface IRegEmail {
+        verification_token_registration_email: string;
+        token_expiry_registration_email: { $gt: number };
+      }
+      interface IResetPassword {
+        verification_token_reset_password: string;
+        token_expiry__reset_password: { $gt: number };
+      }
+
+      let filter: IRegEmail | IResetPassword;
+
+      if (from === 'registration_email') {
+        filter = {
+          verification_token_registration_email: verification_token,
+          token_expiry_registration_email: { $gt: Date.now() },
+        };
+      }
+
+      if (from === 'reset_password') {
+        filter = {
+          verification_token_reset_password: verification_token,
+          token_expiry__reset_password: { $gt: Date.now() },
+        };
+      }
+
+      return await db.collection('users').findOne(filter);
     } catch (error) {
       throw new Error(`find_by_verification_token, ${error}`);
     }
