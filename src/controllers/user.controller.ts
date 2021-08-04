@@ -317,10 +317,10 @@ export default class UserController {
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
 
-      const { current_password, new_password, userId } = req.body;
+      const { current_password, new_password, user_id } = req.body;
 
       // GET USER DOCUMENT
-      const user = await this.commonModel.findById(req.db, userId);
+      const user = await this.commonModel.findById(req.db, user_id);
 
       if (user) {
         // CHECK PASSWORD

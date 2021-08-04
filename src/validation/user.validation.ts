@@ -71,14 +71,14 @@ export const editProfileInfoValidation = (reqBody: {
 };
 
 export const change_password_validation = (reqBody: {
-  userId: string;
+  user_id: string;
   token: string;
   current_password: string;
   new_password: string;
   re_entered_new_password: string;
 }): ValidationResult => {
   const change_password_schema = Joi.object({
-    userId: Joi.string().required(),
+    user_id: Joi.string().required(),
     token: Joi.string().required(),
     current_password: Joi.string().required().min(6).max(128).label('Current Password'),
     new_password: Joi.string().required().min(6).max(128).label('New Password'),
