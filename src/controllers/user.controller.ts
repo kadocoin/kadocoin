@@ -398,6 +398,14 @@ export default class UserController {
 
       const { email, user_id } = req.body;
 
+      // GET USER DOCUMENT
+      const user = await this.commonModel.findById(req.db, user_id);
+
+      if (user.emailVerified)
+        return res
+          .status(NOT_FOUND)
+          .json({ type: 'error', message: 'Email already verified. Logout and login back again.' });
+
       const verification_token_registration_email = await generate_verification_token();
       const token_expiry_registration_email = generate_token_expiry();
 
@@ -431,7 +439,7 @@ export default class UserController {
     }
   };
 
-  verify_token = async (req: Request, res: Response): Promise<Response> => {
+  verify_registration_email = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = verify_token_validation(req.body);
 
