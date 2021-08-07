@@ -21,6 +21,7 @@ import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
+import sanitize_html from '../util/sanitze_html';
 
 export default class TransactionController {
   /**
@@ -51,32 +52,12 @@ export default class TransactionController {
     let { amount, recipient, publicKey, address, message, sendFee } = req.body;
 
     // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-    amount = sanitizeHTML(amount, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
-    recipient = sanitizeHTML(recipient, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
-    publicKey = sanitizeHTML(publicKey, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
-    address = sanitizeHTML(address, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
-    message &&
-      (message = sanitizeHTML(message, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
-    sendFee &&
-      (sendFee = sanitizeHTML(sendFee, {
-        allowedTags: [],
-        allowedAttributes: {},
-      }));
+    amount = sanitize_html(amount);
+    recipient = sanitize_html(recipient);
+    publicKey = sanitize_html(publicKey);
+    address = sanitize_html(address);
+    message && (message = sanitize_html(message)); // OPTIONAL
+    sendFee && (sendFee = sanitize_html(sendFee));  // OPTIONAL
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -149,6 +130,8 @@ export default class TransactionController {
     transactionPool.setTransaction(transaction);
 
     pubSub.broadcastTransaction(transaction);
+    
+    // TODO: SAVE TRANSACTION TO DB
 
     return res.status(CREATED).json({ type: 'success', transaction });
   };

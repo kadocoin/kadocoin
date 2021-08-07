@@ -59,15 +59,16 @@ export default class UserController {
 
   register = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const { email, password, userCreationDate } = req.body;
       const { error } = registerValidation(req.body);
-
-      const wallet = new Wallet();
-
       if (error)
         return res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
+
+      const { email, password, userCreationDate } = req.body;
+
+
+      const wallet = new Wallet();
 
       const emailExist = await this.commonModel.findByEmail(req.db, email);
       if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
