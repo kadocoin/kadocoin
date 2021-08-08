@@ -17,6 +17,7 @@ export async function must_be_verified(
   next: NextFunction
 ): Promise<NextFunction | Response> {
   try {
+    console.log({ regBody: req.body });
     const commonModel = new CommonModel();
 
     /* CHECK REDIS FOR CACHED ENTRY FIRST */
@@ -28,6 +29,8 @@ export async function must_be_verified(
       next();
       return;
     }
+
+    console.log('before db check');
 
     /* IF REDIS RETURNS A CACHE MISS, MAKE A TRIP TO THE DATABASE */
     const { emailVerified } = await commonModel.findById(req.db, req.body.user_id);
