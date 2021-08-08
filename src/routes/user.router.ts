@@ -12,7 +12,7 @@ import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
 import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 import multer from 'multer';
 import { must_be_verified } from '../middleware/must_be_verified';
-const upload = multer({ dest: 'app/dist/temp' });
+const upload = multer({ dest: './app/dist/temp' });
 
 export default class UserRouter {
   private app: Application;
