@@ -15,15 +15,6 @@ import {
   REDIS_PASSWORD_CACHING,
 } from './secret';
 
-console.log({
-  port: REDIS_PORT,
-  host: REDIS_URL,
-  password: REDIS_PASSWORD,
-  port_cache: REDIS_PORT_CACHING,
-  host_cache: REDIS_URL_CACHING,
-  password_cache: REDIS_PASSWORD_CACHING,
-});
-
 export const redisClientPub = new Redis({
   port: REDIS_PORT,
   host: REDIS_URL,
