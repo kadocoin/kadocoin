@@ -21,6 +21,7 @@ export async function must_be_verified(
 
     /* CHECK REDIS FOR CACHED ENTRY FIRST */
     const cacheEntry = await redisClientCaching.get(`user:${req.body.user_id}`);
+    console.log({ cacheEntry });
 
     /* IF REDIS RETURNS A CACHE HIT */
     if (cacheEntry) {
@@ -30,11 +31,14 @@ export async function must_be_verified(
 
     /* IF REDIS RETURNS A CACHE MISS, MAKE A TRIP TO THE DATABASE */
     const { emailVerified } = await commonModel.findById(req.db, req.body.user_id);
+    console.log({ emailVerified });
 
     if (!emailVerified) throw new Error(); // ERROR IS SENT TO CATCH BLOCK
 
     /* ADD THE ENTRY TO REDIS FOR NEXT TIME AND SET AN EXPIRY OF ONE HOUR */
     redisClientCaching.set(`user:${req.body.user_id}`, 'true', 'EX', 3600);
+
+    console.log('Yes it is verified');
 
     next();
   } catch (error) {
