@@ -25,6 +25,7 @@ class Block {
   public blockSize: string;
   public transactionVolume: string;
   public blockReward: string;
+  public feeReward: string;
   public blockchainHeight: number;
 
   constructor({
@@ -37,6 +38,7 @@ class Block {
     blockSize,
     transactionVolume,
     blockReward,
+    feeReward,
     blockchainHeight,
   }: Block) {
     this.timestamp = timestamp;
@@ -48,6 +50,7 @@ class Block {
     this.blockSize = blockSize;
     this.transactionVolume = transactionVolume;
     this.blockReward = blockReward;
+    this.feeReward = feeReward;
     this.blockchainHeight = blockchainHeight;
   }
 
@@ -71,7 +74,6 @@ class Block {
     const lastHash = lastBlock.hash;
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: chain.length });
     const feeReward = totalFeeReward({ transactions });
-    const totalBlockReward = Number(MINING_REWARD) + Number(feeReward);
     const cleanedTransactions = cleanUpTransaction({ transactions });
 
     do {
@@ -94,7 +96,8 @@ class Block {
       hash,
       blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash),
       transactionVolume: transactionVolume({ transactions }),
-      blockReward: totalBlockReward.toFixed(8),
+      blockReward: MINING_REWARD,
+      feeReward,
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
     });
   }

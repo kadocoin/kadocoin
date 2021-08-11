@@ -29,10 +29,10 @@ export const transactValidation = (body: {
   return transactSchema.validate(body, { convert: true });
 };
 
-export const mineValidation = (body: { address: string; message: string }): ValidationResult => {
+export const mineValidation = (body: { address: string; message?: string }): ValidationResult => {
   const mineSchema = Joi.object().keys({
     address: Joi.string().trim().required(),
-    message: Joi.string().trim().max(160),
+    message: Joi.string().trim().max(160).allow(''),
   });
 
   return mineSchema.validate(body);

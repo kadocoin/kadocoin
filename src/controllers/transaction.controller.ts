@@ -57,7 +57,7 @@ export default class TransactionController {
     publicKey = sanitize_html(publicKey);
     address = sanitize_html(address);
     message && (message = sanitize_html(message)); // OPTIONAL
-    sendFee && (sendFee = sanitize_html(sendFee));  // OPTIONAL
+    sendFee && (sendFee = sanitize_html(sendFee)); // OPTIONAL
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -130,7 +130,7 @@ export default class TransactionController {
     transactionPool.setTransaction(transaction);
 
     pubSub.broadcastTransaction(transaction);
-    
+
     // TODO: SAVE TRANSACTION TO DB
 
     return res.status(CREATED).json({ type: 'success', transaction });

@@ -61,6 +61,7 @@ describe('Blockchain', () => {
           blockSize: '999',
           transactionVolume: '999',
           blockReward: (50).toFixed(8),
+          feeReward: (5).toFixed(8),
           blockchainHeight: newChain.chain.length,
         };
 
@@ -111,6 +112,7 @@ describe('Blockchain', () => {
             blockSize: '999',
             transactionVolume: '999',
             blockReward: (50).toFixed(8),
+            feeReward: (5).toFixed(8),
             blockchainHeight: newChain.chain.length,
           });
 
@@ -151,6 +153,7 @@ describe('Blockchain', () => {
           blockSize: '999',
           transactionVolume: '999',
           blockReward: (50).toFixed(8),
+          feeReward: (5).toFixed(8),
           blockchainHeight: newChain.chain.length,
         };
 
