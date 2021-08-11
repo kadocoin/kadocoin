@@ -34,6 +34,7 @@ describe('Block', () => {
     blockSize: '999',
     transactionVolume: '999',
     blockReward: (50).toFixed(8),
+    feeReward: (5).toFixed(8),
     blockchainHeight: 1,
   });
 
