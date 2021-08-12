@@ -29,6 +29,7 @@ import * as swaggerDocument from './swagger.json';
  * @var localWallet - signs and verifies transactions on this node
  */
 const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
+console.log(localWallet.address);
 /**
  * @var blockchain app wide variable
  */

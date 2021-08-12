@@ -36,8 +36,6 @@ export async function must_be_verified(
     /* ADD THE ENTRY TO REDIS FOR NEXT TIME AND SET AN EXPIRY OF ONE HOUR */
     redisClientCaching.set(`user:${req.body.user_id}`, 'true', 'EX', 3600);
 
-    console.log('Yes it is verified');
-
     next();
   } catch (error) {
     log_err_to_file?.error(error);

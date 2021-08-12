@@ -7,14 +7,19 @@
  */
 import express, { Application } from 'express';
 import helmet from 'helmet';
-import cors from 'cors';
+// import cors from 'cors';
 
 export default class ExpressMiddleWares {
   public app: Application;
 
   constructor(app: Application) {
     this.app = app;
-    app.use(cors());
+    // app.use(cors());
+    app.use(function (_, res, next) {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+      next();
+    });
     app.use(helmet());
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
