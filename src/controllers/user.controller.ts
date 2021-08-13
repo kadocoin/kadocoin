@@ -67,7 +67,6 @@ export default class UserController {
 
       const { email, password, userCreationDate } = req.body;
 
-
       const wallet = new Wallet();
 
       const emailExist = await this.commonModel.findByEmail(req.db, email);
