@@ -10,9 +10,8 @@ import app from './app';
 import request from 'request';
 import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
 import 'dotenv/config';
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/user.router';
-import ExpressMiddleWares from './middleware/expressMiddlewares';
 import TransactionRouter from './routes/transaction.router';
 import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
@@ -25,6 +24,7 @@ import Mining_Reward from './util/supply_reward';
 import * as swaggerDocument from './swagger.json';
 import { Db, MongoClient } from 'mongodb';
 import { MONGODB_URI, DB_NAME } from './config/secret';
+import helmet from 'helmet';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -49,12 +49,6 @@ const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new TransactionRouter(app, transactionPool, blockchain, pubSub, localWallet);
   next();
 };
-
-const initializeMiddleWares = (_: Request, __: Response, next: NextFunction) => {
-  new ExpressMiddleWares(app);
-  next();
-};
-
 const syncWithRootState = () => {
   request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
@@ -95,11 +89,22 @@ const syncWithRootState = () => {
   });
 };
 
-app.use(initializeMiddleWares);
+/** MIDDLEWARES */
+
+app.use(function (_, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+app.use(helmet());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(initializeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// OPEN MONGODB CONNECTED AND START APP
+/** END MIDDLEWARES */
+
+/**  OPEN MONGODB CONNECTED AND START APP  */
 MongoClient.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

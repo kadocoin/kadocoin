@@ -218,7 +218,7 @@ export default class UserController {
         });
 
       return res.status(SUCCESS).json({
-        balance: Wallet.calTotalNumTransactionsAmountSentAndReceived({
+        balance: Wallet.calculateTotalSentAndReceived({
           chain: req.blockchain.chain,
           address: req.body.address,
         }),

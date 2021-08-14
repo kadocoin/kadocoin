@@ -80,20 +80,16 @@ class Wallet {
       ? outputsTotal.toFixed(8)
       : (STARTING_BALANCE + outputsTotal).toFixed(8);
   }
-  static calTotalNumTransactionsAmountSentAndReceived({
-    chain,
-    address,
-  }: {
-    chain: IChain;
-    address: string;
-  }): {
-    numberOfTransactions: number;
+  static calculateTotalSentAndReceived({ chain, address }: { chain: IChain; address: string }): {
+    numTransactionsInitiated: number;
     totalSent: string;
     totalReceived: string;
+    totalFeesPaid: string;
   } {
-    let numberOfTransactions = 0,
+    let numTransactionsInitiated = 0,
       totalSent = 0,
-      totalReceived = 0;
+      totalReceived = 0,
+      totalFeesPaid = 0;
 
     for (let i = chain.length - 1; i > 0; i--) {
       const block = chain[i];
@@ -101,11 +97,13 @@ class Wallet {
       for (const transaction of block.transactions) {
         // TOTAL SENT
         if (transaction.input.address === address) {
-          numberOfTransactions += 1;
+          numTransactionsInitiated += 1;
 
           const amountSent = Number(transaction.input.amount) - Number(transaction.output[address]);
+          const feesPaid = Number(transaction.input.sendFee);
 
           totalSent += amountSent;
+          totalFeesPaid += feesPaid;
         }
         // TOTAL RECEIVED
         const outputAddresses = Object.keys(transaction.output);
@@ -123,8 +121,9 @@ class Wallet {
     }
 
     return {
-      numberOfTransactions: numberOfTransactions,
+      numTransactionsInitiated: numTransactionsInitiated,
       totalSent: totalSent.toFixed(8),
+      totalFeesPaid: totalFeesPaid.toFixed(8),
       totalReceived: totalReceived.toFixed(8),
     };
   }
