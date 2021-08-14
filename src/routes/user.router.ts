@@ -33,10 +33,11 @@ export default class UserRouter {
 
     this.app.post(
       '/wallet-info',
-      mustBeLoggedIn,
       blockchainMiddleWare(this.blockchain),
       this.UserController.walletInfo
     );
+
+    this.app.post('/balance', blockchainMiddleWare(this.blockchain), this.UserController.balance);
 
     this.app.post('/login', this.UserController.login);
     this.app.put(

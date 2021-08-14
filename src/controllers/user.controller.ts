@@ -12,7 +12,6 @@ import {
   emailValidation,
   registerValidation,
   loginValidation,
-  walletInfoValidation,
   editProfileInfoValidation,
   change_password_validation,
   delete_account_validation,
@@ -20,6 +19,7 @@ import {
   userId_email_token_validation,
   tokenValidation,
   forgot_password_step_2_validation,
+  addressValidation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -27,6 +27,7 @@ import {
   CREATED,
   NOT_FOUND,
   SUCCESS,
+  INCORRECT_VALIDATION,
 } from '../statusCode/statusCode';
 import UserModel from '../models/user.model';
 import jwt from 'jsonwebtoken';
@@ -45,6 +46,7 @@ import {
 } from '../util/generate_verification_token';
 import { ResetPasswordEmail } from '../emailTemplates/resetPasswordEmail';
 import { ResetPasswordEmailSuccess } from '../emailTemplates/resetPasswordEmailSuccess';
+import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -165,7 +167,7 @@ export default class UserController {
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
 
-      const user = await this.commonModel.findByEmail(req.db, req.body.email);
+      let user = await this.commonModel.findByEmail(req.db, req.body.email);
 
       if (!user) return res.status(NOT_FOUND).json({ message: 'Incorrect email or password' });
 
@@ -189,6 +191,8 @@ export default class UserController {
         }
       );
 
+      user = removeSensitiveProps(user);
+
       return res.status(SUCCESS).json({ user });
     } catch (error) {
       if (error instanceof Error) {
@@ -200,11 +204,47 @@ export default class UserController {
 
   walletInfo = (req: Request, res: Response): Response => {
     try {
-      const { error } = walletInfoValidation(req.body);
+      const { error } = addressValidation(req.body.address);
       if (error)
         return res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
+
+      // CHECK THE VALIDITY OF ADDRESS
+      if (!isValidChecksumAddress(req.body.address.trim()))
+        return res.status(INCORRECT_VALIDATION).json({
+          type: 'error',
+          message: 'Invalid address.',
+        });
+
+      return res.status(SUCCESS).json({
+        balance: Wallet.calTotalNumTransactionsAmountSentAndReceived({
+          chain: req.blockchain.chain,
+          address: req.body.address,
+        }),
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  balance = (req: Request, res: Response): Response => {
+    try {
+      const { error } = addressValidation(req.body.address);
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      // CHECK THE VALIDITY OF ADDRESS
+      if (!isValidChecksumAddress(req.body.address.trim()))
+        return res.status(INCORRECT_VALIDATION).json({
+          type: 'error',
+          message: 'Invalid address.',
+        });
 
       return res.status(SUCCESS).json({
         balance: Wallet.calculateBalance({

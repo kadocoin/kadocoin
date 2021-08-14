@@ -127,6 +127,7 @@ export interface ICInput_R extends ICommon_Address_PublicKey {
   localPublicKey: string;
   signature: string;
   sendFee?: string;
+  recipient?: string;
 }
 
 /** createOutput() PARAM type */

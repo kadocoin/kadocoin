@@ -80,6 +80,56 @@ class Wallet {
       ? outputsTotal.toFixed(8)
       : (STARTING_BALANCE + outputsTotal).toFixed(8);
   }
+  static calTotalNumTransactionsAmountSentAndReceived({
+    chain,
+    address,
+  }: {
+    chain: IChain;
+    address: string;
+  }): {
+    numberOfTransactions: number;
+    totalSent: string;
+    totalReceived: string;
+  } {
+    let numberOfTransactions = 0,
+      totalSent = 0,
+      totalReceived = 0;
+
+    for (let i = chain.length - 1; i > 0; i--) {
+      const block = chain[i];
+
+      for (const transaction of block.transactions) {
+        // TOTAL SENT
+        if (transaction.input.address === address) {
+          numberOfTransactions += 1;
+
+          const amountSent = Number(transaction.input.amount) - Number(transaction.output[address]);
+
+          totalSent += amountSent;
+        }
+        // TOTAL RECEIVED
+        const outputAddresses = Object.keys(transaction.output);
+
+        for (let i = 0; i < outputAddresses.length; i++) {
+          if (transaction.input.address != '' && transaction.input.address !== outputAddresses[i]) {
+            address == outputAddresses[i] &&
+              (totalReceived += Number(transaction.output[outputAddresses[i]]));
+          }
+          if (transaction.input.address == '' && transaction.input.recipient == address) {
+            totalReceived += Number(transaction.output[outputAddresses[i]]);
+          }
+        }
+      }
+    }
+
+    return {
+      numberOfTransactions: numberOfTransactions,
+      totalSent: totalSent.toFixed(8),
+      totalReceived: totalReceived.toFixed(8),
+    };
+  }
+
+  // END CLASS
 }
 
 export default Wallet;

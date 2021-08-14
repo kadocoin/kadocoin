@@ -66,7 +66,7 @@ export default class TransactionController {
         message: 'Invalid recipient address.',
       });
 
-    // CHECK THE VALIDITY OF RECIPIENT ADDRESS
+    // CHECK THE VALIDITY OF SENDER ADDRESS
     if (!isValidChecksumAddress(address.trim()))
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',

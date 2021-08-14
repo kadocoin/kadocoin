@@ -38,16 +38,8 @@ export const loginValidation = (user: { email: string; password: string }): Vali
   return loginSchema.validate(user);
 };
 
-export const walletInfoValidation = (reqBody: {
-  address: string;
-  token: string;
-}): ValidationResult => {
-  const walletInfoSchema = Joi.object({
-    address: Joi.string().required(),
-    token: Joi.string().required(),
-  });
-
-  return walletInfoSchema.validate(reqBody);
+export const addressValidation = (address: string): ValidationResult => {
+  return Joi.string().required().label('address').validate(address);
 };
 
 export const editProfileInfoValidation = (reqBody: {
