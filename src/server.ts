@@ -99,6 +99,7 @@ app.use(initializeMiddleWares);
 app.use(initializeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// OPEN MONGODB CONNECTED AND START APP
 MongoClient.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -116,11 +117,12 @@ MongoClient.connect(MONGODB_URI, {
       ]);
     };
 
-    await createIndexes(app.locals.db as Db);
+    await createIndexes(app.locals.db);
+    console.log('*****MongoDB is connected*****');
 
     app.listen(PORT, () => {
       syncWithRootState();
-      console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
+      console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });
   })
   .catch(err => {
