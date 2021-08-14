@@ -52,7 +52,7 @@ const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
 const syncWithRootState = () => {
   request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
-      const rootChain = JSON.parse(body);
+      const rootChain = JSON.parse(body).message;
 
       console.log('Replacing your LOCAL blockchain with the consensus blockchain');
       console.log('working on it.................');
@@ -71,7 +71,7 @@ const syncWithRootState = () => {
 
   request({ url: `${ROOT_NODE_ADDRESS}/transaction-pool` }, (error, response, body) => {
     if (!error && response.statusCode === 200) {
-      const rootTransactionPoolMap = JSON.parse(body);
+      const rootTransactionPoolMap = JSON.parse(body).message;
 
       // CHECK EMPTY
       if (isEmptyObject(rootTransactionPoolMap))

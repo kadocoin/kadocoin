@@ -140,7 +140,7 @@ export default class TransactionController {
     try {
       const { transactionPool } = req;
 
-      return res.status(SUCCESS).json(transactionPool.transactionMap);
+      return res.status(SUCCESS).json({ type: 'success', message: transactionPool.transactionMap });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

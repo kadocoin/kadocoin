@@ -12,7 +12,7 @@ import Block from '../blockchain/block';
 export default class BlockController {
   getBlocks = (req: Request, res: Response): Response => {
     try {
-      return res.status(SUCCESS).json(req.blockchain.chain);
+      return res.status(SUCCESS).json({ type: 'success', message: req.blockchain.chain });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
