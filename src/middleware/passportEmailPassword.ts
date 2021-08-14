@@ -20,7 +20,7 @@ passportEmailPassword.serializeUser((user: any, done) => {
 
 passportEmailPassword.deserializeUser((req: Request, id: string, done: any) => {
   try {
-    findById(req.db, id)
+    findById(req.app.locals.db, id)
       .then(user => {
         return done(null, user);
       })
@@ -34,7 +34,7 @@ passportEmailPassword.use(
   new LocalStrategy(
     { usernameField: 'email', passReqToCallback: true },
     async (req, email, password, done) => {
-      const user = await findByEmail(req.db, email);
+      const user = await findByEmail(req.app.locals.db, email);
 
       if (!user) return done(null, false, { message: 'Email or password is incorrect' });
 

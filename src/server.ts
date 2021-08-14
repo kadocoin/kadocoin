@@ -14,7 +14,6 @@ import { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/user.router';
 import ExpressMiddleWares from './middleware/expressMiddlewares';
 import TransactionRouter from './routes/transaction.router';
-import Database from './middleware/database';
 import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
 import PubSub from './pubSub';
@@ -24,12 +23,13 @@ import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
 import Mining_Reward from './util/supply_reward';
 import * as swaggerDocument from './swagger.json';
+import { Db, MongoClient } from 'mongodb';
+import { MONGODB_URI, DB_NAME } from './config/secret';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
  */
 const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
-console.log(localWallet.address);
 /**
  * @var blockchain app wide variable
  */
@@ -52,7 +52,6 @@ const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
 
 const initializeMiddleWares = (_: Request, __: Response, next: NextFunction) => {
   new ExpressMiddleWares(app);
-  new Database(app);
   next();
 };
 
@@ -100,7 +99,30 @@ app.use(initializeMiddleWares);
 app.use(initializeRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.listen(PORT, () => {
-  syncWithRootState();
-  console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
-});
+MongoClient.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(async client => {
+    app.locals.dbClient = client;
+    app.locals.db = client.db(DB_NAME);
+
+    // CREATE INDEX
+    const createIndexes = async (db: Db): Promise<void> => {
+      await Promise.all([
+        db
+          .collection('users')
+          .createIndex({ email: 1, _id: 1, address: 1, publicKey: 1 }, { unique: true }),
+      ]);
+    };
+
+    await createIndexes(app.locals.db as Db);
+
+    app.listen(PORT, () => {
+      syncWithRootState();
+      console.log(`Application is running on ${PORT} in ${ENVIRONMENT}`);
+    });
+  })
+  .catch(err => {
+    throw new Error(err);
+  });

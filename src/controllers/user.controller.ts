@@ -71,7 +71,7 @@ export default class UserController {
 
       const wallet = new Wallet();
 
-      const emailExist = await this.commonModel.findByEmail(req.db, email);
+      const emailExist = await this.commonModel.findByEmail(req.app.locals.db, email);
       if (emailExist) return res.status(ALREADY_EXISTS).json({ message: 'Email already exists' });
 
       // HASH PASSWORD
@@ -82,7 +82,7 @@ export default class UserController {
       const token_expiry = generate_token_expiry();
 
       let user = await this.userModel.register(
-        req.db,
+        req.app.locals.db,
         {
           email,
           hashedPassword,
@@ -145,7 +145,7 @@ export default class UserController {
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
 
-      const emailExist = await this.commonModel.findByEmail(req.db, email);
+      const emailExist = await this.commonModel.findByEmail(req.app.locals.db, email);
 
       if (emailExist) return res.status(SUCCESS).json({ message: 'email exists' });
 
@@ -167,7 +167,7 @@ export default class UserController {
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
 
-      let user = await this.commonModel.findByEmail(req.db, req.body.email);
+      let user = await this.commonModel.findByEmail(req.app.locals.db, req.body.email);
 
       if (!user) return res.status(NOT_FOUND).json({ message: 'Incorrect email or password' });
 
@@ -301,7 +301,7 @@ export default class UserController {
 
       let user =
         Object.keys(update).length &&
-        (await this.userModel.updateUserById(req.db, user_id, {
+        (await this.userModel.updateUserById(req.app.locals.db, user_id, {
           ...(name && { name }),
           ...(bio && { bio }),
           ...(email && { email }),
@@ -360,7 +360,7 @@ export default class UserController {
       const { current_password, new_password, user_id } = req.body;
 
       // GET USER DOCUMENT
-      const user = await this.commonModel.findById(req.db, user_id);
+      const user = await this.commonModel.findById(req.app.locals.db, user_id);
 
       if (user) {
         // CHECK PASSWORD
@@ -371,7 +371,7 @@ export default class UserController {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(new_password, salt);
 
-        await this.userModel.updateUserById(req.db, user._id, {
+        await this.userModel.updateUserById(req.app.locals.db, user._id, {
           password: hashedPassword,
         });
 
@@ -399,7 +399,7 @@ export default class UserController {
       const { user_id } = req.body;
 
       // GET USER DOCUMENT
-      const userAccountToDelete = await this.userModel.delete_account(req.db, user_id);
+      const userAccountToDelete = await this.userModel.delete_account(req.app.locals.db, user_id);
 
       // DELETE PROFILE PICTURE IF IT EXISTS
       if (
@@ -439,7 +439,7 @@ export default class UserController {
       const { email, user_id } = req.body;
 
       // GET USER DOCUMENT
-      const user = await this.commonModel.findById(req.db, user_id);
+      const user = await this.commonModel.findById(req.app.locals.db, user_id);
 
       if (user.emailVerified)
         return res
@@ -450,7 +450,7 @@ export default class UserController {
       const token_expiry_registration_email = generate_token_expiry();
 
       // ADD TO DB
-      await this.userModel.updateUserById(req.db, user_id, {
+      await this.userModel.updateUserById(req.app.locals.db, user_id, {
         verification_token_registration_email,
         token_expiry_registration_email,
       });
@@ -491,7 +491,7 @@ export default class UserController {
       const { verification_token } = req.body;
 
       const user = await this.userModel.find_by_verification_token(
-        req.db,
+        req.app.locals.db,
         verification_token,
         'registration_email'
       );
@@ -502,7 +502,7 @@ export default class UserController {
         });
 
       // SET RESET TOKEN AND EXPIRY TO UNDEFINED
-      await this.userModel.updateUserById(req.db, user._id, {
+      await this.userModel.updateUserById(req.app.locals.db, user._id, {
         verification_token_registration_email: null,
         token_expiry_registration_email: null,
         emailVerified: true,
@@ -533,10 +533,10 @@ export default class UserController {
 
       // GET THE USER DOCUMENT TO USE THE ID
       // TODO: CACHING?
-      const userDoc = await this.commonModel.findByEmail(req.db, email);
+      const userDoc = await this.commonModel.findByEmail(req.app.locals.db, email);
 
       // ADD TO DB
-      const user = await this.userModel.updateUserById(req.db, userDoc._id, {
+      const user = await this.userModel.updateUserById(req.app.locals.db, userDoc._id, {
         verification_token_reset_password,
         token_expiry__reset_password,
       });
@@ -573,7 +573,7 @@ export default class UserController {
       const { verification_token_reset_password } = req.body;
 
       const user = await this.userModel.find_by_verification_token(
-        req.db,
+        req.app.locals.db,
         verification_token_reset_password,
         'reset_password'
       );
@@ -584,7 +584,7 @@ export default class UserController {
         });
 
       // SET RESET TOKEN AND EXPIRY TO UNDEFINED
-      await this.userModel.updateUserById(req.db, user._id, {
+      await this.userModel.updateUserById(req.app.locals.db, user._id, {
         verification_token_reset_password: null,
         token_expiry__reset_password: null,
       });
@@ -610,7 +610,7 @@ export default class UserController {
       const { user_id, new_password } = req.body;
 
       // GET USER DOCUMENT
-      const user = await this.commonModel.findById(req.db, user_id);
+      const user = await this.commonModel.findById(req.app.locals.db, user_id);
 
       if (!user)
         return res
@@ -621,7 +621,7 @@ export default class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(new_password, salt);
 
-      await this.userModel.updateUserById(req.db, user._id, {
+      await this.userModel.updateUserById(req.app.locals.db, user._id, {
         password: hashedPassword,
       });
 
