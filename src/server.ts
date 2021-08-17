@@ -7,8 +7,7 @@
  */
 // Copyright (c) Adamu Muhammad Dankore
 import app from './app';
-import request from 'request';
-import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from './config/secret';
+import { ENVIRONMENT, PORT } from './config/secret';
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/user.router';
@@ -17,14 +16,13 @@ import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
 import PubSub from './pubSub';
 import Wallet from './wallet';
-import isEmptyObject from './util/isEmptyObject';
 import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
-import Mining_Reward from './util/supply_reward';
 import * as swaggerDocument from './swagger.json';
 import { Db, MongoClient } from 'mongodb';
 import { MONGODB_URI, DB_NAME } from './config/secret';
 import helmet from 'helmet';
+import syncWithRootState from './util/syncWithRootState';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -48,45 +46,6 @@ const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new BlockRouter(app, blockchain);
   new TransactionRouter(app, transactionPool, blockchain, pubSub, localWallet);
   next();
-};
-const syncWithRootState = () => {
-  request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      const rootChain = JSON.parse(body).message;
-
-      console.log('Replacing your LOCAL blockchain with the consensus blockchain');
-      console.log('working on it.................');
-
-      blockchain.replaceChain(rootChain, undefined, blockchain.chain.length);
-
-      // UPDATE MINING_REWARD
-      const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-        chainLength: blockchain.chain.length,
-      });
-      console.log({ MINING_REWARD, SUPPLY });
-    } else {
-      console.log(`${ROOT_NODE_ADDRESS}/blocks`, error);
-    }
-  });
-
-  request({ url: `${ROOT_NODE_ADDRESS}/transaction-pool` }, (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      const rootTransactionPoolMap = JSON.parse(body).message;
-
-      // CHECK EMPTY
-      if (isEmptyObject(rootTransactionPoolMap))
-        console.log('No new transaction coming in from the network');
-      // NOT EMPTY
-      if (!isEmptyObject(rootTransactionPoolMap)) {
-        console.log('Adding latest unconfirmed TRANSACTIONS to your node');
-        console.log('working on it.................');
-        transactionPool.setMap(rootTransactionPoolMap);
-        console.log('Done!');
-      }
-    } else {
-      console.log(`${ROOT_NODE_ADDRESS}/transaction-pool`, error);
-    }
-  });
 };
 
 /** MIDDLEWARES */
@@ -126,7 +85,7 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
 
     app.listen(PORT, () => {
-      syncWithRootState();
+      syncWithRootState({ blockchain, transactionPool });
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });
   })

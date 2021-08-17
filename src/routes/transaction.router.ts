@@ -60,6 +60,12 @@ export default class TransactionRouter {
       this.transactionController.transactionPool
     );
 
+    this.app.get(
+      '/transaction/:id',
+      transactionPoolMiddleWare(this.transactionPool),
+      this.transactionController.transaction
+    );
+
     this.app.post(
       '/mine-transactions',
       transactionPoolMiddleWare(this.transactionPool),

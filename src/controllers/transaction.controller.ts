@@ -21,7 +21,7 @@ import { isValidChecksumAddress } from '../util/pubKeyToAddress';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
-import sanitize_html from '../util/sanitze_html';
+import sanitize_html from '../util/sanitize_html';
 
 export default class TransactionController {
   /**
@@ -145,6 +145,25 @@ export default class TransactionController {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
       }
+    }
+  };
+
+  transaction = (req: Request, res: Response): Response => {
+    try {
+      const transaction = Object.values(req.transactionPool).find(
+        transaction => transaction[req.params.id]?.id === req.params.id
+      );
+
+      if (!transaction)
+        return res.status(NOT_FOUND).json({ type: 'error', message: 'Transaction not found' });
+
+      return res.status(SUCCESS).json({ type: 'success', message: transaction });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+        throw new Error(error.message);
+      }
+      throw new Error(error.message);
     }
   };
 
