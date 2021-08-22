@@ -31,10 +31,10 @@ export default class UserRouter {
 
     this.app.post('/register', this.UserController.register);
 
-    this.app.post(
-      '/wallet-info',
+    this.app.get(
+      '/address/:address',
       blockchainMiddleWare(this.blockchain),
-      this.UserController.walletInfo
+      this.UserController.addressInfo
     );
 
     this.app.post('/balance', blockchainMiddleWare(this.blockchain), this.UserController.balance);

@@ -202,25 +202,26 @@ export default class UserController {
     }
   };
 
-  walletInfo = (req: Request, res: Response): Response => {
+  addressInfo = (req: Request, res: Response): Response => {
     try {
-      const { error } = addressValidation(req.body.address);
+      const { error } = addressValidation(req.params.address);
       if (error)
         return res
           .status(INTERNAL_SERVER_ERROR)
           .json({ type: 'error', message: error.details[0].message });
 
       // CHECK THE VALIDITY OF ADDRESS
-      if (!isValidChecksumAddress(req.body.address.trim()))
+      if (!isValidChecksumAddress(req.params.address.trim()))
         return res.status(INCORRECT_VALIDATION).json({
           type: 'error',
           message: 'Invalid address.',
         });
 
       return res.status(SUCCESS).json({
-        balance: Wallet.calculateTotalSentAndReceived({
+        type: 'success',
+        message: Wallet.calculateTotalSentAndReceived({
           chain: req.blockchain.chain,
-          address: req.body.address,
+          address: req.params.address,
         }),
       });
     } catch (error) {

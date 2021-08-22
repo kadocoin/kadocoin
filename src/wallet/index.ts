@@ -85,6 +85,8 @@ class Wallet {
     totalSent: string;
     totalReceived: string;
     totalFeesPaid: string;
+    balance: string;
+    address: string;
   } {
     let numTransactionsInitiated = 0,
       totalSent = 0,
@@ -125,6 +127,8 @@ class Wallet {
       totalSent: totalSent.toFixed(8),
       totalFeesPaid: totalFeesPaid.toFixed(8),
       totalReceived: totalReceived.toFixed(8),
+      balance: Wallet.calculateBalance({ chain, address }),
+      address,
     };
   }
 
