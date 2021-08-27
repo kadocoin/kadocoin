@@ -54,6 +54,15 @@ export default class TransactionRouter {
       this.transactionController.make
     );
 
+    this.app.post(
+      '/send',
+      walletMiddleWare(this.localWallet),
+      transactionPoolMiddleWare(this.transactionPool),
+      blockchainMiddleWare(this.blockchain),
+      pubSubMiddleWare(this.pubSub),
+      this.transactionController.send
+    );
+
     this.app.get(
       '/transaction-pool',
       transactionPoolMiddleWare(this.transactionPool),

@@ -6,7 +6,11 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { Request, Response } from 'express';
-import { mineValidation, transactValidation } from '../validation/transaction.validation';
+import {
+  mineValidation,
+  sendValidation,
+  transactValidation,
+} from '../validation/transaction.validation';
 import {
   INTERNAL_SERVER_ERROR,
   CREATED,
@@ -116,6 +120,117 @@ export default class TransactionController {
           amount: Number(amount),
           chain: blockchain.chain,
           publicKey,
+          address,
+          message,
+          sendFee,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+      }
+    }
+
+    transactionPool.setTransaction(transaction);
+
+    pubSub.broadcastTransaction(transaction);
+
+    // TODO: SAVE TRANSACTION TO DB
+
+    return res.status(CREATED).json({ type: 'success', transaction });
+  };
+
+  /**
+   * Send Kadocoin
+   *
+   * @method make
+   * @param {Request} req Express Request object
+   * @param {Response} res Express Response object
+   * @return a transaction object
+   */
+  send = async (req: Request, res: Response): Promise<Response> => {
+    // ENFORCE 8 DECIMAL PLACES
+    if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: 'error',
+        message:
+          'You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin',
+      });
+
+    // VALIDATE OTHER USER INPUTS
+    const { error } = sendValidation(req.body);
+    if (error)
+      return res
+        .status(INCORRECT_VALIDATION)
+        .json({ type: 'error', message: error.details[0].message });
+
+    // GRAB USER INPUTS
+    let { amount, recipient, address, message, sendFee } = req.body;
+
+    // SANITIZE - REMOVE SCRIPTS/HTML TAGS
+    amount = sanitize_html(amount);
+    recipient = sanitize_html(recipient);
+    address = sanitize_html(address);
+    message && (message = sanitize_html(message)); // OPTIONAL
+    sendFee && (sendFee = sanitize_html(sendFee)); // OPTIONAL
+
+    // CHECK THE VALIDITY OF RECIPIENT ADDRESS
+    if (!isValidChecksumAddress(recipient.trim()))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: 'error',
+        message: 'Invalid recipient address.',
+      });
+
+    // CHECK THE VALIDITY OF SENDER ADDRESS
+    if (!isValidChecksumAddress(address.trim()))
+      return res.status(INCORRECT_VALIDATION).json({
+        type: 'error',
+        message: 'Invalid sender address.',
+      });
+
+    // GRAB NECESSARY MIDDLEWARES
+    const { transactionPool, blockchain, pubSub, localWallet } = req;
+
+    // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
+    if (recipient === address)
+      return res.status(INCORRECT_VALIDATION).json({
+        type: 'error',
+        message: 'Sender and receiver address cannot be the same.',
+      });
+
+    // CHECK FOR EXISTING TRANSACTION
+    let transaction = transactionPool.existingTransactionPool({
+      inputAddress: address,
+    });
+
+    try {
+      if (transaction) {
+        console.log('Update transaction');
+        // GET UP TO DATE USER BALANCE
+        const balance = Wallet.calculateBalance({
+          address: address,
+          chain: blockchain.chain,
+        });
+
+        console.log('instance of Transaction', transaction instanceof Transaction);
+
+        transaction.update({
+          publicKey: transaction.input.localPublicKey,
+          address,
+          recipient,
+          amount: Number(amount),
+          balance,
+          localWallet,
+          message,
+          sendFee,
+        });
+      } else {
+        console.log('New transaction');
+        transaction = localWallet.createTransaction({
+          recipient,
+          amount: Number(amount),
+          chain: blockchain.chain,
+          publicKey: localWallet.publicKey,
           address,
           message,
           sendFee,
