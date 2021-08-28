@@ -29,6 +29,24 @@ export const transactValidation = (body: {
   return transactSchema.validate(body, { convert: true });
 };
 
+export const sendValidation = (body: {
+  amount: string;
+  recipient: string;
+  address: string;
+  message: string;
+  sendFee: string;
+}): ValidationResult => {
+  const sendSchema = Joi.object().keys({
+    amount: Joi.number().positive().required(),
+    recipient: Joi.string().trim().required(),
+    address: Joi.string().trim().required(),
+    message: Joi.string().trim().allow(''),
+    sendFee: Joi.number().positive().allow(''),
+  });
+
+  return sendSchema.validate(body, { convert: true });
+};
+
 export const mineValidation = (body: { address: string; message?: string }): ValidationResult => {
   const mineSchema = Joi.object().keys({
     address: Joi.string().trim().required(),
