@@ -38,7 +38,7 @@ export default class TransactionController {
    */
   make = async (req: Request, res: Response): Promise<Response> => {
     // ENFORCE 8 DECIMAL PLACES
-    if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
+    if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',
         message:
@@ -143,14 +143,14 @@ export default class TransactionController {
   /**
    * Send Kadocoin
    *
-   * @method make
+   * @method send
    * @param {Request} req Express Request object
    * @param {Response} res Express Response object
    * @return a transaction object
    */
   send = async (req: Request, res: Response): Promise<Response> => {
     // ENFORCE 8 DECIMAL PLACES
-    if (!/^\d*\.?\d{1,8}$/.test(req.body.amount))
+    if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',
         message:
@@ -178,7 +178,7 @@ export default class TransactionController {
     if (!isValidChecksumAddress(recipient.trim()))
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',
-        message: 'Invalid recipient address.',
+        message: 'Invalid receiver address.',
       });
 
     // CHECK THE VALIDITY OF SENDER ADDRESS
