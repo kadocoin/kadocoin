@@ -174,6 +174,7 @@ class Transaction {
     blockchainLen: number;
   }): Transaction {
     REWARD_INPUT.recipient = minerPublicKey;
+    REWARD_INPUT.timestamp = Date.now();
     message && (REWARD_INPUT.message = message);
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });
     const rewardTotal = Number(MINING_REWARD) + Number(feeReward);

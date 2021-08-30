@@ -36,7 +36,7 @@ export { GENESIS_DATA };
 
 export const STARTING_BALANCE = 1000;
 const REWARD_INPUT: REWARD_INPUT = {
-  timestamp: 1624848894788,
+  timestamp: 0,
   amount: '',
   address: '',
   publicKey: '',
