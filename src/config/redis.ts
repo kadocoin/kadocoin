@@ -12,7 +12,6 @@ import {
   REDIS_PORT,
   REDIS_PORT_CACHING,
   REDIS_URL_CACHING,
-  REDIS_PASSWORD_CACHING,
 } from './secret';
 
 export const redisClientPub = new Redis({
@@ -28,5 +27,4 @@ export const redisClientSub = new Redis({
 export const redisClientCaching = new Redis({
   port: REDIS_PORT_CACHING,
   host: REDIS_URL_CACHING,
-  password: REDIS_PASSWORD_CACHING,
 });
