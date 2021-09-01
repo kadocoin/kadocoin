@@ -51,6 +51,7 @@ class PubSub {
     switch (channel) {
       case CHANNELS.BLOCKCHAIN:
         this.blockchain.addBlockFromPeerToLocal(parsedMessage, true, this.blockchain.chain, () => {
+          // TODO: CLEAR?
           this.transactionPool.clearBlockchainTransactions({
             chain: parsedMessage,
           });

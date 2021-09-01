@@ -63,6 +63,7 @@ describe('Blockchain', () => {
           blockReward: (50).toFixed(8),
           feeReward: (5).toFixed(8),
           blockchainHeight: newChain.chain.length,
+          hashOfPreviousHashes: cryptoHash('hash-one'),
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -114,6 +115,7 @@ describe('Blockchain', () => {
             blockReward: (50).toFixed(8),
             feeReward: (5).toFixed(8),
             blockchainHeight: newChain.chain.length,
+            hashOfPreviousHashes: cryptoHash(hash),
           });
 
           blockchain.chain.push(badBlock);
@@ -155,6 +157,7 @@ describe('Blockchain', () => {
           blockReward: (50).toFixed(8),
           feeReward: (5).toFixed(8),
           blockchainHeight: newChain.chain.length,
+          hashOfPreviousHashes: cryptoHash('0x86045b56bfeb1A35C6818081130BA0F789dc27c9'),
         };
 
         blockchain.replaceChain(newChain.chain);

@@ -36,6 +36,7 @@ describe('Block', () => {
     blockReward: (50).toFixed(8),
     feeReward: (5).toFixed(8),
     blockchainHeight: 1,
+    hashOfPreviousHashes: cryptoHash(hash),
   });
 
   it('has a timestamp, lastHash, hash, transactions, nonce, difficulty, blockSize, transactionVolume, blockReward, & blockchainHeight properties.', () => {

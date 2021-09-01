@@ -45,18 +45,16 @@ class TransactionMiner {
         })
       );
 
-      // ADD
-
       // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
 
-      // BROADCAST NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
+      // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
       this.pubSub.broadcastNewlyMinedBlock({
         block: newlyMinedBlock,
         info: { KADOCOIN_VERSION, LOCAL_IP, height: this.blockchain.chain.length },
       });
 
-      // CLEAR THE POOL
+      // TODO: CLEAR THE POOL?
       this.transactionPool.clear();
 
       return 'success';

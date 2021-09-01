@@ -6,6 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { REWARD_INPUT } from '../types';
+import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Transaction from '../wallet/transaction';
 
@@ -14,10 +15,11 @@ export const MINE_RATE = 5000;
 export const DEFAULT_MESSAGE = 'Welcome to Kadocoin API. Visit https://kadocoin.org';
 
 const transactions: Array<Transaction> = [];
+const hash = '*None*';
 const GENESIS_DATA = {
   timestamp: 1626071497054,
   lastHash: '*None*',
-  hash: '*None*',
+  hash,
   difficulty: INITIAL_DIFFICULTY,
   nonce: 0,
   transactions,
@@ -25,6 +27,7 @@ const GENESIS_DATA = {
   transactionVolume: '',
   blockReward: '',
   feeReward: '',
+  hashOfPreviousHashes: cryptoHash(hash),
   blockchainHeight: 1,
 };
 
