@@ -119,18 +119,18 @@ class Blockchain {
   }
 
   static isValidBlock(incomingObj: incomingObj, localBlockchain?: IChain): boolean {
-    const { timestamp, lastHash, hash, transactions, nonce, difficulty, hashOfPreviousHashes } =
+    const { timestamp, lastHash, hash, transactions, nonce, difficulty, hashOfAllHashes } =
       incomingObj.block;
     const cleanedTransactions = cleanUpTransaction({ transactions });
     const previousBlock = localBlockchain[localBlockchain.length - 1];
     const previousHash = previousBlock.hash;
     const lastDifficulty = previousBlock.difficulty;
     const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
-    const hashes = cryptoHash(previousBlock.hashOfPreviousHashes, hash);
+    const hashes = cryptoHash(previousBlock.hashOfAllHashes, hash);
 
-    console.log({ hashes, hashOfPreviousHashes });
+    console.log({ hashes, hashOfAllHashes });
 
-    if (hashes !== hashOfPreviousHashes) return false;
+    if (hashes !== hashOfAllHashes) return false;
 
     if (previousHash !== lastHash) return false;
 

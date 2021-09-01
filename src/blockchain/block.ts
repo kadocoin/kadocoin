@@ -27,7 +27,7 @@ class Block {
   public blockReward: string;
   public feeReward: string;
   public blockchainHeight: number;
-  public hashOfPreviousHashes: string;
+  public hashOfAllHashes: string;
 
   constructor({
     timestamp,
@@ -41,7 +41,7 @@ class Block {
     blockReward,
     feeReward,
     blockchainHeight,
-    hashOfPreviousHashes,
+    hashOfAllHashes,
   }: Block) {
     this.timestamp = timestamp;
     this.lastHash = lastHash;
@@ -54,7 +54,7 @@ class Block {
     this.blockReward = blockReward;
     this.feeReward = feeReward;
     this.blockchainHeight = blockchainHeight;
-    this.hashOfPreviousHashes = hashOfPreviousHashes;
+    this.hashOfAllHashes = hashOfAllHashes;
   }
 
   static genesis(): Block {
@@ -90,7 +90,7 @@ class Block {
       hash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
     } while (hexToBinary(hash).substring(0, difficulty) !== '0'.repeat(difficulty));
 
-    const hashOfPreviousHashes = cryptoHash(lastBlock.hashOfPreviousHashes, hash);
+    const hashOfAllHashes = cryptoHash(lastBlock.hashOfAllHashes, hash);
 
     return new Block({
       timestamp,
@@ -99,20 +99,12 @@ class Block {
       difficulty,
       nonce,
       hash,
-      blockSize: size(
-        timestamp,
-        lastHash,
-        transactions,
-        difficulty,
-        nonce,
-        hash,
-        hashOfPreviousHashes
-      ),
+      blockSize: size(timestamp, lastHash, transactions, difficulty, nonce, hash, hashOfAllHashes),
       transactionVolume: transactionVolume({ transactions }),
       blockReward: MINING_REWARD,
       feeReward,
       blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
-      hashOfPreviousHashes,
+      hashOfAllHashes,
     });
   }
 

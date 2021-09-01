@@ -27,7 +27,7 @@ const GENESIS_DATA = {
   transactionVolume: '',
   blockReward: '',
   feeReward: '',
-  hashOfPreviousHashes: cryptoHash(hash),
+  hashOfAllHashes: cryptoHash(hash),
   blockchainHeight: 1,
 };
 
