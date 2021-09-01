@@ -63,6 +63,7 @@ describe('Blockchain', () => {
           blockReward: (50).toFixed(8),
           feeReward: (5).toFixed(8),
           blockchainHeight: newChain.chain.length,
+          hashOfPreviousHashes: cryptoHash('hash-one'),
         };
 
         expect(Blockchain.isValidChain(blockchain.chain)).toBe(false);
@@ -114,6 +115,7 @@ describe('Blockchain', () => {
             blockReward: (50).toFixed(8),
             feeReward: (5).toFixed(8),
             blockchainHeight: newChain.chain.length,
+            hashOfPreviousHashes: cryptoHash(hash),
           });
 
           blockchain.chain.push(badBlock);
@@ -155,6 +157,7 @@ describe('Blockchain', () => {
           blockReward: (50).toFixed(8),
           feeReward: (5).toFixed(8),
           blockchainHeight: newChain.chain.length,
+          hashOfPreviousHashes: cryptoHash('0x86045b56bfeb1A35C6818081130BA0F789dc27c9'),
         };
 
         blockchain.replaceChain(newChain.chain);
@@ -202,19 +205,6 @@ describe('Blockchain', () => {
         });
       });
     });
-
-    describe('and the `validateTransactions` flag i true', () => {
-      it('calls validateTransactionData()', () => {
-        const validateTransactionDataMock = jest.fn();
-
-        blockchain.validTransactionData = validateTransactionDataMock;
-
-        newChain.addBlock({ transactions: [sampleData] });
-        blockchain.replaceChain(newChain.chain, true);
-
-        expect(validateTransactionDataMock).toHaveBeenCalled();
-      });
-    });
   });
 
   describe('validTransactionData()', () => {
@@ -244,9 +234,7 @@ describe('Blockchain', () => {
       it('returns true', () => {
         newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
-        expect(
-          blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
-        ).toBe(true);
+        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(true);
         expect(errorMock).not.toHaveBeenCalled();
       });
     });
@@ -256,9 +244,7 @@ describe('Blockchain', () => {
         newChain.addBlock({
           transactions: [transaction, rewardTransaction, rewardTransaction],
         });
-        expect(
-          blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
-        ).toBe(false);
+        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });
@@ -270,9 +256,7 @@ describe('Blockchain', () => {
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
-          expect(
-            blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
-          ).toBe(false);
+          expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
       });
@@ -283,9 +267,7 @@ describe('Blockchain', () => {
 
           newChain.addBlock({ transactions: [transaction, rewardTransaction] });
 
-          expect(
-            blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
-          ).toBe(false);
+          expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
       });
@@ -297,9 +279,7 @@ describe('Blockchain', () => {
           transactions: [transaction, transaction, transaction],
         });
 
-        expect(
-          blockchain.validTransactionData({ chain: newChain.chain, localBlockchainLen: 1 })
-        ).toBe(false);
+        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });

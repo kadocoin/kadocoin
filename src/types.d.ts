@@ -175,3 +175,8 @@ export interface REWARD_INPUT {
   signature: string;
   message?: string;
 }
+
+export interface incomingObj {
+  block: Block;
+  info: { KADOCOIN_VERSION: string; LOCAL_IP: string; height: number };
+}

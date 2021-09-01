@@ -19,7 +19,8 @@ const syncWithRootState = ({
       console.log('Replacing your LOCAL blockchain with the consensus blockchain');
       console.log('working on it.................');
 
-      blockchain.replaceChain(rootChain, undefined, blockchain.chain.length);
+      // TODO: SYNC FROM DISK
+      blockchain.replaceChain(rootChain);
 
       // UPDATE MINING_REWARD
       const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
