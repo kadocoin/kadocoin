@@ -11,6 +11,7 @@ import { ITMinerConstructorParams } from '../types';
 import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
+import { KADOCOIN_VERSION, LOCAL_IP } from '../config/secret';
 
 class TransactionMiner {
   public blockchain: Blockchain;
@@ -44,11 +45,16 @@ class TransactionMiner {
         })
       );
 
-      // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
-      this.blockchain.addBlock({ transactions: validTransactions });
+      // ADD
 
-      // BROADCAST THE UPDATED BLOCKCHAIN
-      this.pubSub.broadcastChain();
+      // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
+      const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
+
+      // BROADCAST NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
+      this.pubSub.broadcastNewlyMinedBlock({
+        block: newlyMinedBlock,
+        info: { KADOCOIN_VERSION, LOCAL_IP, height: this.blockchain.chain.length },
+      });
 
       // CLEAR THE POOL
       this.transactionPool.clear();

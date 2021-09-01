@@ -7,6 +7,7 @@
  */
 import dotenv from 'dotenv';
 import fs from 'fs';
+import { networkInterfaces } from 'os';
 
 if (fs.existsSync('.env')) {
   console.debug('Using .env file to supply config environment variables');
@@ -98,3 +99,24 @@ if (!REDIS_URL_CACHING) {
 
 export const SESSION_SECRET = process.env['SESSION_SECRET'];
 export const ADMIN_EMAIL = process.env['ADMIN_EMAIL'];
+export const KADOCOIN_VERSION = '1.0.0';
+
+/**
+ * IP ADDRESS
+ */
+const nets = networkInterfaces();
+const results = Object.create(null);
+
+for (const name of Object.keys(nets)) {
+  for (const net of nets[name]) {
+    // SKIP OVER NON-IPV4 AND INTERNAL (I.E. 127.0.0.1) ADDRESSES
+    if (net.family === 'IPv4' && !net.internal) {
+      if (!results[name]) {
+        results[name] = [];
+      }
+      results[name].push(net.address);
+    }
+  }
+}
+
+export const LOCAL_IP = results['en1'][0];

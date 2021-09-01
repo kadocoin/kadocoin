@@ -8,6 +8,7 @@
 import { Redis } from 'ioredis';
 import Blockchain from '../blockchain';
 import { redisClientPub, redisClientSub } from '../config/redis';
+import { incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -49,7 +50,7 @@ class PubSub {
 
     switch (channel) {
       case CHANNELS.BLOCKCHAIN:
-        this.blockchain.replaceChain(parsedMessage, true, this.blockchain.chain.length, () => {
+        this.blockchain.addBlockFromPeerToLocal(parsedMessage, true, this.blockchain.chain, () => {
           this.transactionPool.clearBlockchainTransactions({
             chain: parsedMessage,
           });
@@ -89,6 +90,13 @@ class PubSub {
     this.publish({
       channel: CHANNELS.TRANSACTION,
       message: JSON.stringify(transaction),
+    });
+  }
+
+  broadcastNewlyMinedBlock(block: incomingObj): void {
+    this.publish({
+      channel: CHANNELS.BLOCKCHAIN,
+      message: JSON.stringify(block),
     });
   }
 
