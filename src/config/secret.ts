@@ -119,6 +119,5 @@ for (const name of Object.keys(nets)) {
   }
 }
 
-console.log({ results });
-
-export const LOCAL_IP = 'No IP Set';
+export const LOCAL_IP = JSON.stringify(Object.values(results)[0]).substring(2, 15);
+console.log({ LOCAL_IP });

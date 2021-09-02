@@ -138,6 +138,8 @@ class Transaction {
       output,
     } = transaction;
 
+    console.log(Number(amount), Number(calcOutputTotal(output)));
+
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
     if (Number(amount) !== Number(calcOutputTotal(output))) {
       console.error(`Invalid transaction from ${address} `);
