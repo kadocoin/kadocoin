@@ -130,3 +130,4 @@ function getIP() {
 }
 
 export const LOCAL_IP = getIP();
+console.log({ LOCAL_IP });
