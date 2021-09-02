@@ -119,5 +119,14 @@ for (const name of Object.keys(nets)) {
   }
 }
 
-export const LOCAL_IP = JSON.stringify(Object.values(results)[0]).substring(2, 15);
-console.log({ LOCAL_IP });
+const _IP = JSON.stringify(Object.values(results)[0]).substring(2, 15);
+function getIP() {
+  let ip = '';
+  for (let i = 0; i < _IP.length; i++) {
+    const ele = _IP[i];
+    if (ele == '.' || typeof Number(ele) == 'number') ip += ele;
+  }
+  return ip;
+}
+
+export const LOCAL_IP = getIP();
