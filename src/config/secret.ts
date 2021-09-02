@@ -119,4 +119,6 @@ for (const name of Object.keys(nets)) {
   }
 }
 
-export const LOCAL_IP = results['en1'][0] || 'No IP Detected';
+console.log({ results });
+
+export const LOCAL_IP = 'No IP Set';
