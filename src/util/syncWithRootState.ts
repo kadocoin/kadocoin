@@ -1,26 +1,50 @@
 import request from 'request';
 import Blockchain from '../blockchain';
+import { sampleBlocks } from '../config/constants';
 import { ROOT_NODE_ADDRESS } from '../config/secret';
 import TransactionPool from '../wallet/transaction-pool';
+import appendToFile from './appendToFile';
+import getLastLine from './getLastLine';
 import isEmptyObject from './isEmptyObject';
 import Mining_Reward from './supply_reward';
 
-const syncWithRootState = ({
+export default async function syncWithRootState({
   blockchain,
   transactionPool,
 }: {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
-}): void => {
-  request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, (error, response, body) => {
+}): Promise<void> {
+  request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, async (error, response, body) => {
     if (!error && response.statusCode === 200) {
-      const rootChain = JSON.parse(body).message;
+      const rootChain2 = JSON.parse(body).message;
+      const rootChain = sampleBlocks;
+
+      /** DO FILE STUFF */
+      const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
+      const blockchainHeightFromFile = await getLastLine();
+      console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
+
+      if (blockchainHeightFromFile > blockchainHeightFromPeer) {
+        console.log('________THIS PEER IS AHEAD__________');
+        // return
+      }
+
+      if (blockchainHeightFromPeer > blockchainHeightFromFile) {
+        /** ADD THE MISSING BLOCKS TO LOCAL FILE */
+        console.log('_______ADD THE MISSING BLOCKS TO LOCAL FILE_____');
+        // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
+        const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
+
+        // NOW WRITE LINE BY LINE
+        appendToFile(diffBlockchain);
+      }
 
       console.log('Replacing your LOCAL blockchain with the consensus blockchain');
       console.log('working on it.................');
 
       // TODO: SYNC FROM DISK
-      blockchain.replaceChain(rootChain);
+      blockchain.replaceChain(rootChain2);
 
       // UPDATE MINING_REWARD
       const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
@@ -50,6 +74,4 @@ const syncWithRootState = ({
       console.log(`${ROOT_NODE_ADDRESS}/transaction-pool`, error);
     }
   });
-};
-
-export default syncWithRootState;
+}
