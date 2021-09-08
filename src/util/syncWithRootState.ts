@@ -7,6 +7,8 @@ import appendToFile from './appendToFile';
 import getLastLine from './getLastLine';
 import isEmptyObject from './isEmptyObject';
 import Mining_Reward from './supply_reward';
+import fs from 'fs';
+const file = 'src/array2.txt';
 
 export default async function syncWithRootState({
   blockchain,
@@ -20,24 +22,31 @@ export default async function syncWithRootState({
       const rootChain2 = JSON.parse(body).message;
       const rootChain = sampleBlocks;
 
-      /** DO FILE STUFF */
-      const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-      const blockchainHeightFromFile = await getLastLine();
-      console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
+      if (fs.existsSync(file)) {
+        /** DO FILE STUFF */
+        const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
+        const blockchainHeightFromFile = await getLastLine(file);
+        console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
 
-      if (blockchainHeightFromFile > blockchainHeightFromPeer) {
-        console.log('________THIS PEER IS AHEAD__________');
-        // return
-      }
+        /** THIS PEER IS AHEAD */
+        if (blockchainHeightFromPeer < blockchainHeightFromFile) {
+          console.log('________THIS PEER IS AHEAD__________');
+          // DELETE FILE AND ADD CURRENT FILE
+        }
 
-      if (blockchainHeightFromPeer > blockchainHeightFromFile) {
-        /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-        console.log('_______ADD THE MISSING BLOCKS TO LOCAL FILE_____');
-        // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
-        const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
+        /** THIS PEER NEEDS TO CATCH UP */
+        if (blockchainHeightFromPeer > blockchainHeightFromFile) {
+          /** ADD THE MISSING BLOCKS TO LOCAL FILE */
+          console.log('_______ADD THE MISSING BLOCKS TO LOCAL FILE_____');
+          // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
+          const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
-        // NOW WRITE LINE BY LINE
-        appendToFile(diffBlockchain);
+          // NOW WRITE LINE BY LINE
+          appendToFile(diffBlockchain, file);
+        }
+      } else {
+        console.log('______FILE DOES NOT EXISTS______');
+        appendToFile(rootChain, file);
       }
 
       console.log('Replacing your LOCAL blockchain with the consensus blockchain');
@@ -51,6 +60,7 @@ export default async function syncWithRootState({
         chainLength: blockchain.chain.length,
       });
       console.log({ MINING_REWARD, SUPPLY });
+      console.dir(blockchain.chain[0].blockchainHeight);
     } else {
       console.log(`${ROOT_NODE_ADDRESS}/blocks`, error);
     }

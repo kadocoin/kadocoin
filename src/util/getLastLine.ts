@@ -1,10 +1,9 @@
 import fs from 'fs';
 import readline from 'readline';
 
-export default function getLastLine(): Promise<number> {
-  const inStream = fs.createReadStream('src/array.txt');
-
+export default function getLastLine(file: string): Promise<number> {
   return new Promise((resolve, reject) => {
+    const inStream = fs.createReadStream(file);
     const rl = readline.createInterface(inStream);
 
     let lastLine = '';
@@ -20,7 +19,7 @@ export default function getLastLine(): Promise<number> {
       if (lastLine) {
         resolve(JSON.parse(lastLine).blockchainHeight);
       }
-      resolve(1);
+      resolve(0);
     });
   });
 }
