@@ -1,14 +1,13 @@
 import request from 'request';
 import Blockchain from '../blockchain';
-import { sampleBlocks } from '../config/constants';
+import { blockchainStorageFile } from '../config/constants';
 import { ROOT_NODE_ADDRESS } from '../config/secret';
 import TransactionPool from '../wallet/transaction-pool';
 import appendToFile from './appendToFile';
 import getLastLine from './getLastLine';
 import isEmptyObject from './isEmptyObject';
 import Mining_Reward from './supply_reward';
-import fs from 'fs';
-const file = 'src/array2.txt';
+import fs, { unlinkSync } from 'fs';
 
 export default async function syncWithRootState({
   blockchain,
@@ -19,48 +18,52 @@ export default async function syncWithRootState({
 }): Promise<void> {
   request({ url: `${ROOT_NODE_ADDRESS}/blocks` }, async (error, response, body) => {
     if (!error && response.statusCode === 200) {
-      const rootChain2 = JSON.parse(body).message;
-      const rootChain = sampleBlocks;
+      const rootChain = JSON.parse(body).message;
 
-      if (fs.existsSync(file)) {
-        /** DO FILE STUFF */
+      // FILE EXISTS
+      if (fs.existsSync(blockchainStorageFile)) {
         const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-        const blockchainHeightFromFile = await getLastLine(file);
+        const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
         console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
 
         /** THIS PEER IS AHEAD */
         if (blockchainHeightFromPeer < blockchainHeightFromFile) {
-          console.log('________THIS PEER IS AHEAD__________');
-          // DELETE FILE AND ADD CURRENT FILE
+          console.log('________THIS PEER IS AHEAD________');
+          try {
+            unlinkSync(blockchainStorageFile);
+            console.log('________FILE DELETED________');
+            appendToFile(rootChain, blockchainStorageFile);
+          } catch {
+            console.log('________ERROR DELETING FILE________');
+          }
         }
 
         /** THIS PEER NEEDS TO CATCH UP */
         if (blockchainHeightFromPeer > blockchainHeightFromFile) {
           /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-          console.log('_______ADD THE MISSING BLOCKS TO LOCAL FILE_____');
+          console.log('________ADD THE MISSING BLOCKS TO LOCAL FILE________');
           // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
           const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
           // NOW WRITE LINE BY LINE
-          appendToFile(diffBlockchain, file);
+          appendToFile(diffBlockchain, blockchainStorageFile);
         }
       } else {
-        console.log('______FILE DOES NOT EXISTS______');
-        appendToFile(rootChain, file);
+        console.log('________FILE DOES NOT EXISTS________');
+        appendToFile(rootChain, blockchainStorageFile);
       }
 
-      console.log('Replacing your LOCAL blockchain with the consensus blockchain');
-      console.log('working on it.................');
+      console.log('________REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN________');
+      console.log('________WORKING ON IT.................________');
 
-      // TODO: SYNC FROM DISK
-      blockchain.replaceChain(rootChain2);
+      // TODO: SYNC FROM DISK ?
+      blockchain.replaceChain(rootChain);
 
       // UPDATE MINING_REWARD
       const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
         chainLength: blockchain.chain.length,
       });
       console.log({ MINING_REWARD, SUPPLY });
-      console.dir(blockchain.chain[0].blockchainHeight);
     } else {
       console.log(`${ROOT_NODE_ADDRESS}/blocks`, error);
     }

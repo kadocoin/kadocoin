@@ -12,6 +12,8 @@ import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 import { KADOCOIN_VERSION, LOCAL_IP } from '../config/secret';
+import appendToFile from '../util/appendToFile';
+import { blockchainStorageFile } from '../config/constants';
 
 class TransactionMiner {
   public blockchain: Blockchain;
@@ -53,6 +55,9 @@ class TransactionMiner {
         block: newlyMinedBlock,
         info: { KADOCOIN_VERSION, LOCAL_IP, height: this.blockchain.chain.length },
       });
+
+      // ADD BLOCK TO FILE
+      appendToFile([newlyMinedBlock], blockchainStorageFile);
 
       // TODO: CLEAR THE POOL?
       this.transactionPool.clear();

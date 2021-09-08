@@ -4,10 +4,7 @@ import fs from 'fs';
 export default function appendToFile(blockchain: any, file: string): void {
   const fileStream = fs.createWriteStream(file, { flags: 'a' });
 
-  fileStream.on('error', function (err) {
-    /* error handling */
-    console.log({ err });
-  });
+  fileStream.on('error', err => console.log({ type: 'filesystem', err }));
 
   blockchain.forEach((blk: any) => fileStream.write(JSON.stringify(blk) + '\n'));
 

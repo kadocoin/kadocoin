@@ -50,6 +50,8 @@ const REWARD_INPUT: REWARD_INPUT = {
 
 export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
+export const NOT_ENOUGH = 'Insufficient balance';
+export const blockchainStorageFile = 'src/array.txt';
 
 export const sampleDataForTests = {
   id: '2d5791f0-d9af-11eb-ac13-099d1d20fcfc',
@@ -289,5 +291,3 @@ export const sampleBlocks = [
     hashOfAllHashes: 'd78e916cfa852700cc0a16cbcddb11b27d473c289e1a45f4f54a600457a22909',
   },
 ];
-
-export const NOT_ENOUGH = 'Insufficient balance';
