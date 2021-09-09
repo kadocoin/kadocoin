@@ -84,8 +84,8 @@ MongoClient.connect(MONGODB_URI, {
     await createIndexes(app.locals.db);
     console.log('*****MongoDB is connected*****');
 
-    app.listen(PORT, () => {
-      syncWithRootState({ blockchain, transactionPool });
+    app.listen(PORT, async () => {
+      await syncWithRootState({ blockchain, transactionPool });
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });
   })
