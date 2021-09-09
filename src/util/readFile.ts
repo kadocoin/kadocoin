@@ -1,8 +1,10 @@
 import fs from 'fs';
 import readline from 'readline';
+import { blockchainStorageFile } from '../config/constants';
 
-export default async function processLineByLine(): Promise<void> {
-  const fileStream = fs.createReadStream('src/array.txt');
+export default async function readLineByLine(): Promise<void> {
+  const fileStream = fs.createReadStream(blockchainStorageFile);
+  const chain = [];
 
   const rl = readline.createInterface({
     input: fileStream,
@@ -10,12 +12,14 @@ export default async function processLineByLine(): Promise<void> {
   });
 
   // Note: we use the crlfDelay option to recognize all instances of CR LF
-  // ('\r\n') in src/array2.txt as a single line break.
+  // ('\r\n') in the file as a single line break.
 
   for await (const line of rl) {
-    // Each line in src/array2.txt will be successively available here as `line`.
-    console.log(`Line from file: ${line}`);
+    // Each line in the file will be successively available here as `line`.
+    chain.push(JSON.parse(line));
   }
+
+  console.log(chain);
 
   fileStream.close();
 }
