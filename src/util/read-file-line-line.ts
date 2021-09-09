@@ -2,7 +2,7 @@ import fs from 'fs';
 import readline from 'readline';
 import { blockchainStorageFile } from '../config/constants';
 
-export default async function readLineByLine(): Promise<void> {
+export default async function readFileLineByLine(): Promise<void> {
   const fileStream = fs.createReadStream(blockchainStorageFile);
   const chain = [];
 
