@@ -6,6 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { REWARD_INPUT } from '../types';
+import ConsoleLog from '../util/console-log';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Transaction from '../wallet/transaction';
@@ -54,6 +55,7 @@ export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = prod ? 'array.txt' : 'src/array.txt';
+ConsoleLog(blockchainStorageFile);
 
 export const sampleDataForTests = {
   id: '2d5791f0-d9af-11eb-ac13-099d1d20fcfc',
