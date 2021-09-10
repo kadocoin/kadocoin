@@ -54,7 +54,7 @@ const REWARD_INPUT: REWARD_INPUT = {
 export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
-export const blockchainStorageFile = prod ? 'array.txt' : 'src/array.txt';
+export const blockchainStorageFile = prod ? 'dist/array.txt' : 'src/array.txt';
 ConsoleLog(blockchainStorageFile);
 
 export const sampleDataForTests = {
