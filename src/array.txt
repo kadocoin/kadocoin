@@ -1,1 +1,0 @@
-{"timestamp":1626071497054,"lastHash":"*None*","hash":"*None*","transactions":[],"nonce":0,"difficulty":10,"blockSize":"230","transactionVolume":"","blockReward":"","feeReward":"","blockchainHeight":1,"hashOfAllHashes":"91d7da959863806d9256aa7c48ddaf497fd3156825459fa0f754930320db9a69"}
