@@ -20,6 +20,7 @@ import {
   tokenValidation,
   forgot_password_step_2_validation,
   addressValidation,
+  subscribeToNewsletterValidation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -653,6 +654,35 @@ export default class UserController {
       );
 
       return res.status(SUCCESS).json({ message: user });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  subscribe_to_newsletter = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = subscribeToNewsletterValidation(req.body);
+
+      if (error)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ type: 'error', message: error.details[0].message });
+
+      const { email, date } = req.body;
+
+      // CHECK IF ALREADY SUBSCRIBED
+      let subscriberDoc = await this.userModel.find_subscriber(req.app.locals.db, email);
+
+      if (subscriberDoc)
+        return res.status(SUCCESS).json({ type: 'found', message: 'Already a subscriber' });
+
+      // THEY ARE NOT SUBSCRIBED. SUBSCRIBE THEM
+      subscriberDoc = await this.userModel.save_subscriber(req.app.locals.db, email, date);
+
+      return res.status(CREATED).json({ type: 'success', message: 'success' });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });

@@ -137,3 +137,15 @@ export const forgot_password_step_2_validation = (reqBody: {
 
   return forgot_password_step_2_schema.validate(reqBody);
 };
+
+export const subscribeToNewsletterValidation = (user: {
+  email: string;
+  date: string;
+}): ValidationResult => {
+  const subscribeToNewsletterSchema = Joi.object({
+    email: Joi.string().email().required(),
+    date: Joi.string().required(),
+  });
+
+  return subscribeToNewsletterSchema.validate(user);
+};

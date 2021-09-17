@@ -114,5 +114,24 @@ export default class UserModel {
     }
   }
 
+  async save_subscriber(db: Db, email: string, date: string): Promise<any> {
+    try {
+      return await db
+        .collection('newsletter')
+        .insertOne({ email, date })
+        .then(({ ops }) => ops[0]);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async find_subscriber(db: Db, email: string): Promise<any> {
+    try {
+      return await db.collection('newsletter').findOne({ email });
+    } catch (error) {
+      return null;
+    }
+  }
+
   //
 }
