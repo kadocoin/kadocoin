@@ -149,3 +149,25 @@ export const subscribeToNewsletterValidation = (user: {
 
   return subscribeToNewsletterSchema.validate(user);
 };
+
+export const contactUsValidation = (body: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  date: string;
+}): ValidationResult => {
+  const contactUsSchema = Joi.object({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    email: Joi.string().email().required(),
+    phone: Joi.string().allow(''),
+    subject: Joi.string().required(),
+    message: Joi.string().required(),
+    date: Joi.string().required(),
+  });
+
+  return contactUsSchema.validate(body);
+};

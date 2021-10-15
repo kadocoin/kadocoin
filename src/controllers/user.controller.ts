@@ -21,6 +21,7 @@ import {
   forgot_password_step_2_validation,
   addressValidation,
   subscribeToNewsletterValidation,
+  contactUsValidation,
 } from '../validation/user.validation';
 import {
   INTERNAL_SERVER_ERROR,
@@ -65,7 +66,7 @@ export default class UserController {
       const { error } = registerValidation(req.body);
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { email, password, userCreationDate } = req.body;
@@ -143,7 +144,7 @@ export default class UserController {
       const { error } = emailValidation(email);
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const emailExist = await this.commonModel.findByEmail(req.app.locals.db, email);
@@ -165,7 +166,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       let user = await this.commonModel.findByEmail(req.app.locals.db, req.body.email);
@@ -208,7 +209,7 @@ export default class UserController {
       const { error } = addressValidation(req.params.address);
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       // CHECK THE VALIDITY OF ADDRESS
@@ -238,7 +239,7 @@ export default class UserController {
       const { error } = addressValidation(req.body.address);
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       // CHECK THE VALIDITY OF ADDRESS
@@ -268,7 +269,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       let profilePicture: string;
@@ -356,7 +357,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { current_password, new_password, user_id } = req.body;
@@ -395,7 +396,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { user_id } = req.body;
@@ -435,7 +436,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { email, user_id } = req.body;
@@ -487,7 +488,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { verification_token } = req.body;
@@ -525,7 +526,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { email } = req.body;
@@ -569,7 +570,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { verification_token_reset_password } = req.body;
@@ -606,7 +607,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { user_id, new_password } = req.body;
@@ -668,7 +669,7 @@ export default class UserController {
 
       if (error)
         return res
-          .status(INTERNAL_SERVER_ERROR)
+          .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
 
       const { email, date } = req.body;
@@ -681,6 +682,35 @@ export default class UserController {
 
       // THEY ARE NOT SUBSCRIBED. SUBSCRIBE THEM
       subscriberDoc = await this.userModel.save_subscriber(req.app.locals.db, email, date);
+
+      return res.status(CREATED).json({ type: 'success', message: 'success' });
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  contact_us = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = contactUsValidation(req.body);
+
+      if (error)
+        return res
+          .status(INCORRECT_VALIDATION)
+          .json({ type: 'error', message: error.details[0].message });
+
+      // SAVE INTO DB
+      const contactDoc = await this.userModel.contact_us(req.app.locals.db, req.body);
+
+      if (!contactDoc)
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({
+            type: 'error',
+            message: 'Sorry, we are unable to save your message. Please try again.',
+          });
 
       return res.status(CREATED).json({ type: 'success', message: 'success' });
     } catch (error) {

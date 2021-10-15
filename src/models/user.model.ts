@@ -133,5 +133,27 @@ export default class UserModel {
     }
   }
 
+  async contact_us(
+    db: Db,
+    body: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+      subject: string;
+      message: string;
+      date: string;
+    }
+  ): Promise<any> {
+    try {
+      return await db
+        .collection('contact-us')
+        .insertOne(body)
+        .then(({ ops }) => ops[0]);
+    } catch (error) {
+      return null;
+    }
+  }
+
   //
 }
