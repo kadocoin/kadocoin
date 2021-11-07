@@ -30,6 +30,12 @@
     "cryptography"
   ],
   "author": "Adamu Muhammad Dankore",
+  "contributors": [
+    {
+      "name": "Adamu Muhammad Dankore",
+      "url": "https://github.com/dankore"
+    }
+  ],
   "license": "MIT",
   "dependencies": {
     "@nephys/plexus": "^1.1.9",
@@ -119,8 +125,7 @@
   "lint-staged": {
     "*.ts": [
       "yarn format",
-      "yarn lint",
-      "yarn test"
+      "yarn lint"
     ]
   }
 }
