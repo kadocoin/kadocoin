@@ -12,24 +12,52 @@ import plexus from '@nephys/plexus';
 import publicIp from 'public-ip';
 import { incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
+import Blockchain from '../blockchain';
+import TransactionPool from '../wallet/transaction-pool';
+
 const PORT = 5346;
+const MSG_TYPES = {
+  BLOCKCHAIN: 'BLOCKCHAIN',
+  TRANSACTION: 'TRANSACTION',
+};
 
 class P2P {
-  node: { self: any; on: any; connect: any; broadcast: any };
+  node: plexus;
+  blockchain: Blockchain;
+  transactionPool: TransactionPool;
 
-  constructor() {
+  constructor({
+    blockchain,
+    transactionPool,
+  }: {
+    blockchain: Blockchain;
+    transactionPool: TransactionPool;
+  }) {
     this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
+    this.blockchain = blockchain;
+    this.transactionPool = transactionPool;
   }
 
-  // incoming(): void {
-  //   console.log(this.node.self)
-  //   this.node.on('broadcast', (data: string) => {
-  //     console.log({ broadcastCasted: data });
-  //   });
-  // }
+  handleMessage(type: string, message: string): void {
+    console.log(`Message received. Channel: ${type}. Message: ${message}`);
 
-  async getPublicIP(): Promise<string> {
-    return await publicIp.v4();
+    const parsedMessage = JSON.parse(message);
+
+    switch (type) {
+      case MSG_TYPES.BLOCKCHAIN:
+        this.blockchain.addBlockFromPeerToLocal(parsedMessage, true, this.blockchain.chain, () => {
+          // TODO: CLEAR?
+          this.transactionPool.clearBlockchainTransactions({
+            chain: parsedMessage,
+          });
+        });
+        return;
+      case MSG_TYPES.TRANSACTION:
+        this.transactionPool.setTransaction(parsedMessage);
+        return;
+      default:
+        return;
+    }
   }
 
   async broadcastTransaction(transaction: Transaction): Promise<void> {
@@ -83,6 +111,8 @@ class P2P {
 
     // END BROADCAST
   }
+
+  getPublicIP = async (): Promise<string> => await publicIp.v4();
 }
 
 export default P2P;
