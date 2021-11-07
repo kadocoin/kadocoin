@@ -23,6 +23,7 @@ import { Db, MongoClient } from 'mongodb';
 import { MONGODB_URI, DB_NAME } from './config/secret';
 import helmet from 'helmet';
 import syncWithRootState from './util/syncWithRootState';
+import P2P from './p2p';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -83,6 +84,8 @@ MongoClient.connect(MONGODB_URI, {
 
     await createIndexes(app.locals.db);
     console.log('*****MongoDB is connected*****');
+
+    new P2P();
 
     app.listen(PORT, async () => {
       await syncWithRootState({ blockchain, transactionPool });

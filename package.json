@@ -32,6 +32,7 @@
   "author": "Adamu Muhammad Dankore",
   "license": "MIT",
   "dependencies": {
+    "@nephys/plexus": "^1.1.9",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.26.2",
     "connect-mongo": "^4.4.1",
@@ -53,6 +54,7 @@
     "nodemailer": "^6.6.3",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
+    "public-ip": "^4.0.4",
     "request": "^2.88.2",
     "sanitize-html": "^2.4.0",
     "swagger-ui-express": "^4.1.6",
@@ -84,6 +86,7 @@
     "@types/nodemon": "^1.19.0",
     "@types/passport": "^1.0.6",
     "@types/passport-local": "^1.0.33",
+    "@types/public-ip": "^3.1.0",
     "@types/request": "^2.48.5",
     "@types/sanitize-html": "^2.3.1",
     "@types/swagger-jsdoc": "^6.0.0",
