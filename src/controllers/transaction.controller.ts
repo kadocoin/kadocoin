@@ -78,7 +78,8 @@ export default class TransactionController {
       });
 
     // GRAB NECESSARY MIDDLEWARES
-    const { transactionPool, blockchain, pubSub, localWallet } = req;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { transactionPool, blockchain, p2p, localWallet } = req;
 
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
@@ -133,7 +134,7 @@ export default class TransactionController {
 
     transactionPool.setTransaction(transaction);
 
-    pubSub.broadcastTransaction(transaction);
+    p2p.broadcastTransaction(transaction);
 
     // TODO: SAVE TRANSACTION TO DB
 
@@ -189,7 +190,7 @@ export default class TransactionController {
       });
 
     // GRAB NECESSARY MIDDLEWARES
-    const { transactionPool, blockchain, pubSub, localWallet } = req;
+    const { transactionPool, blockchain, p2p, localWallet } = req;
 
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
@@ -244,7 +245,7 @@ export default class TransactionController {
 
     transactionPool.setTransaction(transaction);
 
-    pubSub.broadcastTransaction(transaction);
+    p2p.broadcastTransaction(transaction);
 
     // TODO: SAVE TRANSACTION TO DB
 
@@ -308,14 +309,14 @@ export default class TransactionController {
         }));
 
       // GRAB NECESSARY MIDDLEWARES
-      const { transactionPool, blockchain, pubSub } = req;
+      const { transactionPool, blockchain, p2p } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({
           blockchain: blockchain,
           transactionPool: transactionPool,
           address: address,
-          pubSub: pubSub,
+          p2p: p2p,
           message: message,
         });
 

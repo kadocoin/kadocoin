@@ -8,7 +8,6 @@
 import { Db, MongoClient } from 'mongodb';
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
-import PubSub from './pubSub';
 import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
@@ -16,7 +15,7 @@ import TransactionPool from './wallet/transaction-pool';
 export interface ITMinerConstructorParams {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
-  pubSub: PubSub;
+  p2p: any;
   address: string;
   message: string;
 }
@@ -84,7 +83,7 @@ declare global {
       blockchain: Blockchain;
       wallet: Wallet;
       transactionPool: TransactionPool;
-      pubSub: PubSub;
+      p2p: any;
       localWallet: Wallet;
     }
   }

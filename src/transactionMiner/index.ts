@@ -6,7 +6,6 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Blockchain from '../blockchain';
-import PubSub from '../pubSub';
 import { ITMinerConstructorParams } from '../types';
 import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
@@ -18,14 +17,14 @@ import { blockchainStorageFile } from '../config/constants';
 class TransactionMiner {
   public blockchain: Blockchain;
   public transactionPool: TransactionPool;
-  public pubSub: PubSub;
+  public p2p: any;
   public address: string;
   public message?: string;
 
-  constructor({ blockchain, transactionPool, address, pubSub, message }: ITMinerConstructorParams) {
+  constructor({ blockchain, transactionPool, address, p2p, message }: ITMinerConstructorParams) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
-    this.pubSub = pubSub;
+    this.p2p = p2p;
     this.address = address;
     this.message = message;
   }
@@ -51,7 +50,7 @@ class TransactionMiner {
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
 
       // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
-      this.pubSub.broadcastNewlyMinedBlock({
+      this.p2p.broadcastNewlyMinedBlock({
         block: newlyMinedBlock,
         info: { KADOCOIN_VERSION, LOCAL_IP: 'replace_me', height: this.blockchain.chain.length },
       });

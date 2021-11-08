@@ -40,12 +40,13 @@ const transactionPool = new TransactionPool();
 /**
  * @var pubSub app wide variable
  */
-const pubSub = new PubSub({ blockchain, transactionPool });
+
+const p2p = new P2P({ blockchain, transactionPool });
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
   new BlockRouter(app, blockchain);
-  new TransactionRouter(app, transactionPool, blockchain, pubSub, localWallet);
+  new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
   next();
 };
 
@@ -84,8 +85,6 @@ MongoClient.connect(MONGODB_URI, {
 
     await createIndexes(app.locals.db);
     console.log('*****MongoDB is connected*****');
-
-    new P2P({ blockchain, transactionPool });
 
     app.listen(PORT, async () => {
       await syncWithRootState({ blockchain, transactionPool });

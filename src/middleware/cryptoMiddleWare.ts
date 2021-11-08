@@ -27,9 +27,10 @@ export function transactionPoolMiddleWare(transactionPool: TransactionPool): TRe
   };
 }
 
-export function pubSubMiddleWare(pubSub: PubSub): TReturnType {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function pubSubMiddleWare(p2p: any): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
-    req.pubSub = pubSub;
+    req.p2p = p2p;
     next();
   };
 }

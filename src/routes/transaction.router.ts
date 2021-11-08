@@ -15,7 +15,6 @@ import {
   walletMiddleWare,
 } from '../middleware/cryptoMiddleWare';
 import { must_be_verified } from '../middleware/must_be_verified';
-import PubSub from '../pubSub';
 import Wallet from '../wallet';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -24,20 +23,21 @@ export default class TransactionRouter {
   private transactionController: TransactionController;
   private transactionPool: TransactionPool;
   private blockchain: Blockchain;
-  private pubSub: PubSub;
+  private p2p: any;
   private localWallet: Wallet;
 
   constructor(
     app: Application,
     transactionPool: TransactionPool,
     blockchain: Blockchain,
-    pubSub: PubSub,
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    p2p: any,
     localWallet: Wallet
   ) {
     this.app = app;
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
-    this.pubSub = pubSub;
+    this.p2p = p2p;
     this.transactionController = new TransactionController();
     this.localWallet = localWallet;
     this.initRoute();
@@ -50,7 +50,7 @@ export default class TransactionRouter {
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
+      pubSubMiddleWare(this.p2p),
       this.transactionController.make
     );
 
@@ -59,7 +59,7 @@ export default class TransactionRouter {
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
+      pubSubMiddleWare(this.p2p),
       this.transactionController.send
     );
 
@@ -79,7 +79,7 @@ export default class TransactionRouter {
       '/mine-transactions',
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
+      pubSubMiddleWare(this.p2p),
       this.transactionController.mine
     );
   }
