@@ -14,7 +14,6 @@ import UserRouter from './routes/user.router';
 import TransactionRouter from './routes/transaction.router';
 import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
-import PubSub from './pubSub';
 import Wallet from './wallet';
 import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';

@@ -14,10 +14,13 @@ import { incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
+import ConsoleLog from '../util/console-log';
 
 let PORT = 5346;
 if (process.env.GENERATE_PEER_PORT === 'true') PORT = 5347;
+
 console.log({ PORT });
+
 const MSG_TYPES = {
   BLOCKCHAIN: 'BLOCKCHAIN',
   TRANSACTION: 'TRANSACTION',
@@ -43,29 +46,51 @@ class P2P {
 
   handleMessage(): void {
     this.node.on('broadcast', (data: any) => {
-      console.log({ data });
-      // switch (data.type) {
-      //   case MSG_TYPES.BLOCKCHAIN:
-      //     this.blockchain.addBlockFromPeerToLocal(
-      //       data.metadata.message,
-      //       true,
-      //       this.blockchain.chain,
-      //       () => {
-      //         // TODO: CLEAR?
-      //         this.transactionPool.clearBlockchainTransactions({
-      //           chain: data.metadata.message,
-      //         });
-      //       }
-      //     );
+      switch (data.type) {
+        case MSG_TYPES.BLOCKCHAIN:
+          console.log('BLOCKCHAIN');
+          this.blockchain.addBlockFromPeerToLocal(data.message, true, this.blockchain.chain, () => {
+            // TODO: CLEAR?
+            this.transactionPool.clearBlockchainTransactions({
+              chain: data.message,
+            });
+          });
 
-      //     // TODO: SEND TO OTHER NODES
-      //     return;
-      //   case MSG_TYPES.TRANSACTION:
-      //     this.transactionPool.setTransaction(data.metadata.message);
-      //     return;
-      //   default:
-      //     return;
-      // }
+          // TODO: SEND TO OTHER NODES
+          return;
+        case MSG_TYPES.TRANSACTION:
+          console.log('TRANSACTION');
+
+          /**
+           * FORWARD TRANSACTION TO PEERS
+           */
+
+          // CHECK FOR EXISTING TRANSACTION
+          const existingTransaction = this.transactionPool.existingTransactionPool({
+            inputAddress: data.message.input.address,
+          });
+
+          this.transactionPool.setTransaction(data.message);
+
+          if (existingTransaction) {
+            if (existingTransaction.input.timestamp == data.message.input.timestamp) {
+              ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
+              return;
+            }
+
+            // FORWARD THE MESSAGE TO OTHER PEERS
+            ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+            this.forwardTransactionToPeers(data.message, data.sender);
+          }
+
+          console.log({
+            existingTransaction: existingTransaction,
+            incomingTransaction: data.message,
+          });
+          return;
+        default:
+          return;
+      }
     });
   }
 
@@ -132,6 +157,32 @@ class P2P {
       port: this.node.self.port,
       id: this.node.self.id,
     };
+  }
+
+  async forwardTransactionToPeers(
+    transaction: Transaction,
+    sender: { host: string; port: number; id: string }
+  ): Promise<void> {
+    const peers = [{ host: '127.0.0.1', port: 5348 }];
+    console.log(transaction, sender);
+
+    // FOR EACH PEER
+    peers.forEach(peer => {
+      if (sender.host != peer.host) {
+        // CONNECT THIS PEER TO THE REMOTE PEER
+        this.node.connect({ host: peer.host, port: peer.port });
+        // DO THIS ONCE CONNECTED
+        this.node.on('connected', () => {
+          const message = {
+            type: 'TRANSACTION',
+            message: transaction,
+            sender,
+          };
+
+          this.node.broadcast({ data: message });
+        });
+      }
+    });
   }
 }
 
