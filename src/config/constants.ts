@@ -55,6 +55,7 @@ export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = prod ? 'data/blockchain.txt' : 'src/data/blockchain.txt';
+export const peersStorageFile = prod ? 'data/peers.txt' : 'src/data/peers.txt';
 ConsoleLog(blockchainStorageFile);
 
 export const sampleDataForTests = {

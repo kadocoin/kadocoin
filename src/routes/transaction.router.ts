@@ -10,7 +10,7 @@ import Blockchain from '../blockchain';
 import TransactionController from '../controllers/transaction.controller';
 import {
   blockchainMiddleWare,
-  pubSubMiddleWare,
+  p2pMiddleWare,
   transactionPoolMiddleWare,
   walletMiddleWare,
 } from '../middleware/cryptoMiddleWare';
@@ -50,7 +50,7 @@ export default class TransactionRouter {
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.p2p),
+      p2pMiddleWare(this.p2p),
       this.transactionController.make
     );
 
@@ -59,7 +59,7 @@ export default class TransactionRouter {
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.p2p),
+      p2pMiddleWare(this.p2p),
       this.transactionController.send
     );
 
@@ -79,7 +79,7 @@ export default class TransactionRouter {
       '/mine-transactions',
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.p2p),
+      p2pMiddleWare(this.p2p),
       this.transactionController.mine
     );
   }

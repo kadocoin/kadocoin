@@ -10,11 +10,17 @@
 // @ts-ignore
 import plexus from '@nephys/plexus';
 import publicIp from 'public-ip';
+import fs from 'fs';
 import { incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
 import ConsoleLog from '../util/console-log';
+import request from 'request';
+import { ROOT_NODE_ADDRESS } from '../config/secret';
+import appendPeerToFile from '../util/appendPeerToFile';
+import getPeersFromFile from '../util/getPeersFromFile';
+import { peersStorageFile } from '../config/constants';
 
 let PORT = 5346;
 if (process.env.GENERATE_PEER_PORT === 'true') PORT = 5347;
@@ -41,6 +47,7 @@ class P2P {
     this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
+    // this.addRemotePeersToLocal();
     this.handleMessage();
   }
 
@@ -145,6 +152,26 @@ class P2P {
     });
 
     // END BROADCAST
+  }
+
+  async getPeers(): Promise<(string | Buffer)[]> {
+    if (fs.existsSync(peersStorageFile)) {
+      return getPeersFromFile(peersStorageFile);
+    }
+
+    return ['This node has no peers'];
+  }
+
+  addRemotePeersToLocal(): void {
+    request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const peers = JSON.parse(body).message;
+
+        appendPeerToFile(peers);
+      } else {
+        console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
+      }
+    });
   }
 
   getPublicIP = async (): Promise<string> => await publicIp.v4();

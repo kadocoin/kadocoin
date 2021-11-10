@@ -23,6 +23,7 @@ import { MONGODB_URI, DB_NAME } from './config/secret';
 import helmet from 'helmet';
 import syncWithRootState from './util/syncWithRootState';
 import P2P from './p2p';
+import P2PRouter from './routes/p2p.router';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -45,6 +46,7 @@ const p2p = new P2P({ blockchain, transactionPool });
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
   new BlockRouter(app, blockchain);
+  new P2PRouter(app, p2p);
   new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
   next();
 };
