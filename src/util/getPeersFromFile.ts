@@ -1,24 +1,22 @@
 import fs from 'fs';
+import readline from 'readline';
 
-export default function getPeersFromFile(peersStorageFile: string): Promise<(string | Buffer)[]> {
+export default function getPeersFromFile(peersStorageFile: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    const readStream = fs.createReadStream(peersStorageFile);
-    const chunks: (string | Buffer)[] = [];
+    const inStream = fs.createReadStream(peersStorageFile);
+    const rl = readline.createInterface(inStream);
+    const peers: string[] = [];
 
-    // HANDLE ANY ERRORS WHILE READING
-    readStream.on('error', err => {
-      reject(`Error reading file: ', ${err}`);
+    rl.on('line', function (line) {
+      if (line.length >= 1) {
+        peers.push(JSON.parse(line));
+      }
     });
 
-    // LISTEN FOR DATA
-    readStream.on('data', chunk => {
-      chunks.push(chunk);
-    });
+    rl.on('error', reject);
 
-    // FILE IS DONE BEING READ
-    readStream.on('close', () => {
-      // CREATE A BUFFER OF THE IMAGE FROM THE STREAM
-      resolve(chunks);
+    rl.on('close', function () {
+      resolve(peers);
     });
   });
 }

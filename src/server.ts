@@ -89,6 +89,7 @@ MongoClient.connect(MONGODB_URI, {
 
     app.listen(PORT, async () => {
       await syncWithRootState({ blockchain, transactionPool });
+      if (PORT > 2000) p2p.addRemotePeersToLocal();
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });
   })

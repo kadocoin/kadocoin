@@ -166,8 +166,12 @@ class P2P {
     request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, (error, response, body) => {
       if (!error && response.statusCode === 200) {
         const peers = JSON.parse(body).message;
+        console.log({ body });
 
-        appendPeerToFile(peers);
+        ConsoleLog('Adding remote peer to file');
+        console.log(peers);
+        appendPeerToFile(peers, peersStorageFile);
+        ConsoleLog('End adding remote peer to file');
       } else {
         console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
       }
