@@ -1,7 +1,7 @@
 import fs from 'fs';
 import readline from 'readline';
 
-export default function getPeersFromFile(peersStorageFile: string): Promise<string[]> {
+export default function getPeersFromFile(peersStorageFile: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const inStream = fs.createReadStream(peersStorageFile);
     const rl = readline.createInterface(inStream);
@@ -16,7 +16,7 @@ export default function getPeersFromFile(peersStorageFile: string): Promise<stri
     rl.on('error', reject);
 
     rl.on('close', function () {
-      resolve(peers);
+      resolve(JSON.stringify(peers));
     });
   });
 }

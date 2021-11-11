@@ -154,24 +154,42 @@ class P2P {
     // END BROADCAST
   }
 
-  async getPeers(): Promise<(string | Buffer)[]> {
+  async getPeers(): Promise<string> {
     if (fs.existsSync(peersStorageFile)) {
       return getPeersFromFile(peersStorageFile);
     }
 
-    return ['This node has no peers'];
+    return 'This node has no peers';
   }
 
   addRemotePeersToLocal(): void {
-    request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, (error, response, body) => {
+    request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
-        const peers = JSON.parse(body).message;
-        console.log({ body });
+        const incomingPeers = JSON.parse(JSON.parse(body).message);
 
-        ConsoleLog('Adding remote peer to file');
-        console.log(peers);
-        appendPeerToFile(peers, peersStorageFile);
-        ConsoleLog('End adding remote peer to file');
+        /** GET LOCAL PEERS */
+        const localPeers = JSON.parse(await this.getPeers());
+
+        const peersNotPresentInLocal = [];
+        const localHosts = new Map();
+
+        for (let j = 0; j < localPeers.length; j++) {
+          localHosts.set(localPeers[j].host, localPeers[j].port);
+        }
+
+        for (let i = 0; i < incomingPeers.length; i++) {
+          const incomingPeer = incomingPeers[i];
+
+          if (!localHosts.has(incomingPeer.host)) peersNotPresentInLocal.push(incomingPeer);
+        }
+
+        ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+
+        if (peersNotPresentInLocal.length) {
+          ConsoleLog('Adding remote peer to file');
+          appendPeerToFile(peersNotPresentInLocal, peersStorageFile);
+          ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+        }
       } else {
         console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
       }
