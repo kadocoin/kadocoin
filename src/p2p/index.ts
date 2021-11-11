@@ -11,7 +11,7 @@
 import plexus from '@nephys/plexus';
 import publicIp from 'public-ip';
 import fs from 'fs';
-import { incomingObj } from '../types';
+import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
@@ -170,18 +170,7 @@ class P2P {
         /** GET LOCAL PEERS */
         const localPeers = JSON.parse(await this.getPeers());
 
-        const peersNotPresentInLocal = [];
-        const localHosts = new Map();
-
-        for (let j = 0; j < localPeers.length; j++) {
-          localHosts.set(localPeers[j].host, localPeers[j].port);
-        }
-
-        for (let i = 0; i < incomingPeers.length; i++) {
-          const incomingPeer = incomingPeers[i];
-
-          if (!localHosts.has(incomingPeer.host)) peersNotPresentInLocal.push(incomingPeer);
-        }
+        const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
 
         ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
 
@@ -194,6 +183,23 @@ class P2P {
         console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
       }
     });
+  }
+
+  private getPeersNotInLocal(incomingPeers: Array<IHost>, localPeers: Array<IHost>) {
+    const peersNotPresentInLocal = [];
+    const localHosts = new Map();
+
+    for (let j = 0; j < localPeers.length; j++) {
+      localHosts.set(localPeers[j].host, localPeers[j].port);
+    }
+
+    for (let i = 0; i < incomingPeers.length; i++) {
+      const incomingPeer = incomingPeers[i];
+
+      if (!localHosts.has(incomingPeer.host)) peersNotPresentInLocal.push(incomingPeer);
+    }
+
+    return peersNotPresentInLocal;
   }
 
   getPublicIP = async (): Promise<string> => await publicIp.v4();

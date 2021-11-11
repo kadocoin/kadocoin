@@ -13,6 +13,11 @@ import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
 
+export interface IHost {
+  host: string;
+  port: number;
+}
+
 export interface ITMinerConstructorParams {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
