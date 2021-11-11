@@ -16,7 +16,11 @@ export default function getPeersFromFile(peersStorageFile: string): Promise<stri
     rl.on('error', reject);
 
     rl.on('close', function () {
-      resolve(JSON.stringify(peers));
+      if (peers.length) {
+        resolve(JSON.stringify(peers));
+      }
+
+      resolve('');
     });
   });
 }

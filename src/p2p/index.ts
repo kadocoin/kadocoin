@@ -158,26 +158,29 @@ class P2P {
     if (fs.existsSync(peersStorageFile)) {
       return getPeersFromFile(peersStorageFile);
     }
-
-    return 'This node has no peers';
+    return '';
   }
 
   addRemotePeersToLocal(): void {
     request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
-        const incomingPeers = JSON.parse(JSON.parse(body).message);
+        let incomingPeers = JSON.parse(body).message;
 
-        /** GET LOCAL PEERS */
-        const localPeers = JSON.parse(await this.getPeers());
+        if (incomingPeers) {
+          /** GET LOCAL PEERS */
+          incomingPeers = JSON.parse(incomingPeers);
 
-        const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
+          const localPeers = JSON.parse(await this.getPeers());
 
-        ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+          const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
 
-        if (peersNotPresentInLocal.length) {
-          ConsoleLog('Adding remote peer to file');
-          appendPeerToFile(peersNotPresentInLocal, peersStorageFile);
-          ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+          ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+
+          if (peersNotPresentInLocal.length) {
+            ConsoleLog('Adding remote peer to file');
+            appendPeerToFile(peersNotPresentInLocal, peersStorageFile);
+            ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+          }
         }
       } else {
         console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
