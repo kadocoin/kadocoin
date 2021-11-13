@@ -6,7 +6,6 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { REWARD_INPUT } from '../types';
-import ConsoleLog from '../util/console-log';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Transaction from '../wallet/transaction';
@@ -56,7 +55,12 @@ export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = prod ? 'data/blockchain.txt' : 'src/data/blockchain.txt';
 export const peersStorageFile = prod ? 'data/peers.txt' : 'src/data/peers.txt';
-ConsoleLog(blockchainStorageFile);
+export const hardCodedPeers = [
+  { host: '127.0.0.1', port: 5343 },
+  { host: '127.0.0.1', port: 5349 },
+  { host: '127.0.0.1', port: 5341 },
+  { host: '127.0.0.1', port: 5340 },
+];
 
 export const sampleDataForTests = {
   id: '2d5791f0-d9af-11eb-ac13-099d1d20fcfc',
