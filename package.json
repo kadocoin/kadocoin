@@ -45,7 +45,6 @@
     "express-session": "^1.17.2",
     "helmet": "^4.6.0",
     "hex-to-bin": "^1.0.1",
-    "ioredis": "^4.27.6",
     "joi": "^17.4.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "3.6.10",

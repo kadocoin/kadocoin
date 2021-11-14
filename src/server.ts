@@ -21,7 +21,6 @@ import * as swaggerDocument from './swagger.json';
 import { Db, MongoClient } from 'mongodb';
 import { MONGODB_URI, DB_NAME } from './config/secret';
 import helmet from 'helmet';
-import syncWithRootState from './util/syncWithRootState';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 

@@ -58,19 +58,18 @@ class P2P {
     transactionPool: TransactionPool;
   }) {
     this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
-    this.node.rpc.on('ready', () => {
-      this.blockchain = blockchain;
-      this.node.store({ key: 'blocks', value: this.blockchain });
-      this.transactionPool = transactionPool;
-      this.broadcast_emitter = new EventEmitter();
-      this.count = 0;
-      this.connected = false;
-      this.randomPeerIndexTracker = [];
-      this.arrayPeersIndex = Array.from(Array(hardCodedPeers.length).keys());
-      this.hardCodedPeers = hardCodedPeers;
-      // this.addRemotePeersToLocal();
-      this.handleMessage();
-    });
+
+    this.blockchain = blockchain;
+    this.node.store({ key: 'blocks', value: this.blockchain });
+    this.transactionPool = transactionPool;
+    this.broadcast_emitter = new EventEmitter();
+    this.count = 0;
+    this.connected = false;
+    this.randomPeerIndexTracker = [];
+    this.arrayPeersIndex = Array.from(Array(hardCodedPeers.length).keys());
+    this.hardCodedPeers = hardCodedPeers;
+    // this.addRemotePeersToLocal();
+    this.handleMessage();
   }
 
   handleMessage(): void {
@@ -216,98 +215,105 @@ class P2P {
 
   async syncNodeWithHistoricalBlockchain(): Promise<void> {
     for (let i = 0; i < this.hardCodedPeers.length; i++) {
+      console.log({ connected: this.connected });
       if (!this.connected) {
+        //  NODE CONNECT ATTEMPT
+        console.log('NODE CONNECT ATTEMPT');
+        console.log(`Attempting to connect to ${JSON.stringify(this.hardCodedPeers[i], null, 2)}`);
+
+        console.log('');
+        console.log('=============================');
+        console.log('');
+        console.log('');
+        // console.log('Waiting for 10 sec to before start');
+        // await new Promise(resolve => setTimeout(resolve, 10000));
+        // await this.chooseNodeAndSync(this.hardCodedPeers[i]);
+
+        // console.log('adamu');
         await this.chooseNodeAndSync(this.hardCodedPeers[i]);
 
-        console.log('Waiting for 10 sec');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        console.log('Waiting for 10 sec to before next');
       } else {
-        ConsoleLog("Connected to a peer so I'm breaking");
+        console.log('about to break');
         break;
       }
     }
-    if (!this.connected) {
-      console.log('every node no luck');
-      const peers = await this.getPeers();
-      console.log({ peers });
-    }
+
+    // if (!this.connected) {
+    //   console.log('every node no luck');
+    //   const peers = await this.getPeers();
+    //   console.log({ peers });
+    // }
   }
 
   async chooseNodeAndSync(randomPeer: IHost): Promise<void> {
     this.node.connect({ host: randomPeer.host, port: randomPeer.port });
+    this.node.removeAllListeners('connected');
+    this.node.on('connected', () => this.onConnected());
+  }
 
-    //  NODE CONNECT ATTEMPT
-    console.log('NODE CONNECT ATTEMPT');
-    console.log(`Attempting to connect to ${JSON.stringify(randomPeer, null, 2)}`);
+  onConnected(): void {
+    this.connected = true;
+    const lookup = this.node.find({ key: 'blocks' });
+    console.log('look up');
+    //  THE ITEM EXISTS ON THE NETWORK
+    // lookup.on('found', async (result: any) => {
+    //   const rootChain = result.value.chain;
 
-    console.log('');
-    console.log('=============================');
-    console.log('');
-    console.log('');
+    //   /** SAVING TO FILE STARTS */
+    //   // FILE EXISTS
+    //   if (fs.existsSync(blockchainStorageFile)) {
+    //     const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
+    //     const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
+    //     console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
 
-    this.node.on('connected', () => {
-      const lookup = this.node.find({ key: 'blocks' });
-      this.connected = true;
-      this.broadcast_emitter.emit('hello');
+    //     /** THIS PEER IS AHEAD */
+    //     if (blockchainHeightFromPeer < blockchainHeightFromFile) {
+    //       try {
+    //         ConsoleLog('THIS PEER IS AHEAD');
+    //         // DELETE FILE
+    //         unlinkSync(blockchainStorageFile);
+    //         ConsoleLog('FILE DELETED');
+    //         // REPLACE WITH BLOCKS FROM PEER
+    //         appendToFile(rootChain, blockchainStorageFile);
+    //       } catch {
+    //         ConsoleLog('ERROR DELETING FILE');
+    //       }
+    //     }
 
-      //  THE ITEM EXISTS ON THE NETWORK
-      lookup.on('found', async (result: any) => {
-        const rootChain = result.value.chain;
+    //     /** THIS PEER NEEDS TO CATCH UP */
+    //     if (blockchainHeightFromPeer > blockchainHeightFromFile) {
+    //       /** ADD THE MISSING BLOCKS TO LOCAL FILE */
+    //       ConsoleLog('ADD THE MISSING BLOCKS TO LOCAL FILE');
+    //       // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
+    //       const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
-        /** SAVING TO FILE STARTS */
-        // FILE EXISTS
-        if (fs.existsSync(blockchainStorageFile)) {
-          const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-          const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
-          console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
+    //       // NOW WRITE LINE BY LINE
+    //       appendToFile(diffBlockchain, blockchainStorageFile);
+    //     }
+    //   } else {
+    //     ConsoleLog('FILE DOES NOT EXISTS');
+    //     appendToFile(rootChain, blockchainStorageFile);
+    //   }
+    //   /** END SAVING TO FILE */
 
-          /** THIS PEER IS AHEAD */
-          if (blockchainHeightFromPeer < blockchainHeightFromFile) {
-            try {
-              ConsoleLog('THIS PEER IS AHEAD');
-              // DELETE FILE
-              unlinkSync(blockchainStorageFile);
-              ConsoleLog('FILE DELETED');
-              // REPLACE WITH BLOCKS FROM PEER
-              appendToFile(rootChain, blockchainStorageFile);
-            } catch {
-              ConsoleLog('ERROR DELETING FILE');
-            }
-          }
+    //   ConsoleLog('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
+    //   ConsoleLog('WORKING ON IT ADAMU');
 
-          /** THIS PEER NEEDS TO CATCH UP */
-          if (blockchainHeightFromPeer > blockchainHeightFromFile) {
-            /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-            ConsoleLog('ADD THE MISSING BLOCKS TO LOCAL FILE');
-            // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
-            const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
+    //   // TODO: SYNC FROM DISK ?
+    //   this.blockchain.replaceChain(rootChain);
 
-            // NOW WRITE LINE BY LINE
-            appendToFile(diffBlockchain, blockchainStorageFile);
-          }
-        } else {
-          ConsoleLog('FILE DOES NOT EXISTS');
-          appendToFile(rootChain, blockchainStorageFile);
-        }
-        /** END SAVING TO FILE */
+    //   // UPDATE MINING_REWARD
+    //   const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+    //     chainLength: this.blockchain.chain.length,
+    //   });
+    //   console.log({ MINING_REWARD, SUPPLY });
+    // });
 
-        ConsoleLog('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
-        ConsoleLog('WORKING ON IT');
-
-        // TODO: SYNC FROM DISK ?
-        this.blockchain.replaceChain(rootChain);
-
-        // UPDATE MINING_REWARD
-        const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-          chainLength: this.blockchain.chain.length,
-        });
-        console.log({ MINING_REWARD, SUPPLY });
-      });
-
-      //  THE ITEM DOESN'T EXIST ANYWHERE ON THE NETWORK
-      lookup.on('timeout', () => {
-        ConsoleLog('Find request timed out');
-      });
+    //  THE ITEM DOESN'T EXIST ANYWHERE ON THE NETWORK
+    lookup.on('timeout', () => {
+      ConsoleLog('Find request timed out');
     });
   }
 
