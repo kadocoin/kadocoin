@@ -186,11 +186,18 @@ class P2P {
     request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
         let incomingPeers = JSON.parse(body).message;
+        incomingPeers = [
+          { host: '127.3.0.1', port: 5343 },
+          { host: '127.4.0.1', port: 5342 },
+          { host: '127.2.0.1', port: 5347 },
+          { host: '127.6.0.1', port: 5344 },
+          { host: '127.8.0.1', port: 5343 },
+        ];
 
         if (incomingPeers) {
           try {
             /** GET LOCAL PEERS */
-            incomingPeers = JSON.parse(incomingPeers);
+            // incomingPeers = JSON.parse(incomingPeers);
 
             const localPeers = JSON.parse(await this.getPeers());
 
@@ -204,7 +211,7 @@ class P2P {
               ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
             }
           } catch (error) {
-            console.log('Error adding peers to local file.');
+            console.log('Error adding peers to local file.', error);
           }
         }
       } else {
@@ -214,102 +221,118 @@ class P2P {
   }
 
   async syncNodeWithHistoricalBlockchain(): Promise<void> {
-    for (let i = 0; i < this.hardCodedPeers.length; i++) {
+    await this.loopAndRunPeers(this.hardCodedPeers);
+
+    if (!this.connected) {
+      console.log('RETRIEVING PEERS FROM LOCAL FILE');
+      const peers = await this.getPeers();
+      console.log({ peers });
+    }
+  }
+
+  private async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
+    for (let i = 0; i < peers.length; i++) {
+      console.log('');
+      console.log('');
+      console.log('=============================');
+      console.log('');
+      console.log('');
       console.log({ connected: this.connected });
       if (!this.connected) {
         //  NODE CONNECT ATTEMPT
-        console.log('NODE CONNECT ATTEMPT');
-        console.log(`Attempting to connect to ${JSON.stringify(this.hardCodedPeers[i], null, 2)}`);
-
+        console.log('');
         console.log('');
         console.log('=============================');
         console.log('');
         console.log('');
-        // console.log('Waiting for 10 sec to before start');
-        // await new Promise(resolve => setTimeout(resolve, 10000));
-        // await this.chooseNodeAndSync(this.hardCodedPeers[i]);
+        console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
 
-        // console.log('adamu');
-        await this.chooseNodeAndSync(this.hardCodedPeers[i]);
+        console.log('');
+        console.log('');
+        console.log('=============================');
+        console.log('');
+        console.log('');
 
-        await new Promise(resolve => setTimeout(resolve, 10000));
-        console.log('Waiting for 10 sec to before next');
+        await this.chooseNodeAndSync(peers[i]);
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        console.log('Waiting for 3 sec to before next');
       } else {
-        console.log('about to break');
+        console.log('');
+        console.log('=============================');
+        console.log('');
+        console.log('');
+        ConsoleLog('NONE OF THE HARDCODED PEERS ARE ALIVE');
+        ConsoleLog('EXITING...');
         break;
       }
     }
-
-    // if (!this.connected) {
-    //   console.log('every node no luck');
-    //   const peers = await this.getPeers();
-    //   console.log({ peers });
-    // }
   }
 
   async chooseNodeAndSync(randomPeer: IHost): Promise<void> {
     this.node.connect({ host: randomPeer.host, port: randomPeer.port });
+    // REMOVE ALL CONNECTED EVENTS
     this.node.removeAllListeners('connected');
     this.node.on('connected', () => this.onConnected());
   }
 
-  onConnected(): void {
+  private onConnected(): void {
     this.connected = true;
     const lookup = this.node.find({ key: 'blocks' });
     console.log('look up');
     //  THE ITEM EXISTS ON THE NETWORK
-    // lookup.on('found', async (result: any) => {
-    //   const rootChain = result.value.chain;
+    lookup.on('found', async (result: any) => {
+      const rootChain = result.value.chain;
 
-    //   /** SAVING TO FILE STARTS */
-    //   // FILE EXISTS
-    //   if (fs.existsSync(blockchainStorageFile)) {
-    //     const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-    //     const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
-    //     console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
+      /** SAVING TO FILE STARTS */
+      // FILE EXISTS
+      if (fs.existsSync(blockchainStorageFile)) {
+        const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
+        const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
+        console.log({ blockchainHeightFromPeer, blockchainHeightFromFile });
 
-    //     /** THIS PEER IS AHEAD */
-    //     if (blockchainHeightFromPeer < blockchainHeightFromFile) {
-    //       try {
-    //         ConsoleLog('THIS PEER IS AHEAD');
-    //         // DELETE FILE
-    //         unlinkSync(blockchainStorageFile);
-    //         ConsoleLog('FILE DELETED');
-    //         // REPLACE WITH BLOCKS FROM PEER
-    //         appendToFile(rootChain, blockchainStorageFile);
-    //       } catch {
-    //         ConsoleLog('ERROR DELETING FILE');
-    //       }
-    //     }
+        /** THIS PEER IS AHEAD */
+        if (blockchainHeightFromPeer < blockchainHeightFromFile) {
+          try {
+            ConsoleLog('THIS PEER IS AHEAD');
+            // DELETE FILE
+            unlinkSync(blockchainStorageFile);
+            ConsoleLog('FILE DELETED');
+            // REPLACE WITH BLOCKS FROM PEER
+            appendToFile(rootChain, blockchainStorageFile);
+          } catch {
+            ConsoleLog('ERROR DELETING FILE');
+          }
+        }
 
-    //     /** THIS PEER NEEDS TO CATCH UP */
-    //     if (blockchainHeightFromPeer > blockchainHeightFromFile) {
-    //       /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-    //       ConsoleLog('ADD THE MISSING BLOCKS TO LOCAL FILE');
-    //       // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
-    //       const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
+        /** THIS PEER NEEDS TO CATCH UP */
+        if (blockchainHeightFromPeer > blockchainHeightFromFile) {
+          /** ADD THE MISSING BLOCKS TO LOCAL FILE */
+          ConsoleLog('ADD THE MISSING BLOCKS TO LOCAL FILE');
+          // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
+          const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
-    //       // NOW WRITE LINE BY LINE
-    //       appendToFile(diffBlockchain, blockchainStorageFile);
-    //     }
-    //   } else {
-    //     ConsoleLog('FILE DOES NOT EXISTS');
-    //     appendToFile(rootChain, blockchainStorageFile);
-    //   }
-    //   /** END SAVING TO FILE */
+          // NOW WRITE LINE BY LINE
+          appendToFile(diffBlockchain, blockchainStorageFile);
+        }
+      } else {
+        ConsoleLog('FILE DOES NOT EXISTS');
+        appendToFile(rootChain, blockchainStorageFile);
+      }
+      /** END SAVING TO FILE */
 
-    //   ConsoleLog('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
-    //   ConsoleLog('WORKING ON IT ADAMU');
+      ConsoleLog('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
+      ConsoleLog('WORKING ON IT ADAMU');
 
-    //   // TODO: SYNC FROM DISK ?
-    //   this.blockchain.replaceChain(rootChain);
+      // TODO: SYNC FROM DISK ?
+      this.blockchain.replaceChain(rootChain);
 
-    //   // UPDATE MINING_REWARD
-    //   const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-    //     chainLength: this.blockchain.chain.length,
-    //   });
-    //   console.log({ MINING_REWARD, SUPPLY });
-    // });
+      // UPDATE MINING_REWARD
+      const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+        chainLength: this.blockchain.chain.length,
+      });
+      console.log({ MINING_REWARD, SUPPLY });
+    });
 
     //  THE ITEM DOESN'T EXIST ANYWHERE ON THE NETWORK
     lookup.on('timeout', () => {

@@ -56,11 +56,10 @@ export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = prod ? 'data/blockchain.txt' : 'src/data/blockchain.txt';
 export const peersStorageFile = prod ? 'data/peers.txt' : 'src/data/peers.txt';
 export const hardCodedPeers = [
-  { host: '127.0.0.1', port: 5345 },
-  { host: '127.0.0.1', port: 5349 },
-  { host: '127.0.0.1', port: 5346 },
-  { host: '127.0.0.1', port: 5342 },
-  // { host: '127.0.0.1', port: 5340 },
+  { host: '127.0.0.1', port: 5343 },
+  { host: '127.0.0.1', port: 5348 },
+  // { host: '127.0.0.1', port: 5342 },
+  // { host: '127.0.0.1', port: 5341 },
 ];
 
 export const sampleDataForTests = {
