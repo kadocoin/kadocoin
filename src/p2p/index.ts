@@ -186,18 +186,11 @@ class P2P {
     request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
         let incomingPeers = JSON.parse(body).message;
-        incomingPeers = [
-          { host: '127.3.0.1', port: 5343 },
-          { host: '127.4.0.1', port: 5342 },
-          { host: '127.2.0.1', port: 5347 },
-          { host: '127.6.0.1', port: 5344 },
-          { host: '127.8.0.1', port: 5343 },
-        ];
 
         if (incomingPeers) {
           try {
             /** GET LOCAL PEERS */
-            // incomingPeers = JSON.parse(incomingPeers);
+            incomingPeers = JSON.parse(incomingPeers);
 
             const localPeers = JSON.parse(await this.getPeers());
 
@@ -223,10 +216,16 @@ class P2P {
   async syncNodeWithHistoricalBlockchain(): Promise<void> {
     await this.loopAndRunPeers(this.hardCodedPeers);
 
+    console.log('RETRIEVING PEERS FROM LOCAL FILE');
     if (!this.connected) {
-      console.log('RETRIEVING PEERS FROM LOCAL FILE');
       const peers = await this.getPeers();
-      console.log({ peers });
+      const peersParsed = JSON.parse(peers);
+
+      console.log({ peersParsed });
+
+      if (peersParsed) {
+        await this.loopAndRunPeers(peersParsed);
+      }
     }
   }
 
@@ -262,8 +261,8 @@ class P2P {
         console.log('=============================');
         console.log('');
         console.log('');
-        ConsoleLog('NONE OF THE HARDCODED PEERS ARE ALIVE');
-        ConsoleLog('EXITING...');
+        ConsoleLog('Found a peer that responded');
+        ConsoleLog('Exiting');
         break;
       }
     }
