@@ -49,27 +49,32 @@ class P2P {
   arrayPeersIndex: number[];
   hardCodedPeers: { host: string; port: number }[];
   connected: boolean;
+  kadocoin_events: EventEmitter;
 
   constructor({
     blockchain,
     transactionPool,
+    kadocoin_events,
   }: {
     blockchain: Blockchain;
     transactionPool: TransactionPool;
+    kadocoin_events: EventEmitter;
   }) {
     this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
-
+    this.kadocoin_events = kadocoin_events;
     this.blockchain = blockchain;
     this.node.store({ key: 'blocks', value: this.blockchain });
+    this.node.store({ key: 'peers', value: [] });
     this.transactionPool = transactionPool;
-    this.broadcast_emitter = new EventEmitter();
-    this.count = 0;
     this.connected = false;
     this.randomPeerIndexTracker = [];
     this.arrayPeersIndex = Array.from(Array(hardCodedPeers.length).keys());
     this.hardCodedPeers = hardCodedPeers;
     // this.addRemotePeersToLocal();
     this.handleMessage();
+    // this.kadocoin_events.once('get-the-connected-peer-peers', randomPeer =>
+    //   this.onConnectedGetPeers(randomPeer)
+    // );
   }
 
   handleMessage(): void {
@@ -182,8 +187,65 @@ class P2P {
     return '';
   }
 
-  addRemotePeersToLocal(): void {
-    request({ url: `${ROOT_NODE_ADDRESS}/get-peers` }, async (error, response, body) => {
+  async syncNodeWithHistoricalBlockchain(): Promise<void> {
+    // LOOP THRU HARDCODED PEERS
+    await this.loopAndRunPeers(this.hardCodedPeers);
+
+    // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
+    if (!this.connected) {
+      console.log('');
+      console.log('RETRIEVING PEERS FROM LOCAL FILE');
+      const peers = await this.getPeers();
+      const peersParsed = JSON.parse(peers);
+
+      if (peersParsed) {
+        await this.loopAndRunPeers(peersParsed);
+      }
+    }
+  }
+
+  private async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
+    for (let i = 0; i < peers.length; i++) {
+      ConsoleLog('=============================');
+      console.log({ connected: this.connected });
+      if (!this.connected) {
+        //  NODE CONNECT ATTEMPT
+        console.log('');
+        console.log('');
+        console.log('=============================');
+        console.log('');
+        console.log('');
+        console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
+
+        console.log('');
+        console.log('');
+        console.log('=============================');
+        console.log('');
+        console.log('');
+
+        await this.getBlockchainDataFromRandomPeer(peers[i]);
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      } else {
+        ConsoleLog('Found a peer that responded');
+        ConsoleLog('Exiting');
+        break;
+      }
+    }
+  }
+
+  async getBlockchainDataFromRandomPeer(randomPeer: IHost): Promise<void> {
+    this.node.connect({ host: randomPeer.host, port: randomPeer.port });
+
+    // REMOVE ALL `CONNECTED` EVENTS
+    this.node.removeAllListeners('connected');
+
+    // GET BLOCKCHAIN DATA FROM OTHER PEERS
+    this.node.on('connected', () => this.onConnected(randomPeer));
+  }
+
+  private onConnectedGetPeers(randomPeer: IHost): void {
+    request({ url: `http://${randomPeer.host}:2000/get-peers` }, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
         let incomingPeers = JSON.parse(body).message;
 
@@ -207,81 +269,25 @@ class P2P {
             console.log('Error adding peers to local file.', error);
           }
         }
+        // this.kadocoin_events.emit('addRemotePeersToLocal_complete');
       } else {
         console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
       }
     });
   }
 
-  async syncNodeWithHistoricalBlockchain(): Promise<void> {
-    await this.loopAndRunPeers(this.hardCodedPeers);
-
-    console.log('RETRIEVING PEERS FROM LOCAL FILE');
-    if (!this.connected) {
-      const peers = await this.getPeers();
-      const peersParsed = JSON.parse(peers);
-
-      console.log({ peersParsed });
-
-      if (peersParsed) {
-        await this.loopAndRunPeers(peersParsed);
-      }
-    }
-  }
-
-  private async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
-    for (let i = 0; i < peers.length; i++) {
-      console.log('');
-      console.log('');
-      console.log('=============================');
-      console.log('');
-      console.log('');
-      console.log({ connected: this.connected });
-      if (!this.connected) {
-        //  NODE CONNECT ATTEMPT
-        console.log('');
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
-        console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
-
-        console.log('');
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
-
-        await this.chooseNodeAndSync(peers[i]);
-
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        console.log('Waiting for 3 sec to before next');
-      } else {
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
-        ConsoleLog('Found a peer that responded');
-        ConsoleLog('Exiting');
-        break;
-      }
-    }
-  }
-
-  async chooseNodeAndSync(randomPeer: IHost): Promise<void> {
-    this.node.connect({ host: randomPeer.host, port: randomPeer.port });
-    // REMOVE ALL CONNECTED EVENTS
-    this.node.removeAllListeners('connected');
-    this.node.on('connected', () => this.onConnected());
-  }
-
-  private onConnected(): void {
+  private onConnected(randomPeer: IHost): void {
     this.connected = true;
     const lookup = this.node.find({ key: 'blocks' });
-    console.log('look up');
+
+    ConsoleLog('Found an alive peer. Looking up its data');
+
     //  THE ITEM EXISTS ON THE NETWORK
     lookup.on('found', async (result: any) => {
       const rootChain = result.value.chain;
+
+      // GET THIS LIVE REMOTE PEER PEERS
+      this.kadocoin_events.emit('get-the-connected-peer-peers', randomPeer);
 
       /** SAVING TO FILE STARTS */
       // FILE EXISTS
@@ -321,7 +327,7 @@ class P2P {
       /** END SAVING TO FILE */
 
       ConsoleLog('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
-      ConsoleLog('WORKING ON IT ADAMU');
+      ConsoleLog('WORKING ON IT');
 
       // TODO: SYNC FROM DISK ?
       this.blockchain.replaceChain(rootChain);

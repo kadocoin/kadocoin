@@ -23,6 +23,7 @@ import { MONGODB_URI, DB_NAME } from './config/secret';
 import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
+import EventsEmitter from 'events';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -37,10 +38,14 @@ const blockchain = new Blockchain();
  */
 const transactionPool = new TransactionPool();
 /**
- * @var pubSub app wide variable
+ * @var p2p app wide variable
+ */
+const kadocoin_events = new EventsEmitter();
+/**
+ * @var kadocoin_events app wide variable
  */
 
-const p2p = new P2P({ blockchain, transactionPool });
+const p2p = new P2P({ blockchain, transactionPool, kadocoin_events });
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
@@ -87,10 +92,9 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
 
     app.listen(PORT, async () => {
-      // if (PORT > 2000) p2p.addRemotePeersToLocal();
-
-      // await new Promise(resolve => setTimeout(resolve, 10000));
-      if (PORT > 2000) await p2p.syncNodeWithHistoricalBlockchain();
+      if (PORT > 2000) {
+        await p2p.syncNodeWithHistoricalBlockchain();
+      }
 
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });
