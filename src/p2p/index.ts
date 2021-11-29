@@ -64,17 +64,12 @@ class P2P {
     this.kadocoin_events = kadocoin_events;
     this.blockchain = blockchain;
     this.node.store({ key: 'blocks', value: this.blockchain });
-    this.node.store({ key: 'peers', value: [] });
     this.transactionPool = transactionPool;
     this.connected = false;
     this.randomPeerIndexTracker = [];
     this.arrayPeersIndex = Array.from(Array(hardCodedPeers.length).keys());
     this.hardCodedPeers = hardCodedPeers;
-    // this.addRemotePeersToLocal();
     this.handleMessage();
-    // this.kadocoin_events.once('get-the-connected-peer-peers', randomPeer =>
-    //   this.onConnectedGetPeers(randomPeer)
-    // );
   }
 
   handleMessage(): void {
@@ -287,7 +282,7 @@ class P2P {
       const rootChain = result.value.chain;
 
       // GET THIS LIVE REMOTE PEER PEERS
-      this.kadocoin_events.emit('get-the-connected-peer-peers', randomPeer);
+      this.onConnectedGetPeers(randomPeer);
 
       /** SAVING TO FILE STARTS */
       // FILE EXISTS

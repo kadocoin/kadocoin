@@ -58,7 +58,6 @@ export const peersStorageFile = prod ? 'data/peers.txt' : 'src/data/peers.txt';
 export const hardCodedPeers = [
   { host: '127.0.0.1', port: 5343 },
   { host: '127.0.0.1', port: 5348 },
-  { host: '127.0.0.1', port: 5342 },
   { host: '127.0.0.1', port: 5341 },
 ];
 
