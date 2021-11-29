@@ -92,7 +92,7 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
 
     app.listen(PORT, async () => {
-      if (PORT > 2000) await p2p.syncNodeWithHistoricalBlockchain();
+      await p2p.syncNodeWithHistoricalBlockchain();
 
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });

@@ -26,12 +26,7 @@ import appendToFile from '../util/appendPeerToFile';
 import Mining_Reward from '../util/supply_reward';
 import EventEmitter from 'events';
 
-let PORT = 5346;
-if (process.env.GENERATE_PEER_PORT === 'true') {
-  PORT = 5347;
-}
-
-console.log({ PORT });
+const PORT = 5346;
 
 const MSG_TYPES = {
   BLOCKCHAIN: 'BLOCKCHAIN',
