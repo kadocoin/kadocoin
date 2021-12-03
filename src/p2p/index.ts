@@ -39,9 +39,6 @@ class P2P {
   transactionPool: TransactionPool;
   rpc: any;
   broadcast_emitter: EventEmitter;
-  count: number;
-  randomPeerIndexTracker: number[];
-  arrayPeersIndex: number[];
   hardCodedPeers: { host: string; port: number }[];
   connected: boolean;
   kadocoin_events: EventEmitter;
@@ -61,8 +58,6 @@ class P2P {
     this.node.store({ key: 'blocks', value: this.blockchain });
     this.transactionPool = transactionPool;
     this.connected = false;
-    this.randomPeerIndexTracker = [];
-    this.arrayPeersIndex = Array.from(Array(hardCodedPeers.length).keys());
     this.hardCodedPeers = hardCodedPeers;
     this.handleMessage();
   }
