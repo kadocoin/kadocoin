@@ -228,7 +228,7 @@ class P2P {
     this.node.removeAllListeners('connected');
 
     // GET BLOCKCHAIN DATA FROM OTHER PEERS
-    this.node.on('connected', () => this.onConnected(randomPeer));
+    this.node.once('connected', () => this.onConnected(randomPeer));
   }
 
   private onConnectedGetPeers(randomPeer: IHost): void {
