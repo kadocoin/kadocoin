@@ -32,24 +32,28 @@ import plexus from '@nephys/plexus';
  * @var localWallet - signs and verifies transactions on this node
  */
 const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
+
 /**
  * @var blockchain app wide variable
  */
 const blockchain = new Blockchain();
+
 /**
  * @var transactionPool app wide variable
  */
 const transactionPool = new TransactionPool();
-/**
- * @var p2p app wide variable
- */
-const kadocoin_events = new EventsEmitter();
+
 /**
  * @var kadocoin_events app wide variable
  */
+const kadocoin_events = new EventsEmitter();
 
+/**
+ * @var node_P2P app wide variable
+ */
 const node = new plexus.Node({ host: '127.0.0.1', port: 5346 });
 
+// GET P2P NODE READY ANYTHING ELSE
 node.rpc.on('ready', () => {
   const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
 

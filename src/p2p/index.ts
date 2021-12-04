@@ -52,7 +52,6 @@ class P2P {
     kadocoin_events: EventEmitter;
     node: any;
   }) {
-    // this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
     this.node = node;
     this.kadocoin_events = kadocoin_events;
     this.blockchain = blockchain;
