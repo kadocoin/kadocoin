@@ -215,6 +215,8 @@ class P2P {
         }
       } else {
         ConsoleLog('Found a peer that responded');
+        // REMOVE ALL `CONNECTED` EVENTS
+        this.node.removeAllListeners('connected');
         ConsoleLog('Exiting');
         break;
       }
