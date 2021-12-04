@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import plexus from '@nephys/plexus';
+// import plexus from '@nephys/plexus';
 import publicIp from 'public-ip';
 import fs, { unlinkSync } from 'fs';
 import { IHost, incomingObj } from '../types';
@@ -25,8 +25,6 @@ import getLastLine from '../util/getLastLine';
 import appendToFile from '../util/appendPeerToFile';
 import Mining_Reward from '../util/supply_reward';
 import EventEmitter from 'events';
-
-const PORT = 5346;
 
 const MSG_TYPES = {
   BLOCKCHAIN: 'BLOCKCHAIN',
@@ -47,12 +45,15 @@ class P2P {
     blockchain,
     transactionPool,
     kadocoin_events,
+    node,
   }: {
     blockchain: Blockchain;
     transactionPool: TransactionPool;
     kadocoin_events: EventEmitter;
+    node: any;
   }) {
-    this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
+    // this.node = new plexus.Node({ host: '127.0.0.1', port: PORT });
+    this.node = node;
     this.kadocoin_events = kadocoin_events;
     this.blockchain = blockchain;
     this.node.store({ key: 'blocks', value: this.blockchain });
@@ -153,7 +154,7 @@ class P2P {
           type: 'BLOCK',
           metadata: {
             message: block,
-            sender: `${ip}:${PORT}`,
+            sender: `${ip}:${5346}`,
             timestamp: new Date().getTime(),
           },
         };

@@ -24,6 +24,9 @@ import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import EventsEmitter from 'events';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import plexus from '@nephys/plexus';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -45,58 +48,62 @@ const kadocoin_events = new EventsEmitter();
  * @var kadocoin_events app wide variable
  */
 
-const p2p = new P2P({ blockchain, transactionPool, kadocoin_events });
+const node = new plexus.Node({ host: '127.0.0.1', port: 5346 });
 
-const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
-  new UserRouter(app, blockchain);
-  new BlockRouter(app, blockchain);
-  new P2PRouter(app, p2p);
-  new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
-  next();
-};
+node.rpc.on('ready', () => {
+  const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
 
-/** MIDDLEWARES */
+  const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
+    new UserRouter(app, blockchain);
+    new BlockRouter(app, blockchain);
+    new P2PRouter(app, p2p);
+    new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
+    next();
+  };
 
-app.use(function (_, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
-app.use(helmet());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(initializeRoutes);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  /** MIDDLEWARES */
 
-/** END MIDDLEWARES */
-
-/**  OPEN MONGODB CONNECTED AND START APP  */
-MongoClient.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(async client => {
-    app.locals.dbClient = client;
-    app.locals.db = client.db(DB_NAME);
-
-    // CREATE INDEX
-    const createIndexes = async (db: Db): Promise<void> => {
-      await Promise.all([
-        db
-          .collection('users')
-          .createIndex({ email: 1, _id: 1, address: 1, publicKey: 1 }, { unique: true }),
-      ]);
-    };
-
-    await createIndexes(app.locals.db);
-    console.log('*****MongoDB is connected*****');
-
-    app.listen(PORT, async () => {
-      await p2p.syncNodeWithHistoricalBlockchain();
-
-      console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
-    });
-  })
-  .catch(err => {
-    throw new Error(err);
+  app.use(function (_, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
   });
+  app.use(helmet());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(initializeRoutes);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+  /** END MIDDLEWARES */
+
+  /**  OPEN MONGODB CONNECTED AND START APP  */
+  MongoClient.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+    .then(async client => {
+      app.locals.dbClient = client;
+      app.locals.db = client.db(DB_NAME);
+
+      // CREATE INDEX
+      const createIndexes = async (db: Db): Promise<void> => {
+        await Promise.all([
+          db
+            .collection('users')
+            .createIndex({ email: 1, _id: 1, address: 1, publicKey: 1 }, { unique: true }),
+        ]);
+      };
+
+      await createIndexes(app.locals.db);
+      console.log('*****MongoDB is connected*****');
+
+      app.listen(PORT, async () => {
+        await p2p.syncNodeWithHistoricalBlockchain();
+
+        console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+      });
+    })
+    .catch(err => {
+      throw new Error(err);
+    });
+});
