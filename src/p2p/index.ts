@@ -194,23 +194,25 @@ class P2P {
       ConsoleLog('=============================');
       console.log({ connected: this.connected });
       if (!this.connected) {
-        //  NODE CONNECT ATTEMPT
-        console.log('');
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
-        console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
+        if (peers[i].host !== '192.168.0.156') {
+          //  NODE CONNECT ATTEMPT
+          console.log('');
+          console.log('');
+          console.log('=============================');
+          console.log('');
+          console.log('');
+          console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
 
-        console.log('');
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
+          console.log('');
+          console.log('');
+          console.log('=============================');
+          console.log('');
+          console.log('');
 
-        await this.getBlockchainDataFromRandomPeer(peers[i]);
+          await this.getBlockchainDataFromRandomPeer(peers[i]);
 
-        await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
       } else {
         ConsoleLog('Found a peer that responded');
         ConsoleLog('Exiting');
