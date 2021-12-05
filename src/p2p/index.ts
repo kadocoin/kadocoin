@@ -197,11 +197,9 @@ class P2P {
 
       if (peersParsed) {
         await this.loopAndRunPeers(peersParsed);
+        ConsoleLog('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
       }
     }
-
-    // NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE :(
-    ConsoleLog('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
   }
 
   private async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
