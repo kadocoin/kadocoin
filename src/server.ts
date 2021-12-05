@@ -6,6 +6,10 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 // Copyright (c) Adamu Muhammad Dankore
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import plexus from '@nephys/plexus';
 import app from './app';
 import { ENVIRONMENT, PORT } from './config/secret';
 import 'dotenv/config';
@@ -24,9 +28,6 @@ import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import EventsEmitter from 'events';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import plexus from '@nephys/plexus';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -101,10 +102,12 @@ node.rpc.on('ready', () => {
       await createIndexes(app.locals.db);
       console.log('*****MongoDB is connected*****');
 
-      app.listen(PORT, async () => {
-        await p2p.syncNodeWithHistoricalBlockchain();
+      await p2p.syncNodeWithHistoricalBlockchain();
 
-        console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+      kadocoin_events.once('sync-complete', () => {
+        app.listen(PORT, async () => {
+          console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+        });
       });
     })
     .catch(err => {

@@ -15,6 +15,7 @@ import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward } from '../util/transaction-metrics';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
 import { KADOCOIN_VERSION } from '../config/secret';
+import ConsoleLog from '../util/console-log';
 
 class Blockchain {
   public chain: IChain;
@@ -160,7 +161,7 @@ class Blockchain {
     if (onSuccess) onSuccess();
 
     this.chain = incomingChain;
-    console.log(
+    ConsoleLog(
       `Replaced your LOCAL blockchain with the incoming consensus blockchain: ${size(
         this.chain
       )} bytes`

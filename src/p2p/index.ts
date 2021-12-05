@@ -25,11 +25,17 @@ import getLastLine from '../util/getLastLine';
 import appendToFile from '../util/appendPeerToFile';
 import Mining_Reward from '../util/supply_reward';
 import EventEmitter from 'events';
+import isEmptyObject from '../util/isEmptyObject';
 
 const MSG_TYPES = {
   BLOCKCHAIN: 'BLOCKCHAIN',
   TRANSACTION: 'TRANSACTION',
 };
+
+let local_ip = '192.168.0.156'; // MAC
+
+if (process.env.DEV_MACHINE === 'abuja') local_ip = '192.168.0.148';
+if (process.env.DEV_MACHINE === 'ubuntu') local_ip = '192.168.0.155';
 
 class P2P {
   node: any;
@@ -57,6 +63,7 @@ class P2P {
     this.blockchain = blockchain;
     this.node.store({ key: 'blocks', value: this.blockchain });
     this.transactionPool = transactionPool;
+    this.node.store({ key: 'transactions', value: this.transactionPool.transactionMap });
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
     this.handleMessage();
@@ -194,7 +201,7 @@ class P2P {
       ConsoleLog('=============================');
       console.log({ connected: this.connected });
       if (!this.connected) {
-        if (peers[i].host !== '192.168.0.156') {
+        if (peers[i].host !== local_ip) {
           //  NODE CONNECT ATTEMPT
           console.log('');
           console.log('');
@@ -223,62 +230,33 @@ class P2P {
     }
   }
 
-  async getBlockchainDataFromRandomPeer(randomPeer: IHost): Promise<void> {
-    this.node.connect({ host: randomPeer.host, port: randomPeer.port });
-
+  private async getBlockchainDataFromRandomPeer(randomPeer: IHost): Promise<void> {
     // REMOVE ALL `CONNECTED` EVENTS
     this.node.removeAllListeners('connected');
 
+    this.node.connect({ host: randomPeer.host, port: randomPeer.port });
+
     // GET BLOCKCHAIN DATA FROM OTHER PEERS
-    this.node.once('connected', () => this.onConnected(randomPeer));
+    this.node.once('connected', async () => await this.onSyncGetData(randomPeer));
   }
 
-  private onConnectedGetPeers(randomPeer: IHost): void {
-    request({ url: `http://${randomPeer.host}:2000/get-peers` }, async (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        let incomingPeers = JSON.parse(body).message;
-
-        if (incomingPeers) {
-          try {
-            /** GET LOCAL PEERS */
-            incomingPeers = JSON.parse(incomingPeers);
-
-            const localPeers = JSON.parse(await this.getPeers());
-
-            const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
-
-            ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
-
-            if (peersNotPresentInLocal.length) {
-              ConsoleLog('Adding remote peer to file');
-              appendPeerToFile(peersNotPresentInLocal, peersStorageFile);
-              ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
-            }
-          } catch (error) {
-            console.log('Error adding peers to local file.', error);
-          }
-        }
-        // this.kadocoin_events.emit('addRemotePeersToLocal_complete');
-      } else {
-        console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
-      }
-    });
-  }
-
-  private onConnected(randomPeer: IHost): void {
+  private async onSyncGetData(randomPeer: IHost): Promise<void> {
     this.connected = true;
     const lookup = this.node.find({ key: 'blocks' });
 
     ConsoleLog('Found an alive peer. Looking up its data');
 
-    //  THE ITEM EXISTS ON THE NETWORK
+    /**** THE ITEM EXISTS ON THE NETWORK ****/
     lookup.on('found', async (result: any) => {
       const rootChain = result.value.chain;
 
-      // GET THIS LIVE REMOTE PEER PEERS
-      this.onConnectedGetPeers(randomPeer);
+      /** GET THIS LIVE REMOTE PEER PEERS **/
+      await this.onSyncGetPeers(randomPeer);
 
-      /** SAVING TO FILE STARTS */
+      /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
+      await this.onSyncGetTransactions(randomPeer);
+
+      /** SAVING TO FILE STARTS **/
       // FILE EXISTS
       if (fs.existsSync(blockchainStorageFile)) {
         const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
@@ -332,6 +310,63 @@ class P2P {
     lookup.on('timeout', () => {
       ConsoleLog('Find request timed out');
     });
+  }
+
+  private async onSyncGetPeers(randomPeer: IHost): Promise<void> {
+    request({ url: `http://${randomPeer.host}:2000/get-peers` }, async (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        let incomingPeers = JSON.parse(body).message;
+
+        if (incomingPeers) {
+          try {
+            /** GET LOCAL PEERS */
+            incomingPeers = JSON.parse(incomingPeers);
+
+            const localPeers = JSON.parse(await this.getPeers());
+
+            const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
+
+            ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+
+            if (peersNotPresentInLocal.length) {
+              ConsoleLog('Adding remote peer to file');
+              appendPeerToFile(peersNotPresentInLocal, peersStorageFile);
+              ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+            }
+          } catch (error) {
+            console.log('Error adding peers to local file.', error);
+          }
+        }
+      } else {
+        console.log(`${ROOT_NODE_ADDRESS}/get-peers`, error);
+      }
+    });
+  }
+
+  private async onSyncGetTransactions(randomPeer: IHost): Promise<void> {
+    request(
+      { url: `http://${randomPeer.host}:2000/transaction-pool` },
+      async (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          const rootTransactionPoolMap = JSON.parse(body).message;
+
+          // CHECK EMPTY
+          if (isEmptyObject(rootTransactionPoolMap))
+            ConsoleLog('No new transaction coming in from the network');
+          // NOT EMPTY
+          if (!isEmptyObject(rootTransactionPoolMap)) {
+            ConsoleLog('Adding latest unconfirmed TRANSACTIONS to your node');
+            ConsoleLog('working on it...');
+            this.transactionPool.setMap(rootTransactionPoolMap);
+            ConsoleLog('Done');
+          }
+        } else {
+          console.log(`${ROOT_NODE_ADDRESS}/transaction-pool`, error);
+        }
+
+        this.kadocoin_events.emit('sync-complete');
+      }
+    );
   }
 
   private getPeersNotInLocal(incomingPeers: Array<IHost>, localPeers: Array<IHost>) {
