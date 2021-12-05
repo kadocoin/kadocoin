@@ -250,7 +250,7 @@ class P2P {
     ConsoleLog('Found an alive peer. Looking up its data');
 
     /**** THE ITEM EXISTS ON THE NETWORK ****/
-    lookup.on('found', async (result: any) => {
+    lookup.once('found', async (result: any) => {
       const rootChain = result.value.chain;
 
       /** GET THIS LIVE REMOTE PEER PEERS **/
@@ -310,7 +310,7 @@ class P2P {
     });
 
     //  THE ITEM DOESN'T EXIST ANYWHERE ON THE NETWORK
-    lookup.on('timeout', () => {
+    lookup.once('timeout', () => {
       ConsoleLog('Find request timed out');
     });
   }
