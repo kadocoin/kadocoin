@@ -85,6 +85,9 @@ class P2P {
           return;
         case MSG_TYPES.TRANSACTION:
           console.log('TRANSACTION');
+          console.log({
+            incomingTransaction: data.message,
+          });
 
           /**
            * FORWARD TRANSACTION TO PEERS
@@ -110,7 +113,6 @@ class P2P {
 
           console.log({
             existingTransaction: existingTransaction,
-            incomingTransaction: data.message,
           });
           return;
         default:
