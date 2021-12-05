@@ -113,7 +113,7 @@ class P2P {
   }
 
   async broadcastTransaction(transaction: Transaction): Promise<void> {
-    const peers = [{ host: '127.0.0.1', port: 5347 }];
+    const peers = JSON.parse(await this.getPeers()) as IHost[];
     const aboutThisNode = await this.nodeInfo();
 
     // FOR EACH PEER
@@ -122,7 +122,7 @@ class P2P {
       this.node.connect({ host: peer.host, port: peer.port });
 
       // DO THIS ONCE CONNECTED
-      this.node.on('connected', () => {
+      this.node.once('connected', () => {
         const message = {
           type: 'TRANSACTION',
           message: transaction,
@@ -367,8 +367,7 @@ class P2P {
     transaction: Transaction,
     sender: { host: string; port: number; id: string }
   ): Promise<void> {
-    const peers = [{ host: '127.0.0.1', port: 5348 }];
-    console.log(transaction, sender);
+    const peers = JSON.parse(await this.getPeers()) as IHost[];
 
     // FOR EACH PEER
     peers.forEach(peer => {
@@ -376,7 +375,7 @@ class P2P {
         // CONNECT THIS PEER TO THE REMOTE PEER
         this.node.connect({ host: peer.host, port: peer.port });
         // DO THIS ONCE CONNECTED
-        this.node.on('connected', () => {
+        this.node.once('connected', () => {
           const message = {
             type: 'TRANSACTION',
             message: transaction,
