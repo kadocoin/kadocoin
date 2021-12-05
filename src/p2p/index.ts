@@ -17,7 +17,7 @@ import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
 import ConsoleLog from '../util/console-log';
 import request from 'request';
-import { ROOT_NODE_ADDRESS } from '../config/secret';
+import { ENVIRONMENT, PORT, ROOT_NODE_ADDRESS } from '../config/secret';
 import appendPeerToFile from '../util/appendPeerToFile';
 import getPeersFromFile from '../util/getPeersFromFile';
 import { blockchainStorageFile, hardCodedPeers, peersStorageFile } from '../config/constants';
@@ -26,6 +26,7 @@ import appendToFile from '../util/appendPeerToFile';
 import Mining_Reward from '../util/supply_reward';
 import EventEmitter from 'events';
 import isEmptyObject from '../util/isEmptyObject';
+import { Application } from 'express';
 
 const MSG_TYPES = {
   BLOCKCHAIN: 'BLOCKCHAIN',
@@ -46,17 +47,20 @@ class P2P {
   hardCodedPeers: { host: string; port: number }[];
   connected: boolean;
   kadocoin_events: EventEmitter;
+  app: Application;
 
   constructor({
     blockchain,
     transactionPool,
     kadocoin_events,
     node,
+    app,
   }: {
     blockchain: Blockchain;
     transactionPool: TransactionPool;
     kadocoin_events: EventEmitter;
     node: any;
+    app: Application;
   }) {
     this.node = node;
     this.kadocoin_events = kadocoin_events;
@@ -66,6 +70,7 @@ class P2P {
     this.node.store({ key: 'transactions', value: this.transactionPool.transactionMap });
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
+    this.app = app;
     this.handleMessage();
   }
 
@@ -194,6 +199,9 @@ class P2P {
         await this.loopAndRunPeers(peersParsed);
       }
     }
+
+    // NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE :(
+    ConsoleLog('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
   }
 
   private async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
@@ -224,7 +232,12 @@ class P2P {
         ConsoleLog('Found a peer that responded');
         // REMOVE ALL `CONNECTED` EVENTS
         this.node.removeAllListeners('connected');
-        ConsoleLog('Exiting');
+
+        // EXIT AND START KADOCOIN
+        ConsoleLog('Exit and start Kadocoin');
+        this.app.listen(PORT, async () => {
+          console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+        });
         break;
       }
     }
@@ -363,8 +376,6 @@ class P2P {
         } else {
           console.log(`${ROOT_NODE_ADDRESS}/transaction-pool`, error);
         }
-
-        this.kadocoin_events.emit('sync-complete');
       }
     );
   }

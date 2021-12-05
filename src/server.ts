@@ -11,7 +11,6 @@
 // @ts-ignore
 import plexus from '@nephys/plexus';
 import app from './app';
-import { ENVIRONMENT, PORT } from './config/secret';
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import UserRouter from './routes/user.router';
@@ -56,7 +55,7 @@ const node = new plexus.Node({ host: '127.0.0.1', port: 5346 });
 
 // GET P2P NODE READY ANYTHING ELSE
 node.rpc.on('ready', () => {
-  const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
+  const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node, app });
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new UserRouter(app, blockchain);
@@ -103,12 +102,6 @@ node.rpc.on('ready', () => {
       console.log('*****MongoDB is connected*****');
 
       await p2p.syncNodeWithHistoricalBlockchain();
-
-      kadocoin_events.once('sync-complete', () => {
-        app.listen(PORT, async () => {
-          console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
-        });
-      });
     })
     .catch(err => {
       throw new Error(err);
