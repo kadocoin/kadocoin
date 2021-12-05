@@ -22,7 +22,7 @@ import { BlockRouter } from './routes/block.router';
 import swaggerUi from 'swagger-ui-express';
 import * as swaggerDocument from './swagger.json';
 import { Db, MongoClient } from 'mongodb';
-import { MONGODB_URI, DB_NAME } from './config/secret';
+import { MONGODB_URI, DB_NAME, PORT, ENVIRONMENT } from './config/secret';
 import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
@@ -55,7 +55,7 @@ const node = new plexus.Node({ host: '127.0.0.1', port: 5346 });
 
 // GET P2P NODE READY ANYTHING ELSE
 node.rpc.on('ready', () => {
-  const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node, app });
+  const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new UserRouter(app, blockchain);
@@ -102,6 +102,12 @@ node.rpc.on('ready', () => {
       console.log('*****MongoDB is connected*****');
 
       await p2p.syncNodeWithHistoricalBlockchain();
+
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      app.listen(PORT, async () => {
+        console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+      });
     })
     .catch(err => {
       throw new Error(err);
