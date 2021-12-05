@@ -232,13 +232,13 @@ class P2P {
   }
 
   private async getBlockchainDataFromRandomPeer(randomPeer: IHost): Promise<void> {
+    // REMOVE ALL `CONNECTED` EVENTS
+    this.node.removeAllListeners('connected');
+
     this.node.connect({ host: randomPeer.host, port: randomPeer.port });
 
     // GET BLOCKCHAIN DATA FROM OTHER PEERS
     this.node.once('connected', async () => await this.onSyncGetData(randomPeer));
-
-    // REMOVE ALL `CONNECTED` EVENTS
-    this.node.removeAllListeners('connected');
   }
 
   private async onSyncGetData(randomPeer: IHost): Promise<void> {
