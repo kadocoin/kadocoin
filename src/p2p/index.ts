@@ -104,9 +104,8 @@ class P2P {
               return;
             }
 
-            // FORWARD THE MESSAGE TO OTHER PEERS
-            //ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
-            //this.forwardTransactionToPeers(data.message, data.sender);
+            this.transactionPool.setTransaction(data.message);
+          } else {
             this.transactionPool.setTransaction(data.message);
           }
 
