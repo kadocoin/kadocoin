@@ -100,7 +100,7 @@ class P2P {
 
           if (existingTransaction) {
             if (existingTransaction.input.timestamp == data.message.input.timestamp) {
-              ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
+              ConsoleLog('I already have this transaction. IGNORING IT.');
               return;
             }
 
@@ -110,9 +110,6 @@ class P2P {
             this.transactionPool.setTransaction(data.message);
           }
 
-          console.log({
-            existingTransaction: existingTransaction,
-          });
           return;
         default:
           return;
