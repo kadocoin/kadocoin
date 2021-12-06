@@ -121,28 +121,38 @@ class P2P {
   }
 
   async broadcastTransaction(transaction: Transaction): Promise<void> {
-    const peers = JSON.parse(await this.getPeers()) as IHost[];
     const aboutThisNode = await this.nodeInfo();
 
+    const message = {
+      type: 'TRANSACTION',
+      message: transaction,
+      sender: {
+        about: aboutThisNode,
+        timestamp: new Date().getTime(),
+      },
+    };
+
+    this.node.broadcast({ data: message });
+
     // FOR EACH PEER
-    peers.forEach(peer => {
-      // CONNECT THIS PEER TO THE REMOTE PEER
-      this.node.connect({ host: peer.host, port: peer.port });
+    // peers.forEach(peer => {
+    //   // CONNECT THIS PEER TO THE REMOTE PEER
+    //   this.node.connect({ host: peer.host, port: peer.port });
 
-      // DO THIS ONCE CONNECTED
-      this.node.once('connected', () => {
-        const message = {
-          type: 'TRANSACTION',
-          message: transaction,
-          sender: {
-            about: aboutThisNode,
-            timestamp: new Date().getTime(),
-          },
-        };
+    //   // DO THIS ONCE CONNECTED
+    //   this.node.once('connected', () => {
+    //     const message = {
+    //       type: 'TRANSACTION',
+    //       message: transaction,
+    //       sender: {
+    //         about: aboutThisNode,
+    //         timestamp: new Date().getTime(),
+    //       },
+    //     };
 
-        this.node.broadcast({ data: message });
-      });
-    });
+    //     this.node.broadcast({ data: message });
+    //   });
+    // });
 
     // END BROADCAST
   }
