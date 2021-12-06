@@ -98,8 +98,6 @@ class P2P {
             inputAddress: data.message.input.address,
           });
 
-          this.transactionPool.setTransaction(data.message);
-
           if (existingTransaction) {
             if (existingTransaction.input.timestamp == data.message.input.timestamp) {
               ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
@@ -107,8 +105,9 @@ class P2P {
             }
 
             // FORWARD THE MESSAGE TO OTHER PEERS
-            ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
-            this.forwardTransactionToPeers(data.message, data.sender);
+            //ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+            //this.forwardTransactionToPeers(data.message, data.sender);
+            this.transactionPool.setTransaction(data.message);
           }
 
           console.log({
