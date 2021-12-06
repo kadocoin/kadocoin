@@ -70,7 +70,7 @@ class P2P {
   }
 
   handleMessage(): void {
-    this.node.on('broadcast', (data: any) => {
+    this.node.once('broadcast', (data: any) => {
       switch (data.type) {
         case MSG_TYPES.BLOCKCHAIN:
           console.log('BLOCKCHAIN');
