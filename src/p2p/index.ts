@@ -234,7 +234,7 @@ class P2P {
       } else {
         ConsoleLog('Found a peer that responded');
         // REMOVE ALL `CONNECTED` EVENTS
-        this.node.removeAllListeners('connected');
+        // this.node.removeAllListeners('connected');;
 
         break;
       }
@@ -258,7 +258,7 @@ class P2P {
     ConsoleLog('Found an alive peer. Looking up its data');
 
     /**** THE ITEM EXISTS ON THE NETWORK ****/
-    lookup.once('found', async (result: any) => {
+    lookup.on('found', async (result: any) => {
       const rootChain = result.value.chain;
 
       /** GET THIS LIVE REMOTE PEER PEERS **/
@@ -318,7 +318,7 @@ class P2P {
     });
 
     //  THE ITEM DOESN'T EXIST ANYWHERE ON THE NETWORK
-    lookup.once('timeout', () => {
+    lookup.on('timeout', () => {
       ConsoleLog('Find request timed out');
     });
   }
