@@ -36,6 +36,9 @@ let local_ip = '192.168.0.156'; // MAC
 
 if (process.env.DEV_MACHINE === 'abuja') local_ip = '192.168.0.148';
 if (process.env.DEV_MACHINE === 'ubuntu') local_ip = '192.168.0.155';
+if (process.env.DEV_MACHINE === 'bauchi') local_ip = '192.168.0.151';
+
+console.log({ local_ip });
 
 class P2P {
   node: any;

@@ -13,6 +13,7 @@
     "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --exec ts-node src/server.ts",
     "dev-abuja": "cross-env DEV_MACHINE='abuja' nodemon --watch src/ --exec ts-node src/server.ts",
     "dev-ubuntu": "cross-env DEV_MACHINE='ubuntu' nodemon --watch src/ --exec ts-node src/server.ts",
+    "dev-bauchi": "cross-env DEV_MACHINE='bauchi' nodemon --watch src/ --exec ts-node src/server.ts",
     "lint": "eslint --ext .ts --fix",
     "lint:fix": "eslint . --fix",
     "clean": "rimraf dist/",
