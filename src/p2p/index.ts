@@ -132,28 +132,6 @@ class P2P {
     };
 
     this.node.broadcast({ data: message });
-
-    // FOR EACH PEER
-    // peers.forEach(peer => {
-    //   // CONNECT THIS PEER TO THE REMOTE PEER
-    //   this.node.connect({ host: peer.host, port: peer.port });
-
-    //   // DO THIS ONCE CONNECTED
-    //   this.node.once('connected', () => {
-    //     const message = {
-    //       type: 'TRANSACTION',
-    //       message: transaction,
-    //       sender: {
-    //         about: aboutThisNode,
-    //         timestamp: new Date().getTime(),
-    //       },
-    //     };
-
-    //     this.node.broadcast({ data: message });
-    //   });
-    // });
-
-    // END BROADCAST
   }
 
   async broadcastNewlyMinedBlock(block: incomingObj): Promise<void> {
@@ -233,8 +211,6 @@ class P2P {
         }
       } else {
         ConsoleLog('Found a peer that responded');
-        // REMOVE ALL `CONNECTED` EVENTS
-        // this.node.removeAllListeners('connected');;
 
         break;
       }
@@ -248,7 +224,7 @@ class P2P {
     this.node.connect({ host: randomPeer.host, port: randomPeer.port });
 
     // GET BLOCKCHAIN DATA FROM OTHER PEERS
-    this.node.once('connected', async () => await this.onSyncGetData(randomPeer));
+    this.node.on('connected', async () => await this.onSyncGetData(randomPeer));
   }
 
   private async onSyncGetData(randomPeer: IHost): Promise<void> {

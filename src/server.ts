@@ -107,6 +107,9 @@ node.rpc.on('ready', () => {
 
       app.listen(PORT, async () => {
         console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+
+        // REMOVE ALL `CONNECTED` EVENTS
+        node.removeAllListeners('connected');
       });
     })
     .catch(err => {
