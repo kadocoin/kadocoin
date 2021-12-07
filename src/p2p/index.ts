@@ -11,7 +11,7 @@
 // import plexus from '@nephys/plexus';
 import publicIp from 'public-ip';
 import fs, { unlinkSync } from 'fs';
-import { IHost, incomingObj } from '../types';
+import { IHost } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
@@ -27,10 +27,10 @@ import Mining_Reward from '../util/supply_reward';
 import EventEmitter from 'events';
 import isEmptyObject from '../util/isEmptyObject';
 
-const MSG_TYPES = {
-  BLOCKCHAIN: 'BLOCKCHAIN',
-  TRANSACTION: 'TRANSACTION',
-};
+// const MSG_TYPES = {
+//   BLOCKCHAIN: 'BLOCKCHAIN',
+//   TRANSACTION: 'TRANSACTION',
+// };
 
 let local_ip = '192.168.0.156'; // MAC
 
