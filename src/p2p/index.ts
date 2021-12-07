@@ -142,7 +142,6 @@ class P2P {
     // FOR EACH PEER
     peers.forEach(peer => {
       // CONNECT THIS PEER TO THE REMOTE PEER
-      this.node.connect({ host: peer.host, port: peer.port });
 
       const message = {
         type: 'TRANSACTION',
@@ -158,28 +157,28 @@ class P2P {
           host: peer.host,
           port: peer.port,
         })
-        .run('handle/foo', { data: message }, (err: any, result: any) => {
+        .run('handle/receiveTransactions', { data: message }, (err: any, result: any) => {
           console.log({ err, result });
         });
     });
   }
 
-  async broadcastTransaction(transaction: Transaction): Promise<void> {
-    console.log({ count2: this.count2 });
-    const aboutThisNode = await this.nodeInfo();
+  // async broadcastTransaction(transaction: Transaction): Promise<void> {
+  //   console.log({ count2: this.count2 });
+  //   const aboutThisNode = await this.nodeInfo();
 
-    const message = {
-      type: 'TRANSACTION',
-      message: transaction,
-      sender: {
-        about: aboutThisNode,
-        timestamp: new Date().getTime(),
-      },
-    };
+  //   const message = {
+  //     type: 'TRANSACTION',
+  //     message: transaction,
+  //     sender: {
+  //       about: aboutThisNode,
+  //       timestamp: new Date().getTime(),
+  //     },
+  //   };
 
-    this.node.broadcast({ data: message });
-    this.count2++;
-  }
+  //   this.node.broadcast({ data: message });
+  //   this.count2++;
+  // }
 
   async broadcastNewlyMinedBlock(block: incomingObj): Promise<void> {
     block;

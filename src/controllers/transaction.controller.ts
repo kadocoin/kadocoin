@@ -250,7 +250,7 @@ export default class TransactionController {
 
     transactionPool.setTransaction(transaction);
 
-    p2p.broadcastTransaction(transaction);
+    p2p.sendTransactions(transaction);
     this.count++;
 
     // TODO: SAVE TRANSACTION TO DB
