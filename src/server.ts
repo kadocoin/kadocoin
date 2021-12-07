@@ -111,7 +111,7 @@ MongoClient.connect(MONGODB_URI, {
     await createIndexes(app.locals.db);
     console.log('*****MongoDB is connected*****');
 
-    // await p2p.syncNodeWithHistoricalBlockchain();
+    await p2p.syncNodeWithHistoricalBlockchain();
 
     app.listen(PORT, async () => {
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
