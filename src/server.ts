@@ -113,16 +113,6 @@ MongoClient.connect(MONGODB_URI, {
 
     await p2p.syncNodeWithHistoricalBlockchain();
 
-    // const wellKnownPeers = node.wellKnownPeers.get();
-    // console.log(wellKnownPeers);
-
-    node.getEndpointFor('foobar', (err: any, endpoint: any, metadata: any) => {
-      console.log({ err, endpoint, metadata });
-    });
-
-  
-
-
     app.listen(PORT, async () => {
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
     });

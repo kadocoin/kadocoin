@@ -194,8 +194,8 @@ class P2P {
 
   async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
     for (let i = 0; i < peers.length; i++) {
-      ConsoleLog('=============================');
-      console.log({ connected: this.connected });
+      ConsoleLog(`==========${i}===================`);
+     
       if (!this.connected) {
         if (peers[i].host !== local_ip) {
           //  NODE CONNECT ATTEMPT
@@ -214,7 +214,7 @@ class P2P {
 
           await this.onSyncGetData(peers[i]);
 
-          await new Promise(resolve => setTimeout(resolve, 130000));
+          await new Promise(resolve => setTimeout(resolve, 8000));
         }
       } else {
         ConsoleLog('Found a peer that responded');
@@ -250,6 +250,8 @@ class P2P {
           console.log({ on_sync_peers__err, on_sync_peers__result });
 
           if(on_sync_peers__result == 'success') this.connected = true
+
+           console.log({ connected: this.connected });
         }
       );
   }
