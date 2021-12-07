@@ -49,6 +49,7 @@ class P2P {
   hardCodedPeers: { host: string; port: number }[];
   connected: boolean;
   kadocoin_events: EventEmitter;
+  count: number;
 
   constructor({
     blockchain,
@@ -69,6 +70,7 @@ class P2P {
     this.node.store({ key: 'transactions', value: this.transactionPool.transactionMap });
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
+    this.count = 0;
     this.handleMessage();
   }
 
@@ -222,10 +224,12 @@ class P2P {
     this.node.removeAllListeners('connected');
     this.node.removeAllListeners('found');
 
-    this.node.connect({ host: randomPeer.host, port: randomPeer.port });
+    const status = this.node.connect({ host: randomPeer.host, port: randomPeer.port });
 
     // GET BLOCKCHAIN DATA FROM OTHER PEERS
-    this.node.on('connected', async () => await this.onSyncGetData(randomPeer));
+    status.once('response', async () =>
+      this.node.once('connected', async () => await this.onSyncGetData(randomPeer))
+    );
   }
 
   private async onSyncGetData(randomPeer: IHost): Promise<void> {
