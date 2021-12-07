@@ -74,6 +74,7 @@ class P2P {
     this.count = 0;
     this.count2 = 0;
     // this.handleMessage();
+    this.receiveTransactions();
   }
 
   handleMessage(): void {
