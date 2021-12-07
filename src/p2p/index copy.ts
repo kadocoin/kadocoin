@@ -126,44 +126,6 @@ class P2P {
     });
   }
 
-  receiveTransactions(): void {
-    this.node.handle.receiveTransactions = (payload: any, done: any) => {
-      // Do something with payload...
-      console.log({ payload });
-      done(null);
-      // or: done(null, result);
-    };
-  }
-
-  async sendTransactions(transaction: Transaction): Promise<void> {
-    const peers = this.hardCodedPeers;
-    const aboutThisNode = await this.nodeInfo();
-
-    // FOR EACH PEER
-    peers.forEach(peer => {
-      // CONNECT THIS PEER TO THE REMOTE PEER
-      this.node.connect({ host: peer.host, port: peer.port });
-
-      const message = {
-        type: 'TRANSACTION',
-        message: transaction,
-        sender: {
-          about: aboutThisNode,
-          timestamp: new Date().getTime(),
-        },
-      };
-
-      this.node
-        .remote({
-          host: peer.host,
-          port: peer.port,
-        })
-        .run('handle/foo', { data: message }, (err: any, result: any) => {
-          console.log({ err, result });
-        });
-    });
-  }
-
   async broadcastTransaction(transaction: Transaction): Promise<void> {
     console.log({ count2: this.count2 });
     const aboutThisNode = await this.nodeInfo();
