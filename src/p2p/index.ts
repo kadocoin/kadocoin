@@ -226,7 +226,7 @@ class P2P {
 
   async onSyncGetData(randomPeer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
-    
+
     await this.onSyncGetPeers(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
@@ -249,10 +249,6 @@ class P2P {
         { data: [{ host: '192.168.0.2', port: 5346 }] },
         (on_sync_peers__err: any, on_sync_peers__result: any) => {
           console.log({ on_sync_peers__err, on_sync_peers__result });
-
-          if (on_sync_peers__result == 'success') {
-            this.connected = true;
-          }
         }
       );
   }
@@ -266,6 +262,7 @@ class P2P {
       }
 
       if (payload.data && !err) {
+        this.connected = true;
         const incomingPeers = payload.data;
 
         if (incomingPeers) {
