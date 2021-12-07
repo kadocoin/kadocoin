@@ -32,7 +32,7 @@ import isEmptyObject from '../util/isEmptyObject';
 //   TRANSACTION: 'TRANSACTION',
 // };
 
-let local_ip = '192.168.0.156'; // MAC
+let local_ip = '192.168.0.2'; // MAC
 
 if (process.env.DEV_MACHINE === 'abuja') local_ip = '192.168.0.148';
 if (process.env.DEV_MACHINE === 'ubuntu') local_ip = '192.168.0.155';
@@ -66,66 +66,13 @@ class P2P {
     this.node = node;
     this.kadocoin_events = kadocoin_events;
     this.blockchain = blockchain;
-    // this.node.store({ key: 'blocks', value: this.blockchain });
     this.transactionPool = transactionPool;
-    // this.node.store({ key: 'transactions', value: this.transactionPool.transactionMap });
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
     this.count = 0;
     this.count2 = 0;
-    // this.handleMessage();
     this.receiveTransactions();
   }
-
-  // handleMessage(): void {
-  //   console.log('entered handle');
-  //   this.node.on('broadcast', (data: any) => {
-  //     console.log({ countHandleMessage: this.count });
-  //     this.count++;
-  //     switch (data.type) {
-  //       case MSG_TYPES.BLOCKCHAIN:
-  //         console.log('BLOCKCHAIN');
-  //         this.blockchain.addBlockFromPeerToLocal(data.message, true, this.blockchain.chain, () => {
-  //           // TODO: CLEAR?
-  //           this.transactionPool.clearBlockchainTransactions({
-  //             chain: data.message,
-  //           });
-  //         });
-
-  //         // TODO: SEND TO OTHER NODES
-  //         return;
-  //       case MSG_TYPES.TRANSACTION:
-  //         console.log('TRANSACTION');
-  //         console.log({
-  //           incomingTransaction: data.message,
-  //         });
-
-  //         /**
-  //          * FORWARD TRANSACTION TO PEERS
-  //          */
-
-  //         // CHECK FOR EXISTING TRANSACTION
-  //         const existingTransaction = this.transactionPool.existingTransactionPool({
-  //           inputAddress: data.message.input.address,
-  //         });
-
-  //         if (existingTransaction) {
-  //           if (existingTransaction.input.timestamp == data.message.input.timestamp) {
-  //             ConsoleLog('I already have this transaction. IGNORING IT.');
-  //             return;
-  //           }
-
-  //           this.transactionPool.setTransaction(data.message);
-  //         } else {
-  //           this.transactionPool.setTransaction(data.message);
-  //         }
-
-  //         return;
-  //       default:
-  //         return;
-  //     }
-  //   });
-  // }
 
   receiveTransactions(): void {
     this.node.handle.receiveTransactions = (payload: any) => {

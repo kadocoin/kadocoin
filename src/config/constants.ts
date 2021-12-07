@@ -59,7 +59,7 @@ export const hardCodedPeers = [
   { host: '192.168.0.148', port: 5346 }, // ABUJA
   { host: '192.168.0.155', port: 5346 }, // UBUNTU
   { host: '192.168.0.2', port: 5346 }, // MAC
-  { host: '192.168.0.151', port: 5346 }, // BAUCHI
+  // { host: '192.168.0.151', port: 5346 }, // BAUCHI
 ];
 
 export const sampleDataForTests = {
