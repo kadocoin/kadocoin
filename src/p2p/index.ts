@@ -75,49 +75,59 @@ class P2P {
   }
 
   handleMessage(): void {
-    this.node.on('broadcast', (data: any) => {
-      switch (data.type) {
-        case MSG_TYPES.BLOCKCHAIN:
-          console.log('BLOCKCHAIN');
-          this.blockchain.addBlockFromPeerToLocal(data.message, true, this.blockchain.chain, () => {
-            // TODO: CLEAR?
-            this.transactionPool.clearBlockchainTransactions({
-              chain: data.message,
+    console.log('entered ahndle');
+    this.node.rpc.on('ready', () => {
+      this.node.on('broadcast', (data: any) => {
+        console.log({ countHandleMessage: this.count });
+        this.count++;
+        switch (data.type) {
+          case MSG_TYPES.BLOCKCHAIN:
+            console.log('BLOCKCHAIN');
+            this.blockchain.addBlockFromPeerToLocal(
+              data.message,
+              true,
+              this.blockchain.chain,
+              () => {
+                // TODO: CLEAR?
+                this.transactionPool.clearBlockchainTransactions({
+                  chain: data.message,
+                });
+              }
+            );
+
+            // TODO: SEND TO OTHER NODES
+            return;
+          case MSG_TYPES.TRANSACTION:
+            console.log('TRANSACTION');
+            console.log({
+              incomingTransaction: data.message,
             });
-          });
 
-          // TODO: SEND TO OTHER NODES
-          return;
-        case MSG_TYPES.TRANSACTION:
-          console.log('TRANSACTION');
-          console.log({
-            incomingTransaction: data.message,
-          });
+            /**
+             * FORWARD TRANSACTION TO PEERS
+             */
 
-          /**
-           * FORWARD TRANSACTION TO PEERS
-           */
+            // CHECK FOR EXISTING TRANSACTION
+            const existingTransaction = this.transactionPool.existingTransactionPool({
+              inputAddress: data.message.input.address,
+            });
 
-          // CHECK FOR EXISTING TRANSACTION
-          const existingTransaction = this.transactionPool.existingTransactionPool({
-            inputAddress: data.message.input.address,
-          });
+            if (existingTransaction) {
+              if (existingTransaction.input.timestamp == data.message.input.timestamp) {
+                ConsoleLog('I already have this transaction. IGNORING IT.');
+                return;
+              }
 
-          if (existingTransaction) {
-            if (existingTransaction.input.timestamp == data.message.input.timestamp) {
-              ConsoleLog('I already have this transaction. IGNORING IT.');
-              return;
+              this.transactionPool.setTransaction(data.message);
+            } else {
+              this.transactionPool.setTransaction(data.message);
             }
 
-            this.transactionPool.setTransaction(data.message);
-          } else {
-            this.transactionPool.setTransaction(data.message);
-          }
-
-          return;
-        default:
-          return;
-      }
+            return;
+          default:
+            return;
+        }
+      });
     });
   }
 
@@ -137,27 +147,7 @@ class P2P {
   }
 
   async broadcastNewlyMinedBlock(block: incomingObj): Promise<void> {
-    const peers = [{ host: '127.0.0.1', port: 5347 }];
-    const ip = await this.getPublicIP();
-
-    // FOR EACH PEER
-    peers.forEach(peer => {
-      // CONNECT THIS PEER TO TO THE REMOTE PEER
-      this.node.connect({ host: peer.host, port: peer.port });
-
-      this.node.on('connected', () => {
-        const message = {
-          type: 'BLOCK',
-          metadata: {
-            message: block,
-            sender: `${ip}:${5346}`,
-            timestamp: new Date().getTime(),
-          },
-        };
-
-        this.node.broadcast({ data: message });
-      });
-    });
+    block;
 
     // END BROADCAST
   }
