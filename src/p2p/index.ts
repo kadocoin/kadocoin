@@ -257,7 +257,7 @@ class P2P {
 
   async onSyncSavePeers(): Promise<void> {
     this.node.handle.onSyncSavePeers = async (payload: any, done: any, err: any) => {
-      console.log('inside of onSyncSavePeers');
+      console.log('inside of onSyncSavePeers', { err, payload });
       if (err) {
         console.log({ onSyncSavePeers: err });
         done('error');
