@@ -225,7 +225,7 @@ class P2P {
 
   async onSyncGetData(randomPeer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
-    console.time('adamu start');
+    console.time('adamu-timer');
     await this.onSyncGetPeers(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
@@ -286,7 +286,7 @@ class P2P {
             console.log('Error adding peers to local file.', error);
           }
         }
-        console.timeEnd();
+        console.timeEnd('adamu-timer');
         done('success');
       }
     };
