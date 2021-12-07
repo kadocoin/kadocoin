@@ -214,7 +214,7 @@ class P2P {
 
           await this.onSyncGetData(peers[i]);
 
-          // await new Promise(resolve => setTimeout(resolve, 5000));
+          await new Promise(resolve => setTimeout(resolve, 30000));
         }
       } else {
         ConsoleLog('Found a peer that responded');
