@@ -54,7 +54,7 @@ const kadocoin_events = new EventsEmitter();
 const node = new plexus.Node({ host: '127.0.0.1', port: 5346 });
 
 // GET P2P NODE READY ANYTHING ELSE
-node.rpc.on('ready', () => {
+node.on('ready', () => {
   const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
