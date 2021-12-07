@@ -243,7 +243,7 @@ class P2P {
         port: randomPeer.port,
       })
       .run(
-        'handle/onSyncSavePeers',
+        'handle/syncpeers',
         { data: JSON.parse(await this.getPeers()) },
         (on_sync_peers__err: any, on_sync_peers__result: any) => {
           console.log({ on_sync_peers__err, on_sync_peers__result });
@@ -256,7 +256,7 @@ class P2P {
   }
 
   async onSyncSavePeers(): Promise<void> {
-    this.node.handle.onSyncSavePeers = async (payload: any, done: any, err: any) => {
+    this.node.handle.syncpeers = async (payload: any, done: any, err: any) => {
       console.log('inside of onSyncSavePeers', { err, payload: payload.data });
       if (err) {
         console.log({ onSyncSavePeers: err });
