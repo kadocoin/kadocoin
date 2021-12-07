@@ -178,7 +178,9 @@ class P2P {
           host: peer.host,
           port: peer.port,
         })
-        .run('handle/receiveTransactions', { data: message });
+        .run('handle/receiveTransactions', { data: message }, (err: any, result: any) =>
+          console.log({ err, result })
+        );
     });
   }
 
