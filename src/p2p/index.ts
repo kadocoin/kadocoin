@@ -70,8 +70,8 @@ class P2P {
     this.count = 0;
     this.count2 = 0;
     this.receiveTransactions();
-    this.onSyncSaveTransactions();
-    this.onSyncSaveBlockchain();
+    // this.onSyncSaveTransactions();
+    // this.onSyncSaveBlockchain();
     this.onSyncSavePeers();
   }
 
@@ -228,13 +228,15 @@ class P2P {
     await this.onSyncGetPeers(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
-    await this.onSyncGetTransactions(randomPeer);
+    // await this.onSyncGetTransactions(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER BLOCKCHAIN **/
-    await this.onSyncGetBlockchain(randomPeer);
+    // await this.onSyncGetBlockchain(randomPeer);
   }
 
   private async onSyncGetPeers(randomPeer: IHost): Promise<void> {
+    console.log('trying to get peers from', randomPeer);
+
     this.node
       .remote({
         host: randomPeer.host,
@@ -242,7 +244,7 @@ class P2P {
       })
       .run(
         'handle/onSyncSavePeers',
-        { data: this.transactionPool.transactionMap },
+        { data: JSON.parse(await this.getPeers()) },
         (on_sync_peers__err: any, on_sync_peers__result: any) => {
           console.log({ on_sync_peers__err, on_sync_peers__result });
 
