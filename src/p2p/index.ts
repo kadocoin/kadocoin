@@ -174,6 +174,7 @@ class P2P {
   }
 
   async syncNodeWithHistoricalBlockchain(): Promise<void> {
+    console.time('adamu-timer');
     // LOOP THRU HARDCODED PEERS
     await this.loopAndRunPeers(this.hardCodedPeers);
 
@@ -225,7 +226,7 @@ class P2P {
 
   async onSyncGetData(randomPeer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
-    console.time('adamu-timer');
+    
     await this.onSyncGetPeers(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
