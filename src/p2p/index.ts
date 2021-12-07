@@ -50,6 +50,7 @@ class P2P {
   connected: boolean;
   kadocoin_events: EventEmitter;
   count: number;
+  count2: number;
 
   constructor({
     blockchain,
@@ -71,11 +72,12 @@ class P2P {
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
     this.count = 0;
+    this.count2 = 0;
     this.handleMessage();
   }
 
   handleMessage(): void {
-    console.log('entered ahndle');
+    console.log('entered handle');
 
     this.node.on('broadcast', (data: any) => {
       console.log({ countHandleMessage: this.count });
@@ -126,6 +128,7 @@ class P2P {
   }
 
   async broadcastTransaction(transaction: Transaction): Promise<void> {
+    console.log({ count2: this.count2 });
     const aboutThisNode = await this.nodeInfo();
 
     const message = {
@@ -138,6 +141,7 @@ class P2P {
     };
 
     this.node.broadcast({ data: message });
+    this.count2++;
   }
 
   async broadcastNewlyMinedBlock(block: incomingObj): Promise<void> {
