@@ -214,7 +214,7 @@ class P2P {
 
           await this.onSyncGetData(peers[i]);
 
-          await new Promise(resolve => setTimeout(resolve, 30000));
+          await new Promise(resolve => setTimeout(resolve, 130000));
         }
       } else {
         ConsoleLog('Found a peer that responded');
@@ -248,6 +248,8 @@ class P2P {
         { data: [{ host: '192.168.0.2', port: 5346 }] },
         (on_sync_peers__err: any, on_sync_peers__result: any) => {
           console.log({ on_sync_peers__err, on_sync_peers__result });
+
+          if(on_sync_peers__result == 'success') this.connected = true
         }
       );
   }
@@ -256,13 +258,11 @@ class P2P {
     this.node.handle.syncpeers = async (payload: any, done: any, err: any) => {
       console.log('inside of onSyncSavePeers', { err, payload: payload.data });
       if (err) {
-        // console.log({ onSyncSavePeers: err });
-        done('error');
-        return;
+        return done(err);
       }
 
       if (payload.data && !err) {
-        this.connected = true;
+        // this.connected = true;
         const incomingPeers = payload.data;
 
         if (incomingPeers) {
@@ -284,6 +284,7 @@ class P2P {
             console.log('Error adding peers to local file.', error);
           }
         }
+        done(null, 'success');
       }
     };
   }
