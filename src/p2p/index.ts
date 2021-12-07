@@ -77,62 +77,82 @@ class P2P {
     this.receiveTransactions();
   }
 
-  handleMessage(): void {
-    console.log('entered handle');
-    this.node.on('broadcast', (data: any) => {
-      console.log({ countHandleMessage: this.count });
-      this.count++;
-      switch (data.type) {
-        case MSG_TYPES.BLOCKCHAIN:
-          console.log('BLOCKCHAIN');
-          this.blockchain.addBlockFromPeerToLocal(data.message, true, this.blockchain.chain, () => {
-            // TODO: CLEAR?
-            this.transactionPool.clearBlockchainTransactions({
-              chain: data.message,
-            });
-          });
+  // handleMessage(): void {
+  //   console.log('entered handle');
+  //   this.node.on('broadcast', (data: any) => {
+  //     console.log({ countHandleMessage: this.count });
+  //     this.count++;
+  //     switch (data.type) {
+  //       case MSG_TYPES.BLOCKCHAIN:
+  //         console.log('BLOCKCHAIN');
+  //         this.blockchain.addBlockFromPeerToLocal(data.message, true, this.blockchain.chain, () => {
+  //           // TODO: CLEAR?
+  //           this.transactionPool.clearBlockchainTransactions({
+  //             chain: data.message,
+  //           });
+  //         });
 
-          // TODO: SEND TO OTHER NODES
-          return;
-        case MSG_TYPES.TRANSACTION:
-          console.log('TRANSACTION');
-          console.log({
-            incomingTransaction: data.message,
-          });
+  //         // TODO: SEND TO OTHER NODES
+  //         return;
+  //       case MSG_TYPES.TRANSACTION:
+  //         console.log('TRANSACTION');
+  //         console.log({
+  //           incomingTransaction: data.message,
+  //         });
 
-          /**
-           * FORWARD TRANSACTION TO PEERS
-           */
+  //         /**
+  //          * FORWARD TRANSACTION TO PEERS
+  //          */
 
-          // CHECK FOR EXISTING TRANSACTION
-          const existingTransaction = this.transactionPool.existingTransactionPool({
-            inputAddress: data.message.input.address,
-          });
+  //         // CHECK FOR EXISTING TRANSACTION
+  //         const existingTransaction = this.transactionPool.existingTransactionPool({
+  //           inputAddress: data.message.input.address,
+  //         });
 
-          if (existingTransaction) {
-            if (existingTransaction.input.timestamp == data.message.input.timestamp) {
-              ConsoleLog('I already have this transaction. IGNORING IT.');
-              return;
-            }
+  //         if (existingTransaction) {
+  //           if (existingTransaction.input.timestamp == data.message.input.timestamp) {
+  //             ConsoleLog('I already have this transaction. IGNORING IT.');
+  //             return;
+  //           }
 
-            this.transactionPool.setTransaction(data.message);
-          } else {
-            this.transactionPool.setTransaction(data.message);
-          }
+  //           this.transactionPool.setTransaction(data.message);
+  //         } else {
+  //           this.transactionPool.setTransaction(data.message);
+  //         }
 
-          return;
-        default:
-          return;
-      }
-    });
-  }
+  //         return;
+  //       default:
+  //         return;
+  //     }
+  //   });
+  // }
 
   receiveTransactions(): void {
-    this.node.handle.receiveTransactions = (payload: any, done: any) => {
-      // Do something with payload...
-      console.log({ payload });
-      done(null);
-      // or: done(null, result);
+    this.node.handle.receiveTransactions = (payload: any) => {
+      console.log({ incomingTransaction: payload.data.message });
+      console.log('TRANSACTION');
+
+      /**
+       * FORWARD TRANSACTION TO PEERS
+       */
+
+      // CHECK FOR EXISTING TRANSACTION
+      const existingTransaction = this.transactionPool.existingTransactionPool({
+        inputAddress: payload.data.message.input.address,
+      });
+
+      this.transactionPool.setTransaction(payload.data.message);
+
+      if (existingTransaction) {
+        if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
+          ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
+          return;
+        }
+
+        // FORWARD THE MESSAGE TO OTHER PEERS
+        ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+        this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
+      }
     };
   }
 
@@ -142,7 +162,7 @@ class P2P {
     // FOR EACH PEER
     hardCodedPeers.forEach(peer => {
       // CONNECT THIS PEER TO THE REMOTE PEER
-      console.log({ peer });
+      console.log({ sendingTxsTo: peer });
 
       const message = {
         type: 'TRANSACTION',
@@ -158,33 +178,36 @@ class P2P {
           host: peer.host,
           port: peer.port,
         })
-        .run('handle/receiveTransactions', { data: message }, (err: any, result: any) => {
-          console.log({ err, result });
-        });
+        .run('handle/receiveTransactions', { data: message });
     });
   }
 
-  // async broadcastTransaction(transaction: Transaction): Promise<void> {
-  //   console.log({ count2: this.count2 });
-  //   const aboutThisNode = await this.nodeInfo();
+  async forwardTransactionToPeers(
+    transaction: Transaction,
+    sender: { host: string; port: number; id: string }
+  ): Promise<void> {
+    const peers = JSON.parse(await this.getPeers()) as IHost[];
 
-  //   const message = {
-  //     type: 'TRANSACTION',
-  //     message: transaction,
-  //     sender: {
-  //       about: aboutThisNode,
-  //       timestamp: new Date().getTime(),
-  //     },
-  //   };
+    // FOR EACH PEER
+    peers.forEach(peer => {
+      if (sender.host != peer.host) {
+        // CONNECT THIS PEER TO THE REMOTE PEER
+        console.log({ forwardingTo: peer });
 
-  //   this.node.broadcast({ data: message });
-  //   this.count2++;
-  // }
+        const message = {
+          type: 'TRANSACTION',
+          message: transaction,
+          sender,
+        };
 
-  async broadcastNewlyMinedBlock(block: incomingObj): Promise<void> {
-    block;
-
-    // END BROADCAST
+        this.node
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run('handle/receiveTransactions', { data: message });
+      }
+    });
   }
 
   async getPeers(): Promise<string> {
@@ -411,31 +434,6 @@ class P2P {
       port: this.node.self.port,
       id: this.node.self.id,
     };
-  }
-
-  async forwardTransactionToPeers(
-    transaction: Transaction,
-    sender: { host: string; port: number; id: string }
-  ): Promise<void> {
-    const peers = JSON.parse(await this.getPeers()) as IHost[];
-
-    // FOR EACH PEER
-    peers.forEach(peer => {
-      if (sender.host != peer.host) {
-        // CONNECT THIS PEER TO THE REMOTE PEER
-        this.node.connect({ host: peer.host, port: peer.port });
-        // DO THIS ONCE CONNECTED
-        this.node.once('connected', () => {
-          const message = {
-            type: 'TRANSACTION',
-            message: transaction,
-            sender,
-          };
-
-          this.node.broadcast({ data: message });
-        });
-      }
-    });
   }
 }
 
