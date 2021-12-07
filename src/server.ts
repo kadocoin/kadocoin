@@ -59,7 +59,7 @@ const node = P2PModule.peer({
     host: '127.0.0.1',
     port: 5346,
   },
-  wellKnownPeers: { host: '192.168.0.151', port: 5346 },
+  // wellKnownPeers: { host: '192.168.0.151', port: 5346 },
 });
 
 const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
@@ -114,14 +114,6 @@ MongoClient.connect(MONGODB_URI, {
 
     app.listen(PORT, async () => {
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
-
-      console.log({ listenersC: kadocoin_events.listenerCount('connected') });
-      console.log({ listenersF: kadocoin_events.listenerCount('found') });
-      console.log({ listenersB: kadocoin_events.listenerCount('broadcast') });
-
-      // REMOVE ALL `CONNECTED` EVENTS
-      node.removeAllListeners('connected');
-      node.removeAllListeners('found');
     });
   })
   .catch(err => {
