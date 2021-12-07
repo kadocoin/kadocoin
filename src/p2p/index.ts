@@ -76,58 +76,52 @@ class P2P {
 
   handleMessage(): void {
     console.log('entered ahndle');
-    this.node.rpc.on('ready', () => {
-      this.node.on('broadcast', (data: any) => {
-        console.log({ countHandleMessage: this.count });
-        this.count++;
-        switch (data.type) {
-          case MSG_TYPES.BLOCKCHAIN:
-            console.log('BLOCKCHAIN');
-            this.blockchain.addBlockFromPeerToLocal(
-              data.message,
-              true,
-              this.blockchain.chain,
-              () => {
-                // TODO: CLEAR?
-                this.transactionPool.clearBlockchainTransactions({
-                  chain: data.message,
-                });
-              }
-            );
 
-            // TODO: SEND TO OTHER NODES
-            return;
-          case MSG_TYPES.TRANSACTION:
-            console.log('TRANSACTION');
-            console.log({
-              incomingTransaction: data.message,
+    this.node.on('broadcast', (data: any) => {
+      console.log({ countHandleMessage: this.count });
+      this.count++;
+      switch (data.type) {
+        case MSG_TYPES.BLOCKCHAIN:
+          console.log('BLOCKCHAIN');
+          this.blockchain.addBlockFromPeerToLocal(data.message, true, this.blockchain.chain, () => {
+            // TODO: CLEAR?
+            this.transactionPool.clearBlockchainTransactions({
+              chain: data.message,
             });
+          });
 
-            /**
-             * FORWARD TRANSACTION TO PEERS
-             */
+          // TODO: SEND TO OTHER NODES
+          return;
+        case MSG_TYPES.TRANSACTION:
+          console.log('TRANSACTION');
+          console.log({
+            incomingTransaction: data.message,
+          });
 
-            // CHECK FOR EXISTING TRANSACTION
-            const existingTransaction = this.transactionPool.existingTransactionPool({
-              inputAddress: data.message.input.address,
-            });
+          /**
+           * FORWARD TRANSACTION TO PEERS
+           */
 
-            if (existingTransaction) {
-              if (existingTransaction.input.timestamp == data.message.input.timestamp) {
-                ConsoleLog('I already have this transaction. IGNORING IT.');
-                return;
-              }
+          // CHECK FOR EXISTING TRANSACTION
+          const existingTransaction = this.transactionPool.existingTransactionPool({
+            inputAddress: data.message.input.address,
+          });
 
-              this.transactionPool.setTransaction(data.message);
-            } else {
-              this.transactionPool.setTransaction(data.message);
+          if (existingTransaction) {
+            if (existingTransaction.input.timestamp == data.message.input.timestamp) {
+              ConsoleLog('I already have this transaction. IGNORING IT.');
+              return;
             }
 
-            return;
-          default:
-            return;
-        }
-      });
+            this.transactionPool.setTransaction(data.message);
+          } else {
+            this.transactionPool.setTransaction(data.message);
+          }
+
+          return;
+        default:
+          return;
+      }
     });
   }
 
