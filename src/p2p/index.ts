@@ -225,7 +225,7 @@ class P2P {
 
   async onSyncGetData(randomPeer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
-    console.time();
+    console.time('adamu start');
     await this.onSyncGetPeers(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
