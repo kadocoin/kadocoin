@@ -263,8 +263,8 @@ class P2P {
         done('error');
       }
 
-      if (payload.data.message && !err) {
-        const incomingPeers = payload.data.message;
+      if (payload.data && !err) {
+        const incomingPeers = payload.data;
 
         if (incomingPeers) {
           try {
