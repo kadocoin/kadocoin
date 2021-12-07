@@ -75,8 +75,14 @@ class P2P {
   }
 
   receiveTransactions(): void {
-    this.node.handle.receiveTransactions = (payload: any) => {
+    this.node.handle.receiveTransactions = (payload: any, done: any, err: any) => {
       console.log({ incomingTransaction: payload.data.message });
+      if (err) {
+        console.log({ err });
+        done(err);
+      }
+
+      // or: done(null, result);
       console.log('TRANSACTION');
 
       /**
@@ -95,11 +101,11 @@ class P2P {
           ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
           return;
         }
-
-        // FORWARD THE MESSAGE TO OTHER PEERS
-        ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
-        this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
       }
+
+      // FORWARD THE MESSAGE TO OTHER PEERS
+      ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+      this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
     };
   }
 
