@@ -76,36 +76,39 @@ class P2P {
 
   receiveTransactions(): void {
     this.node.handle.receiveTransactions = (payload: any, done: any, err: any) => {
-      console.log({ incomingTransaction: payload.data.message });
       if (err) {
         console.log({ err });
         done(err);
       }
 
-      // or: done(null, result);
-      console.log('TRANSACTION');
+      if (payload.data.message && !err) {
+        console.log({ incomingTransaction: payload.data.message });
 
-      /**
-       * FORWARD TRANSACTION TO PEERS
-       */
+        // or: done(null, result);
+        console.log('TRANSACTION');
 
-      // CHECK FOR EXISTING TRANSACTION
-      const existingTransaction = this.transactionPool.existingTransactionPool({
-        inputAddress: payload.data.message.input.address,
-      });
+        /**
+         * FORWARD TRANSACTION TO PEERS
+         */
 
-      this.transactionPool.setTransaction(payload.data.message);
+        // CHECK FOR EXISTING TRANSACTION
+        const existingTransaction = this.transactionPool.existingTransactionPool({
+          inputAddress: payload.data.message.input.address,
+        });
 
-      if (existingTransaction) {
-        if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
-          ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
-          return;
+        this.transactionPool.setTransaction(payload.data.message);
+
+        if (existingTransaction) {
+          if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
+            ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
+            return;
+          }
         }
-      }
 
-      // FORWARD THE MESSAGE TO OTHER PEERS
-      ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
-      this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
+        // FORWARD THE MESSAGE TO OTHER PEERS
+        ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+        this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
+      }
     };
   }
 
