@@ -137,7 +137,10 @@ class P2P {
   }
 
   async sendTransactions(transaction: Transaction): Promise<void> {
-    const peers = [{ host: '192.168.0.148', port: 5346 }];
+    const peers = [
+      { host: '192.168.0.148', port: 5346 },
+      { host: '192.168.0.151', port: 5346 },
+    ];
     const aboutThisNode = await this.nodeInfo();
 
     // FOR EACH PEER

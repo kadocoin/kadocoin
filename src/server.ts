@@ -29,6 +29,7 @@ import EventsEmitter from 'events';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import P2PModule from 'p2p';
+import { hardCodedPeers } from './config/constants';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -61,7 +62,7 @@ const node = P2PModule.peer({
     host: '127.0.0.1',
     port: 5346,
   },
-  wellKnownPeers: { host: '192.168.0.148', port: 5346 },
+  wellKnownPeers: hardCodedPeers,
 });
 
 const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
