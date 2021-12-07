@@ -101,7 +101,7 @@ node.on('ready', () => {
       await createIndexes(app.locals.db);
       console.log('*****MongoDB is connected*****');
 
-      await p2p.syncNodeWithHistoricalBlockchain();
+      // await p2p.syncNodeWithHistoricalBlockchain();
 
       await new Promise(resolve => setTimeout(resolve, 5000));
 
