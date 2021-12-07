@@ -191,7 +191,7 @@ class P2P {
     }
   }
 
-  private async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
+  async loopAndRunPeers(peers: Array<IHost>): Promise<void> {
     for (let i = 0; i < peers.length; i++) {
       ConsoleLog('=============================');
       console.log({ connected: this.connected });
@@ -213,7 +213,7 @@ class P2P {
 
           await this.onSyncGetData(peers[i]);
 
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          // await new Promise(resolve => setTimeout(resolve, 5000));
         }
       } else {
         ConsoleLog('Found a peer that responded');
@@ -223,7 +223,7 @@ class P2P {
     }
   }
 
-  private async onSyncGetData(randomPeer: IHost): Promise<void> {
+  async onSyncGetData(randomPeer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
     await this.onSyncGetPeers(randomPeer);
 
@@ -234,7 +234,7 @@ class P2P {
     // await this.onSyncGetBlockchain(randomPeer);
   }
 
-  private async onSyncGetPeers(randomPeer: IHost): Promise<void> {
+  async onSyncGetPeers(randomPeer: IHost): Promise<void> {
     console.log('trying to get peers from', randomPeer);
 
     this.node
@@ -255,12 +255,12 @@ class P2P {
       );
   }
 
-  private async onSyncSavePeers(): Promise<void> {
+  async onSyncSavePeers(): Promise<void> {
     this.node.handle.onSyncSavePeers = async (payload: any, done: any, err: any) => {
+      console.log('inside of onSyncSavePeers');
       if (err) {
         console.log({ onSyncSavePeers: err });
         done('error');
-        return;
       }
 
       if (payload.data.message && !err) {
