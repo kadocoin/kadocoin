@@ -108,26 +108,28 @@ class P2P {
 
     // FOR EACH PEER
     hardCodedPeers.forEach(peer => {
-      // CONNECT THIS PEER TO THE REMOTE PEER
-      console.log({ sendingTxsTo: peer });
+      if (peer.host !== local_ip) {
+        // CONNECT THIS PEER TO THE REMOTE PEER
+        console.log({ sendingTxsTo: peer });
 
-      const message = {
-        type: 'TRANSACTION',
-        message: transaction,
-        sender: {
-          about: aboutThisNode,
-          timestamp: new Date().getTime(),
-        },
-      };
+        const message = {
+          type: 'TRANSACTION',
+          message: transaction,
+          sender: {
+            about: aboutThisNode,
+            timestamp: new Date().getTime(),
+          },
+        };
 
-      this.node
-        .remote({
-          host: peer.host,
-          port: peer.port,
-        })
-        .run('handle/receiveTransactions', { data: message }, (err: any, result: any) =>
-          console.log({ err, result })
-        );
+        this.node
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run('handle/receiveTransactions', { data: message }, (err: any, result: any) =>
+            console.log({ err, result })
+          );
+      }
     });
   }
 
