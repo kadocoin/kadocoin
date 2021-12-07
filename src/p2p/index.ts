@@ -225,6 +225,7 @@ class P2P {
 
   async onSyncGetData(randomPeer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
+    console.time();
     await this.onSyncGetPeers(randomPeer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
@@ -285,7 +286,7 @@ class P2P {
             console.log('Error adding peers to local file.', error);
           }
         }
-
+        console.timeEnd();
         done('success');
       }
     };
