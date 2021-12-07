@@ -108,6 +108,10 @@ node.on('ready', () => {
       app.listen(PORT, async () => {
         console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
 
+        console.log({ listenersC: kadocoin_events.listenerCount('connected') });
+        console.log({ listenersF: kadocoin_events.listenerCount('found') });
+        console.log({ listenersB: kadocoin_events.listenerCount('broadcast') });
+
         // REMOVE ALL `CONNECTED` EVENTS
         node.removeAllListeners('connected');
         node.removeAllListeners('found');
