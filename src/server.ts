@@ -26,6 +26,8 @@ import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import EventsEmitter from 'events';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import P2PModule from 'p2p';
 
 /**
@@ -59,7 +61,7 @@ const node = P2PModule.peer({
     host: '127.0.0.1',
     port: 5346,
   },
-  // wellKnownPeers: { host: '192.168.0.151', port: 5346 },
+  wellKnownPeers: { host: '192.168.0.148', port: 5346 },
 });
 
 const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
@@ -109,8 +111,6 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
 
     // await p2p.syncNodeWithHistoricalBlockchain();
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
 
     app.listen(PORT, async () => {
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);

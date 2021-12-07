@@ -66,14 +66,14 @@ class P2P {
     this.node = node;
     this.kadocoin_events = kadocoin_events;
     this.blockchain = blockchain;
-    this.node.store({ key: 'blocks', value: this.blockchain });
+    // this.node.store({ key: 'blocks', value: this.blockchain });
     this.transactionPool = transactionPool;
-    this.node.store({ key: 'transactions', value: this.transactionPool.transactionMap });
+    // this.node.store({ key: 'transactions', value: this.transactionPool.transactionMap });
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
     this.count = 0;
     this.count2 = 0;
-    this.handleMessage();
+    // this.handleMessage();
   }
 
   handleMessage(): void {
