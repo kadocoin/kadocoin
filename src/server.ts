@@ -110,6 +110,7 @@ node.rpc.on('ready', () => {
 
         // REMOVE ALL `CONNECTED` EVENTS
         node.removeAllListeners('connected');
+        node.removeAllListeners('found');
       });
     })
     .catch(err => {

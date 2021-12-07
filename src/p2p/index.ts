@@ -220,6 +220,7 @@ class P2P {
   private async getBlockchainDataFromRandomPeer(randomPeer: IHost): Promise<void> {
     // REMOVE ALL `CONNECTED` EVENTS
     this.node.removeAllListeners('connected');
+    this.node.removeAllListeners('found');
 
     this.node.connect({ host: randomPeer.host, port: randomPeer.port });
 
