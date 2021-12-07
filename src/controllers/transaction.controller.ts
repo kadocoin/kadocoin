@@ -28,6 +28,10 @@ import Mining_Reward from '../util/supply_reward';
 import sanitize_html from '../util/sanitize_html';
 
 export default class TransactionController {
+  count: number;
+  constructor() {
+    this.count = 0;
+  }
   /**
    * Send Kadocoin
    *
@@ -150,6 +154,7 @@ export default class TransactionController {
    * @return a transaction object
    */
   send = async (req: Request, res: Response): Promise<Response> => {
+    console.log({ count: this.count });
     // ENFORCE 8 DECIMAL PLACES
     if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -246,6 +251,7 @@ export default class TransactionController {
     transactionPool.setTransaction(transaction);
 
     p2p.broadcastTransaction(transaction);
+    this.count++;
 
     // TODO: SAVE TRANSACTION TO DB
 
