@@ -116,7 +116,7 @@ class P2P {
   }
 
   receiveBlock(): void {
-    this.node.handle.receiveBlock = (payload: any, done: any, err: any) => {
+    this.node.handle.sendBlockToPeers = (payload: any, done: any, err: any) => {
       if (err) return done(err);
 
       if (payload.data.message && !err) {
