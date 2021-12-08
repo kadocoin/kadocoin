@@ -11,7 +11,7 @@
 // import plexus from '@nephys/plexus';
 import publicIp from 'public-ip';
 import fs from 'fs';
-import { IHost } from '../types';
+import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
@@ -144,7 +144,7 @@ class P2P {
            * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
            */
           ConsoleLog('FORWARDING BLOCK TO MY PEERS.');
-          this.forwardBlockToPeers(payload.data.message, payload.data.sender);
+          this.forwardBlockToPeers(payload.data.message);
         }
 
         if (isExistingBlock) {
@@ -165,7 +165,9 @@ class P2P {
         console.log({ sendingBlockTo: peer });
 
         info.sender = {
-          about: aboutThisNode,
+          host: aboutThisNode.host,
+          port: aboutThisNode.port,
+          id: aboutThisNode.id,
           timestamp: new Date().getTime(),
         };
 
@@ -189,21 +191,24 @@ class P2P {
     });
   }
 
-  async forwardBlockToPeers(
-    block: Block,
-    sender: { host: string; port: number; id: string }
-  ): Promise<void> {
+  async forwardBlockToPeers(incomingObj: incomingObj): Promise<void> {
     const peers = JSON.parse(await this.getPeers()) as IHost[];
 
     // FOR EACH PEER
     peers.forEach(peer => {
-      if (sender.host != peer.host && peer.host != local_ip) {
+      if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
         console.log({ forwardingBlockTo: peer });
+
+        incomingObj.info.sender = {
+          host: incomingObj.info.sender.host,
+          port: incomingObj.info.sender.port,
+          id: incomingObj.info.sender.id,
+          timestamp: new Date().getTime(),
+        };
 
         const message = {
           type: 'BLOCK',
-          message: block,
-          sender,
+          message: incomingObj,
         };
 
         this.node

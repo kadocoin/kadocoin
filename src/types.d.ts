@@ -188,11 +188,9 @@ export interface incomingObj {
     LOCAL_IP: string;
     height: number;
     sender: {
-      about: {
-        host: string;
-        port: number;
-        id: string;
-      };
+      host: string;
+      port: number;
+      id: string;
       timestamp: number;
     };
   };
