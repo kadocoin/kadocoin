@@ -29,7 +29,7 @@ class TransactionMiner {
     this.message = message;
   }
 
-  mineTransactions(): string {
+  async mineTransactions(): Promise<string> {
     // GET THE TRANSACTION POOL'S VALID TRANSACTIONS
     const validTransactions = this.transactionPool.validTransactions();
 
@@ -50,7 +50,8 @@ class TransactionMiner {
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
 
       // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
-      this.p2p.broadcastNewlyMinedBlock({
+
+      await this.p2p.sendBlockToPeers({
         block: newlyMinedBlock,
         info: { KADOCOIN_VERSION, LOCAL_IP: 'replace_me', height: this.blockchain.chain.length },
       });

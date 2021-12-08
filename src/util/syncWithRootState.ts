@@ -78,7 +78,7 @@ export default async function syncWithRootState({
           const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
             chainLength: blockchain.chain.length,
           });
-          ConsoleLog(`MINING_REWARD: ${MINING_REWARD}, SUPPLY:${SUPPLY}`);
+          ConsoleLog(`MINING_REWARD: ${MINING_REWARD}, SUPPLY: ${SUPPLY}`);
         } else {
           ConsoleLog(`${peer.host}:2000/blocks - ${error}`);
         }

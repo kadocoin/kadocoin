@@ -115,21 +115,6 @@ class P2P {
     });
   }
 
-  isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {
-    let is_duplicate = false;
-    for (let i = 0; i < this.blockchain.chain.length; i++) {
-      const block = this.blockchain.chain[i];
-
-      if (incomingBlock.hashOfAllHashes === block.hashOfAllHashes) {
-        is_duplicate = true;
-      }
-
-      if (is_duplicate) break;
-    }
-
-    return is_duplicate;
-  }
-
   receiveBlock(): void {
     this.node.handle.receiveBlock = (payload: any, done: any, err: any) => {
       if (err) return done(err);
@@ -166,6 +151,37 @@ class P2P {
         }
       }
     };
+  }
+
+  async sendBlockToPeers({ block, info }: { block: Block; info: any }): Promise<void> {
+    const aboutThisNode = await this.nodeInfo();
+    console.log({ block, info });
+
+    /** FOR EACH PEER */
+    hardCodedPeers.forEach(peer => {
+      if (peer.host !== local_ip) {
+        console.log({ sendingBlockTo: peer });
+
+        const message = {
+          type: 'BLOCK',
+          message: block,
+          info: info,
+          sender: {
+            about: aboutThisNode,
+            timestamp: new Date().getTime(),
+          },
+        };
+
+        this.node
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run('handle/sendBlockToPeers', { data: message }, (err: any, result: any) =>
+            console.log({ err, result })
+          );
+      }
+    });
   }
 
   async forwardBlockToPeers(
@@ -266,6 +282,21 @@ class P2P {
       return getPeersFromFile(peersStorageFile);
     }
     return '';
+  }
+
+  isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {
+    let is_duplicate = false;
+    for (let i = 0; i < this.blockchain.chain.length; i++) {
+      const block = this.blockchain.chain[i];
+
+      if (incomingBlock.hashOfAllHashes === block.hashOfAllHashes) {
+        is_duplicate = true;
+      }
+
+      if (is_duplicate) break;
+    }
+
+    return is_duplicate;
   }
 }
 
