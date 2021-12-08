@@ -9,6 +9,7 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
+import P2PModule from 'p2p';
 import app from './app';
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
@@ -25,10 +26,6 @@ import { MONGODB_URI, DB_NAME, PORT, ENVIRONMENT } from './config/secret';
 import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
-import EventsEmitter from 'events';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import P2PModule from 'p2p';
 import { hardCodedPeers } from './config/constants';
 import syncWithRootState from './util/syncWithRootState';
 
@@ -48,25 +45,16 @@ const blockchain = new Blockchain();
 const transactionPool = new TransactionPool();
 
 /**
- * @var kadocoin_events app wide variable
- */
-const kadocoin_events = new EventsEmitter();
-
-/**
  * @var node_P2P app wide variable
  */
 
 const node = P2PModule.peer({
   host: '127.0.0.1',
   port: 5346,
-  metadata: {
-    host: '127.0.0.1',
-    port: 5346,
-  },
   wellKnownPeers: hardCodedPeers,
 });
 
-const p2p = new P2P({ blockchain, transactionPool, kadocoin_events, node });
+const p2p = new P2P({ blockchain, transactionPool, node });
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
   new UserRouter(app, blockchain);
