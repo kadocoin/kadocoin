@@ -208,7 +208,12 @@ class P2P {
 
     // FOR EACH PEER
     peers.forEach(peer => {
-      console.log({ peer: peer.host, local_ip });
+      console.log(
+        { peer: peer.host, local_ip },
+        sender.host != peer.host || peer.host != local_ip,
+        sender.host != peer.host && peer.host != local_ip
+      );
+
       if (sender.host != peer.host || peer.host != local_ip) {
         console.log({ forwardingTo: peer });
 
