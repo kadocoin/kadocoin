@@ -214,26 +214,28 @@ class P2P {
         sender.host != peer.host && peer.host != local_ip
       );
 
-      if (sender.host != peer.host || peer.host != local_ip) {
-        console.log({ forwardingTo: peer });
+      if (sender.host != peer.host) {
+        if (peer.host != local_ip) {
+          console.log({ forwardingTo: peer });
 
-        const message = {
-          type: 'TRANSACTION',
-          message: transaction,
-          sender,
-        };
+          const message = {
+            type: 'TRANSACTION',
+            message: transaction,
+            sender,
+          };
 
-        this.node
-          .remote({
-            host: peer.host,
-            port: peer.port,
-          })
-          .run(
-            'handle/receiveTransactions',
-            { data: message },
-            (forwarding_err: any, forwarding_result: any) =>
-              console.log({ forwarding_err, forwarding_result })
-          );
+          this.node
+            .remote({
+              host: peer.host,
+              port: peer.port,
+            })
+            .run(
+              'handle/receiveTransactions',
+              { data: message },
+              (forwarding_err: any, forwarding_result: any) =>
+                console.log({ forwarding_err, forwarding_result })
+            );
+        }
       }
     });
   }
