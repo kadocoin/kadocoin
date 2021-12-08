@@ -18,6 +18,8 @@ import TransactionPool from '../wallet/transaction-pool';
 import ConsoleLog from '../util/console-log';
 import getPeersFromFile from '../util/getPeersFromFile';
 import { hardCodedPeers, peersStorageFile } from '../config/constants';
+import Block from '../blockchain/block';
+import { exit } from 'process';
 
 let local_ip = '192.168.0.2'; // MAC
 
@@ -114,29 +116,89 @@ class P2P {
     });
   }
 
+  isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {
+    let is_duplicate = false;
+    for (let i = 0; i < this.blockchain.chain.length; i++) {
+      const block = this.blockchain.chain[i];
+
+      if (incomingBlock.hashOfAllHashes === block.hashOfAllHashes) {
+        is_duplicate = true;
+      }
+
+      if (is_duplicate) break;
+    }
+
+    return is_duplicate;
+  }
+
   receiveBlock(): void {
     this.node.handle.receiveBlock = (payload: any, done: any, err: any) => {
       if (err) return done(err);
 
       if (payload.data.message && !err) {
         console.log({ INCOMING_BLOCK: payload.data.message });
-        this.blockchain.addBlockFromPeerToLocal(
-          payload.data.message,
-          true,
-          this.blockchain.chain,
-          () => {
-            // TODO: CLEAR?
-            this.transactionPool.clearBlockchainTransactions({
-              chain: payload.data.message,
-            });
-          }
-        );
 
-        // TODO: SEND TO OTHER NODES
+        // CHECK FOR EXISTING BLOCK
+        const isExistingBlock = this.isExistingBlock({ incomingBlock: payload.data.message });
 
-        // this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
+        if (!isExistingBlock) {
+          this.blockchain.addBlockFromPeerToLocal(
+            payload.data.message,
+            true,
+            this.blockchain.chain,
+            () => {
+              // TODO: CLEAR?
+              this.transactionPool.clearBlockchainTransactions({
+                chain: payload.data.message,
+              });
+            }
+          );
+
+          /**
+           * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
+           */
+          ConsoleLog('FORWARDING BLOCK TO MY PEERS.');
+          this.forwardBlockToPeers(payload.data.message, payload.data.sender);
+        }
+
+        if (isExistingBlock) {
+          ConsoleLog("I already have this BLOCK. I'M NOT FORWARDING IT.");
+          return;
+        }
       }
     };
+  }
+
+  async forwardBlockToPeers(
+    block: Block,
+    sender: { host: string; port: number; id: string }
+  ): Promise<void> {
+    const peers = JSON.parse(await this.getPeers()) as IHost[];
+
+    // FOR EACH PEER
+    peers.forEach(peer => {
+      if (sender.host != peer.host) {
+        console.log({ forwardingTo: peer });
+
+        const message = {
+          type: 'BLOCK',
+          message: block,
+          sender,
+        };
+
+        this.node
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run(
+            'handle/receiveBlock',
+            { data: message },
+            (forwarding_blk_err: any, forwarding_blk_result: any) =>
+              console.log({ forwarding_blk_err, forwarding_blk_result })
+          );
+      }
+    });
   }
 
   async forwardTransactionToPeers(
