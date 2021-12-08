@@ -19,7 +19,6 @@ import ConsoleLog from '../util/console-log';
 import getPeersFromFile from '../util/getPeersFromFile';
 import { hardCodedPeers, peersStorageFile } from '../config/constants';
 import Block from '../blockchain/block';
-import { exit } from 'process';
 
 let local_ip = '192.168.0.2'; // MAC
 
