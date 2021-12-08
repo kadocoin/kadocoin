@@ -116,8 +116,10 @@ class P2P {
   }
 
   receiveBlock(): void {
-    this.node.handle.sendBlockToPeers = (payload: any, done: any, err: any) => {
+    this.node.handle.receiveBlockFromPeers = (payload: any, done: any, err: any) => {
       if (err) return done(err);
+
+      console.log(payload.data.message);
 
       if (payload.data.message && !err) {
         console.log({ INCOMING_BLOCK: payload.data.message });
@@ -162,13 +164,16 @@ class P2P {
       if (peer.host !== local_ip) {
         console.log({ sendingBlockTo: peer });
 
+        info.sender = {
+          about: aboutThisNode,
+          timestamp: new Date().getTime(),
+        };
+
         const message = {
           type: 'BLOCK',
-          message: block,
-          info: info,
-          sender: {
-            about: aboutThisNode,
-            timestamp: new Date().getTime(),
+          message: {
+            block,
+            info,
           },
         };
 
@@ -177,7 +182,7 @@ class P2P {
             host: peer.host,
             port: peer.port,
           })
-          .run('handle/sendBlockToPeers', { data: message }, (err: any, result: any) =>
+          .run('handle/receiveBlockFromPeers', { data: message }, (err: any, result: any) =>
             console.log({ err, result })
           );
       }

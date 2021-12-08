@@ -183,5 +183,17 @@ export interface REWARD_INPUT {
 
 export interface incomingObj {
   block: Block;
-  info: { KADOCOIN_VERSION: string; LOCAL_IP: string; height: number };
+  info: {
+    KADOCOIN_VERSION: string;
+    LOCAL_IP: string;
+    height: number;
+    sender: {
+      about: {
+        host: string;
+        port: number;
+        id: string;
+      };
+      timestamp: number;
+    };
+  };
 }

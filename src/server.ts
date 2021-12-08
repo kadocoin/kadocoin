@@ -54,6 +54,8 @@ const node = P2PModule.peer({
   wellKnownPeers: hardCodedPeers,
 });
 
+console.log(node);
+
 const p2p = new P2P({ blockchain, transactionPool, node });
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
