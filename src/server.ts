@@ -30,6 +30,7 @@ import EventsEmitter from 'events';
 // @ts-ignore
 import P2PModule from 'p2p';
 import { hardCodedPeers } from './config/constants';
+import syncWithRootState from './util/syncWithRootState';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -99,7 +100,7 @@ MongoClient.connect(MONGODB_URI, {
     app.locals.dbClient = client;
     app.locals.db = client.db(DB_NAME);
 
-    // CREATE INDEX
+    /** CREATE INDEX */
     const createIndexes = async (db: Db): Promise<void> => {
       await Promise.all([
         db
@@ -111,7 +112,8 @@ MongoClient.connect(MONGODB_URI, {
     await createIndexes(app.locals.db);
     console.log('*****MongoDB is connected*****');
 
-    await p2p.syncNodeWithHistoricalBlockchain();
+    /** GET BLOCKCHAIN DATA FROM PEERS */
+    await syncWithRootState({ blockchain, transactionPool });
 
     app.listen(PORT, async () => {
       console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
