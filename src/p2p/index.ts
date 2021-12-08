@@ -50,6 +50,7 @@ class P2P {
     this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
     this.receiveTransactions();
+    this.receiveBlock();
   }
 
   receiveTransactions(): void {
@@ -111,6 +112,31 @@ class P2P {
           );
       }
     });
+  }
+
+  receiveBlock(): void {
+    this.node.handle.receiveBlock = (payload: any, done: any, err: any) => {
+      if (err) return done(err);
+
+      if (payload.data.message && !err) {
+        console.log({ INCOMING_BLOCK: payload.data.message });
+        this.blockchain.addBlockFromPeerToLocal(
+          payload.data.message,
+          true,
+          this.blockchain.chain,
+          () => {
+            // TODO: CLEAR?
+            this.transactionPool.clearBlockchainTransactions({
+              chain: payload.data.message,
+            });
+          }
+        );
+
+        // TODO: SEND TO OTHER NODES
+
+        // this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
+      }
+    };
   }
 
   async forwardTransactionToPeers(

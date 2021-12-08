@@ -136,8 +136,10 @@ export default class TransactionController {
       }
     }
 
+    /** SAVE TRANSACTION TO MEMORY */
     transactionPool.setTransaction(transaction);
 
+    /** SEND TRANSACTION TO OTHER PEERS */
     p2p.sendTransactions(transaction);
 
     // TODO: SAVE TRANSACTION TO DB
@@ -248,10 +250,11 @@ export default class TransactionController {
       }
     }
 
+    /** SAVE TRANSACTION TO MEMORY */
     transactionPool.setTransaction(transaction);
 
+    /** SEND TRANSACTION TO OTHER PEERS */
     p2p.sendTransactions(transaction);
-    this.count++;
 
     // TODO: SAVE TRANSACTION TO DB
 
