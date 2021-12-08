@@ -176,7 +176,7 @@ class P2P {
 
     // FOR EACH PEER
     peers.forEach(peer => {
-      if (sender.host != peer.host) {
+      if (sender.host != peer.host || peer.host != local_ip) {
         console.log({ forwardingTo: peer });
 
         const message = {
@@ -208,7 +208,7 @@ class P2P {
 
     // FOR EACH PEER
     peers.forEach(peer => {
-      if (sender.host != peer.host) {
+      if (sender.host != peer.host || peer.host != local_ip) {
         console.log({ forwardingTo: peer });
 
         const message = {
