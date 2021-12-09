@@ -11,9 +11,6 @@ export default async function readFileLineByLine(): Promise<void> {
     crlfDelay: Infinity,
   });
 
-  // Note: we use the crlfDelay option to recognize all instances of CR LF
-  // ('\r\n') in the file as a single line break.
-
   for await (const line of rl) {
     // Each line in the file will be successively available here as `line`.
     chain.push(JSON.parse(line));

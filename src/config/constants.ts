@@ -54,6 +54,7 @@ export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = prod ? 'data/blockchain.txt' : 'src/data/blockchain.txt';
+export const logFile = 'log/main.log';
 export const peersStorageFile = prod ? 'data/peers.txt' : 'src/data/peers.txt';
 export const hardCodedPeers = [
   { host: '192.168.0.148', port: 5346 }, // ABUJA

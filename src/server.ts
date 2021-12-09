@@ -28,6 +28,7 @@ import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import syncWithRootState from './util/syncWithRootState';
+import restartServer from './util/restart-server';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -103,7 +104,10 @@ MongoClient.connect(MONGODB_URI, {
     /** GET BLOCKCHAIN DATA FROM PEERS */
     const has_downloaded_txs_and_blks = await syncWithRootState({ blockchain, transactionPool });
 
-    if (!has_downloaded_txs_and_blks) return console.log("Kadocoin didn't start.");
+    if (!has_downloaded_txs_and_blks) {
+      restartServer();
+      return;
+    }
 
     app
       .listen(PORT, async () => {
