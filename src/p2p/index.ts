@@ -33,7 +33,7 @@ class P2P {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
   rpc: any;
-  hardCodedPeers: { host: string; port: number }[];
+  hardCodedPeers: IHost[];
   connected: boolean;
 
   constructor({
@@ -192,70 +192,78 @@ class P2P {
   }
 
   async forwardBlockToPeers(incomingObj: incomingObj): Promise<void> {
-    const peers = JSON.parse(await this.getPeers()) as IHost[];
+    let peers = await this.getPeers();
 
-    // FOR EACH PEER
-    peers.forEach(peer => {
-      if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
-        console.log({ forwardingBlockTo: peer });
+    if (peers) {
+      peers = JSON.parse(peers as string) as [];
 
-        incomingObj.info.sender = {
-          host: incomingObj.info.sender.host,
-          port: incomingObj.info.sender.port,
-          id: incomingObj.info.sender.id,
-          timestamp: new Date().getTime(),
-        };
+      // FOR EACH PEER
+      peers.forEach((peer: IHost) => {
+        if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
+          console.log({ forwardingBlockTo: peer });
 
-        const message = {
-          type: 'BLOCK',
-          message: incomingObj,
-        };
+          incomingObj.info.sender = {
+            host: incomingObj.info.sender.host,
+            port: incomingObj.info.sender.port,
+            id: incomingObj.info.sender.id,
+            timestamp: new Date().getTime(),
+          };
 
-        this.node
-          .remote({
-            host: peer.host,
-            port: peer.port,
-          })
-          .run(
-            'handle/receiveBlock',
-            { data: message },
-            (forwarding_blk_err: any, forwarding_blk_result: any) =>
-              console.log({ forwarding_blk_err, forwarding_blk_result })
-          );
-      }
-    });
+          const message = {
+            type: 'BLOCK',
+            message: incomingObj,
+          };
+
+          this.node
+            .remote({
+              host: peer.host,
+              port: peer.port,
+            })
+            .run(
+              'handle/receiveBlock',
+              { data: message },
+              (forwarding_blk_err: any, forwarding_blk_result: any) =>
+                console.log({ forwarding_blk_err, forwarding_blk_result })
+            );
+        }
+      });
+    }
   }
 
   async forwardTransactionToPeers(
     transaction: Transaction,
     sender: { host: string; port: number; id: string }
   ): Promise<void> {
-    const peers = JSON.parse(await this.getPeers()) as IHost[];
+    let peers = await this.getPeers();
 
-    // FOR EACH PEER
-    peers.forEach(peer => {
-      if (sender.host != peer.host && peer.host != local_ip) {
-        console.log({ forwardingTxsTo: peer });
+    if (peers) {
+      peers = JSON.parse(peers as string) as [];
 
-        const message = {
-          type: 'TRANSACTION',
-          message: transaction,
-          sender,
-        };
+      // FOR EACH PEER
+      peers.forEach((peer: IHost) => {
+        if (sender.host != peer.host && peer.host != local_ip) {
+          console.log({ forwardingTxsTo: peer });
 
-        this.node
-          .remote({
-            host: peer.host,
-            port: peer.port,
-          })
-          .run(
-            'handle/receiveTransactions',
-            { data: message },
-            (forwarding_err: any, forwarding_result: any) =>
-              console.log({ forwarding_err, forwarding_result })
-          );
-      }
-    });
+          const message = {
+            type: 'TRANSACTION',
+            message: transaction,
+            sender,
+          };
+
+          this.node
+            .remote({
+              host: peer.host,
+              port: peer.port,
+            })
+            .run(
+              'handle/receiveTransactions',
+              { data: message },
+              (forwarding_err: any, forwarding_result: any) =>
+                console.log({ forwarding_err, forwarding_result })
+            );
+        }
+      });
+    }
   }
 
   private getPeersNotInLocal(incomingPeers: Array<IHost>, localPeers: Array<IHost>) {
@@ -287,11 +295,11 @@ class P2P {
     };
   }
 
-  async getPeers(): Promise<string> {
+  async getPeers(): Promise<string | []> {
     if (fs.existsSync(peersStorageFile)) {
       return getPeersFromFile(peersStorageFile);
     }
-    return '';
+    return [];
   }
 
   isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {

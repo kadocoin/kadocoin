@@ -15,7 +15,7 @@ export default async function syncWithRootState({
 }: {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
-}): Promise<void> {
+}): Promise<boolean> {
   let has_connected_to_a_peer__blks = false;
   let has_connected_to_a_peer__txs = false;
 
@@ -117,4 +117,6 @@ export default async function syncWithRootState({
       break;
     }
   }
+
+  return has_connected_to_a_peer__blks && has_connected_to_a_peer__txs;
 }

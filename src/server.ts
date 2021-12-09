@@ -54,8 +54,6 @@ const node = P2PModule.peer({
   wellKnownPeers: hardCodedPeers,
 });
 
-console.log(node);
-
 const p2p = new P2P({ blockchain, transactionPool, node });
 
 const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
@@ -103,11 +101,15 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
-    await syncWithRootState({ blockchain, transactionPool });
+    const has_downloaded_txs_and_blks = await syncWithRootState({ blockchain, transactionPool });
 
-    app.listen(PORT, async () => {
-      console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
-    });
+    if (!has_downloaded_txs_and_blks) console.log("Kadocoin didn't start.");
+
+    app
+      .listen(PORT, async () => {
+        console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+      })
+      .on('error', err => console.log(err));
   })
   .catch(err => {
     throw new Error(err);
