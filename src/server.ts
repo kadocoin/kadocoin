@@ -103,7 +103,7 @@ MongoClient.connect(MONGODB_URI, {
     /** GET BLOCKCHAIN DATA FROM PEERS */
     const has_downloaded_txs_and_blks = await syncWithRootState({ blockchain, transactionPool });
 
-    if (!has_downloaded_txs_and_blks) console.log("Kadocoin didn't start.");
+    if (!has_downloaded_txs_and_blks) return console.log("Kadocoin didn't start.");
 
     app
       .listen(PORT, async () => {
