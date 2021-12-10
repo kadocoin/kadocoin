@@ -5,6 +5,7 @@ function get_local_ip(): string {
   if (process.env.DEV_MACHINE === 'ubuntu') local_ip = '192.168.0.155';
   if (process.env.DEV_MACHINE === 'bauchi') local_ip = '192.168.0.151';
 
+  console.log({ local_ip });
   return local_ip;
 }
 

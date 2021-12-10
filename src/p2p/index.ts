@@ -19,14 +19,9 @@ import ConsoleLog from '../util/console-log';
 import getPeersFromFile from '../util/getPeersFromFile';
 import { hardCodedPeers, peersStorageFile } from '../config/constants';
 import Block from '../blockchain/block';
+import get_local_ip from '../util/local';
 
-let local_ip = '192.168.0.2'; // MAC
-
-if (process.env.DEV_MACHINE === 'abuja') local_ip = '192.168.0.148';
-if (process.env.DEV_MACHINE === 'ubuntu') local_ip = '192.168.0.155';
-if (process.env.DEV_MACHINE === 'bauchi') local_ip = '192.168.0.151';
-
-console.log({ local_ip });
+const local_ip = get_local_ip();
 
 class P2P {
   node: any;
