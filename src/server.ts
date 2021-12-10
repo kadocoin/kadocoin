@@ -29,6 +29,7 @@ import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import syncWithRootState from './util/syncWithRootState';
 import restartServer from './util/restart-server';
+import createFolder from './util/create-folder';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -102,12 +103,11 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
+    /** CREATE LOG FOLDER */
+    createFolder('log');
     const has_downloaded_txs_and_blks = await syncWithRootState({ blockchain, transactionPool });
 
-    if (!has_downloaded_txs_and_blks) {
-      restartServer();
-      return;
-    }
+    if (!has_downloaded_txs_and_blks) return restartServer();
 
     app
       .listen(PORT, async () => {
