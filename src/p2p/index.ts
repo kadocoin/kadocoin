@@ -80,7 +80,7 @@ class P2P {
         /**
          * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
          */
-        ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+
         this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
       }
     };
@@ -237,6 +237,7 @@ class P2P {
     let peers = await this.getPeers();
 
     if (peers) {
+      ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
       peers = JSON.parse(peers as string) as [];
 
       // FOR EACH PEER
