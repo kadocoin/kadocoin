@@ -104,7 +104,7 @@ MongoClient.connect(MONGODB_URI, {
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
     /** CREATE LOG FOLDER */
-    createFolder('log');
+    createFolder('logs');
     const has_downloaded_txs_and_blks = await syncWithRootState({ blockchain, transactionPool });
 
     if (!has_downloaded_txs_and_blks) return restartServer();
