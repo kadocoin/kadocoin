@@ -10,7 +10,6 @@ import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Transaction from '../wallet/transaction';
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
-const prod = ENVIRONMENT === 'production';
 
 const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 5000;
@@ -53,9 +52,9 @@ const REWARD_INPUT: REWARD_INPUT = {
 export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
-export const blockchainStorageFile = prod ? 'data/blockchain.txt' : 'src/data/blockchain.txt';
+export const blockchainStorageFile = 'data/blockchain.txt';
 export const logFile = 'logs/main.log';
-export const peersStorageFile = prod ? 'data/peers.txt' : 'src/data/peers.txt';
+export const peersStorageFile = 'data/peers.txt';
 export const hardCodedPeers = [
   { host: '192.168.0.148', port: 5346 }, // ABUJA
   // { host: '192.168.0.155', port: 5346 }, // UBUNTU

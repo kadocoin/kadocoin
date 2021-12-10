@@ -11,10 +11,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 # Created by https://www.toptal.com/developers/gitignore/api/react,node
 # Edit at https://www.topthuskyal.com/developers/gitignore?templates=react,node
 
 ### Node ###
+data
 # Logs
 logs
 logs.txt
