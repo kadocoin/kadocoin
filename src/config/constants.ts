@@ -9,7 +9,10 @@ import { REWARD_INPUT } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import size from '../util/size';
 import Transaction from '../wallet/transaction';
+import createFolderOrFile from '../util/create-folder-or-file';
+
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
+// const prod = ENVIRONMENT === 'production';
 
 const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 5000;
@@ -61,6 +64,10 @@ export const hardCodedPeers = [
   { host: '192.168.0.2', port: 5346 }, // MAC
   // { host: '192.168.0.151', port: 5346 }, // BAUCHI
 ];
+
+/** CREATE LOG FOLDER */
+createFolderOrFile('logs', 'folder');
+createFolderOrFile('data', 'folder');
 
 export const sampleDataForTests = {
   id: '2d5791f0-d9af-11eb-ac13-099d1d20fcfc',
