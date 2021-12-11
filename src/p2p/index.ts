@@ -274,7 +274,9 @@ class P2P {
   // start
   async syncNodeWithHistoricalBlockchain(): Promise<boolean> {
     // LOOP THRU HARDCODED PEERS
+    console.log({ hardcodedPeers: this.hardCodedPeers });
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
+    console.log({ status });
 
     // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
     if (!status) {
