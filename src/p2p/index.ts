@@ -305,6 +305,7 @@ class P2P {
         has_connected_to_a_peer__blks: this.has_connected_to_a_peer__blks,
       });
 
+      console.log(peers[i].host, local_ip);
       if (peers[i].host !== local_ip) {
         //  NODE CONNECT ATTEMPT
         console.log('');
