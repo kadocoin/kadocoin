@@ -106,7 +106,7 @@ MongoClient.connect(MONGODB_URI, {
 
     console.log({ has_downloaded_txs_and_blks });
 
-    // if (!has_downloaded_txs_and_blks) return restartServer();
+    if (!has_downloaded_txs_and_blks) return restartServer();
 
     app
       .listen(PORT, async () => {
