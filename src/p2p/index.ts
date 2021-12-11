@@ -275,7 +275,6 @@ class P2P {
 
   async syncNodeWithHistoricalBlockchain(): Promise<boolean> {
     // LOOP THRU HARDCODED PEERS
-    console.log({ hardcodedPeers: this.hardCodedPeers });
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
     console.log({ status });
 
@@ -287,7 +286,7 @@ class P2P {
       console.log('');
       console.log('RETRIEVING PEERS FROM LOCAL FILE');
       const peers = await this.getPeers();
-      console.log({ peers });
+
       if (peers.length) {
         const peersParsed = JSON.parse(peers as string);
 
