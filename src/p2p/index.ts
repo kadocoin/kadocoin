@@ -37,6 +37,7 @@ class P2P {
   connected: boolean;
   has_connected_to_a_peer__blks: boolean;
   has_connected_to_a_peer__txs: boolean;
+  loopCount: number;
 
   constructor({
     blockchain,
@@ -54,6 +55,7 @@ class P2P {
     this.hardCodedPeers = hardCodedPeers;
     this.has_connected_to_a_peer__blks = false;
     this.has_connected_to_a_peer__txs = false;
+    this.loopCount = 0;
     this.receiveTransactions();
     this.receiveBlock();
   }
@@ -277,9 +279,10 @@ class P2P {
     console.log({ hardcodedPeers: this.hardCodedPeers });
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
     console.log({ status });
+    console.log({ loopCount: this.loopCount });
 
     // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
-    if (!status) {
+    if (!status && this.loopCount == this.hardCodedPeers.length - 1) {
       console.log('');
       console.log('RETRIEVING PEERS FROM LOCAL FILE');
       const peers = await this.getPeers();
@@ -307,6 +310,7 @@ class P2P {
 
       console.log(peers[i].host, local_ip);
       if (peers[i].host !== local_ip) {
+        this.loopCount++;
         //  NODE CONNECT ATTEMPT
         console.log('');
         console.log('');
