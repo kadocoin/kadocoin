@@ -281,7 +281,8 @@ class P2P {
       console.log('');
       console.log('RETRIEVING PEERS FROM LOCAL FILE');
       const peers = await this.getPeers();
-      if (peers) {
+      console.log({ peers });
+      if (peers.length) {
         const peersParsed = JSON.parse(peers as string);
 
         if (peersParsed) {
@@ -326,6 +327,8 @@ class P2P {
         ConsoleLog('Found a peer. Exiting...');
         return true;
       }
+
+      return false;
     }
   }
 
