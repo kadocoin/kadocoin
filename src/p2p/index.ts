@@ -282,7 +282,10 @@ class P2P {
     console.log({ loopCount: this.loopCount });
 
     // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
-    if (!status && this.loopCount == this.hardCodedPeers.length - 1) {
+    if (
+      !this.has_connected_to_a_peer__blks ||
+      (!this.has_connected_to_a_peer__txs && this.loopCount == this.hardCodedPeers.length - 1)
+    ) {
       console.log('');
       console.log('RETRIEVING PEERS FROM LOCAL FILE');
       const peers = await this.getPeers();
@@ -334,8 +337,6 @@ class P2P {
         ConsoleLog('Found a peer. Exiting...');
         return true;
       }
-
-      return false;
     }
   }
 
