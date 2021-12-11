@@ -273,13 +273,11 @@ class P2P {
     }
   }
 
-  // start
   async syncNodeWithHistoricalBlockchain(): Promise<boolean> {
     // LOOP THRU HARDCODED PEERS
     console.log({ hardcodedPeers: this.hardCodedPeers });
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
     console.log({ status });
-    console.log({ loopCount: this.loopCount });
 
     // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
     if (
@@ -311,7 +309,6 @@ class P2P {
         has_connected_to_a_peer__blks: this.has_connected_to_a_peer__blks,
       });
 
-      console.log(peers[i].host, local_ip);
       if (peers[i].host !== local_ip) {
         this.loopCount++;
         //  NODE CONNECT ATTEMPT
