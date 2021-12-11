@@ -27,7 +27,6 @@ import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
-import syncWithRootState from './util/syncWithRootState';
 import restartServer from './util/restart-server';
 
 /**
@@ -103,7 +102,9 @@ MongoClient.connect(MONGODB_URI, {
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
-    const has_downloaded_txs_and_blks = await syncWithRootState({ blockchain, transactionPool });
+    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
+
+    console.log({ has_downloaded_txs_and_blks });
 
     if (!has_downloaded_txs_and_blks) return restartServer();
 
