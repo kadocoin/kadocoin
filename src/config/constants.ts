@@ -68,6 +68,7 @@ export const hardCodedPeers = [
 /** CREATE LOG FOLDER */
 createFolderOrFile('logs', 'folder');
 createFolderOrFile('data', 'folder');
+createFolderOrFile('wallets', 'folder');
 
 export const sampleDataForTests = {
   id: '2d5791f0-d9af-11eb-ac13-099d1d20fcfc',

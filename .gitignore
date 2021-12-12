@@ -17,6 +17,7 @@
 
 ### Node ###
 data
+wallets
 # Logs
 logs
 logs.txt

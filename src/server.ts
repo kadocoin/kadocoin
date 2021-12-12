@@ -28,6 +28,8 @@ import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import restartServer from './util/restart-server';
+import appendWalletToFile from './util/appendWalletToFile';
+import getWalletsFromFile from './util/get-wallets-from-file';
 
 /**
  * @var localWallet - signs and verifies transactions on this node
@@ -102,11 +104,15 @@ MongoClient.connect(MONGODB_URI, {
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
-    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
+    // const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
-    console.log({ has_downloaded_txs_and_blks });
+    // console.log({ has_downloaded_txs_and_blks });
 
-    if (!has_downloaded_txs_and_blks) return restartServer();
+    // if (!has_downloaded_txs_and_blks) return restartServer();
+
+    // appendWalletToFile([JSON.stringify(localWallet.keyPairHex)], 'wallets/wallets.txt');
+    // getWalletsFromFile();
+    console.log(localWallet);
 
     app
       .listen(PORT, async () => {

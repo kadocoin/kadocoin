@@ -17,12 +17,26 @@ class Wallet {
   public keyPair: any;
   public publicKey: string;
   public address: string;
+  privateHex: string;
+  keyPairHex: any;
 
   constructor() {
     this.balance = STARTING_BALANCE.toFixed(8);
     this.keyPair = newEc.genKeyPair();
     this.publicKey = this.keyPair.getPublic().encode('hex');
     this.address = pubKeyToAddress(this.publicKey);
+    this.keyPairHex = this.keyPair.getPrivate('hex');
+  }
+
+  keyPairFromHex(keyPairHexValue: string): any {
+    return newEc.keyFromPrivate(keyPairHexValue, 'hex');
+  }
+
+  test(): void {
+    const signature = this.keyPair.sign('adamu is cool');
+
+    const res = this.keyPairFromHex(this.keyPairHex).verify('adamu is  cool', signature);
+    console.log({ res });
   }
 
   sign(output: ICOutput_R): string {
