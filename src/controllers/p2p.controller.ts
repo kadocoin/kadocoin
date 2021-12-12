@@ -11,7 +11,7 @@ import { INTERNAL_SERVER_ERROR, SUCCESS } from '../statusCode/statusCode';
 export default class P2PController {
   getPeers = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const peers = (await req.p2p.getPeers()) || '';
+      const peers = await req.p2p.getPeers();
       return res.status(SUCCESS).json({ type: 'success', message: peers });
     } catch (error) {
       if (error instanceof Error) {
