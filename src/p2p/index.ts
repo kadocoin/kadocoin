@@ -198,11 +198,9 @@ class P2P {
   }
 
   async forwardBlockToPeers(incomingObj: incomingObj): Promise<void> {
-    let peers = await this.getPeers();
+    const peers = await this.getPeers();
 
-    if (peers) {
-      peers = JSON.parse(peers as string) as [];
-
+    if (peers.length) {
       // FOR EACH PEER
       peers.forEach((peer: IHost) => {
         if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
@@ -240,11 +238,10 @@ class P2P {
     transaction: Transaction,
     sender: { host: string; port: number; id: string }
   ): Promise<void> {
-    let peers = await this.getPeers();
+    const peers = await this.getPeers();
 
-    if (peers) {
+    if (peers.length) {
       ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
-      peers = JSON.parse(peers as string) as [];
 
       // FOR EACH PEER
       peers.forEach((peer: IHost) => {
@@ -288,10 +285,8 @@ class P2P {
       const peers = await this.getPeers();
 
       if (peers.length) {
-        const peersParsed = JSON.parse(peers as string);
-
-        if (peersParsed) {
-          await this.loopAndRunPeers(peersParsed);
+        if (peers) {
+          await this.loopAndRunPeers(peers);
           ConsoleLog('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
         }
       }
@@ -501,7 +496,7 @@ class P2P {
     };
   }
 
-  async getPeers(): Promise<string | []> {
+  async getPeers(): Promise<Array<IHost>> {
     if (fs.existsSync(peersStorageFile)) {
       return getPeersFromFile(peersStorageFile);
     }
