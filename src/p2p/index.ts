@@ -149,7 +149,6 @@ class P2P {
           /**
            * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
            */
-          ConsoleLog('FORWARDING BLOCK TO MY PEERS.');
           this.forwardBlockToPeers(payload.data.message);
         }
 
@@ -200,8 +199,10 @@ class P2P {
   async forwardBlockToPeers(incomingObj: incomingObj): Promise<void> {
     const peers = await this.getPeers();
 
+    // FOR EACH PEER FORWARD THE RECENTLY MINED BLOCK
     if (peers.length) {
-      // FOR EACH PEER
+      ConsoleLog('FORWARDING BLOCK TO MY PEERS.');
+
       peers.forEach((peer: IHost) => {
         if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
           console.log({ forwardingBlockTo: peer });
@@ -240,10 +241,10 @@ class P2P {
   ): Promise<void> {
     const peers = await this.getPeers();
 
+    // FOR EACH PEER FORWARD THE TRANSACTION
     if (peers.length) {
       ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
 
-      // FOR EACH PEER
       peers.forEach((peer: IHost) => {
         if (sender.host != peer.host && peer.host != local_ip) {
           console.log({ forwardingTxsTo: peer });
