@@ -138,7 +138,7 @@ class P2P {
             () => {
               // TODO: CLEAR?
               this.transactionPool.clearBlockchainTransactions({
-                chain: payload.data.message.block,
+                chain: [payload.data.message.block],
               });
             }
           );
