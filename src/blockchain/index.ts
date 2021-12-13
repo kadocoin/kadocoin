@@ -7,7 +7,7 @@
  */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { REWARD_INPUT } from '../config/constants';
+import { blockchainStorageFile, REWARD_INPUT } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, incomingObj, TTransactions } from '../types';
 import size from '../util/size';
@@ -16,6 +16,7 @@ import { totalFeeReward } from '../util/transaction-metrics';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
 import { KADOCOIN_VERSION } from '../config/secret';
 import ConsoleLog from '../util/console-log';
+import appendToFile from '../util/appendToFile';
 
 class Blockchain {
   public chain: IChain;
@@ -72,6 +73,10 @@ class Blockchain {
     if (onSuccess) onSuccess();
 
     this.chain.push(incomingObj.block);
+
+    appendToFile([incomingObj.block], blockchainStorageFile);
+
+    // TODO: ADD BLOCK TO FILE
 
     console.log(
       `The new block that was sent by a peer was added to your LOCAL blockchain: Your local blockchain now weighs ${size(

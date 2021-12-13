@@ -32,9 +32,7 @@ class P2P {
   node: any;
   blockchain: Blockchain;
   transactionPool: TransactionPool;
-  rpc: any;
   hardCodedPeers: IHost[];
-  connected: boolean;
   has_connected_to_a_peer__blks: boolean;
   has_connected_to_a_peer__txs: boolean;
   loopCount: number;
@@ -51,7 +49,6 @@ class P2P {
     this.node = node;
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
-    this.connected = false;
     this.hardCodedPeers = hardCodedPeers;
     this.has_connected_to_a_peer__blks = false;
     this.has_connected_to_a_peer__txs = false;
@@ -381,6 +378,29 @@ class P2P {
   }
 
   private onSyncGetTransactions(peer: IHost): void {
+    request({ url: `http://${peer.host}:2000/transaction-pool` }, (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const rootTransactionPoolMap = JSON.parse(body).message;
+        this.has_connected_to_a_peer__txs = true;
+
+        // CHECK EMPTY
+        if (isEmptyObject(rootTransactionPoolMap))
+          ConsoleLog('No new transaction coming in from the network');
+        // NOT EMPTY
+        if (!isEmptyObject(rootTransactionPoolMap)) {
+          ConsoleLog('Adding latest unconfirmed TRANSACTIONS to your node');
+          ConsoleLog('working on it...');
+          this.transactionPool.setMap(rootTransactionPoolMap);
+          ConsoleLog('Done!');
+        }
+      } else {
+        ConsoleLog(`${peer.host}:2000/transaction-pool - ${error}`);
+      }
+      ConsoleLog('============================================');
+    });
+  }
+
+  private onSyncGetBlocks(peer: IHost): void {
     request({ url: `http://${peer.host}:2000/blocks` }, async (error, response, body) => {
       if (!error && response.statusCode === 200) {
         const rootChain = JSON.parse(body).message;
@@ -442,31 +462,6 @@ class P2P {
       ConsoleLog('============================================');
     });
   }
-
-  private onSyncGetBlocks(peer: IHost): void {
-    request({ url: `http://${peer.host}:2000/transaction-pool` }, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const rootTransactionPoolMap = JSON.parse(body).message;
-        this.has_connected_to_a_peer__txs = true;
-
-        // CHECK EMPTY
-        if (isEmptyObject(rootTransactionPoolMap))
-          ConsoleLog('No new transaction coming in from the network');
-        // NOT EMPTY
-        if (!isEmptyObject(rootTransactionPoolMap)) {
-          ConsoleLog('Adding latest unconfirmed TRANSACTIONS to your node');
-          ConsoleLog('working on it...');
-          this.transactionPool.setMap(rootTransactionPoolMap);
-          ConsoleLog('Done!');
-        }
-      } else {
-        ConsoleLog(`${peer.host}:2000/transaction-pool - ${error}`);
-      }
-      ConsoleLog('============================================');
-    });
-  }
-
-  // end
 
   private getPeersNotInLocal(incomingPeers: Array<IHost>, localPeers: Array<IHost>) {
     const peersNotPresentInLocal = [];
