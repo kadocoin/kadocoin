@@ -104,15 +104,15 @@ MongoClient.connect(MONGODB_URI, {
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
-    // const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
+    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
-    // console.log({ has_downloaded_txs_and_blks });
+    console.log({ has_downloaded_txs_and_blks });
 
-    // if (!has_downloaded_txs_and_blks) return restartServer();
+    if (!has_downloaded_txs_and_blks) return restartServer();
 
-    // appendWalletToFile([JSON.stringify(localWallet.keyPairHex)], 'wallets/wallets.txt');
+    // appendWalletToFile([JSON.stringify(localWallet.formatWalletInfoBeforeStoring(localWallet))], 'wallets/wallets.txt');
     // getWalletsFromFile();
-    console.log(localWallet);
+    // console.log(localWallet);
 
     app
       .listen(PORT, async () => {

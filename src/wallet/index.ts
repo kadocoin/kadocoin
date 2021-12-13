@@ -10,7 +10,7 @@ import { NOT_ENOUGH, STARTING_BALANCE } from '../config/constants';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
-import { IChain, ICOutput_R, ICreateTransactionParams } from '../types';
+import { IChain, ICOutput_R, ICreateTransactionParams, IWalletFormattedForStorage } from '../types';
 
 class Wallet {
   public balance: string;
@@ -30,6 +30,19 @@ class Wallet {
 
   keyPairFromHex(keyPairHexValue: string): any {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
+  }
+
+  // getWalletsFromFile(): string {
+
+  // }
+
+  formatWalletInfoBeforeStoring(wallet: Wallet): IWalletFormattedForStorage {
+    return {
+      balance: wallet.balance,
+      publicKey: wallet.publicKey,
+      address: wallet.address,
+      keyPairHex: wallet.keyPairHex,
+    };
   }
 
   test(): void {
