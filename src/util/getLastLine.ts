@@ -1,8 +1,9 @@
 import fs from 'fs';
 import readline from 'readline';
+import ConsoleLog from './console-log';
 
 export default function getLastLine(file: string): Promise<number> {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const inStream = fs.createReadStream(file);
     const rl = readline.createInterface(inStream);
 
@@ -13,7 +14,7 @@ export default function getLastLine(file: string): Promise<number> {
       }
     });
 
-    rl.on('error', reject);
+    rl.on('error', () => ConsoleLog('Error reading last line'));
 
     rl.on('close', function () {
       if (lastLine) {
