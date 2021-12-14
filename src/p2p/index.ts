@@ -19,10 +19,10 @@ import ConsoleLog from '../util/console-log';
 import { blockchainStorageFile, hardCodedPeers, peersStorageFile } from '../config/constants';
 import Block from '../blockchain/block';
 import get_local_ip from '../util/local';
-import getLastLine from '../util/getLastLine';
+import getLastLine from '../util/get-last-line';
 import appendToFile from '../util/appendToFile';
 import Mining_Reward from '../util/supply_reward';
-import isEmptyObject from '../util/isEmptyObject';
+import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 
 const local_ip = get_local_ip();

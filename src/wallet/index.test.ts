@@ -7,7 +7,7 @@
  */
 import Blockchain from '../blockchain';
 import { sampleDataForTests, STARTING_BALANCE } from '../config/constants';
-import verifySignature from '../util/verifySignature';
+import verifySignature from '../util/verify-signature';
 import Wallet from './index';
 import Transaction from './transaction';
 

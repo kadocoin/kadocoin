@@ -8,7 +8,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { NOT_FOUND } from '../statusCode/statusCode';
 import CommonModel from '../models/common.model';
-import log_err_to_file from '../util/log_err_to_file';
+import log_err_to_file from '../util/log-err-to-file';
 
 export async function must_be_verified(
   req: Request,

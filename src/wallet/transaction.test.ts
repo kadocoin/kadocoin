@@ -6,7 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/constants';
-import verifySignature from '../util/verifySignature';
+import verifySignature from '../util/verify-signature';
 import Wallet from '.';
 import Transaction from './transaction';
 import { calcOutputTotal } from '../util/transaction-metrics';

@@ -9,7 +9,7 @@ import Transaction from './transaction';
 import { NOT_ENOUGH, STARTING_BALANCE, walletsStorageFile } from '../config/constants';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
-import { pubKeyToAddress } from '../util/pubKeyToAddress';
+import { pubKeyToAddress } from '../util/pubkey-to-address';
 import { IChain, ICOutput_R, ICreateTransactionParams, IWalletFormattedForStorage } from '../types';
 import fs from 'fs';
 import appendToFile from '../util/appendToFile';

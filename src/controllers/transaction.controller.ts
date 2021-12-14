@@ -20,12 +20,12 @@ import {
 } from '../statusCode/statusCode';
 import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
-import isEmptyObject from '../util/isEmptyObject';
-import { isValidChecksumAddress } from '../util/pubKeyToAddress';
+import isEmptyObject from '../util/is-empty-object';
+import { isValidChecksumAddress } from '../util/pubkey-to-address';
 import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
-import sanitize_html from '../util/sanitize_html';
+import sanitize_html from '../util/sanitize-html';
 
 export default class TransactionController {
   /**

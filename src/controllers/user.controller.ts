@@ -35,9 +35,9 @@ import UserModel from '../models/user.model';
 import jwt from 'jsonwebtoken';
 import { JWTSECRET } from '../config/secret';
 import Wallet from '../wallet';
-import { removeSensitiveProps } from '../util/removeSensitiveProps';
+import { removeSensitiveProps } from '../util/remove-sensitive-props';
 import { v2 as cloudinary } from 'cloudinary';
-import getCloudinaryImagePublicId from '../util/getCloudinaryImagePublicId';
+import getCloudinaryImagePublicId from '../util/get-cloudinary-image-publicId';
 import sanitizeHTML from 'sanitize-html';
 import uploadToCloudinary from '../util/upload-to-cloudinary';
 import { sendMailNodemailer } from '../util/mail';
@@ -45,10 +45,10 @@ import { RegistrationWelcomeEmailPreVerification } from '../emailTemplates/regis
 import {
   generate_verification_token,
   generate_token_expiry,
-} from '../util/generate_verification_token';
+} from '../util/generate-verification-token';
 import { ResetPasswordEmail } from '../emailTemplates/resetPasswordEmail';
 import { ResetPasswordEmailSuccess } from '../emailTemplates/resetPasswordEmailSuccess';
-import { isValidChecksumAddress } from '../util/pubKeyToAddress';
+import { isValidChecksumAddress } from '../util/pubkey-to-address';
 
 export default class UserController {
   private commonModel: CommonModel;
@@ -705,12 +705,10 @@ export default class UserController {
       const contactDoc = await this.userModel.contact_us(req.app.locals.db, req.body);
 
       if (!contactDoc)
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({
-            type: 'error',
-            message: 'Sorry, we are unable to save your message. Please try again.',
-          });
+        return res.status(INTERNAL_SERVER_ERROR).json({
+          type: 'error',
+          message: 'Sorry, we are unable to save your message. Please try again.',
+        });
 
       return res.status(CREATED).json({ type: 'success', message: 'success' });
     } catch (error) {

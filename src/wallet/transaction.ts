@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid';
 import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
-import verifySignature from '../util/verifySignature';
-import { isValidChecksumAddress } from '../util/pubKeyToAddress';
+import verifySignature from '../util/verify-signature';
+import { isValidChecksumAddress } from '../util/pubkey-to-address';
 import { ICInput, ICInput_R, ICOutput, ICOutput_R, ITransaction, IUpdate } from '../types';
 import { calcOutputTotal } from '../util/transaction-metrics';
 import Mining_Reward from '../util/supply_reward';
