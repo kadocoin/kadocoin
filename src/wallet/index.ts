@@ -11,9 +11,9 @@ import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
 import { IChain, ICOutput_R, ICreateTransactionParams, IWalletFormattedForStorage } from '../types';
-import getWalletsFromFile from '../util/get-wallets-from-file';
 import fs from 'fs';
 import appendToFile from '../util/appendToFile';
+import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 
 class Wallet {
   public balance: string;
@@ -42,9 +42,9 @@ class Wallet {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
   }
 
-  loadWalletsFromFileOrCreateNew({ chain }: { chain: IChain }): Wallet {
+  async loadWalletsFromFileOrCreateNew({ chain }: { chain: IChain }): Promise<Wallet> {
     // GET ALL THE WALLETS FROM STORAGE
-    const wallets = this.formatWalletAfterRetrievingFromStorage({ chain });
+    const wallets = await this.formatWalletAfterRetrievingFromStorage({ chain });
 
     // ONLY RETURN ONE OF THE WALLETS
     if (wallets.length) return wallets[0];
@@ -59,18 +59,22 @@ class Wallet {
     return newWallet;
   }
 
-  formatWalletAfterRetrievingFromStorage({ chain }: { chain: IChain }): Array<Wallet> {
+  async formatWalletAfterRetrievingFromStorage({
+    chain,
+  }: {
+    chain: IChain;
+  }): Promise<Array<Wallet>> {
     const results: Array<Wallet> = [];
 
     if (fs.existsSync(walletsStorageFile)) {
-      const wallets = getWalletsFromFile();
+      const wallets = await getFileContentLineByLine(walletsStorageFile);
 
       if (wallets.length) {
         for (let i = 0; i < wallets.length; i++) {
-          let wallet = JSON.parse(wallets[i]);
+          let wallet = wallets[i];
 
           wallet = new Wallet(
-            Wallet.calculateBalance({ chain, address: wallet.address }), // todo- get chain from file?
+            Wallet.calculateBalance({ chain, address: wallet.address }),
             this.keyPairFromHex(wallet.keyPairHex),
             wallet.publicKey,
             wallet.address,

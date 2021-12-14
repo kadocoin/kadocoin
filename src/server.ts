@@ -57,6 +57,7 @@ MongoClient.connect(MONGODB_URI, {
   useUnifiedTopology: true,
 })
   .then(async client => {
+    console.log('*****MongoDB is connected*****');
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
     const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
@@ -69,7 +70,9 @@ MongoClient.connect(MONGODB_URI, {
      * @var localWallet - signs and verifies transactions on this node
      */
 
-    const localWallet = new Wallet().loadWalletsFromFileOrCreateNew({ chain: blockchain.chain });
+    const localWallet = await new Wallet().loadWalletsFromFileOrCreateNew({
+      chain: blockchain.chain,
+    });
 
     const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
       new UserRouter(app, blockchain);
@@ -107,7 +110,6 @@ MongoClient.connect(MONGODB_URI, {
     };
 
     await createIndexes(app.locals.db);
-    console.log('*****MongoDB is connected*****');
 
     app
       .listen(PORT, async () => {
@@ -116,5 +118,5 @@ MongoClient.connect(MONGODB_URI, {
       .on('error', err => console.log(err));
   })
   .catch(err => {
-    throw new Error(err);
+    console.error(err);
   });

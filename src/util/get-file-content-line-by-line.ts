@@ -1,25 +1,24 @@
 import fs from 'fs';
 import readline from 'readline';
-import { IHost } from '../types';
 import ConsoleLog from './console-log';
 
-export default function getPeersFromFile(peersStorageFile: string): Promise<Array<IHost>> {
+export default function getFileContentLineByLine(filename: string): Promise<Array<any>> {
   return new Promise(resolve => {
-    const inStream = fs.createReadStream(peersStorageFile);
+    const inStream = fs.createReadStream(filename);
     const rl = readline.createInterface(inStream);
-    const peers: Array<IHost> = [];
+    const fileContent: Array<any> = [];
 
     rl.on('line', function (line) {
       if (line.length >= 1) {
-        peers.push(JSON.parse(line));
+        fileContent.push(JSON.parse(line));
       }
     });
 
     rl.on('error', err => ConsoleLog(`Error reading file: ${err}`));
 
     rl.on('close', function () {
-      if (peers.length) {
-        resolve(peers);
+      if (fileContent.length) {
+        resolve(fileContent);
       }
 
       resolve([]);

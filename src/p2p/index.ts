@@ -16,7 +16,6 @@ import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
 import ConsoleLog from '../util/console-log';
-import getPeersFromFile from '../util/getPeersFromFile';
 import { blockchainStorageFile, hardCodedPeers, peersStorageFile } from '../config/constants';
 import Block from '../blockchain/block';
 import get_local_ip from '../util/local';
@@ -24,6 +23,7 @@ import getLastLine from '../util/getLastLine';
 import appendToFile from '../util/appendToFile';
 import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/isEmptyObject';
+import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 
 const local_ip = get_local_ip();
 
@@ -494,7 +494,7 @@ class P2P {
 
   async getPeers(): Promise<Array<IHost>> {
     if (fs.existsSync(peersStorageFile)) {
-      return getPeersFromFile(peersStorageFile);
+      return getFileContentLineByLine(peersStorageFile);
     }
     return [];
   }
