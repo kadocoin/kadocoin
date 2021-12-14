@@ -79,7 +79,18 @@ export default class TransactionController {
 
     // GRAB NECESSARY MIDDLEWARES
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { transactionPool, blockchain, p2p, localWallet } = req;
+    const { transactionPool, blockchain, p2p } = req;
+
+    // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
+    const { keyPairHex } = req.app.locals.user;
+
+    const localWallet = new Wallet(
+      Wallet.calculateBalance({ chain: blockchain.chain, address }),
+      Wallet.keyPairFromHex(keyPairHex),
+      publicKey,
+      address,
+      keyPairHex
+    );
 
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
@@ -96,12 +107,6 @@ export default class TransactionController {
     try {
       if (transaction) {
         console.log('Update transaction');
-        // GET UP TO DATE USER BALANCE
-        const balance = Wallet.calculateBalance({
-          address: address,
-          chain: blockchain.chain,
-        });
-
         console.log('instance of Transaction', transaction instanceof Transaction);
 
         transaction.update({
@@ -109,7 +114,7 @@ export default class TransactionController {
           address,
           recipient,
           amount: Number(amount),
-          balance,
+          balance: localWallet.balance,
           localWallet,
           message,
           sendFee,

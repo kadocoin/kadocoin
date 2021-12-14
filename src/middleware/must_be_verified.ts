@@ -28,9 +28,11 @@ export async function must_be_verified(
     }
 
     /* IF REDIS RETURNS A CACHE MISS, MAKE A TRIP TO THE DATABASE */
-    const { emailVerified } = await commonModel.findById(req.app.locals.db, req.body.user_id);
+    const user = await commonModel.findById(req.app.locals.db, req.body.user_id);
 
-    if (!emailVerified) throw new Error(); // ERROR IS SENT TO CATCH BLOCK
+    req.app.locals.user = user;
+
+    if (!user.emailVerified) throw new Error(); // ERROR IS SENT TO CATCH BLOCK
 
     next();
   } catch (error) {

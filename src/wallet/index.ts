@@ -38,7 +38,7 @@ class Wallet {
     this.keyPairHex = keyPairHex || this.keyPair.getPrivate('hex');
   }
 
-  keyPairFromHex(keyPairHexValue: string): any {
+  static keyPairFromHex(keyPairHexValue: string): any {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
   }
 
@@ -75,7 +75,7 @@ class Wallet {
 
           wallet = new Wallet(
             Wallet.calculateBalance({ chain, address: wallet.address }),
-            this.keyPairFromHex(wallet.keyPairHex),
+            Wallet.keyPairFromHex(wallet.keyPairHex),
             wallet.publicKey,
             wallet.address,
             wallet.keyPairHex
@@ -99,7 +99,7 @@ class Wallet {
   test(): void {
     const signature = this.keyPair.sign('adamu is cool');
 
-    const res = this.keyPairFromHex(this.keyPairHex).verify('adamu is  cool', signature);
+    const res = Wallet.keyPairFromHex(this.keyPairHex).verify('adamu is  cool', signature);
     console.log({ res });
   }
 

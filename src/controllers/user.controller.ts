@@ -91,6 +91,7 @@ export default class UserController {
           userCreationDate,
           address: wallet.address,
           publicKey: wallet.publicKey,
+          keyPairHex: wallet.keyPairHex,
         },
         {
           verification_token,

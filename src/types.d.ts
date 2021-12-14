@@ -92,6 +92,7 @@ export interface IUserModel {
   publicKey?: string;
   address?: string;
   token?: string;
+  keyPairHex?: string;
 }
 
 declare global {
