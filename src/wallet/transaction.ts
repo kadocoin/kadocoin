@@ -12,7 +12,6 @@ class Transaction {
   public output: ICOutput_R;
 
   constructor({
-    publicKey,
     address,
     recipient,
     amount,
@@ -29,7 +28,6 @@ class Transaction {
     this.input =
       input ||
       this.createInput({
-        publicKey,
         address,
         balance,
         localWallet,
@@ -39,15 +37,7 @@ class Transaction {
       });
   }
 
-  createInput({
-    publicKey,
-    balance,
-    address,
-    localWallet,
-    output,
-    message,
-    sendFee,
-  }: ICInput): ICInput_R {
+  createInput({ balance, address, localWallet, output, message, sendFee }: ICInput): ICInput_R {
     const send_fee = sendFee ? Number(sendFee) : 0;
 
     return {
@@ -55,7 +45,6 @@ class Transaction {
       amount: (Number(balance) - send_fee).toFixed(8),
       ...(sendFee && { sendFee: Number(sendFee).toFixed(8) }),
       address,
-      publicKey,
       localPublicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
       ...(message && { message }),
@@ -72,16 +61,7 @@ class Transaction {
     return output;
   }
 
-  update({
-    publicKey,
-    recipient,
-    amount,
-    balance,
-    address,
-    localWallet,
-    message,
-    sendFee,
-  }: IUpdate): void {
+  update({ recipient, amount, balance, address, localWallet, message, sendFee }: IUpdate): void {
     const send_fee = sendFee ? Number(sendFee) : 0;
     const totalAmount = amount + send_fee;
 
@@ -122,7 +102,6 @@ class Transaction {
     }
 
     this.input = this.createInput({
-      publicKey,
       address,
       balance,
       localWallet,

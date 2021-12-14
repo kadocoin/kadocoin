@@ -129,7 +129,7 @@ export interface ITransaction {
 /** COMMON TYPES createInput() */
 interface ICommon_Address_PublicKey {
   address: string;
-  publicKey: string;
+  // publicKey: string;
 }
 /** createInput() PARAM type */
 export interface ICInput extends ICommon_Address_PublicKey {
