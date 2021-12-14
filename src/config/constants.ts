@@ -46,7 +46,6 @@ const REWARD_INPUT: REWARD_INPUT = {
   timestamp: 0,
   amount: '',
   address: '',
-  publicKey: '',
   localPublicKey: '',
   recipient: '',
   signature: '',

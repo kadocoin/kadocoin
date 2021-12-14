@@ -60,11 +60,11 @@ MongoClient.connect(MONGODB_URI, {
     console.log('*****MongoDB is connected*****');
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
-    // const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
+    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
-    // console.log({ has_downloaded_txs_and_blks });
+    console.log({ has_downloaded_txs_and_blks });
 
-    // if (!has_downloaded_txs_and_blks) return restartServer();
+    if (!has_downloaded_txs_and_blks) return restartServer();
 
     /**
      * @var localWallet - signs and verifies transactions on this node

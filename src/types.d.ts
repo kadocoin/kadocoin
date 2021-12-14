@@ -188,7 +188,6 @@ export interface REWARD_INPUT {
   timestamp: number;
   amount: string;
   address: string;
-  publicKey: string;
   localPublicKey: string;
   recipient: string;
   signature: string;
