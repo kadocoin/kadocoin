@@ -24,7 +24,6 @@ import getLastLine from '../util/getLastLine';
 import appendToFile from '../util/appendToFile';
 import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/isEmptyObject';
-import appendPeerToFile from '../util/appendPeerToFile';
 
 const local_ip = get_local_ip();
 
@@ -271,7 +270,6 @@ class P2P {
   async syncNodeWithHistoricalBlockchain(): Promise<boolean> {
     // LOOP THRU HARDCODED PEERS
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
-    console.log({ status });
 
     // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
     if (
@@ -364,7 +362,7 @@ class P2P {
 
             if (peersNotPresentInLocal.length) {
               ConsoleLog('Adding remote peer to file');
-              appendPeerToFile(peersNotPresentInLocal, peersStorageFile);
+              appendToFile(peersNotPresentInLocal, peersStorageFile);
               ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
             }
           } catch (error) {
@@ -449,6 +447,8 @@ class P2P {
         ConsoleLog('WORKING ON IT');
 
         // TODO: SYNC FROM DISK ?
+        // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
+
         this.blockchain.replaceChain(rootChain);
 
         // UPDATE MINING_REWARD

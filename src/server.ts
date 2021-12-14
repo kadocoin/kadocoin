@@ -28,8 +28,6 @@ import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import restartServer from './util/restart-server';
-import appendWalletToFile from './util/appendWalletToFile';
-import getWalletsFromFile from './util/get-wallets-from-file';
 
 /**
  * @var blockchain app wide variable
@@ -60,7 +58,7 @@ MongoClient.connect(MONGODB_URI, {
 })
   .then(async client => {
     /** GET BLOCKCHAIN DATA FROM PEERS */
-    console.log(blockchain.chain.length, 'before');
+
     const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
     console.log({ has_downloaded_txs_and_blks });
@@ -71,8 +69,7 @@ MongoClient.connect(MONGODB_URI, {
      * @var localWallet - signs and verifies transactions on this node
      */
 
-    console.log(blockchain.chain.length, 'after');
-    const localWallet = new Wallet().loadWalletsFromFile({ chain: blockchain.chain });
+    const localWallet = new Wallet().loadWalletsFromFileOrCreateNew({ chain: blockchain.chain });
 
     const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
       new UserRouter(app, blockchain);

@@ -10,17 +10,10 @@ import { NOT_ENOUGH, STARTING_BALANCE, walletsStorageFile } from '../config/cons
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
-import {
-  IChain,
-  ICOutput_R,
-  ICreateTransactionParams,
-  IWalletFormattedForStorage,
-  IWalletParam,
-} from '../types';
-import appendWalletToFile from '../util/appendWalletToFile';
+import { IChain, ICOutput_R, ICreateTransactionParams, IWalletFormattedForStorage } from '../types';
 import getWalletsFromFile from '../util/get-wallets-from-file';
-import getPeersFromFile from '../util/getPeersFromFile';
 import fs from 'fs';
+import appendToFile from '../util/appendToFile';
 
 class Wallet {
   public balance: string;
@@ -49,7 +42,7 @@ class Wallet {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
   }
 
-  loadWalletsFromFile({ chain }: { chain: IChain }): Wallet {
+  loadWalletsFromFileOrCreateNew({ chain }: { chain: IChain }): Wallet {
     // GET ALL THE WALLETS FROM STORAGE
     const wallets = this.formatWalletAfterRetrievingFromStorage({ chain });
 
@@ -57,7 +50,13 @@ class Wallet {
     if (wallets.length) return wallets[0];
 
     // IF NO WALLETS EXIST, CREATE ONE
-    return new Wallet();
+    const newWallet = new Wallet();
+
+    // SAVE IT TO FILE
+    appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
+
+    // RETURN THE NEW WALLET
+    return newWallet;
   }
 
   formatWalletAfterRetrievingFromStorage({ chain }: { chain: IChain }): Array<Wallet> {
