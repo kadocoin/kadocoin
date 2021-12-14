@@ -14,7 +14,7 @@ export default function getLastLine(file: string): Promise<number> {
       }
     });
 
-    rl.on('error', () => ConsoleLog('Error reading last line'));
+    rl.on('error', err => ConsoleLog(`Error reading last line: ${err}`));
 
     rl.on('close', function () {
       if (lastLine) {

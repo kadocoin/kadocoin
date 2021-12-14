@@ -58,6 +58,7 @@ export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = 'data/blockchain.txt';
 export const logFile = 'logs/main.log';
 export const peersStorageFile = 'data/peers.txt';
+export const walletsStorageFile = 'wallets/wallets.txt';
 export const hardCodedPeers = [
   { host: '192.168.0.148', port: 5346 }, // ABUJA
   // { host: '192.168.0.155', port: 5346 }, // UBUNTU

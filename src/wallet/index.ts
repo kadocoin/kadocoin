@@ -6,11 +6,21 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Transaction from './transaction';
-import { NOT_ENOUGH, STARTING_BALANCE } from '../config/constants';
+import { NOT_ENOUGH, STARTING_BALANCE, walletsStorageFile } from '../config/constants';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubKeyToAddress';
-import { IChain, ICOutput_R, ICreateTransactionParams, IWalletFormattedForStorage } from '../types';
+import {
+  IChain,
+  ICOutput_R,
+  ICreateTransactionParams,
+  IWalletFormattedForStorage,
+  IWalletParam,
+} from '../types';
+import appendWalletToFile from '../util/appendWalletToFile';
+import getWalletsFromFile from '../util/get-wallets-from-file';
+import getPeersFromFile from '../util/getPeersFromFile';
+import fs from 'fs';
 
 class Wallet {
   public balance: string;
@@ -18,27 +28,65 @@ class Wallet {
   public publicKey: string;
   public address: string;
   privateHex: string;
-  keyPairHex: any;
+  keyPairHex: string;
 
-  constructor() {
-    this.balance = STARTING_BALANCE.toFixed(8);
-    this.keyPair = newEc.genKeyPair();
-    this.publicKey = this.keyPair.getPublic().encode('hex');
-    this.address = pubKeyToAddress(this.publicKey);
-    this.keyPairHex = this.keyPair.getPrivate('hex');
+  constructor(
+    balance?: string,
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    keyPair?: any,
+    publicKey?: string,
+    address?: string,
+    keyPairHex?: string
+  ) {
+    this.balance = balance || STARTING_BALANCE.toFixed(8);
+    this.keyPair = keyPair || newEc.genKeyPair();
+    this.publicKey = publicKey || this.keyPair.getPublic().encode('hex');
+    this.address = address || pubKeyToAddress(this.publicKey);
+    this.keyPairHex = keyPairHex || this.keyPair.getPrivate('hex');
   }
 
   keyPairFromHex(keyPairHexValue: string): any {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
   }
 
-  // getWalletsFromFile(): string {
+  loadWalletsFromFile({ chain }: { chain: IChain }): Wallet {
+    // GET ALL THE WALLETS FROM STORAGE
+    const wallets = this.formatWalletAfterRetrievingFromStorage({ chain });
 
-  // }
+    // ONLY RETURN ONE OF THE WALLETS
+    if (wallets.length) return wallets[0];
+
+    // IF NO WALLETS EXIST, CREATE ONE
+    return new Wallet();
+  }
+
+  formatWalletAfterRetrievingFromStorage({ chain }: { chain: IChain }): Array<Wallet> {
+    const results: Array<Wallet> = [];
+
+    if (fs.existsSync(walletsStorageFile)) {
+      const wallets = getWalletsFromFile();
+
+      if (wallets.length) {
+        for (let i = 0; i < wallets.length; i++) {
+          let wallet = JSON.parse(wallets[i]);
+
+          wallet = new Wallet(
+            Wallet.calculateBalance({ chain, address: wallet.address }), // todo- get chain from file?
+            this.keyPairFromHex(wallet.keyPairHex),
+            wallet.publicKey,
+            wallet.address,
+            wallet.keyPairHex
+          );
+
+          results.push(wallet);
+        }
+      }
+    }
+    return results;
+  }
 
   formatWalletInfoBeforeStoring(wallet: Wallet): IWalletFormattedForStorage {
     return {
-      balance: wallet.balance,
       publicKey: wallet.publicKey,
       address: wallet.address,
       keyPairHex: wallet.keyPairHex,

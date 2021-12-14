@@ -13,8 +13,15 @@ import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
 
+export interface IWalletParam {
+  balance?: string;
+  keyPair?: any;
+  publicKey?: string;
+  address?: string;
+  keyPairHex?: string;
+}
+
 export interface IWalletFormattedForStorage {
-  balance: string;
   publicKey: string;
   address: string;
   keyPairHex: string;

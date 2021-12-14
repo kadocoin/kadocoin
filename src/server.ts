@@ -32,11 +32,6 @@ import appendWalletToFile from './util/appendWalletToFile';
 import getWalletsFromFile from './util/get-wallets-from-file';
 
 /**
- * @var localWallet - signs and verifies transactions on this node
- */
-const localWallet = new Wallet(); // USE FOR SIGNING / VERIFYING TRANSACTIONS
-
-/**
  * @var blockchain app wide variable
  */
 const blockchain = new Blockchain();
@@ -58,35 +53,50 @@ const node = P2PModule.peer({
 
 const p2p = new P2P({ blockchain, transactionPool, node });
 
-const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
-  new UserRouter(app, blockchain);
-  new BlockRouter(app, blockchain);
-  new P2PRouter(app, p2p);
-  new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
-  next();
-};
-
-/** MIDDLEWARES */
-
-app.use(function (_, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
-app.use(helmet());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(initializeRoutes);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-/** END MIDDLEWARES */
-
 /**  OPEN MONGODB CONNECTED AND START APP  */
 MongoClient.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
   .then(async client => {
+    /** GET BLOCKCHAIN DATA FROM PEERS */
+    console.log(blockchain.chain.length, 'before');
+    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
+
+    console.log({ has_downloaded_txs_and_blks });
+
+    if (!has_downloaded_txs_and_blks) return restartServer();
+
+    /**
+     * @var localWallet - signs and verifies transactions on this node
+     */
+
+    console.log(blockchain.chain.length, 'after');
+    const localWallet = new Wallet().loadWalletsFromFile({ chain: blockchain.chain });
+
+    const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
+      new UserRouter(app, blockchain);
+      new BlockRouter(app, blockchain);
+      new P2PRouter(app, p2p);
+      new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
+      next();
+    };
+
+    /** MIDDLEWARES */
+
+    app.use(function (_, res, next) {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+      next();
+    });
+    app.use(helmet());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(initializeRoutes);
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+    /** END MIDDLEWARES */
+
     app.locals.dbClient = client;
     app.locals.db = client.db(DB_NAME);
 
@@ -101,18 +111,6 @@ MongoClient.connect(MONGODB_URI, {
 
     await createIndexes(app.locals.db);
     console.log('*****MongoDB is connected*****');
-
-    /** GET BLOCKCHAIN DATA FROM PEERS */
-
-    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
-
-    console.log({ has_downloaded_txs_and_blks });
-
-    if (!has_downloaded_txs_and_blks) return restartServer();
-
-    // appendWalletToFile([JSON.stringify(localWallet.formatWalletInfoBeforeStoring(localWallet))], 'wallets/wallets.txt');
-    // getWalletsFromFile();
-    // console.log(localWallet);
 
     app
       .listen(PORT, async () => {
