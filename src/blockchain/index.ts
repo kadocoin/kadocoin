@@ -164,7 +164,7 @@ class Blockchain {
       this.chain.length > 1 &&
       incomingChain.length < this.chain.length
     ) {
-      console.error('The incoming chain must be longer.!');
+      console.error('The incoming chain must be longer.');
       return;
     }
 
