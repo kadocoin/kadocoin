@@ -28,6 +28,7 @@ import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import restartServer from './util/restart-server';
+import logger from './util/logger';
 
 /**  OPEN MONGODB CONNECTED AND START APP  */
 MongoClient.connect(MONGODB_URI, {
@@ -63,7 +64,7 @@ MongoClient.connect(MONGODB_URI, {
 
     const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
-    console.log({ has_downloaded_txs_and_blks });
+    logger.info(`has_downloaded_txs_and_blks: ${has_downloaded_txs_and_blks}`);
 
     if (!has_downloaded_txs_and_blks) return restartServer();
 

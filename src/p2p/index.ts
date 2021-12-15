@@ -71,6 +71,20 @@ class P2P {
         // SAVE TRANSACTION TO MEMORY
         this.transactionPool.setTransaction(payload.data.message.transaction);
 
+        // CHECK FOR DUPLICATE TRANSACTION IN MEMORY
+        if (existingTransaction) {
+          if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
+            ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
+            return;
+          }
+        }
+
+        /**
+         * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
+         */
+
+        this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
+
         // ADD SENDER TO PEERS ON FILE
         const localPeers = await this.getPeers();
         const incomingPeers: IHost[] = payload.data.message.info.senderPeers;
@@ -86,20 +100,6 @@ class P2P {
         const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
 
         appendToFile(peersNotPresentInLocal, peersStorageFile);
-
-        // CHECK FOR DUPLICATE TRANSACTION IN MEMORY
-        if (existingTransaction) {
-          if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
-            ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
-            return;
-          }
-        }
-
-        /**
-         * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
-         */
-
-        this.forwardTransactionToPeers(payload.data.message, payload.data.sender);
       }
     };
   }

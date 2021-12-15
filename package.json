@@ -42,6 +42,7 @@
     "dotenv": "^10.0.0",
     "elliptic": "^6.5.4",
     "express": "^4.17.1",
+    "flaschenpost": "^5.0.49",
     "helmet": "^4.6.0",
     "hex-to-bin": "^1.0.1",
     "joi": "^17.4.0",
