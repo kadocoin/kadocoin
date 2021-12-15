@@ -29,28 +29,6 @@ import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import restartServer from './util/restart-server';
 
-/**
- * @var blockchain app wide variable
- */
-const blockchain = new Blockchain();
-
-/**
- * @var transactionPool app wide variable
- */
-const transactionPool = new TransactionPool();
-
-/**
- * @var node_P2P app wide variable
- */
-
-const node = P2PModule.peer({
-  host: '127.0.0.1',
-  port: 5346,
-  wellKnownPeers: hardCodedPeers,
-});
-
-const p2p = new P2P({ blockchain, transactionPool, node });
-
 /**  OPEN MONGODB CONNECTED AND START APP  */
 MongoClient.connect(MONGODB_URI, {
   useNewUrlParser: true,
@@ -58,6 +36,29 @@ MongoClient.connect(MONGODB_URI, {
 })
   .then(async client => {
     console.log('*****MongoDB is connected*****');
+
+    /**
+     * @var blockchain app wide variable
+     */
+    const blockchain = await new Blockchain().loadBlocksFromFileOrCreateNew();
+
+    /**
+     * @var transactionPool app wide variable
+     */
+    const transactionPool = new TransactionPool();
+
+    /**
+     * @var node_P2P app wide variable
+     */
+
+    const node = P2PModule.peer({
+      host: '127.0.0.1',
+      port: 5346,
+      wellKnownPeers: hardCodedPeers,
+    });
+
+    const p2p = new P2P({ blockchain, transactionPool, node });
+
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
     const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();

@@ -17,12 +17,23 @@ import { cleanUpTransaction } from '../util/clean-up-transaction';
 import { KADOCOIN_VERSION } from '../config/secret';
 import ConsoleLog from '../util/console-log';
 import appendToFile from '../util/appendToFile';
+import fs from 'fs';
+import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 
 class Blockchain {
   public chain: IChain;
 
-  constructor() {
-    this.chain = [Block.genesis()];
+  constructor({ chain }: { chain?: IChain } = {}) {
+    this.chain = chain && chain.length ? chain : [Block.genesis()];
+  }
+
+  async loadBlocksFromFileOrCreateNew(): Promise<Blockchain> {
+    if (fs.existsSync(blockchainStorageFile)) {
+      const chain = await getFileContentLineByLine(blockchainStorageFile);
+      return new Blockchain({ chain });
+    }
+
+    return new Blockchain();
   }
 
   addBlock({ transactions }: { transactions: TTransactions }): Block {
@@ -147,7 +158,6 @@ class Blockchain {
     return true;
   }
 
-  // OLD
   replaceChain(incomingChain: IChain, onSuccess?: () => void): void {
     if (
       incomingChain.length > 1 &&
