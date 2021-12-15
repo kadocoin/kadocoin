@@ -96,13 +96,6 @@ class Wallet {
     };
   }
 
-  test(): void {
-    const signature = this.keyPair.sign('adamu is cool');
-
-    const res = Wallet.keyPairFromHex(this.keyPairHex).verify('adamu is  cool', signature);
-    console.log({ res });
-  }
-
   sign(output: ICOutput_R): string {
     return this.keyPair.sign(cryptoHash(output));
   }

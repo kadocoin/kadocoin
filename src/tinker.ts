@@ -35,8 +35,6 @@ const data = [
       address: '0x86045b56bfeb1A35C6818081130BA0F789dc27c9',
       publicKey:
         '04a5bdca39766c537b433e266e4903f7638b33eee5d75002870f420a897655cf1ac22ef42c59b52c81f918dd12f1061ca98f70ad3897c1a97d036251ca0a0008ac',
-      publicKey:
-        '040e9d64d4ee0fa90efb8bd6c1a0b8509fe20be9371dddef1fa2acaf922c23a775dd191dc32f59f712bd1ea17ab9dd4378cd98bfd31355bf4b504f7c36857db2c3',
       signature: { r: '', s: '' },
     },
   },

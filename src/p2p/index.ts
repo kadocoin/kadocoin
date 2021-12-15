@@ -57,7 +57,7 @@ class P2P {
   }
 
   receiveTransactions(): void {
-    this.node.handle.receiveTransactions = (payload: any, done: any, err: any) => {
+    this.node.handle.receiveTransactions = async (payload: any, done: any, err: any) => {
       if (err) return done(err);
 
       if (payload.data.message && !err) {
@@ -65,11 +65,27 @@ class P2P {
 
         // CHECK FOR EXISTING TRANSACTION
         const existingTransaction = this.transactionPool.existingTransactionPool({
-          inputAddress: payload.data.message.input.address,
+          inputAddress: payload.data.message.transaction.input.address,
         });
 
         // SAVE TRANSACTION TO MEMORY
-        this.transactionPool.setTransaction(payload.data.message);
+        this.transactionPool.setTransaction(payload.data.message.transaction);
+
+        // ADD SENDER TO PEERS ON FILE
+        const localPeers = await this.getPeers();
+        const incomingPeers: IHost[] = payload.data.message.info.senderPeers;
+        const sender = {
+          host: payload.data.message.info.sender.host,
+          port: payload.data.message.info.sender.port,
+        };
+
+        // ADD SENDER DETAILS
+        incomingPeers.push(sender);
+
+        // REMOVE PEERS FROM INCOMING PEERS THAT ARE ALREADY PRESENT LOCALLY
+        const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
+
+        appendToFile(peersNotPresentInLocal, peersStorageFile);
 
         // CHECK FOR DUPLICATE TRANSACTION IN MEMORY
         if (existingTransaction) {
@@ -90,6 +106,7 @@ class P2P {
 
   async sendTransactions(transaction: Transaction): Promise<void> {
     const aboutThisNode = await this.nodeInfo();
+    const localPeers = await this.getPeers();
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
@@ -98,10 +115,17 @@ class P2P {
 
         const message = {
           type: 'TRANSACTION',
-          message: transaction,
-          sender: {
-            about: aboutThisNode,
-            timestamp: new Date().getTime(),
+          message: {
+            transaction,
+            info: {
+              sender: {
+                host: aboutThisNode.host,
+                port: aboutThisNode.port,
+                id: aboutThisNode.id,
+                timestamp: new Date().getTime(),
+              },
+              senderPeers: localPeers,
+            },
           },
         };
 
@@ -348,15 +372,9 @@ class P2P {
             /** GET LOCAL PEERS */
             incomingPeers = JSON.parse(incomingPeers);
 
-            let localPeers = (await this.getPeers()) as string | Array<IHost>;
+            const localPeers = await this.getPeers();
 
-            if (localPeers) {
-              localPeers = JSON.parse(localPeers as string);
-            }
-            const peersNotPresentInLocal = this.getPeersNotInLocal(
-              incomingPeers,
-              (localPeers = [])
-            );
+            const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
 
             ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
 
