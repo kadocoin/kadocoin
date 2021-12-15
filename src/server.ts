@@ -64,7 +64,7 @@ MongoClient.connect(MONGODB_URI, {
 
     const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
-    logger.info(`has_downloaded_txs_and_blks: ${has_downloaded_txs_and_blks}`);
+    logger.info(`has_downloaded_txs_and_blks: ${has_downloaded_txs_and_blks ? true : false}`);
 
     if (!has_downloaded_txs_and_blks) return restartServer();
 
