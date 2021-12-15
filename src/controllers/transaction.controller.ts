@@ -223,7 +223,7 @@ export default class TransactionController {
         console.log('instance of Transaction', transaction instanceof Transaction);
 
         transaction.update({
-          publicKey: transaction.input.localPublicKey,
+          publicKey: transaction.input.publicKey,
           address,
           recipient,
           amount: Number(amount),

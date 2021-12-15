@@ -46,7 +46,7 @@ const REWARD_INPUT: REWARD_INPUT = {
   timestamp: 0,
   amount: '',
   address: '',
-  localPublicKey: '',
+  publicKey: '',
   recipient: '',
   signature: '',
 };
@@ -82,8 +82,6 @@ export const sampleDataForTests = {
     address: '0xC6d23c6703f33F5ad74E6E4fc17C1CE9397D4AAD',
     publicKey:
       '0460eeaa6a2393801ca90356bab01b6d206b9a431d8475f3ebff6999eef7199ad0b0f98e2aa354b24386b072553071dfe100574667584c11b518ea1e36ba959bb4',
-    localPublicKey:
-      '04b9c0f354c36f7df448ed4125480e84aad425b1851e1736c90d08835e4a77e9e7d33bfda4df16b8bf13d933592942aafdeefc2dac7450c833dbdbf445abe258dc',
     signature: '7fd13c4a4175fda39615766a5f0bfce40c0aeccd1d38c5f9e2ab7f8744ac26e2',
   },
 };
@@ -119,8 +117,6 @@ export const sampleBlocks = [
           amount: '1000.00000000',
           address: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           publicKey:
-            '04d4d9b0a09853a8d886360ae13bf5a25208e8c666982b5a0d3a80c2e91fb7fe6ec0c737cfeadac1ab8cdf67f5da723db7e124c45ccef07f10d53fe0b2103cb69f',
-          localPublicKey:
             '04903a1dfd7d49ebb3d6f69968da1da9a267dea75a303eada48985cddd4197547ae706e45dd389be0f3a22fbf962a7420a902cc97877e52d84e73c18aa23990e05',
           signature: {
             r: 'da0f4b658758032fa567e753d5202491caaacc285af17c83c3d2bb4407ac02a9',
@@ -139,7 +135,6 @@ export const sampleBlocks = [
           amount: '',
           address: '',
           publicKey: '',
-          localPublicKey: '',
           recipient: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           signature: '',
         },
@@ -171,8 +166,6 @@ export const sampleBlocks = [
           address: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           publicKey:
             '04d4d9b0a09853a8d886360ae13bf5a25208e8c666982b5a0d3a80c2e91fb7fe6ec0c737cfeadac1ab8cdf67f5da723db7e124c45ccef07f10d53fe0b2103cb69f',
-          localPublicKey:
-            '04903a1dfd7d49ebb3d6f69968da1da9a267dea75a303eada48985cddd4197547ae706e45dd389be0f3a22fbf962a7420a902cc97877e52d84e73c18aa23990e05',
           signature: {
             r: '59ffb668d278c5f08be5faa1932c7ceccdfdd738c26e4140862b2839dcaefb28',
             s: '55a6d08a2ae010491e408c527383a82a7c607217b119621748942afcf517a8e7',
@@ -190,7 +183,6 @@ export const sampleBlocks = [
           amount: '',
           address: '',
           publicKey: '',
-          localPublicKey: '',
           recipient: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           signature: '',
         },
@@ -222,8 +214,6 @@ export const sampleBlocks = [
           address: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           publicKey:
             '04d4d9b0a09853a8d886360ae13bf5a25208e8c666982b5a0d3a80c2e91fb7fe6ec0c737cfeadac1ab8cdf67f5da723db7e124c45ccef07f10d53fe0b2103cb69f',
-          localPublicKey:
-            '04903a1dfd7d49ebb3d6f69968da1da9a267dea75a303eada48985cddd4197547ae706e45dd389be0f3a22fbf962a7420a902cc97877e52d84e73c18aa23990e05',
           signature: {
             r: 'b7406825e88766806ee2f4c7bb240e0ecaaa9ddf45ef90f0e817ce98cd5c7d4f',
             s: '8931f137e1e09d58c68a572b5fc629d80c1d6edddc9f671fe1c63b1fa321252a',
@@ -241,7 +231,6 @@ export const sampleBlocks = [
           amount: '',
           address: '',
           publicKey: '',
-          localPublicKey: '',
           recipient: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           signature: '',
         },
@@ -273,8 +262,6 @@ export const sampleBlocks = [
           address: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           publicKey:
             '04d4d9b0a09853a8d886360ae13bf5a25208e8c666982b5a0d3a80c2e91fb7fe6ec0c737cfeadac1ab8cdf67f5da723db7e124c45ccef07f10d53fe0b2103cb69f',
-          localPublicKey:
-            '04903a1dfd7d49ebb3d6f69968da1da9a267dea75a303eada48985cddd4197547ae706e45dd389be0f3a22fbf962a7420a902cc97877e52d84e73c18aa23990e05',
           signature: {
             r: '539141f01b52623a89c1a6fb56764d2917ba9fedf92373f58d1484d6fc42d5be',
             s: '100101e7ca5b5faf0d0037ee95c51d2deb270ed38f3d303f737399145052f364',
@@ -292,7 +279,6 @@ export const sampleBlocks = [
           amount: '',
           address: '',
           publicKey: '',
-          localPublicKey: '',
           recipient: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
           signature: '',
         },

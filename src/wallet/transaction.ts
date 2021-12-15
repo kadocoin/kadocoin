@@ -45,7 +45,7 @@ class Transaction {
       amount: (Number(balance) - send_fee).toFixed(8),
       ...(sendFee && { sendFee: Number(sendFee).toFixed(8) }),
       address,
-      localPublicKey: localWallet.publicKey,
+      publicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
       ...(message && { message }),
     };
@@ -113,7 +113,7 @@ class Transaction {
 
   static validTransaction(transaction: Transaction): boolean {
     const {
-      input: { address, amount, signature, localPublicKey },
+      input: { address, amount, signature, publicKey },
       output,
     } = transaction;
 
@@ -134,8 +134,8 @@ class Transaction {
     });
 
     // VERIFY THAT THE SENDER CORRECTLY SIGNED THE TRANSACTION
-    if (!verifySignature({ publicKey: localPublicKey, output, signature })) {
-      console.error(`Invalid signature from ${localPublicKey}`);
+    if (!verifySignature({ publicKey: publicKey, output, signature })) {
+      console.error(`Invalid signature from ${publicKey}`);
 
       return false;
     }

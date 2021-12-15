@@ -50,7 +50,6 @@ export interface IInput {
   timestamp: number;
   amount: string;
   sendFee?: string;
-  localPublicKey: string;
   signature: string;
 }
 
@@ -143,7 +142,7 @@ export interface ICInput extends ICommon_Address_PublicKey {
 export interface ICInput_R extends ICommon_Address_PublicKey {
   timestamp: number;
   amount: string;
-  localPublicKey: string;
+  publicKey: string;
   signature: string;
   sendFee?: string;
   recipient?: string;
@@ -188,7 +187,7 @@ export interface REWARD_INPUT {
   timestamp: number;
   amount: string;
   address: string;
-  localPublicKey: string;
+  publicKey: string;
   recipient: string;
   signature: string;
   message?: string;

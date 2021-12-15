@@ -80,8 +80,8 @@ describe('Wallet', () => {
         expect(transaction instanceof Transaction).toBe(true);
       });
 
-      it('matches the transaction input `localPublicKey` with the wallet publicKey', () => {
-        expect(transaction.input.localPublicKey).toEqual(wallet.publicKey);
+      it('matches the transaction input `publicKey` with the wallet publicKey', () => {
+        expect(transaction.input.publicKey).toEqual(wallet.publicKey);
       });
 
       it('outputs the amount to the recipient', () => {
