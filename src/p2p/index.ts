@@ -349,6 +349,7 @@ class P2P {
         return true;
       }
     }
+    return false;
   }
 
   private async getBlockchainDataFromPeer(peer: IHost): Promise<void> {
