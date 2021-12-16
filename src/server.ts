@@ -36,7 +36,7 @@ MongoClient.connect(MONGODB_URI, {
   useUnifiedTopology: true,
 })
   .then(async client => {
-    console.log('*****MongoDB is connected*****');
+    logger.info('*****MongoDB is connected*****');
 
     /**
      * @var blockchain app wide variable
@@ -64,7 +64,9 @@ MongoClient.connect(MONGODB_URI, {
 
     const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
 
-    logger.info(`has_downloaded_txs_and_blks: ${has_downloaded_txs_and_blks ? true : false}`);
+    logger.info(`Node Sync Status`, {
+      has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
+    });
 
     if (!has_downloaded_txs_and_blks) return restartServer();
 

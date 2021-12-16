@@ -58,6 +58,7 @@ export const blockchainStorageFile = 'data/blockchain.txt';
 export const logFile = 'logs/main.log';
 export const peersStorageFile = 'data/peers.txt';
 export const walletsStorageFile = 'wallets/wallets.txt';
+export const REQUEST_TIMEOUT = 5000;
 export const hardCodedPeers = [
   { host: '192.168.0.148', port: 5346 }, // ABUJA
   // { host: '192.168.0.155', port: 5346 }, // UBUNTU

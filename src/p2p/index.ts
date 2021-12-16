@@ -15,8 +15,12 @@ import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
-import ConsoleLog from '../util/console-log';
-import { blockchainStorageFile, hardCodedPeers, peersStorageFile } from '../config/constants';
+import {
+  blockchainStorageFile,
+  hardCodedPeers,
+  peersStorageFile,
+  REQUEST_TIMEOUT,
+} from '../config/constants';
 import Block from '../blockchain/block';
 import get_local_ip from '../util/local';
 import getLastLine from '../util/get-last-line';
@@ -24,6 +28,7 @@ import appendToFile from '../util/appendToFile';
 import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
+import logger from '../util/logger';
 
 const local_ip = get_local_ip();
 
@@ -74,7 +79,7 @@ class P2P {
         // CHECK FOR DUPLICATE TRANSACTION IN MEMORY
         if (existingTransaction) {
           if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
-            ConsoleLog("I already have this transaction. I'M NOT FORWARDING IT.");
+            logger.info("I already have this transaction. I'M NOT FORWARDING IT.");
             return;
           }
         }
@@ -173,7 +178,7 @@ class P2P {
         }
 
         if (isExistingBlock) {
-          ConsoleLog("I already have this BLOCK. I'M NOT FORWARDING IT.");
+          logger.info("I already have this BLOCK. I'M NOT FORWARDING IT.");
           return;
         }
       }
@@ -221,7 +226,7 @@ class P2P {
 
     // FOR EACH PEER FORWARD THE RECENTLY MINED BLOCK
     if (peers.length) {
-      ConsoleLog('FORWARDING BLOCK TO MY PEERS.');
+      logger.info('FORWARDING BLOCK TO MY PEERS.');
 
       peers.forEach((peer: IHost) => {
         if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
@@ -263,7 +268,7 @@ class P2P {
 
     // FOR EACH PEER FORWARD THE TRANSACTION
     if (peers.length) {
-      ConsoleLog('FORWARDING TRANSACTION TO MY PEERS.');
+      logger.info('FORWARDING TRANSACTION TO MY PEERS.');
 
       peers.forEach((peer: IHost) => {
         if (sender.host != peer.host && peer.host != local_ip) {
@@ -307,7 +312,7 @@ class P2P {
       if (peers.length) {
         if (peers) {
           await this.loopAndRunPeers(peers);
-          ConsoleLog('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
+          logger.info('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
         }
       }
     }
@@ -317,7 +322,7 @@ class P2P {
 
   private async loopAndRunPeers(peers: Array<IHost>): Promise<boolean> {
     for (let i = 0; i < peers.length; i++) {
-      ConsoleLog('=============================');
+      logger.info('=============================');
       console.log({
         has_connected_to_a_peer__txs: this.has_connected_to_a_peer__txs,
         has_connected_to_a_peer__blks: this.has_connected_to_a_peer__blks,
@@ -345,7 +350,7 @@ class P2P {
       }
 
       if (this.has_connected_to_a_peer__blks && this.has_connected_to_a_peer__txs) {
-        ConsoleLog('Found a peer. Exiting...');
+        logger.info('Found a peer. Exiting...');
         return true;
       }
     }
@@ -358,127 +363,138 @@ class P2P {
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
     if (!this.has_connected_to_a_peer__txs) this.onSyncGetTransactions(peer);
 
-    // GET BLOCKCHAIN DATA FROM OTHER PEERS
+    // GET BLOCKS DATA FROM OTHER PEERS
     if (!this.has_connected_to_a_peer__blks) this.onSyncGetBlocks(peer);
   }
 
   private onSyncGetPeers(peer: IHost): void {
-    request({ url: `http://${peer.host}:2000/get-peers` }, async (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        let incomingPeers = JSON.parse(body).message;
+    request(
+      { url: `http://${peer.host}:2000/get-peers`, timeout: REQUEST_TIMEOUT },
+      async (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          let incomingPeers = JSON.parse(body).message;
 
-        if (incomingPeers.length) {
-          try {
-            /** GET LOCAL PEERS */
-            incomingPeers = JSON.parse(incomingPeers);
+          if (incomingPeers.length) {
+            try {
+              /** GET LOCAL PEERS */
+              incomingPeers = JSON.parse(incomingPeers);
 
-            const localPeers = await this.getPeers();
+              const localPeers = await this.getPeers();
 
-            const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
+              const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
 
-            ConsoleLog(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+              logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
 
-            if (peersNotPresentInLocal.length) {
-              ConsoleLog('Adding remote peer to file');
-              appendToFile(peersNotPresentInLocal, peersStorageFile);
-              ConsoleLog(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+              if (peersNotPresentInLocal.length) {
+                logger.info('Adding remote peer to file');
+                appendToFile(peersNotPresentInLocal, peersStorageFile);
+                logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+              }
+            } catch (error) {
+              console.log('Error adding peers to local file.', error);
             }
-          } catch (error) {
-            console.log('Error adding peers to local file.', error);
           }
+        } else {
+          logger.info(`${peer.host}:2000/get-peers - ${error}`);
         }
-      } else {
-        ConsoleLog(`${peer.host}:2000/get-peers - ${error}`);
       }
-    });
+    );
   }
 
   private onSyncGetTransactions(peer: IHost): void {
-    request({ url: `http://${peer.host}:2000/transaction-pool` }, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const rootTransactionPoolMap = JSON.parse(body).message;
-        this.has_connected_to_a_peer__txs = true;
+    request(
+      { url: `http://${peer.host}:2000/transaction-pool`, timeout: REQUEST_TIMEOUT },
+      (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          const rootTransactionPoolMap = JSON.parse(body).message;
+          this.has_connected_to_a_peer__txs = true;
 
-        // CHECK EMPTY
-        if (isEmptyObject(rootTransactionPoolMap))
-          ConsoleLog('No new transaction coming in from the network');
-        // NOT EMPTY
-        if (!isEmptyObject(rootTransactionPoolMap)) {
-          ConsoleLog('Adding latest unconfirmed TRANSACTIONS to your node');
-          ConsoleLog('working on it...');
-          this.transactionPool.setMap(rootTransactionPoolMap);
-          ConsoleLog('Done!');
+          // CHECK EMPTY
+          if (isEmptyObject(rootTransactionPoolMap))
+            logger.info('No new transaction coming in from the network');
+          // NOT EMPTY
+          if (!isEmptyObject(rootTransactionPoolMap)) {
+            logger.info('Adding latest unconfirmed TRANSACTIONS to your node');
+            logger.info('working on it...');
+            this.transactionPool.setMap(rootTransactionPoolMap);
+            logger.info('Done!');
+          }
+        } else {
+          logger.info(`${peer.host}:2000/transaction-pool - ${error}`);
         }
-      } else {
-        ConsoleLog(`${peer.host}:2000/transaction-pool - ${error}`);
       }
-      ConsoleLog('============================================');
-    });
+    );
   }
 
   private onSyncGetBlocks(peer: IHost): void {
-    request({ url: `http://${peer.host}:2000/blocks` }, async (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const rootChain = JSON.parse(body).message;
-        this.has_connected_to_a_peer__blks = true;
+    request(
+      { url: `http://${peer.host}:2000/blocks`, timeout: REQUEST_TIMEOUT },
+      async (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          const rootChain = JSON.parse(body).message;
+          this.has_connected_to_a_peer__blks = true;
 
-        /** SAVING TO FILE STARTS */
-        // FILE EXISTS
-        if (fs.existsSync(blockchainStorageFile)) {
-          const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-          const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
-          ConsoleLog(
-            `blockchainHeightFromPeer: ${blockchainHeightFromPeer}, blockchainHeightFromFile: ${blockchainHeightFromFile}`
-          );
+          /** SAVING TO FILE STARTS */
+          // FILE EXISTS
+          if (fs.existsSync(blockchainStorageFile)) {
+            const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
+            const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
+            logger.info('Incoming vs Local Blocks Status', {
+              blockchainHeightFromPeer,
+              blockchainHeightFromFile,
+            });
 
-          /** THIS PEER IS AHEAD */
-          if (blockchainHeightFromPeer < blockchainHeightFromFile) {
-            try {
-              ConsoleLog('THIS PEER IS AHEAD');
-              // DELETE FILE
-              unlinkSync(blockchainStorageFile);
-              ConsoleLog('FILE DELETED');
-              // REPLACE WITH BLOCKS FROM PEER
-              appendToFile(rootChain, blockchainStorageFile);
-            } catch {
-              ConsoleLog('ERROR DELETING FILE');
+            /** THIS PEER IS AHEAD */
+            if (blockchainHeightFromPeer < blockchainHeightFromFile) {
+              try {
+                logger.info('THIS PEER IS AHEAD');
+                // DELETE FILE
+                unlinkSync(blockchainStorageFile);
+                logger.info('FILE DELETED');
+                // REPLACE WITH BLOCKS FROM PEER
+                appendToFile(rootChain, blockchainStorageFile);
+              } catch {
+                logger.info('ERROR DELETING FILE');
+              }
             }
-          }
 
-          /** THIS PEER NEEDS TO CATCH UP */
-          if (blockchainHeightFromPeer > blockchainHeightFromFile) {
-            /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-            ConsoleLog('ADD THE MISSING BLOCKS TO LOCAL FILE');
-            // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
-            const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
+            /** THIS PEER NEEDS TO CATCH UP */
+            if (blockchainHeightFromPeer > blockchainHeightFromFile) {
+              /** ADD THE MISSING BLOCKS TO LOCAL FILE */
+              logger.info('ADD THE MISSING BLOCKS TO LOCAL FILE');
+              // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
+              const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
-            // NOW WRITE LINE BY LINE
-            appendToFile(diffBlockchain, blockchainStorageFile);
+              // NOW WRITE LINE BY LINE
+              appendToFile(diffBlockchain, blockchainStorageFile);
+            }
+          } else {
+            logger.info('FILE DOES NOT EXISTS');
+            appendToFile(rootChain, blockchainStorageFile);
           }
+          /** END SAVING TO FILE */
+
+          logger.info('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
+          logger.info('WORKING ON IT');
+
+          // TODO: SYNC FROM DISK ?
+          // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
+
+          this.blockchain.replaceChain(rootChain);
+
+          // UPDATE MINING_REWARD
+          const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+            chainLength: this.blockchain.chain.length,
+          });
+          logger.info(`Supply info`, {
+            MINING_REWARD,
+            SUPPLY,
+          });
         } else {
-          ConsoleLog('FILE DOES NOT EXISTS');
-          appendToFile(rootChain, blockchainStorageFile);
+          logger.warn(`${peer.host}:2000/blocks - ${error}`);
         }
-        /** END SAVING TO FILE */
-
-        ConsoleLog('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
-        ConsoleLog('WORKING ON IT');
-
-        // TODO: SYNC FROM DISK ?
-        // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
-
-        this.blockchain.replaceChain(rootChain);
-
-        // UPDATE MINING_REWARD
-        const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-          chainLength: this.blockchain.chain.length,
-        });
-        ConsoleLog(`MINING_REWARD: ${MINING_REWARD}, SUPPLY: ${SUPPLY}`);
-      } else {
-        ConsoleLog(`${peer.host}:2000/blocks - ${error}`);
       }
-      ConsoleLog('============================================');
-    });
+    );
   }
 
   private getPeersNotInLocal(incomingPeers: Array<IHost>, localPeers: Array<IHost>) {

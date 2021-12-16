@@ -1,6 +1,6 @@
 import fs from 'fs';
 import readline from 'readline';
-import ConsoleLog from './console-log';
+import logger from './logger';
 
 export default function getLastLine(file: string): Promise<number> {
   return new Promise(resolve => {
@@ -14,7 +14,7 @@ export default function getLastLine(file: string): Promise<number> {
       }
     });
 
-    rl.on('error', err => ConsoleLog(`Error reading last line: ${err}`));
+    rl.on('error', err => logger.error(`Error reading last line: ${err}`));
 
     rl.on('close', function () {
       if (lastLine) {
