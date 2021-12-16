@@ -269,6 +269,7 @@ class P2P {
     const peers = await this.getPeers();
 
     // FOR EACH PEER FORWARD THE TRANSACTION
+    console.log({ peers });
     if (peers.length) {
       logger.info('FORWARDING TRANSACTION TO MY PEERS.');
 
