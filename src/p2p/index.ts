@@ -90,7 +90,10 @@ class P2P {
          * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
          */
 
-        this.forwardTransactionToPeers(payload.data.message.transaction, payload.data.sender);
+        this.forwardTransactionToPeers(
+          payload.data.message.transaction,
+          payload.data.message.info.sender
+        );
 
         // ADD SENDER TO PEERS ON FILE
         const localPeers = await this.getPeers();
