@@ -68,7 +68,7 @@ MongoClient.connect(MONGODB_URI, {
       has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
     });
 
-    // if (!has_downloaded_txs_and_blks) return restartServer();
+    if (!has_downloaded_txs_and_blks) return restartServer();
 
     /**
      * @var localWallet - signs and verifies transactions on this node
