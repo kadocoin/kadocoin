@@ -78,7 +78,9 @@ class P2P {
 
         // CHECK FOR DUPLICATE TRANSACTION IN MEMORY
         if (existingTransaction) {
-          if (existingTransaction.input.timestamp == payload.data.message.input.timestamp) {
+          if (
+            existingTransaction.input.timestamp == payload.data.message.transaction.input.timestamp
+          ) {
             logger.info("I already have this transaction. I'M NOT FORWARDING IT.");
             return;
           }
