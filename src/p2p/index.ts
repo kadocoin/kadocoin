@@ -485,7 +485,7 @@ class P2P {
             chainLength: this.blockchain.chain.length,
           });
 
-          logger.info(`Supply info`, {
+          logger.info(`Mining reward and supply`, {
             MINING_REWARD,
             SUPPLY,
           });
