@@ -111,7 +111,7 @@ class P2P {
 
         appendToFile(peersNotPresentInLocal, peersStorageFile);
 
-        done(null, 'txn-200');
+        return done(null, 'txn-200');
       }
 
       done(new Error('Invalid txn'));
