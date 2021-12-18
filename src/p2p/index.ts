@@ -185,11 +185,7 @@ class P2P {
           this.forwardBlockToPeers(payload.data.message);
         }
 
-        if (isExistingBlock) {
-          logger.info("I already have this BLOCK. I'M NOT FORWARDING IT.");
-          return;
-        }
-
+        if (isExistingBlock) logger.info("I have this BLOCK. I'M NOT FORWARDING IT.");
         return;
       }
       return done(new Error('blk-500'));
