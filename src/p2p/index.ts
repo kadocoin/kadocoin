@@ -148,9 +148,11 @@ class P2P {
             host: peer.host,
             port: peer.port,
           })
-          .run('handle/receiveTransactions', { data: message }, (err: any, result: any) =>
-            console.log('handle/receiveTransactions', { err, result })
-          );
+          .run('handle/receiveTransactions', { data: message }, (err: any, result: any) => {
+            if (result == 'txn-200') logger.info('Success sending txn to: ', { peer });
+
+            if (err) logger.error('Error sending txn to: ', { peer });
+          });
       }
     });
   }
@@ -187,15 +189,15 @@ class P2P {
           logger.info("I already have this BLOCK. I'M NOT FORWARDING IT.");
           return;
         }
+
         return;
       }
-      return done(new Error('Invalid block message.'));
+      return done(new Error('blk-500'));
     };
   }
 
   public sendBlockToPeers({ block }: { block: Block }): void {
     const aboutThisPeer = this.peerInfo();
-    console.log({ block });
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
