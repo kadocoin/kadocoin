@@ -111,7 +111,7 @@ class P2P {
 
         appendToFile(peersNotPresentInLocal, peersStorageFile);
 
-        done('hello');
+        done(null, `hello from ${this.ip_address}`);
       }
     };
   }
