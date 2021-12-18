@@ -53,7 +53,6 @@ class TransactionMiner {
 
       await this.p2p.sendBlockToPeers({
         block: newlyMinedBlock,
-        info: { KADOCOIN_VERSION, LOCAL_IP: 'replace_me', height: this.blockchain.chain.length },
       });
 
       // ADD BLOCK TO FILE

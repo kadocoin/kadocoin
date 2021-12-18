@@ -29,6 +29,7 @@ import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
+import { KADOCOIN_VERSION } from '../config/secret';
 
 const local_ip = get_local_ip();
 
@@ -190,20 +191,24 @@ class P2P {
     };
   }
 
-  async sendBlockToPeers({ block, info }: { block: Block; info: any }): Promise<void> {
+  async sendBlockToPeers({ block }: { block: Block }): Promise<void> {
     const aboutThisNode = await this.nodeInfo();
-    console.log({ block, info });
+    console.log({ block });
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
       if (peer.host !== local_ip) {
         console.log({ sendingBlockTo: peer });
 
-        info.sender = {
-          host: aboutThisNode.host,
-          port: aboutThisNode.port,
-          id: aboutThisNode.id,
-          timestamp: new Date().getTime(),
+        const info = {
+          KADOCOIN_VERSION,
+          height: this.blockchain.chain.length,
+          sender: {
+            host: aboutThisNode.host,
+            port: aboutThisNode.port,
+            id: aboutThisNode.id,
+            timestamp: new Date().getTime(),
+          },
         };
 
         const message = {

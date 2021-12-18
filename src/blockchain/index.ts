@@ -87,9 +87,7 @@ class Blockchain {
 
     appendToFile([incomingObj.block], blockchainStorageFile);
 
-    // TODO: ADD BLOCK TO FILE
-
-    console.log(
+    logger.info(
       `The new block that was sent by a peer was added to your LOCAL blockchain: Your local blockchain now weighs ${size(
         this.chain
       )} bytes`
