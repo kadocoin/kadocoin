@@ -116,7 +116,7 @@ class P2P {
   }
 
   async sendTransactions(transaction: Transaction): Promise<void> {
-    const aboutThisNode = await this.nodeInfo();
+    const aboutThisNode = await this.peerInfo();
     const localPeers = await this.getPeers();
 
     /** FOR EACH PEER */
@@ -192,7 +192,7 @@ class P2P {
   }
 
   async sendBlockToPeers({ block }: { block: Block }): Promise<void> {
-    const aboutThisNode = await this.nodeInfo();
+    const aboutThisNode = await this.peerInfo();
     console.log({ block });
 
     /** FOR EACH PEER */
@@ -522,7 +522,7 @@ class P2P {
     return peersNotPresentInLocal;
   }
 
-  async nodeInfo(): Promise<{ host: string; port: number; id: string }> {
+  async peerInfo(): Promise<{ host: string; port: number; id: string }> {
     return {
       host: this.ip_address,
       port: this.node.self.port,
