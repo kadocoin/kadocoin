@@ -64,10 +64,8 @@ class P2P {
   }
 
   private receiveTransactions(): void {
-    this.peer.handle.receiveTransactions = async (payload: any, done: any, err: any) => {
-      if (err) return done(err);
-
-      if (payload.data.message && !err) {
+    this.peer.handle.receiveTransactions = async (payload: any, done: any) => {
+      if (payload.data.message) {
         logger.info('INCOMING TRANSACTION', payload.data.message);
 
         // CHECK FOR EXISTING TRANSACTION
@@ -112,6 +110,8 @@ class P2P {
         const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
 
         appendToFile(peersNotPresentInLocal, peersStorageFile);
+
+        done('hello');
       }
     };
   }
@@ -147,7 +147,7 @@ class P2P {
             port: peer.port,
           })
           .run('handle/receiveTransactions', { data: message }, (err: any, result: any) =>
-            console.log({ err, result })
+            console.log('handle/receiveTransactions', { err, result })
           );
       }
     });
