@@ -31,14 +31,14 @@ import { KADOCOIN_VERSION } from '../config/secret';
 import ConsoleLog from '../util/console-log';
 
 class P2P {
-  peer: any; // PEER LIBRARY IS NOT TYPED WHY IT IS `any`
-  blockchain: Blockchain;
-  transactionPool: TransactionPool;
-  hardCodedPeers: IHost[];
-  has_connected_to_a_peer__blks: boolean;
-  has_connected_to_a_peer__txs: boolean;
-  loopCount: number;
-  ip_address: string;
+  private peer: any; // PEER LIBRARY IS NOT TYPED WHY IT IS `any`
+  private blockchain: Blockchain;
+  private transactionPool: TransactionPool;
+  private hardCodedPeers: IHost[];
+  private has_connected_to_a_peer__blks: boolean;
+  private has_connected_to_a_peer__txs: boolean;
+  private loopCount: number;
+  private ip_address: string;
 
   constructor({
     blockchain,
@@ -63,12 +63,12 @@ class P2P {
     this.receiveBlock();
   }
 
-  receiveTransactions(): void {
+  private receiveTransactions(): void {
     this.peer.handle.receiveTransactions = async (payload: any, done: any, err: any) => {
       if (err) return done(err);
 
       if (payload.data.message && !err) {
-        console.log({ INCOMING_TRANSACTION: payload.data.message });
+        logger.info('INCOMING TRANSACTION', payload.data.message);
 
         // CHECK FOR EXISTING TRANSACTION
         const existingTransaction = this.transactionPool.existingTransactionPool({
@@ -116,14 +116,14 @@ class P2P {
     };
   }
 
-  async sendTransactions(transaction: Transaction): Promise<void> {
-    const aboutThisPeer = await this.peerInfo();
+  public async sendTransactions(transaction: Transaction): Promise<void> {
+    const aboutThisPeer = this.peerInfo();
     const localPeers = await this.getPeers();
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
       if (peer.host !== this.ip_address) {
-        console.log({ sendingTxsTo: peer });
+        logger.info('Sending tsx to: ', { peer });
 
         const message = {
           type: 'TRANSACTION',
@@ -153,11 +153,9 @@ class P2P {
     });
   }
 
-  receiveBlock(): void {
+  private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = (payload: any, done: any, err: any) => {
       if (err) return done(err);
-
-      console.log(payload.data.message);
 
       if (payload.data.message && !err) {
         console.log({ INCOMING_BLOCK: payload.data.message });
@@ -175,6 +173,8 @@ class P2P {
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
               });
+
+              done('Block received.');
             }
           );
 
@@ -192,14 +192,14 @@ class P2P {
     };
   }
 
-  async sendBlockToPeers({ block }: { block: Block }): Promise<void> {
-    const aboutThisPeer = await this.peerInfo();
+  public sendBlockToPeers({ block }: { block: Block }): void {
+    const aboutThisPeer = this.peerInfo();
     console.log({ block });
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
       if (peer.host !== this.ip_address) {
-        console.log({ sendingBlockTo: peer });
+        logger.info('Sending block to: ', { peer });
 
         const info = {
           KADOCOIN_VERSION,
@@ -232,7 +232,7 @@ class P2P {
     });
   }
 
-  async forwardBlockToPeers(incomingObj: incomingObj): Promise<void> {
+  private async forwardBlockToPeers(incomingObj: incomingObj): Promise<void> {
     const peers = await this.getPeers();
 
     // FOR EACH PEER FORWARD THE RECENTLY MINED BLOCK
@@ -269,7 +269,7 @@ class P2P {
     }
   }
 
-  async forwardTransactionToPeers(
+  private async forwardTransactionToPeers(
     transaction: Transaction,
     sender: { host: string; port: number; id: string }
   ): Promise<void> {
@@ -304,7 +304,7 @@ class P2P {
     }
   }
 
-  async syncPeerWithHistoricalBlockchain(): Promise<boolean> {
+  public async syncPeerWithHistoricalBlockchain(): Promise<boolean> {
     // LOOP THRU HARDCODED PEERS
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
 
@@ -514,7 +514,7 @@ class P2P {
     return peersNotPresentInLocal;
   }
 
-  async peerInfo(): Promise<{ host: string; port: number; id: string }> {
+  private peerInfo(): { host: string; port: number; id: string } {
     return {
       host: this.ip_address,
       port: this.peer.self.port,
@@ -522,14 +522,14 @@ class P2P {
     };
   }
 
-  async getPeers(): Promise<Array<IHost>> {
+  public async getPeers(): Promise<Array<IHost>> {
     if (fs.existsSync(peersStorageFile)) {
       return getFileContentLineByLine(peersStorageFile);
     }
     return [];
   }
 
-  isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {
+  public isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {
     let is_duplicate = false;
     for (let i = 0; i < this.blockchain.chain.length; i++) {
       const block = this.blockchain.chain[i];
