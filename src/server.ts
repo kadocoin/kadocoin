@@ -60,6 +60,7 @@ MongoClient.connect(MONGODB_URI, {
     });
 
     const ip_address = await address();
+    console.info({ ip_address });
     const p2p = new P2P({ blockchain, transactionPool, node, ip_address });
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
