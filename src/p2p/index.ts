@@ -187,6 +187,7 @@ class P2P {
           logger.info("I already have this BLOCK. I'M NOT FORWARDING IT.");
           return;
         }
+        return;
       }
       return done(new Error('Invalid block message.'));
     };
