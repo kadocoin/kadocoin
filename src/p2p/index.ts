@@ -30,7 +30,7 @@ import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../config/secret';
 
 class P2P {
-  node: any;
+  peer: any; // PEER LIBRARY IS NOT TYPED WHY IT IS `any`
   blockchain: Blockchain;
   transactionPool: TransactionPool;
   hardCodedPeers: IHost[];
@@ -42,15 +42,15 @@ class P2P {
   constructor({
     blockchain,
     transactionPool,
-    node,
+    peer,
     ip_address,
   }: {
     blockchain: Blockchain;
     transactionPool: TransactionPool;
-    node: any;
+    peer: any;
     ip_address: string;
   }) {
-    this.node = node;
+    this.peer = peer;
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
     this.hardCodedPeers = hardCodedPeers;
@@ -63,7 +63,7 @@ class P2P {
   }
 
   receiveTransactions(): void {
-    this.node.handle.receiveTransactions = async (payload: any, done: any, err: any) => {
+    this.peer.handle.receiveTransactions = async (payload: any, done: any, err: any) => {
       if (err) return done(err);
 
       if (payload.data.message && !err) {
@@ -116,7 +116,7 @@ class P2P {
   }
 
   async sendTransactions(transaction: Transaction): Promise<void> {
-    const aboutThisNode = await this.peerInfo();
+    const aboutThisPeer = await this.peerInfo();
     const localPeers = await this.getPeers();
 
     /** FOR EACH PEER */
@@ -130,9 +130,9 @@ class P2P {
             transaction,
             info: {
               sender: {
-                host: aboutThisNode.host,
-                port: aboutThisNode.port,
-                id: aboutThisNode.id,
+                host: aboutThisPeer.host,
+                port: aboutThisPeer.port,
+                id: aboutThisPeer.id,
                 timestamp: new Date().getTime(),
               },
               senderPeers: localPeers,
@@ -140,7 +140,7 @@ class P2P {
           },
         };
 
-        this.node
+        this.peer
           .remote({
             host: peer.host,
             port: peer.port,
@@ -153,7 +153,7 @@ class P2P {
   }
 
   receiveBlock(): void {
-    this.node.handle.receiveBlockFromPeers = (payload: any, done: any, err: any) => {
+    this.peer.handle.receiveBlockFromPeers = (payload: any, done: any, err: any) => {
       if (err) return done(err);
 
       console.log(payload.data.message);
@@ -192,7 +192,7 @@ class P2P {
   }
 
   async sendBlockToPeers({ block }: { block: Block }): Promise<void> {
-    const aboutThisNode = await this.peerInfo();
+    const aboutThisPeer = await this.peerInfo();
     console.log({ block });
 
     /** FOR EACH PEER */
@@ -204,9 +204,9 @@ class P2P {
           KADOCOIN_VERSION,
           height: this.blockchain.chain.length,
           sender: {
-            host: aboutThisNode.host,
-            port: aboutThisNode.port,
-            id: aboutThisNode.id,
+            host: aboutThisPeer.host,
+            port: aboutThisPeer.port,
+            id: aboutThisPeer.id,
             timestamp: new Date().getTime(),
           },
         };
@@ -219,7 +219,7 @@ class P2P {
           },
         };
 
-        this.node
+        this.peer
           .remote({
             host: peer.host,
             port: peer.port,
@@ -254,7 +254,7 @@ class P2P {
             message: incomingObj,
           };
 
-          this.node
+          this.peer
             .remote({
               host: peer.host,
               port: peer.port,
@@ -277,13 +277,11 @@ class P2P {
     const peers = await this.getPeers();
 
     // FOR EACH PEER FORWARD THE TRANSACTION
-    console.log({ peers });
     if (peers.length) {
-      logger.info('FORWARDING TRANSACTION TO MY PEERS.');
-
       peers.forEach((peer: IHost) => {
+        // DO NOT SEND THIS TXS TO THE SENDER OR TO THIS PEER
         if (sender.host != peer.host && peer.host != this.ip_address) {
-          console.log({ forwardingTxsTo: peer });
+          logger.info(`FORWARDING TRANSACTION TO: ${peer}`);
 
           const message = {
             type: 'TRANSACTION',
@@ -291,7 +289,7 @@ class P2P {
             sender,
           };
 
-          this.node
+          this.peer
             .remote({
               host: peer.host,
               port: peer.port,
@@ -307,7 +305,7 @@ class P2P {
     }
   }
 
-  async syncNodeWithHistoricalBlockchain(): Promise<boolean> {
+  async syncPeerWithHistoricalBlockchain(): Promise<boolean> {
     // LOOP THRU HARDCODED PEERS
     const status = await this.loopAndRunPeers(this.hardCodedPeers);
 
@@ -341,7 +339,7 @@ class P2P {
 
       if (peers[i].host !== this.ip_address) {
         this.loopCount++;
-        //  NODE CONNECT ATTEMPT
+        //  PEER CONNECT ATTEMPT
         console.log('');
         console.log('');
         console.log('=============================');
@@ -423,7 +421,7 @@ class P2P {
             logger.info('No new transaction coming in from the network');
           // NOT EMPTY
           if (!isEmptyObject(rootTransactionPoolMap)) {
-            logger.info('Adding latest unconfirmed TRANSACTIONS to your node...');
+            logger.info('Adding latest unconfirmed TRANSACTIONS to your peer...');
             this.transactionPool.setMap(rootTransactionPoolMap);
             logger.info('Done!');
           }
@@ -525,8 +523,8 @@ class P2P {
   async peerInfo(): Promise<{ host: string; port: number; id: string }> {
     return {
       host: this.ip_address,
-      port: this.node.self.port,
-      id: this.node.self.id,
+      port: this.peer.self.port,
+      id: this.peer.self.id,
     };
   }
 

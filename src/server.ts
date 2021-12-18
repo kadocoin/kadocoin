@@ -53,19 +53,20 @@ MongoClient.connect(MONGODB_URI, {
      * @var node_P2P app wide variable
      */
 
-    const node = P2PModule.peer({
+    const peer = P2PModule.peer({
       host: '127.0.0.1',
       port: 5346,
       wellKnownPeers: hardCodedPeers,
     });
 
     const ip_address = await address();
+
     console.info({ ip_address });
-    const p2p = new P2P({ blockchain, transactionPool, node, ip_address });
+    const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
 
-    const has_downloaded_txs_and_blks = await p2p.syncNodeWithHistoricalBlockchain();
+    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain();
 
     logger.info(`Node Sync Status`, {
       has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
