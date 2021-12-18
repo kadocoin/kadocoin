@@ -117,10 +117,10 @@ MongoClient.connect(MONGODB_URI, {
 
     app
       .listen(PORT, async () => {
-        console.log(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+        logger.info(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
       })
-      .on('error', err => console.log(err));
+      .on('error', err => logger.error(`${err}`));
   })
   .catch(err => {
-    console.error(err);
+    logger.error(err);
   });

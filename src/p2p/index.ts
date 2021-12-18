@@ -383,13 +383,11 @@ class P2P {
       { url: `http://${peer.host}:2000/get-peers`, timeout: REQUEST_TIMEOUT },
       async (error, response, body) => {
         if (!error && response.statusCode === 200) {
-          let incomingPeers = JSON.parse(body).message;
+          const incomingPeers = JSON.parse(body).message;
 
           if (incomingPeers.length) {
             try {
               /** GET LOCAL PEERS */
-              incomingPeers = JSON.parse(incomingPeers);
-
               const localPeers = await this.getPeers();
 
               const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
@@ -425,8 +423,7 @@ class P2P {
             logger.info('No new transaction coming in from the network');
           // NOT EMPTY
           if (!isEmptyObject(rootTransactionPoolMap)) {
-            logger.info('Adding latest unconfirmed TRANSACTIONS to your node');
-            logger.info('working on it...');
+            logger.info('Adding latest unconfirmed TRANSACTIONS to your node...');
             this.transactionPool.setMap(rootTransactionPoolMap);
             logger.info('Done!');
           }

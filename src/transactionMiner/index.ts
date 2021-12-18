@@ -10,7 +10,6 @@ import { ITMinerConstructorParams } from '../types';
 import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
-import { KADOCOIN_VERSION } from '../config/secret';
 import appendToFile from '../util/appendToFile';
 import { blockchainStorageFile } from '../config/constants';
 
@@ -50,10 +49,7 @@ class TransactionMiner {
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
 
       // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
-
-      await this.p2p.sendBlockToPeers({
-        block: newlyMinedBlock,
-      });
+      await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
 
       // ADD BLOCK TO FILE
       appendToFile([newlyMinedBlock], blockchainStorageFile);
