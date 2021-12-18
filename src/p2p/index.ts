@@ -158,7 +158,7 @@ class P2P {
       if (err) return done(err);
 
       if (payload.data.message && !err) {
-        console.log({ INCOMING_BLOCK: payload.data.message });
+        logger.info('INCOMING BLOCK', payload.data.message);
 
         // CHECK FOR EXISTING BLOCK
         const isExistingBlock = this.isExistingBlock({ incomingBlock: payload.data.message });
@@ -169,7 +169,7 @@ class P2P {
             true,
             this.blockchain.chain,
             () => {
-              // TODO: CLEAR?
+              // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
               });
@@ -224,7 +224,7 @@ class P2P {
             port: peer.port,
           })
           .run('handle/receiveBlockFromPeers', { data: message }, (err: any, result: any) =>
-            console.log({ err, result })
+            console.log('After block was sent result', { err, result })
           );
       }
     });

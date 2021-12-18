@@ -88,9 +88,7 @@ class Blockchain {
     appendToFile([incomingObj.block], blockchainStorageFile);
 
     logger.info(
-      `The new block that was sent by a peer was added to your LOCAL blockchain: Your local blockchain now weighs ${size(
-        this.chain
-      )} bytes`
+      `New block successfully added. Your local blockchain now weighs ${size(this.chain)} bytes`
     );
   }
 
