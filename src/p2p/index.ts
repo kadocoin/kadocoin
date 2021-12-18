@@ -173,8 +173,6 @@ class P2P {
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
               });
-
-              done('Block received.');
             }
           );
 
