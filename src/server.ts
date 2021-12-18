@@ -29,7 +29,7 @@ import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import restartServer from './util/restart-server';
 import logger from './util/logger';
-import address from './util/get-address';
+import address from './util/get-ip-address';
 
 /**  OPEN MONGODB CONNECTED AND START APP  */
 MongoClient.connect(MONGODB_URI, {
