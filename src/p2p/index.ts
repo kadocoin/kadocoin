@@ -237,11 +237,9 @@ class P2P {
 
     // FOR EACH PEER FORWARD THE RECENTLY MINED BLOCK
     if (peers.length) {
-      logger.info('FORWARDING BLOCK TO MY PEERS.');
-
       peers.forEach((peer: IHost) => {
         if (incomingObj.info.sender.host != peer.host && peer.host != this.ip_address) {
-          console.log({ forwardingBlockTo: peer });
+          logger.info(`FORWARDING BLOCK TO: ${peer}`);
 
           incomingObj.info.sender = {
             host: incomingObj.info.sender.host,
