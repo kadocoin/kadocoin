@@ -28,6 +28,7 @@ import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../config/secret';
+import ConsoleLog from '../util/console-log';
 
 class P2P {
   peer: any; // PEER LIBRARY IS NOT TYPED WHY IT IS `any`
@@ -339,19 +340,13 @@ class P2P {
 
       if (peers[i].host !== this.ip_address) {
         this.loopCount++;
-        //  PEER CONNECT ATTEMPT
-        console.log('');
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
+
+        //  ATTEMPT TO CONNECT TO PEER
+        ConsoleLog('=============================');
+
         console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
 
-        console.log('');
-        console.log('');
-        console.log('=============================');
-        console.log('');
-        console.log('');
+        ConsoleLog('=============================');
 
         await this.getBlockchainDataFromPeer(peers[i]);
 
@@ -419,6 +414,7 @@ class P2P {
           // CHECK EMPTY
           if (isEmptyObject(rootTransactionPoolMap))
             logger.info('No new transaction coming in from the network');
+
           // NOT EMPTY
           if (!isEmptyObject(rootTransactionPoolMap)) {
             logger.info('Adding latest unconfirmed TRANSACTIONS to your peer...');
@@ -480,18 +476,18 @@ class P2P {
           }
           /** END SAVING TO FILE */
 
-          logger.info('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN');
-          logger.info('WORKING ON IT');
+          logger.info('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN...');
 
           // TODO: SYNC FROM DISK ?
           // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
 
           this.blockchain.replaceChain(rootChain);
 
-          // UPDATE MINING_REWARD
+          /**  UPDATE MINING_REWARD */
           const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
             chainLength: this.blockchain.chain.length,
           });
+
           logger.info(`Supply info`, {
             MINING_REWARD,
             SUPPLY,

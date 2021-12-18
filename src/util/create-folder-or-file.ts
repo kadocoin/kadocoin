@@ -16,6 +16,6 @@ export default function createFolderOrFile(name_of_file_or_folder: string, type:
       );
     }
   } catch (e) {
-    logger.error('An error occurred creating .');
+    logger.error(`An error occurred creating: ${e}`);
   }
 }
