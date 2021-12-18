@@ -111,8 +111,10 @@ class P2P {
 
         appendToFile(peersNotPresentInLocal, peersStorageFile);
 
-        done(null, `hello from ${this.ip_address}`);
+        done(null, 'txn-200');
       }
+
+      done(new Error('Invalid txn'));
     };
   }
 
@@ -123,7 +125,7 @@ class P2P {
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
       if (peer.host !== this.ip_address) {
-        logger.info('Sending tsx to: ', { peer });
+        logger.info('Sending txn to: ', { peer });
 
         const message = {
           type: 'TRANSACTION',
