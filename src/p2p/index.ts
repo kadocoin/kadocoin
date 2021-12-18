@@ -114,7 +114,7 @@ class P2P {
         return done(null, 'txn-200');
       }
 
-      done(new Error('Invalid txn'));
+      return done(new Error('Invalid txn'));
     };
   }
 
@@ -156,10 +156,8 @@ class P2P {
   }
 
   private receiveBlock(): void {
-    this.peer.handle.receiveBlockFromPeers = (payload: any, done: any, err: any) => {
-      if (err) return done(err);
-
-      if (payload.data.message && !err) {
+    this.peer.handle.receiveBlockFromPeers = (payload: any, done: any) => {
+      if (payload.data.message) {
         logger.info('INCOMING BLOCK', payload.data.message);
 
         // CHECK FOR EXISTING BLOCK
@@ -175,6 +173,7 @@ class P2P {
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
               });
+              return done(null, 'blk-200');
             }
           );
 
@@ -189,6 +188,7 @@ class P2P {
           return;
         }
       }
+      return done(new Error('Invalid block message.'));
     };
   }
 
@@ -199,8 +199,6 @@ class P2P {
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
       if (peer.host !== this.ip_address) {
-        logger.info('Sending block to: ', { peer });
-
         const info = {
           KADOCOIN_VERSION,
           height: this.blockchain.chain.length,
@@ -225,9 +223,11 @@ class P2P {
             host: peer.host,
             port: peer.port,
           })
-          .run('handle/receiveBlockFromPeers', { data: message }, (err: any, result: any) =>
-            console.log('After block was sent result', { err, result })
-          );
+          .run('handle/receiveBlockFromPeers', { data: message }, (err: any, result: any) => {
+            if (result == 'blk-200') logger.info('Success sending block to: ', { peer });
+
+            if (err) logger.error('Error sending block to: ', { peer });
+          });
       }
     });
   }
