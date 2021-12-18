@@ -17,7 +17,7 @@ if (fs.existsSync('.env')) {
 }
 
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
-const prod = ENVIRONMENT === 'production';
+export const prod = ENVIRONMENT === 'production';
 
 export const MONGODB_URI = prod ? process.env['MONGODB_URI'] : process.env['MONGODB_URI_DEV'];
 export const DB_NAME = process.env['DB_NAME'];
@@ -46,22 +46,6 @@ export const PORT = PEER_PORT || DEFAULT_PORT;
 
 export const JWTSECRET = process.env['JWTSECRET'];
 
-// export const ROOT_NODE_ADDRESS = process.env['ROOT_NODE_ADDRESS'];
-export const ROOT_NODE_ADDRESS = prod
-  ? process.env['ROOT_NODE_ADDRESS']
-  : process.env['ROOT_NODE_ADDRESS_DEV'];
-
-/**
- * STOP STARTING SERVER UNLESS ROOT_NODE_ADDRESS IS PROVIDED
- */
-if (!ROOT_NODE_ADDRESS) {
-  if (prod) {
-    throw new Error('No Redis host url. Set ROOT_NODE_ADDRESS environment variable.');
-  } else {
-    throw new Error('No Redis host url. Set ROOT_NODE_ADDRESS_DEV environment variable.');
-  }
-}
-
 export const NEXT_JS_APP_ADDRESS = prod
   ? process.env['NEXT_JS_APP_ADDRESS']
   : process.env['NEXT_JS_APP_ADDRESS_DEV'];
@@ -70,31 +54,9 @@ export const REDIS_URL = process.env['REDIS_URL'];
 export const REDIS_PASSWORD = process.env['REDIS_PASSWORD'];
 export const REDIS_PORT = Number(process.env['REDIS_PORT']);
 
-/**
- * STOP STARTING SERVER UNLESS REDIS_URL IS PROVIDED
- */
-if (!REDIS_URL) {
-  if (prod) {
-    throw new Error('No Redis host url. Set REDIS_URL environment variable.');
-  } else {
-    throw new Error('No Redis host url. Set REDIS_URL_LOCAL environment variable.');
-  }
-}
-
 export const REDIS_URL_CACHING = process.env['REDIS_URL_CACHING'];
 export const REDIS_PASSWORD_CACHING = process.env['REDIS_PASSWORD_CACHING'];
 export const REDIS_PORT_CACHING = Number(process.env['REDIS_PORT_CACHING']);
-
-/**
- * STOP STARTING SERVER UNLESS REDIS_URL_CACHING IS PROVIDED
- */
-if (!REDIS_URL_CACHING) {
-  if (prod) {
-    throw new Error('No Redis host url. Set REDIS_URL_CACHING environment variable.');
-  } else {
-    throw new Error('No Redis host url. Set REDIS_URL_CACHING_LOCAL environment variable.');
-  }
-}
 
 export const SESSION_SECRET = process.env['SESSION_SECRET'];
 export const ADMIN_EMAIL = process.env['ADMIN_EMAIL'];

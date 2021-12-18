@@ -29,6 +29,7 @@ import P2PRouter from './routes/p2p.router';
 import { hardCodedPeers } from './config/constants';
 import restartServer from './util/restart-server';
 import logger from './util/logger';
+import address from './util/get-address';
 
 /**  OPEN MONGODB CONNECTED AND START APP  */
 MongoClient.connect(MONGODB_URI, {
@@ -58,7 +59,8 @@ MongoClient.connect(MONGODB_URI, {
       wellKnownPeers: hardCodedPeers,
     });
 
-    const p2p = new P2P({ blockchain, transactionPool, node });
+    const ip_address = await address();
+    const p2p = new P2P({ blockchain, transactionPool, node, ip_address });
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
 

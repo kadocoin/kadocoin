@@ -9,7 +9,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import request from 'request';
-import publicIp from 'public-ip';
 import fs, { unlinkSync } from 'fs';
 import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
@@ -22,7 +21,6 @@ import {
   REQUEST_TIMEOUT,
 } from '../config/constants';
 import Block from '../blockchain/block';
-import get_local_ip from '../util/local';
 import getLastLine from '../util/get-last-line';
 import appendToFile from '../util/appendToFile';
 import Mining_Reward from '../util/supply_reward';
@@ -30,8 +28,6 @@ import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../config/secret';
-
-const local_ip = get_local_ip();
 
 class P2P {
   node: any;
@@ -41,15 +37,18 @@ class P2P {
   has_connected_to_a_peer__blks: boolean;
   has_connected_to_a_peer__txs: boolean;
   loopCount: number;
+  ip_address: string;
 
   constructor({
     blockchain,
     transactionPool,
     node,
+    ip_address,
   }: {
     blockchain: Blockchain;
     transactionPool: TransactionPool;
     node: any;
+    ip_address: string;
   }) {
     this.node = node;
     this.blockchain = blockchain;
@@ -58,6 +57,7 @@ class P2P {
     this.has_connected_to_a_peer__blks = false;
     this.has_connected_to_a_peer__txs = false;
     this.loopCount = 0;
+    this.ip_address = ip_address;
     this.receiveTransactions();
     this.receiveBlock();
   }
@@ -121,7 +121,7 @@ class P2P {
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
-      if (peer.host !== local_ip) {
+      if (peer.host !== this.ip_address) {
         console.log({ sendingTxsTo: peer });
 
         const message = {
@@ -197,7 +197,7 @@ class P2P {
 
     /** FOR EACH PEER */
     hardCodedPeers.forEach(peer => {
-      if (peer.host !== local_ip) {
+      if (peer.host !== this.ip_address) {
         console.log({ sendingBlockTo: peer });
 
         const info = {
@@ -239,7 +239,7 @@ class P2P {
       logger.info('FORWARDING BLOCK TO MY PEERS.');
 
       peers.forEach((peer: IHost) => {
-        if (incomingObj.info.sender.host != peer.host && peer.host != local_ip) {
+        if (incomingObj.info.sender.host != peer.host && peer.host != this.ip_address) {
           console.log({ forwardingBlockTo: peer });
 
           incomingObj.info.sender = {
@@ -282,7 +282,7 @@ class P2P {
       logger.info('FORWARDING TRANSACTION TO MY PEERS.');
 
       peers.forEach((peer: IHost) => {
-        if (sender.host != peer.host && peer.host != local_ip) {
+        if (sender.host != peer.host && peer.host != this.ip_address) {
           console.log({ forwardingTxsTo: peer });
 
           const message = {
@@ -339,7 +339,7 @@ class P2P {
         has_connected_to_a_peer__blks: this.has_connected_to_a_peer__blks,
       });
 
-      if (peers[i].host !== local_ip) {
+      if (peers[i].host !== this.ip_address) {
         this.loopCount++;
         //  NODE CONNECT ATTEMPT
         console.log('');
@@ -522,13 +522,9 @@ class P2P {
     return peersNotPresentInLocal;
   }
 
-  getPublicIP = async (): Promise<string> => await publicIp.v4();
-
   async nodeInfo(): Promise<{ host: string; port: number; id: string }> {
-    const ip = await this.getPublicIP();
-
     return {
-      host: ip,
+      host: this.ip_address,
       port: this.node.self.port,
       id: this.node.self.id,
     };
