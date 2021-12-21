@@ -36,21 +36,26 @@ class TransactionPool {
     return fee_bucket;
   }
 
-  sortFeeBucket(fee_bucket: Map<string, Transaction[]>): Map<string, Transaction[]> {
-    const keys_reversed = Array.from(fee_bucket.keys()).sort().reverse();
+  sortTransactionsWithHigherFeesFirst(
+    orderTransactions: Map<string, Transaction[]>
+  ): Map<string, Transaction[]> {
+    const keys_reversed = Array.from(orderTransactions.keys()).sort().reverse();
     const sorted = new Map();
 
     for (let i = 0; i < keys_reversed.length; i++) {
       const key = keys_reversed[i];
-      sorted.set(key, fee_bucket.get(key));
+      sorted.set(key, orderTransactions.get(key));
     }
 
     return sorted;
   }
 
-  filterTransactionsToMine(bucket: Map<string, Transaction[]>): Record<string, Transaction> {
+  // FILTER TRANSACTIONS WITH HIGHER SEND FEES TO MINE
+  filterTransactionsAccordingToSendFee(
+    bucket: Map<string, Transaction[]>
+  ): Record<string, Transaction> {
     let weight = 0;
-    const max_weight = 600;
+    const max_weight = 1024 * 1024;
     const txn_to_mine: Record<string, Transaction> = {};
 
     bucket.forEach(transactions => {
@@ -61,8 +66,10 @@ class TransactionPool {
         // EXIT ADDING MORE TRANSACTIONS IF LIMIT IS REACHED
         if (weight > max_weight) return console.log('I now have enough to mine');
 
+        // ADD THIS TRANSACTION TO BUCKET
         txn_to_mine[transaction['id']] = transaction;
 
+        // ADD THE WEIGHT OF THIS TRANSACTION TO THE COUNTER
         weight += Number(weight_of_txn);
       }
     });
@@ -109,7 +116,11 @@ class TransactionPool {
   }
 
   validTransactions(): Array<Transaction> {
-    return Object.values(this.transactionMap).filter(transaction => {
+    const ordered_txn = this.orderTransactionsAccordingToSendFee();
+    const sorted_txn = this.sortTransactionsWithHigherFeesFirst(ordered_txn);
+    const filtered_txn = this.filterTransactionsAccordingToSendFee(sorted_txn);
+
+    return Object.values(filtered_txn).filter(transaction => {
       const isValid = Transaction.validTransaction(transaction);
 
       if (isValid) {

@@ -119,16 +119,3 @@ function getBucketsOfMineableTransactions(
 }
 
 console.log(getBucketsOfMineableTransactions(sorted_fee_bucket));
-// getBucketsOfMineableTransactions(sorted_fee_bucket);
-
-// function checkSameObjKey(map: any, key: any) {
-//   const keys = map.keys();
-//   let anotherKey;
-
-//   while ((anotherKey = keys.next().value)) {
-//     // YOUR COMPARISON HERE
-//     if (key.id == anotherKey.id) return true;
-//   }
-
-//   return false;
-// }
