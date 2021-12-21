@@ -47,7 +47,7 @@ class Blockchain {
     return newlyMinedBlock;
   }
 
-  sort({ chain }: { chain: IChain }): IChain {
+  private sort({ chain }: { chain: IChain }): IChain {
     return chain.sort((a, b) => {
       if (a.timestamp > b.timestamp) return 1;
       if (a.timestamp < b.timestamp) return -1;

@@ -118,6 +118,11 @@ MongoClient.connect(MONGODB_URI, {
     };
 
     await createIndexes(app.locals.db);
+    console.log(
+      transactionPool.filterTransactionsToMine(
+        transactionPool.sort_fee_bucket(transactionPool.orderTransactionsAccordingToSendFee())
+      )
+    );
 
     app
       .listen(PORT, async () => {

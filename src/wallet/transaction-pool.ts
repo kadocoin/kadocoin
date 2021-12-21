@@ -6,13 +6,68 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { IChain } from '../types';
+import size from '../util/size';
 import Transaction from './transaction';
 
 class TransactionPool {
-  transactionMap: Record<string, Transaction>;
+  public transactionMap: Record<string, Transaction>;
 
   constructor() {
     this.transactionMap = {};
+  }
+
+  orderTransactionsAccordingToSendFee(): Map<string, Transaction> {
+    const fee_bucket = new Map();
+    const unit = 1024 * 1024;
+
+    for (const txn in this.transactionMap) {
+      const sendFee = this.transactionMap[txn]['input']['sendFee'] || 0;
+
+      const size_of_txn_in_bytes = size(this.transactionMap[txn]);
+      const weight_per_fee = Math.ceil((Number(sendFee) * unit) / Number(size_of_txn_in_bytes));
+
+      if (fee_bucket.has(weight_per_fee)) {
+        fee_bucket.get(weight_per_fee).push(this.transactionMap[txn]);
+      } else {
+        fee_bucket.set(weight_per_fee, [this.transactionMap[txn]]);
+      }
+    }
+
+    return fee_bucket;
+  }
+
+  sort_fee_bucket(fee_bucket: Map<string, Transaction>): Map<string, Transaction> {
+    const keys_reversed = Array.from(fee_bucket.keys()).sort().reverse();
+    const sorted = new Map();
+
+    for (let i = 0; i < keys_reversed.length; i++) {
+      const key = keys_reversed[i];
+      sorted.set(key, fee_bucket.get(key));
+    }
+
+    return sorted;
+  }
+
+  filterTransactionsToMine(bucket: Map<string, Transaction>): Map<string, Transaction> {
+    let weight = 0;
+    const max_weight = 600;
+    const txn_to_mine = new Map();
+
+    bucket.forEach((transactions: any) => {
+      for (let i = 0; i < transactions.length; i++) {
+        if (weight > max_weight) return console.log('I now have enough to mine');
+
+        const transaction = transactions[i];
+
+        const weight_of_txn = size(transaction);
+        console.log({ weight_of_txn });
+        txn_to_mine.set(transaction['id'], transaction);
+
+        weight += Number(weight_of_txn);
+      }
+    });
+
+    return txn_to_mine;
   }
 
   clear(): void {
