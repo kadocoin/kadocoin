@@ -16,7 +16,7 @@ class TransactionPool {
     this.transactionMap = {};
   }
 
-  orderTransactionsAccordingToSendFee(): Map<string, Transaction> {
+  orderTransactionsAccordingToSendFee(): Map<string, Transaction[]> {
     const fee_bucket = new Map();
     const unit = 1024 * 1024;
 
@@ -36,7 +36,7 @@ class TransactionPool {
     return fee_bucket;
   }
 
-  sort_fee_bucket(fee_bucket: Map<string, Transaction>): Map<string, Transaction> {
+  sortFeeBucket(fee_bucket: Map<string, Transaction[]>): Map<string, Transaction[]> {
     const keys_reversed = Array.from(fee_bucket.keys()).sort().reverse();
     const sorted = new Map();
 
@@ -48,20 +48,20 @@ class TransactionPool {
     return sorted;
   }
 
-  filterTransactionsToMine(bucket: Map<string, Transaction>): Map<string, Transaction> {
+  filterTransactionsToMine(bucket: Map<string, Transaction[]>): Record<string, Transaction> {
     let weight = 0;
     const max_weight = 600;
-    const txn_to_mine = new Map();
+    const txn_to_mine: Record<string, Transaction> = {};
 
-    bucket.forEach((transactions: any) => {
+    bucket.forEach(transactions => {
       for (let i = 0; i < transactions.length; i++) {
+        const transaction = transactions[i];
+        const weight_of_txn = size(transaction);
+
+        // EXIT ADDING MORE TRANSACTIONS IF LIMIT IS REACHED
         if (weight > max_weight) return console.log('I now have enough to mine');
 
-        const transaction = transactions[i];
-
-        const weight_of_txn = size(transaction);
-        console.log({ weight_of_txn });
-        txn_to_mine.set(transaction['id'], transaction);
+        txn_to_mine[transaction['id']] = transaction;
 
         weight += Number(weight_of_txn);
       }

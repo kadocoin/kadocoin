@@ -78,9 +78,7 @@ function setTransactionsAccordingToSendFee(
 const testObj = setTransactionsAccordingToSendFee(txn);
 console.log(testObj);
 
-function sort_fee_bucket(
-  fee_bucket: Map<string, TTransactionChild>
-): Map<string, TTransactionChild> {
+function sortFeeBucket(fee_bucket: Map<string, TTransactionChild>): Map<string, TTransactionChild> {
   const keys_reversed = Array.from(fee_bucket.keys()).sort().reverse();
   const sorted = new Map();
 
@@ -92,7 +90,7 @@ function sort_fee_bucket(
   return sorted;
 }
 
-const sorted_fee_bucket = sort_fee_bucket(testObj);
+const sorted_fee_bucket = sortFeeBucket(testObj);
 console.log('---------');
 console.log(sorted_fee_bucket);
 
