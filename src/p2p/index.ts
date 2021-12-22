@@ -188,15 +188,11 @@ class P2P {
               host: peer.host,
               port: peer.port,
             })
-            .run(
-              'handle/receiveTransactions',
-              { data: message },
-              (forwarding_err: Error) => {
-                if (forwarding_err) {
-                  console.warn('Failed to send txn to', { peer });
-                }
+            .run('handle/receiveTransactions', { data: message }, (forwarding_err: Error) => {
+              if (forwarding_err) {
+                console.warn('Failed to send txn to', { peer });
               }
-            );
+            });
         }
       });
     }
@@ -385,11 +381,9 @@ class P2P {
         port: peer.port,
       })
       .run(
-        '/handle/getMetadata',
+        '/handle/sendPeersToRequesterAndRequesterInfoToSupplier',
         { data: JSON.stringify([{ host: this.ip_address, port: P2P_PORT }]) },
-        async (err: any, result: any) => {
-          console.log({ err, result });
-
+        async (err: Error, result: any) => {
           if (!err && result) {
             const incomingPeers = result;
 
@@ -412,14 +406,14 @@ class P2P {
               }
             }
           } else {
-            logger.info(`${peer.host}:${peer.port}/handle/getMetadata- ${err}`);
+            logger.info(`${peer.host}:${peer.port}/handle/sendPeersToRequesterAndRequesterInfoToSupplier- ${err}`);
           }
         }
       );
   }
 
   private onSyncReceiveRequestingPeerInfo(): void {
-    this.peer.handle.getMetadata = async (payload: any, done: any) => {
+    this.peer.handle.sendPeersToRequesterAndRequesterInfoToSupplier = async (payload: any, done: any) => {
       logger.info('onSyncReceiveRequestingPeerInfo', { payload });
 
       /** GET LOCAL PEERS */
