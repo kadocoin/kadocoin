@@ -59,11 +59,13 @@ export const logFile = 'logs/main.log';
 export const peersStorageFile = 'data/peers.txt';
 export const walletsStorageFile = 'wallets/wallets.txt';
 export const REQUEST_TIMEOUT = 5000;
+export const KADOCOIN_VERSION = '1.0.0';
+export const P2P_PORT = 5346;
 export const hardCodedPeers = [
-  { host: '192.168.0.148', port: 5346 }, // ABUJA
-  // { host: '192.168.0.155', port: 5346 }, // UBUNTU
-  { host: '192.168.0.2', port: 5346 }, // MAC
-  // { host: '192.168.0.151', port: 5346 }, // BAUCHI
+  { host: '192.168.0.148', port: P2P_PORT }, // ABUJA
+  // { host: '192.168.0.155', port: P2P_PORT }, // UBUNTU
+  { host: '192.168.0.2', port: P2P_PORT }, // MAC
+  // { host: '192.168.0.151', port: P2P_PORT }, // BAUCHI
 ];
 
 /** CREATE LOG FOLDER */

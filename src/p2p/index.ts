@@ -27,7 +27,7 @@ import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
-import { KADOCOIN_VERSION } from '../config/secret';
+import { KADOCOIN_VERSION } from '../config/constants';
 import ConsoleLog from '../util/console-log';
 
 class P2P {

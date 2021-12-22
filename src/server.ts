@@ -26,7 +26,7 @@ import { MONGODB_URI, DB_NAME, PORT, ENVIRONMENT } from './config/secret';
 import helmet from 'helmet';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
-import { hardCodedPeers } from './config/constants';
+import { hardCodedPeers, P2P_PORT } from './config/constants';
 import restartServer from './util/restart-server';
 import logger from './util/logger';
 import address from './util/get-ip-address';
@@ -49,19 +49,19 @@ MongoClient.connect(MONGODB_URI, {
      */
     const transactionPool = new TransactionPool();
 
+    const ip_address = await address();
+    console.info('This peer IP address', { ip_address });
+
     /**
      * @var node_P2P app wide variable
      */
-
     const peer = P2PModule.peer({
       host: '127.0.0.1',
-      port: 5346,
+      port: P2P_PORT,
+      metadata: { host: ip_address, port: P2P_PORT },
       wellKnownPeers: hardCodedPeers,
     });
 
-    const ip_address = await address();
-
-    console.info({ ip_address });
     const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
 
     /** GET BLOCKCHAIN DATA FROM PEERS */

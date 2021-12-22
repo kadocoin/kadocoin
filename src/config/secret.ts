@@ -37,12 +37,12 @@ if (!MONGODB_URI) {
  * PORT
  */
 export const DEFAULT_PORT = 2000;
-let PEER_PORT = 0;
+let DEV_PEER_PORT = 0;
 
-if (process.env.GENERATE_PEER_PORT === 'true')
-  PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
+if (process.env.GENERATE_DEV_DEV_PEER_PORT === 'true')
+  DEV_PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
 
-export const PORT = PEER_PORT || DEFAULT_PORT;
+export const PORT = DEV_PEER_PORT || DEFAULT_PORT;
 
 export const JWTSECRET = process.env['JWTSECRET'];
 
@@ -60,4 +60,3 @@ export const REDIS_PORT_CACHING = Number(process.env['REDIS_PORT_CACHING']);
 
 export const SESSION_SECRET = process.env['SESSION_SECRET'];
 export const ADMIN_EMAIL = process.env['ADMIN_EMAIL'];
-export const KADOCOIN_VERSION = '1.0.0';

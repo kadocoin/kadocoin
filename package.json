@@ -10,7 +10,7 @@
     "average-work": "nodemon --watch src/ --watch logs/main.log --exec ts-node src/util/average-work.ts",
     "tinker": "nodemon --watch src/ --watch logs/main.log --exec ts-node src/tinker.ts",
     "supply": "nodemon --watch src/ --watch logs/main.log --exec ts-node src/util/supply_reward/index.ts",
-    "dev-peer": "cross-env GENERATE_PEER_PORT='true' nodemon --watch src/ --watch logs/main.log --exec ts-node src/server.ts",
+    "dev-peer": "cross-env GENERATE_DEV_PEER_PORT='true' nodemon --watch src/ --watch logs/main.log --exec ts-node src/server.ts",
     "dev-abuja": "cross-env DEV_MACHINE='abuja' nodemon --watch src/ --watch logs/main.log --exec ts-node src/server.ts",
     "dev-ubuntu": "cross-env DEV_MACHINE='ubuntu' nodemon --watch src/ --watch logs/main.log --exec ts-node src/server.ts",
     "dev-bauchi": "cross-env DEV_MACHINE='bauchi' nodemon --watch src/ --watch logs/main.log --exec ts-node src/server.ts",
