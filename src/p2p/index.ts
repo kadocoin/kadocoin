@@ -157,6 +157,46 @@ class P2P {
     });
   }
 
+  private async forwardTransactionToPeers(
+    transaction: Transaction,
+    sender: { host: string; port: number; id: string }
+  ): Promise<void> {
+    const localPeers = await this.getPeers();
+
+    // FOR EACH PEER FORWARD THE TRANSACTION
+    if (localPeers.length) {
+      localPeers.forEach((peer: IHost) => {
+        // DO NOT SEND THIS TXS TO THE SENDER OR TO THIS PEER
+        if (sender.host != peer.host && peer.host != this.ip_address) {
+          logger.info(`FORWARDING TRANSACTION TO: ${peer}`);
+
+          const message = {
+            type: 'TRANSACTION',
+            message: {
+              transaction,
+              info: {
+                sender: sender,
+                senderPeers: localPeers,
+              },
+            },
+          };
+
+          this.peer
+            .remote({
+              host: peer.host,
+              port: peer.port,
+            })
+            .run(
+              'handle/receiveTransactions',
+              { data: message },
+              (forwarding_err: any, forwarding_result: any) =>
+                console.log({ forwarding_err, forwarding_result })
+            );
+        }
+      });
+    }
+  }
+
   private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = (payload: any, done: any) => {
       if (payload.data.message) {
@@ -262,41 +302,6 @@ class P2P {
               { data: message },
               (forwarding_blk_err: any, forwarding_blk_result: any) =>
                 console.log({ forwarding_blk_err, forwarding_blk_result })
-            );
-        }
-      });
-    }
-  }
-
-  private async forwardTransactionToPeers(
-    transaction: Transaction,
-    sender: { host: string; port: number; id: string }
-  ): Promise<void> {
-    const peers = await this.getPeers();
-
-    // FOR EACH PEER FORWARD THE TRANSACTION
-    if (peers.length) {
-      peers.forEach((peer: IHost) => {
-        // DO NOT SEND THIS TXS TO THE SENDER OR TO THIS PEER
-        if (sender.host != peer.host && peer.host != this.ip_address) {
-          logger.info(`FORWARDING TRANSACTION TO: ${peer}`);
-
-          const message = {
-            type: 'TRANSACTION',
-            message: transaction,
-            sender,
-          };
-
-          this.peer
-            .remote({
-              host: peer.host,
-              port: peer.port,
-            })
-            .run(
-              'handle/receiveTransactions',
-              { data: message },
-              (forwarding_err: any, forwarding_result: any) =>
-                console.log({ forwarding_err, forwarding_result })
             );
         }
       });
