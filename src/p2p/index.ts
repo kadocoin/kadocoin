@@ -191,8 +191,11 @@ class P2P {
             .run(
               'handle/receiveTransactions',
               { data: message },
-              (forwarding_err: any, forwarding_result: any) =>
-                console.log({ forwarding_err, forwarding_result })
+              (forwarding_err: Error) => {
+                if (forwarding_err) {
+                  console.warn('Failed to send txn to', { peer });
+                }
+              }
             );
         }
       });
