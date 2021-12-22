@@ -200,11 +200,11 @@ class P2P {
 
   private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = (payload: any, done: any) => {
-      if (payload.data.message) {
+      if (payload.data.message.block) {
         logger.info('INCOMING BLOCK', payload.data.message);
 
         // CHECK FOR EXISTING BLOCK
-        const isExistingBlock = this.isExistingBlock({ incomingBlock: payload.data.message });
+        const isExistingBlock = this.isExistingBlock({ incomingBlock: payload.data.message.block });
 
         if (!isExistingBlock) {
           this.blockchain.addBlockFromPeerToLocal(
@@ -295,7 +295,7 @@ class P2P {
               port: peer.port,
             })
             .run('handle/receiveBlock', { data: message }, (forwarding_blk_err: Error) => {
-              if (forwarding_blk_err) console.warn('Failed to send txn to', { peer });
+              if (forwarding_blk_err) console.warn('Failed to send new blk to', { peer });
             });
         }
       });
