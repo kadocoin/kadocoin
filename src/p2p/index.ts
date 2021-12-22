@@ -406,14 +406,23 @@ class P2P {
               }
             }
           } else {
-            logger.info(`${peer.host}:${peer.port}/handle/sendPeersToRequesterAndRequesterInfoToSupplier- ${err}`);
+            logger.info(
+              `${peer.host}:${peer.port}/handle/sendPeersToRequesterAndRequesterInfoToSupplier- ${err}`
+            );
           }
         }
       );
   }
 
+  // WHEN A NODE STARTS, IT SENDS A REQUEST TO OTHER PEER(S).
+  // THE OTHER PEER(S) RECEIVE THE REQUESTING PEER'S IP ADDRESS AND PORT NUMBER
+  // THEY ADD THE IP AND PORT TO THEIR LIST OF KNOWN PEERS USING THE
+  // METHOD BELOW
   private onSyncReceiveRequestingPeerInfo(): void {
-    this.peer.handle.sendPeersToRequesterAndRequesterInfoToSupplier = async (payload: any, done: any) => {
+    this.peer.handle.sendPeersToRequesterAndRequesterInfoToSupplier = async (
+      payload: { data: any },
+      done: (err: Error, result: string) => void
+    ) => {
       logger.info('onSyncReceiveRequestingPeerInfo', { payload });
 
       /** GET LOCAL PEERS */
