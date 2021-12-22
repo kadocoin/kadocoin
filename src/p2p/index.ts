@@ -281,16 +281,12 @@ class P2P {
         if (incomingObj.info.sender.host != peer.host && peer.host != this.ip_address) {
           logger.info(`FORWARDING BLOCK TO: ${peer}`);
 
-          incomingObj.info.sender = {
-            host: incomingObj.info.sender.host,
-            port: incomingObj.info.sender.port,
-            id: incomingObj.info.sender.id,
-            timestamp: new Date().getTime(),
-          };
-
           const message = {
             type: 'BLOCK',
-            message: incomingObj,
+            message: {
+              block: incomingObj.block,
+              info: incomingObj.info,
+            },
           };
 
           this.peer
@@ -298,12 +294,9 @@ class P2P {
               host: peer.host,
               port: peer.port,
             })
-            .run(
-              'handle/receiveBlock',
-              { data: message },
-              (forwarding_blk_err: any, forwarding_blk_result: any) =>
-                console.log({ forwarding_blk_err, forwarding_blk_result })
-            );
+            .run('handle/receiveBlock', { data: message }, (forwarding_blk_err: Error) => {
+              if (forwarding_blk_err) console.warn('Failed to send txn to', { peer });
+            });
         }
       });
     }
