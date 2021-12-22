@@ -279,7 +279,7 @@ class P2P {
     if (peers.length) {
       peers.forEach((peer: IHost) => {
         if (incomingObj.info.sender.host != peer.host && peer.host != this.ip_address) {
-          logger.info(`FORWARDING BLOCK TO: ${peer}`);
+          logger.info(`FORWARDING BLOCK TO`, { peer });
 
           const message = {
             type: 'BLOCK',
