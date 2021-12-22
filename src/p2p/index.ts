@@ -588,7 +588,8 @@ class P2P {
     for (let i = 0; i < incomingPeers.length; i++) {
       const incomingPeer = incomingPeers[i];
 
-      if (!localHosts.has(incomingPeer.host)) peersNotPresentInLocal.push(incomingPeer);
+      if (!localHosts.has(incomingPeer.host) && incomingPeer.host != this.ip_address)
+        peersNotPresentInLocal.push(incomingPeer);
     }
 
     return peersNotPresentInLocal;
