@@ -335,7 +335,7 @@ class P2P {
   private async loopAndRunPeers(peers: Array<IHost>): Promise<boolean> {
     for (let i = 0; i < peers.length; i++) {
       logger.info('=============================');
-      console.log({
+      logger.info('Statuses', {
         has_connected_to_a_peer__txs: this.has_connected_to_a_peer__txs,
         has_connected_to_a_peer__blks: this.has_connected_to_a_peer__blks,
       });
@@ -346,7 +346,7 @@ class P2P {
         //  ATTEMPT TO CONNECT TO PEER
         ConsoleLog('=============================');
 
-        console.log(`Attempting to connect to ${JSON.stringify(peers[i], null, 2)}`);
+        logger.info('Attempting to connect to ', { host: peers[i].host, port: peers[i].port });
 
         ConsoleLog('=============================');
 

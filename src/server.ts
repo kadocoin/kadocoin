@@ -50,7 +50,7 @@ MongoClient.connect(MONGODB_URI, {
     const transactionPool = new TransactionPool();
 
     const ip_address = await address();
-    console.info('This peer IP address', { ip_address });
+    logger.info('This peer IP address', { ip_address });
 
     /**
      * @var node_P2P app wide variable
