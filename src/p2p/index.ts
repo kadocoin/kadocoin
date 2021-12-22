@@ -62,7 +62,7 @@ class P2P {
     this.ip_address = ip_address;
     this.receiveTransactions();
     this.receiveBlock();
-    this.onSyncReceivePeers();
+    this.onSyncReceiveRequestingPeerInfo();
   }
 
   private receiveTransactions(): void {
@@ -367,7 +367,6 @@ class P2P {
   private async getBlockchainDataFromPeer(peer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
     this.onSyncGetPeers(peer);
-    this.onSyncGetPeers2(peer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
     if (!this.has_connected_to_a_peer__txs) this.onSyncGetTransactions(peer);
@@ -376,7 +375,7 @@ class P2P {
     if (!this.has_connected_to_a_peer__blks) this.onSyncGetBlocks(peer);
   }
 
-  private async onSyncGetPeers2(peer: IHost): Promise<void> {
+  private onSyncGetPeers(peer: IHost): void {
     this.peer
       .remote({
         host: peer.host,
@@ -384,22 +383,67 @@ class P2P {
       })
       .run(
         '/handle/getMetadata',
-        { data: JSON.stringify({ host: this.ip_address, port: P2P_PORT }) },
-        (err: any, result: any) => {
+        { data: JSON.stringify([{ host: this.ip_address, port: P2P_PORT }]) },
+        async (err: any, result: any) => {
           console.log({ err, result });
+
+          if (!err) {
+            const incomingPeers = JSON.parse(result).data || [];
+
+            if (incomingPeers.length) {
+              try {
+                /** GET LOCAL PEERS */
+                const localPeers = await this.getPeers();
+
+                const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
+
+                logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+
+                if (peersNotPresentInLocal.length) {
+                  logger.info('Adding remote peer to file');
+                  appendToFile(peersNotPresentInLocal, peersStorageFile);
+                  logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+                }
+              } catch (error) {
+                console.log('Error adding peers to local file.', error);
+              }
+            }
+          } else {
+            logger.info(`${peer.host}:${peer.port}/handle/getMetadata- ${err}`);
+          }
         }
       );
   }
 
-  private onSyncReceivePeers(): void {
+  private onSyncReceiveRequestingPeerInfo(): void {
     this.peer.handle.getMetadata = async (payload: any, done: any) => {
-      console.log({ payload });
+      logger.info('onSyncReceiveRequestingPeerInfo', { payload });
+
+      /** GET LOCAL PEERS */
       const localPeers = await this.getPeers();
-      done(null, JSON.stringify(localPeers));
+
+      try {
+        const peersNotPresentInLocal = this.getPeersNotInLocal(
+          JSON.parse(payload.data),
+          localPeers
+        );
+
+        logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+
+        if (peersNotPresentInLocal.length) {
+          logger.info('Adding remote peer to file');
+          appendToFile(peersNotPresentInLocal, peersStorageFile);
+          logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+        }
+      } catch (error) {
+        console.log('Error adding peers to local file.', error);
+      }
+      // SEND THE REQUESTING PEER MY LOCAL PEERS
+      return done(null, JSON.stringify(localPeers));
     };
   }
 
-  private onSyncGetPeers(peer: IHost): void {
+  private onSyncGetPeersOld(peer: IHost): void {
     request(
       { url: `http://${peer.host}:2000/get-peers`, timeout: REQUEST_TIMEOUT },
       async (error, response, body) => {
