@@ -17,6 +17,7 @@ import TransactionPool from '../wallet/transaction-pool';
 import {
   blockchainStorageFile,
   hardCodedPeers,
+  P2P_PORT,
   peersStorageFile,
   REQUEST_TIMEOUT,
 } from '../config/constants';
@@ -61,6 +62,7 @@ class P2P {
     this.ip_address = ip_address;
     this.receiveTransactions();
     this.receiveBlock();
+    this.onSyncReceivePeers();
   }
 
   private receiveTransactions(): void {
@@ -365,12 +367,33 @@ class P2P {
   private async getBlockchainDataFromPeer(peer: IHost): Promise<void> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
     this.onSyncGetPeers(peer);
+    this.onSyncGetPeers2(peer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
     if (!this.has_connected_to_a_peer__txs) this.onSyncGetTransactions(peer);
 
     // GET BLOCKS DATA FROM OTHER PEERS
     if (!this.has_connected_to_a_peer__blks) this.onSyncGetBlocks(peer);
+  }
+
+  private async onSyncGetPeers2(peer: IHost): Promise<void> {
+    const localPeers = await this.getPeers();
+
+    this.peer
+      .remote({
+        host: peer.host,
+        port: peer.port,
+      })
+      .run('/handle/getMetadata', { data: JSON.stringify(localPeers) }, (err: any, result: any) => {
+        console.log({ err, result });
+      });
+  }
+
+  private onSyncReceivePeers(): void {
+    this.peer.handle.getMetadata = (payload: any, done: any) => {
+      console.log({ payload });
+      done(null, JSON.stringify({ host: this.ip_address, port: P2P_PORT }));
+    };
   }
 
   private onSyncGetPeers(peer: IHost): void {
