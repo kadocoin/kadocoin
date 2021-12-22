@@ -294,7 +294,7 @@ class P2P {
               host: peer.host,
               port: peer.port,
             })
-            .run('handle/receiveBlock', { data: message }, (forwarding_blk_err: Error) => {
+            .run('handle/receiveBlockFromPeers', { data: message }, (forwarding_blk_err: Error) => {
               if (forwarding_blk_err) console.warn('Failed to send new blk to', { peer });
             });
         }
