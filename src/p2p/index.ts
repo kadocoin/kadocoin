@@ -170,7 +170,7 @@ class P2P {
       localPeers.forEach((peer: IHost) => {
         // DO NOT SEND THIS TXS TO THE SENDER OR TO THIS PEER
         if (sender.host != peer.host && peer.host != this.ip_address) {
-          logger.info(`FORWARDING TRANSACTION TO: ${peer}`);
+          logger.info('FORWARDING TRANSACTION TO:', { peer });
 
           const message = {
             type: 'TRANSACTION',
