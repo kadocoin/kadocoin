@@ -387,8 +387,8 @@ class P2P {
         async (err: any, result: any) => {
           console.log({ err, result });
 
-          if (!err) {
-            const incomingPeers = JSON.parse(result).data || [];
+          if (!err && result) {
+            const incomingPeers = result;
 
             if (incomingPeers.length) {
               try {
