@@ -377,22 +377,25 @@ class P2P {
   }
 
   private async onSyncGetPeers2(peer: IHost): Promise<void> {
-    const localPeers = await this.getPeers();
-
     this.peer
       .remote({
         host: peer.host,
         port: peer.port,
       })
-      .run('/handle/getMetadata', { data: JSON.stringify(localPeers) }, (err: any, result: any) => {
-        console.log({ err, result });
-      });
+      .run(
+        '/handle/getMetadata',
+        { data: JSON.stringify({ host: this.ip_address, port: P2P_PORT }) },
+        (err: any, result: any) => {
+          console.log({ err, result });
+        }
+      );
   }
 
   private onSyncReceivePeers(): void {
-    this.peer.handle.getMetadata = (payload: any, done: any) => {
+    this.peer.handle.getMetadata = async (payload: any, done: any) => {
       console.log({ payload });
-      done(null, JSON.stringify({ host: this.ip_address, port: P2P_PORT }));
+      const localPeers = await this.getPeers();
+      done(null, JSON.stringify(localPeers));
     };
   }
 
