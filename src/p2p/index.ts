@@ -277,9 +277,9 @@ class P2P {
             port: peer.port,
           })
           .run('handle/receiveBlockFromPeers', { data: message }, (err: any, result: any) => {
-            if (result == 'blk-200') logger.info('Success sending block to: ', { peer });
+            if (result == 'blk-200') logger.info('Success sending block to:', { peer });
 
-            if (err) logger.error('Error sending block to: ', { peer });
+            if (err) logger.warn('Error sending block to:', { peer });
           });
       }
     });
