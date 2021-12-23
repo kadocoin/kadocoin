@@ -385,30 +385,10 @@ class P2P {
             const incomingPeers = result;
 
             if (incomingPeers.length) {
-              try {
-                /** GET LOCAL PEERS */
-                const localPeers = await this.getPeers();
-                const peersNotPresentInLocal = this.removeDuplicatePeers({
-                  peersThatNeedDupsRemoved: incomingPeers,
-                  currentPeers: localPeers,
-                });
-
-                if (peersNotPresentInLocal.length) {
-                  logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
-
-                  logger.info('Adding remote peer to file');
-
-                  // ADD PEER TO MEMORY'S WELLKNOWN PEER
-                  this.addToWellKnownPeers(peersNotPresentInLocal);
-
-                  // SAVE PEER TO FILE
-                  appendToFile(peersNotPresentInLocal, peersStorageFile);
-
-                  logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
-                }
-              } catch (error) {
-                console.log('Error adding peers to local file.', error);
-              }
+              // SAVE PEERS TO FILE AND ADD TO WELLKNOWN PEERS IN MEMORY
+              await this.savePeersToFileAndAddToWellKnownPeers({
+                incomingPeers: JSON.stringify(incomingPeers),
+              });
             }
           } else {
             logger.info(
@@ -430,31 +410,47 @@ class P2P {
     ) => {
       logger.info('onSyncReceiveRequestingPeerInfo', { payload });
 
-      /** GET LOCAL PEERS */
-      const localPeers = await this.getPeers();
+      // SAVE PEERS TO FILE AND ADD TO WELLKNOWN PEERS IN MEMORY
+      const localPeers = await this.savePeersToFileAndAddToWellKnownPeers({
+        incomingPeers: payload.data,
+      });
 
-      try {
-        const peersNotPresentInLocal = this.removeDuplicatePeers({
-          peersThatNeedDupsRemoved: JSON.parse(payload.data),
-          currentPeers: localPeers,
-        });
-
-        if (peersNotPresentInLocal.length) {
-          logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
-          logger.info('Adding remote peer to file');
-          // ADD PEER TO MEMORY'S WELLKNOWN PEER
-          this.addToWellKnownPeers(peersNotPresentInLocal);
-
-          // SAVE PEER TO FILE
-          appendToFile(peersNotPresentInLocal, peersStorageFile);
-          logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
-        }
-      } catch (error) {
-        console.log('Error adding peers to local file.', error);
-      }
       // SEND THE REQUESTING PEER MY LOCAL PEERS
       return done(null, JSON.stringify(localPeers));
     };
+  }
+
+  private async savePeersToFileAndAddToWellKnownPeers({
+    incomingPeers,
+  }: {
+    incomingPeers: string;
+  }): Promise<IHost[]> {
+    try {
+      /** GET LOCAL PEERS */
+      const localPeers = await this.getPeers();
+      const peersNotPresentInLocal = this.removeDuplicatePeers({
+        peersThatNeedDupsRemoved: JSON.parse(incomingPeers),
+        currentPeers: localPeers,
+      });
+
+      if (peersNotPresentInLocal.length) {
+        logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+        logger.info('Adding remote peer to file');
+
+        // ADD PEER TO MEMORY'S WELLKNOWN PEER
+        this.addToWellKnownPeers(peersNotPresentInLocal);
+
+        // SAVE PEER TO FILE
+        appendToFile(peersNotPresentInLocal, peersStorageFile);
+
+        logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
+
+        return localPeers;
+      }
+    } catch (error) {
+      console.log('Error adding peers to local file.', error);
+      return [];
+    }
   }
 
   private onSyncGetTransactions(peer: IHost): void {
