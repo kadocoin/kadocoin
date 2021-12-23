@@ -60,6 +60,7 @@ export const peersStorageFile = 'data/peers.txt';
 export const walletsStorageFile = 'wallets/wallets.txt';
 export const REQUEST_TIMEOUT = 5000;
 export const KADOCOIN_VERSION = '1.0.0';
+export const MAX_WEIGHT_TXN = 1024 * 1024; // 1 MB
 export const P2P_PORT = 5346;
 export const hardCodedPeers = !prod
   ? [

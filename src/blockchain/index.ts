@@ -7,7 +7,7 @@
  */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { blockchainStorageFile, REWARD_INPUT } from '../config/constants';
+import { blockchainStorageFile, MAX_WEIGHT_TXN, REWARD_INPUT } from '../config/constants';
 import Transaction from '../wallet/transaction';
 import { IChain, incomingObj, TTransactions } from '../types';
 import size from '../util/size';
@@ -90,6 +90,7 @@ class Blockchain {
     const feeReward = totalFeeReward({ transactions: block.transactions });
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: this.chain.length });
     const totalReward = (Number(MINING_REWARD) + Number(feeReward)).toFixed(8);
+    let weight = 0;
 
     for (const transaction of block.transactions) {
       if (transaction.input.address === REWARD_INPUT.address) {
@@ -117,8 +118,17 @@ class Blockchain {
           transactionSet.add(transaction);
         }
       }
+
+      weight += Number(size(transaction));
     }
-    // END FOR LOOP
+
+    // CHECK FOR TRANSACTIONS LIMIT
+    if (weight > MAX_WEIGHT_TXN) {
+      console.log('Transactions exceeds limit.');
+      return false;
+    }
+
+    logger.info('Block Transactions weight', { weight });
 
     return true;
   }

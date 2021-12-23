@@ -5,6 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
+import { MAX_WEIGHT_TXN } from '../config/constants';
 import { IChain } from '../types';
 import logger from '../util/logger';
 import size from '../util/size';
@@ -56,7 +57,6 @@ class TransactionPool {
     bucket: Map<string, Transaction[]>
   ): Record<string, Transaction> {
     let weight = 0;
-    const max_weight = 1024 * 1024;
     const txn_to_mine: Record<string, Transaction> = {};
 
     bucket.forEach(transactions => {
@@ -65,7 +65,7 @@ class TransactionPool {
         const weight_of_txn = size(transaction);
 
         // EXIT ADDING MORE TRANSACTIONS IF LIMIT IS REACHED
-        if (weight > max_weight) return console.log('I now have enough to mine');
+        if (weight > MAX_WEIGHT_TXN) return console.log('I now have enough to mine');
 
         // ADD THIS TRANSACTION TO BUCKET
         txn_to_mine[transaction['id']] = transaction;
