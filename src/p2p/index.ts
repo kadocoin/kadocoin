@@ -62,6 +62,11 @@ class P2P {
     this.receiveTransactions();
     this.receiveBlock();
     this.onSyncReceiveRequestingPeerInfo();
+    this.onStartAddPeersFromFileToWellKnownPeers();
+  }
+
+  private onStartAddPeersFromFileToWellKnownPeers(): void {
+    this.getPeers().then(localPeers => this.addToWellKnownPeers(localPeers));
   }
 
   private receiveTransactions(): void {
