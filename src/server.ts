@@ -64,8 +64,9 @@ MongoClient.connect(MONGODB_URI, {
 
     const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
 
-    /** GET BLOCKCHAIN DATA FROM PEERS */
+    setInterval(() => console.log(peer.wellKnownPeers.get()), 30 * 1000);
 
+    /** GET BLOCKCHAIN DATA FROM PEERS */
     const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain();
 
     logger.info(`Node Sync Status`, {
