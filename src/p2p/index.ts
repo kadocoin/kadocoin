@@ -341,12 +341,6 @@ class P2P {
 
   private async loopAndRunPeers(peers: Array<IHost>): Promise<boolean> {
     for (let i = 0; i < peers.length; i++) {
-      logger.info('=============================');
-      logger.info('Statuses', {
-        has_connected_to_a_peer__txs: this.has_connected_to_a_peer__txs,
-        has_connected_to_a_peer__blks: this.has_connected_to_a_peer__blks,
-      });
-
       if (peers[i].host !== this.ip_address) {
         this.loopCount++;
 
@@ -464,16 +458,13 @@ class P2P {
           const rootTransactionPoolMap = JSON.parse(body).message;
           this.has_connected_to_a_peer__txs = true;
 
-          // CHECK EMPTY
+          // NO TRANSACTIONS TO ADD TO THIS PEER
           if (isEmptyObject(rootTransactionPoolMap))
             logger.info('No new transaction coming in from the network');
 
-          // NOT EMPTY
-          if (!isEmptyObject(rootTransactionPoolMap)) {
-            logger.info('Adding latest unconfirmed TRANSACTIONS to your peer...');
-            this.transactionPool.setMap(rootTransactionPoolMap);
-            logger.info('Done!');
-          }
+          // YES TRANSACTIONS TO ADD TO THIS PEER
+          if (!isEmptyObject(rootTransactionPoolMap))
+            this.transactionPool.onSyncAddTransactions(rootTransactionPoolMap);
         } else {
           logger.info(`${peer.host}:2000/transaction-pool - ${error}`);
         }
@@ -528,8 +519,6 @@ class P2P {
             appendToFile(rootChain, blockchainStorageFile);
           }
           /** END SAVING TO FILE */
-
-          logger.info('REPLACING YOUR LOCAL BLOCKCHAIN WITH THE CONSENSUS BLOCKCHAIN...');
 
           // TODO: SYNC FROM DISK ?
           // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?

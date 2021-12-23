@@ -6,6 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { IChain } from '../types';
+import logger from '../util/logger';
 import size from '../util/size';
 import Transaction from './transaction';
 
@@ -85,7 +86,7 @@ class TransactionPool {
     this.transactionMap[transaction.id] = transaction;
   }
 
-  setMap(transactionMap: Record<string, Transaction>): void {
+  onSyncAddTransactions(transactionMap: Record<string, Transaction>): void {
     const transactions = Object.values(transactionMap);
 
     transactions.forEach(transaction => {
@@ -97,6 +98,8 @@ class TransactionPool {
 
       this.setTransaction(transaction);
     });
+
+    logger.info('Added latest unconfirmed transactions.');
   }
 
   existingTransactionPool({ inputAddress }: { inputAddress: string }): Transaction {

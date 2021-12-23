@@ -49,7 +49,11 @@ MongoClient.connect(MONGODB_URI, {
      */
     const transactionPool = new TransactionPool();
 
+    /**
+     * @ip_address ip_address app wide variable
+     */
     const ip_address = await address();
+
     logger.info('This peer IP address', { ip_address });
 
     /**
@@ -58,18 +62,18 @@ MongoClient.connect(MONGODB_URI, {
     const peer = P2PModule.peer({
       host: '127.0.0.1',
       port: P2P_PORT,
-      metadata: { host: ip_address, port: P2P_PORT },
+      metadata: { host: ip_address, port: P2P_PORT, type: 'full_node' },
       wellKnownPeers: hardCodedPeers,
     });
 
     const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
 
-    setInterval(() => console.log(peer.wellKnownPeers.get()), 30 * 1000);
+    setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
 
     /** GET BLOCKCHAIN DATA FROM PEERS */
     const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain();
 
-    logger.info(`Node Sync Status`, {
+    logger.info(`Node sync status`, {
       has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
     });
 
