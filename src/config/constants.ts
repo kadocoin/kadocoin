@@ -12,7 +12,7 @@ import Transaction from '../wallet/transaction';
 import createFolderOrFile from '../util/create-folder-or-file';
 
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
-// const prod = ENVIRONMENT === 'production';
+const prod = ENVIRONMENT === 'production';
 
 const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 5000;
@@ -61,12 +61,12 @@ export const walletsStorageFile = 'wallets/wallets.txt';
 export const REQUEST_TIMEOUT = 5000;
 export const KADOCOIN_VERSION = '1.0.0';
 export const P2P_PORT = 5346;
-export const hardCodedPeers = [
-  { host: '192.168.0.148', port: P2P_PORT }, // ABUJA
-  // { host: '192.168.0.155', port: P2P_PORT }, // UBUNTU
-  { host: '192.168.0.2', port: P2P_PORT }, // MAC
-  // { host: '192.168.0.151', port: P2P_PORT }, // BAUCHI
-];
+export const hardCodedPeers = !prod
+  ? [
+      { host: '192.168.0.148', port: P2P_PORT }, // ABUJA
+      { host: '192.168.0.2', port: P2P_PORT }, // MAC
+    ]
+  : [{ host: '173.16.164.35', port: P2P_PORT }];
 
 /** CREATE LOG FOLDER */
 createFolderOrFile('logs', 'folder');
