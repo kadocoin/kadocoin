@@ -408,8 +408,6 @@ class P2P {
       payload: { data: any },
       done: (err: Error, result: string) => void
     ) => {
-      logger.info('onSyncReceiveRequestingPeerInfo', { payload });
-
       // SAVE PEERS TO FILE AND ADD TO WELLKNOWN PEERS IN MEMORY
       const localPeers = await this.savePeersToFileAndAddToWellKnownPeers({
         incomingPeers: payload.data,
