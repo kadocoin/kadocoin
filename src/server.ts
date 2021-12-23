@@ -61,7 +61,9 @@ MongoClient.connect(MONGODB_URI, {
       metadata: { host: ip_address, port: P2P_PORT },
       wellKnownPeers: hardCodedPeers,
     });
-
+    console.log(peer.wellKnownPeers.get());
+    peer.wellKnownPeers.add({ host: 'test', port: 55 });
+    console.log(peer.wellKnownPeers.get());
     const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
 
     /** GET BLOCKCHAIN DATA FROM PEERS */

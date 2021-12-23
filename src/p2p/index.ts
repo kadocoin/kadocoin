@@ -29,10 +29,9 @@ import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../config/constants';
-import ConsoleLog from '../util/console-log';
 
 class P2P {
-  private peer: any; // PEER LIBRARY IS NOT TYPED WHY IT IS `any`
+  private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
   private blockchain: Blockchain;
   private transactionPool: TransactionPool;
   private hardCodedPeers: IHost[];
@@ -109,8 +108,15 @@ class P2P {
         incomingPeers.push(sender);
 
         // REMOVE PEERS FROM INCOMING PEERS THAT ARE ALREADY PRESENT LOCALLY
-        const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
+        const peersNotPresentInLocal = this.removeDuplicatePeers({
+          peersThatNeedDupsRemoved: incomingPeers,
+          currentPeers: localPeers,
+        });
 
+        // ADD PEER TO MEMORY'S WELLKNOWN PEER
+        this.addToWellKnownPeers(peersNotPresentInLocal);
+
+        // SAVE PEER TO FILE
         appendToFile(peersNotPresentInLocal, peersStorageFile);
 
         return done(null, 'txn-200');
@@ -233,11 +239,13 @@ class P2P {
     };
   }
 
-  public sendBlockToPeers({ block }: { block: Block }): void {
+  public async sendBlockToPeers({ block }: { block: Block }): Promise<void> {
     const aboutThisPeer = this.peerInfo();
+    const localPeers = await this.getPeers();
+    const combinedPeers = hardCodedPeers.concat(localPeers);
 
     /** FOR EACH PEER */
-    hardCodedPeers.forEach(peer => {
+    combinedPeers.forEach(peer => {
       if (peer.host !== this.ip_address) {
         const info = {
           KADOCOIN_VERSION,
@@ -338,11 +346,7 @@ class P2P {
         this.loopCount++;
 
         //  ATTEMPT TO CONNECT TO PEER
-        ConsoleLog('=============================');
-
-        logger.info('Attempting to connect to ', { host: peers[i].host, port: peers[i].port });
-
-        ConsoleLog('=============================');
+        logger.info('Attempting to connect to', { host: peers[i].host, port: peers[i].port });
 
         await this.getBlockchainDataFromPeer(peers[i]);
 
@@ -384,14 +388,22 @@ class P2P {
               try {
                 /** GET LOCAL PEERS */
                 const localPeers = await this.getPeers();
-
-                const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
-
-                logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+                const peersNotPresentInLocal = this.removeDuplicatePeers({
+                  peersThatNeedDupsRemoved: incomingPeers,
+                  currentPeers: localPeers,
+                });
 
                 if (peersNotPresentInLocal.length) {
+                  logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+
                   logger.info('Adding remote peer to file');
+
+                  // ADD PEER TO MEMORY'S WELLKNOWN PEER
+                  this.addToWellKnownPeers(peersNotPresentInLocal);
+
+                  // SAVE PEER TO FILE
                   appendToFile(peersNotPresentInLocal, peersStorageFile);
+
                   logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
                 }
               } catch (error) {
@@ -422,15 +434,18 @@ class P2P {
       const localPeers = await this.getPeers();
 
       try {
-        const peersNotPresentInLocal = this.getPeersNotInLocal(
-          JSON.parse(payload.data),
-          localPeers
-        );
-
-        logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
+        const peersNotPresentInLocal = this.removeDuplicatePeers({
+          peersThatNeedDupsRemoved: JSON.parse(payload.data),
+          currentPeers: localPeers,
+        });
 
         if (peersNotPresentInLocal.length) {
+          logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
           logger.info('Adding remote peer to file');
+          // ADD PEER TO MEMORY'S WELLKNOWN PEER
+          this.addToWellKnownPeers(peersNotPresentInLocal);
+
+          // SAVE PEER TO FILE
           appendToFile(peersNotPresentInLocal, peersStorageFile);
           logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
         }
@@ -440,38 +455,6 @@ class P2P {
       // SEND THE REQUESTING PEER MY LOCAL PEERS
       return done(null, JSON.stringify(localPeers));
     };
-  }
-
-  private onSyncGetPeersOld(peer: IHost): void {
-    request(
-      { url: `http://${peer.host}:2000/get-peers`, timeout: REQUEST_TIMEOUT },
-      async (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const incomingPeers = JSON.parse(body).message;
-
-          if (incomingPeers.length) {
-            try {
-              /** GET LOCAL PEERS */
-              const localPeers = await this.getPeers();
-
-              const peersNotPresentInLocal = this.getPeersNotInLocal(incomingPeers, localPeers);
-
-              logger.info(`Found ${peersNotPresentInLocal.length}(s) incoming peers`);
-
-              if (peersNotPresentInLocal.length) {
-                logger.info('Adding remote peer to file');
-                appendToFile(peersNotPresentInLocal, peersStorageFile);
-                logger.info(`Added ${peersNotPresentInLocal.length} remote peer(s) to file`);
-              }
-            } catch (error) {
-              console.log('Error adding peers to local file.', error);
-            }
-          }
-        } else {
-          logger.info(`${peer.host}:2000/get-peers - ${error}`);
-        }
-      }
-    );
   }
 
   private onSyncGetTransactions(peer: IHost): void {
@@ -570,19 +553,25 @@ class P2P {
     );
   }
 
-  private getPeersNotInLocal(incomingPeers: Array<IHost>, localPeers: Array<IHost>) {
+  private removeDuplicatePeers({
+    peersThatNeedDupsRemoved,
+    currentPeers,
+  }: {
+    peersThatNeedDupsRemoved: Array<IHost>;
+    currentPeers: Array<IHost>;
+  }) {
     const peersNotPresentInLocal = [];
     const localHosts = new Map();
 
-    for (let j = 0; j < localPeers.length; j++) {
-      localHosts.set(localPeers[j].host, localPeers[j].port);
+    for (let j = 0; j < currentPeers.length; j++) {
+      localHosts.set(currentPeers[j].host, currentPeers[j].port);
     }
 
-    for (let i = 0; i < incomingPeers.length; i++) {
-      const incomingPeer = incomingPeers[i];
+    for (let i = 0; i < peersThatNeedDupsRemoved.length; i++) {
+      const peer = peersThatNeedDupsRemoved[i];
 
-      if (!localHosts.has(incomingPeer.host) && incomingPeer.host != this.ip_address)
-        peersNotPresentInLocal.push(incomingPeer);
+      if (!localHosts.has(peer.host) && peer.host != this.ip_address)
+        peersNotPresentInLocal.push(peer);
     }
 
     return peersNotPresentInLocal;
@@ -616,6 +605,18 @@ class P2P {
     }
 
     return is_duplicate;
+  }
+
+  private addToWellKnownPeers(peersToAdd: IHost[]): void {
+    const currentWellKnownPeers = this.peer.wellKnownPeers.get();
+    const dupsPeersRemoved = this.removeDuplicatePeers({
+      peersThatNeedDupsRemoved: peersToAdd,
+      currentPeers: currentWellKnownPeers,
+    });
+
+    for (let i = 0; i < dupsPeersRemoved.length; i++) {
+      this.peer.wellKnownPeers.add(dupsPeersRemoved[i]);
+    }
   }
 }
 

@@ -49,13 +49,15 @@ class TransactionMiner {
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
 
       // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
-      this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
+      await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
 
       // ADD BLOCK TO FILE
       appendToFile([newlyMinedBlock], blockchainStorageFile);
 
-      // TODO: CLEAR THE POOL?
-      this.transactionPool.clear();
+      // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
+      this.transactionPool.clearBlockchainTransactions({
+        chain: [newlyMinedBlock],
+      });
 
       return 'success';
     }
