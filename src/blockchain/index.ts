@@ -124,7 +124,7 @@ class Blockchain {
 
     // CHECK FOR TRANSACTIONS LIMIT
     if (weight > MAX_WEIGHT_TXN) {
-      console.log('Transactions exceeds limit.');
+      console.error('Transactions exceeds limit.');
       return false;
     }
 

@@ -19,7 +19,7 @@
     "clean": "rimraf dist/",
     "build": "yarn clean && tsc",
     "start": "cross-env process.env.NODE_ENV='production' nodemon dist/server.js --watch dist/logs/main.log",
-    "test": "jest",
+    "test": "jest --bail --findRelatedTests",
     "prepare-husky": "husky install",
     "format": "prettier --write",
     "license": "license-check-and-add add -f license.config.json"
