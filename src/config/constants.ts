@@ -60,14 +60,14 @@ export const peersStorageFile = 'data/peers.txt';
 export const walletsStorageFile = 'wallets/wallets.txt';
 export const REQUEST_TIMEOUT = 5000;
 export const KADOCOIN_VERSION = '1.0.0';
-export const MAX_WEIGHT_TXN = 1024 * 1024; // 1 MB
-export const P2P_PORT = 5346;
-export const hardCodedPeers = !prod
-  ? [
+export const MAX_WEIGHT_TXN = 1.5 * 1024 * 1024; // 1.5 MB
+export const P2P_PORT = prod ? 5346 : 15346;
+export const hardCodedPeers = prod
+  ? [{ host: '173.16.164.35', port: P2P_PORT }]
+  : [
       { host: '192.168.0.148', port: P2P_PORT }, // ABUJA
       { host: '192.168.0.2', port: P2P_PORT }, // MAC
-    ]
-  : [{ host: '173.16.164.35', port: P2P_PORT }];
+    ];
 
 /** CREATE LOG FOLDER */
 createFolderOrFile('logs', 'folder');
