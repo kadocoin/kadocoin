@@ -55,6 +55,7 @@ export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
 export const blockchainStorageFile = 'data/blockchain.txt';
+export const balancesStorageFolder = 'data';
 export const logFile = 'logs/main.log';
 export const peersStorageFile = 'data/peers.txt';
 export const walletsStorageFile = 'wallets/wallets.txt';
