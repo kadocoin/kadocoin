@@ -22,7 +22,6 @@ import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
 import isEmptyObject from '../util/is-empty-object';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
-import Transaction from '../wallet/transaction';
 import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
 import sanitize_html from '../util/sanitize-html';
@@ -82,7 +81,7 @@ export default class TransactionController {
     const { transactionPool, blockchain, p2p, leveldb } = req;
 
     leveldb.getBalance(address, ({ type, message }) => {
-      console.log('make route', { message });
+      console.log('make route', { message }); // REMOVE
       if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
 
       // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
@@ -110,11 +109,9 @@ export default class TransactionController {
 
       try {
         if (transaction) {
-          console.log('Update transaction');
-          console.log('instance of Transaction', transaction instanceof Transaction);
+          console.log('Update transaction'); // REMOVE
 
           transaction.update({
-            publicKey,
             address,
             recipient,
             amount: Number(amount),
@@ -124,11 +121,13 @@ export default class TransactionController {
             sendFee,
           });
         } else {
-          console.log('New transaction');
+          console.log('New transaction'); // REMOVE
+
           transaction = localWallet.createTransaction({
             recipient,
             amount: Number(amount),
-            chain: blockchain.chain,
+            balance: message,
+            localWallet,
             publicKey,
             address,
             message,
@@ -161,7 +160,7 @@ export default class TransactionController {
    * @param {Response} res Express Response object
    * @return a transaction object
    */
-  send = async (req: Request, res: Response): Promise<Response> => {
+  send_without_account = async (req: Request, res: Response): Promise<Response> => {
     // ENFORCE 8 DECIMAL PLACES
     if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -201,9 +200,6 @@ export default class TransactionController {
         message: 'Invalid sender address.',
       });
 
-    // GRAB NECESSARY MIDDLEWARES
-    const { transactionPool, blockchain, p2p, localWallet } = req;
-
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
       return res.status(INCORRECT_VALIDATION).json({
@@ -211,59 +207,61 @@ export default class TransactionController {
         message: 'Sender and receiver address cannot be the same.',
       });
 
-    // CHECK FOR EXISTING TRANSACTION
-    let transaction = transactionPool.existingTransactionPool({
-      inputAddress: address,
+    // GRAB NECESSARY MIDDLEWARES
+    const { transactionPool, p2p, localWallet, leveldb } = req;
+
+    leveldb.getBalance(address, ({ type, message }) => {
+      console.log('send route', { message }); // REMOVE
+      if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
+
+      // CHECK FOR EXISTING TRANSACTION
+      let transaction = transactionPool.existingTransactionPool({
+        inputAddress: address,
+      });
+
+      try {
+        if (transaction) {
+          console.log('Update transaction'); // REMOVE
+
+          transaction.update({
+            address,
+            recipient,
+            amount: Number(amount),
+            balance: message,
+            localWallet,
+            message,
+            sendFee,
+          });
+        } else {
+          console.log('New transaction'); // REMOVE
+
+          transaction = localWallet.createTransaction({
+            recipient,
+            amount: Number(amount),
+            balance: message,
+            localWallet,
+            publicKey: localWallet.publicKey,
+            address,
+            message,
+            sendFee,
+          });
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+        }
+      }
+
+      /** SAVE TRANSACTION TO MEMORY */
+      transactionPool.setTransaction(transaction);
+
+      /** SEND TRANSACTION TO OTHER PEERS */
+      p2p.sendTransactions(transaction);
+
+      // TODO: SAVE TRANSACTION TO DB
+
+      return res.status(CREATED).json({ type: 'success', transaction });
     });
-
-    try {
-      if (transaction) {
-        console.log('Update transaction');
-        // GET UP TO DATE USER BALANCE
-        const balance = Wallet.calculateBalance({
-          address: address,
-          chain: blockchain.chain,
-        });
-
-        console.log('instance of Transaction', transaction instanceof Transaction);
-
-        transaction.update({
-          publicKey: transaction.input.publicKey,
-          address,
-          recipient,
-          amount: Number(amount),
-          balance,
-          localWallet,
-          message,
-          sendFee,
-        });
-      } else {
-        console.log('New transaction');
-        transaction = localWallet.createTransaction({
-          recipient,
-          amount: Number(amount),
-          chain: blockchain.chain,
-          publicKey: localWallet.publicKey,
-          address,
-          message,
-          sendFee,
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
-      }
-    }
-
-    /** SAVE TRANSACTION TO MEMORY */
-    transactionPool.setTransaction(transaction);
-
-    /** SEND TRANSACTION TO OTHER PEERS */
-    p2p.sendTransactions(transaction);
-
-    // TODO: SAVE TRANSACTION TO DB
-
-    return res.status(CREATED).json({ type: 'success', transaction });
   };
 
   transactionPool = (req: Request, res: Response): Response | undefined => {

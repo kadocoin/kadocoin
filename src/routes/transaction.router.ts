@@ -60,13 +60,15 @@ export default class TransactionRouter {
       this.transactionController.make
     );
 
+    // MULTI-WALLET ONLY
     this.app.post(
-      '/send',
+      '/send-without-account',
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
       p2pMiddleWare(this.p2p),
-      this.transactionController.send
+      leveldbMiddleWare(this.leveldb),
+      this.transactionController.send_without_account
     );
 
     this.app.get(

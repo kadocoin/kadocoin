@@ -11,7 +11,7 @@ class LevelDB {
   }
 
   public getBalance(address: string, done: ({}: { type: string; message: string }) => void): void {
-    this.balancesDB.get(address, async (err: { notFound: any }, value: string) => {
+    this.balancesDB.get(address.trim(), async (err: { notFound: any }, value: string) => {
       if (err) {
         if (err.notFound) return done({ type: 'success', message: (0).toFixed(8) });
 

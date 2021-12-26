@@ -166,7 +166,6 @@ export interface ICOutput_R {
 
 /** update() PARAMS type  */
 export interface IUpdate {
-  publicKey: string;
   address: string;
   recipient: string;
   amount: number;
@@ -179,11 +178,13 @@ export interface IUpdate {
 export interface ICreateTransactionParams {
   recipient: string;
   amount: number;
-  chain?: IChain;
+  localWallet: Wallet;
+  balance?: string;
   publicKey?: string;
   address?: string;
   message?: string;
   sendFee?: string;
+  callback?: any;
 }
 
 export interface REWARD_INPUT {

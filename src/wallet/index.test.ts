@@ -62,9 +62,9 @@ describe('Wallet', () => {
   describe('createTransaction()', () => {
     describe('and the amount exceeds the balance', () => {
       it('throws an error', () =>
-        expect(() => wallet.createTransaction({ amount: 1001, recipient: 'anyone' })).toThrow(
-          'Insufficient balance'
-        ));
+        expect(() =>
+          wallet.createTransaction({ amount: 1001, recipient: 'anyone', localWallet: wallet })
+        ).toThrow('Insufficient balance'));
     });
 
     describe('and the amount is valid', () => {
@@ -73,7 +73,7 @@ describe('Wallet', () => {
       beforeEach(() => {
         amount = 50;
         recipient = 'kadocoin user address';
-        transaction = wallet.createTransaction({ amount, recipient });
+        transaction = wallet.createTransaction({ amount, recipient, localWallet: wallet });
       });
 
       it('creates an instance of `Transaction`', () => {
@@ -99,7 +99,7 @@ describe('Wallet', () => {
         wallet.createTransaction({
           recipient: 'kadocoin user address',
           amount: 10,
-          chain: new Blockchain().chain,
+          localWallet: wallet,
         });
 
         expect(calculateBalanceMock).toHaveBeenCalled();
@@ -134,11 +134,13 @@ describe('Wallet', () => {
       beforeEach(() => {
         transactionOne = new Wallet().createTransaction({
           recipient: wallet.address,
+          localWallet: wallet,
           amount: 50,
         });
 
         transactionTwo = new Wallet().createTransaction({
           recipient: wallet.address,
+          localWallet: wallet,
           amount: 60,
         });
 
@@ -168,6 +170,7 @@ describe('Wallet', () => {
             recipient: 'Kado',
             amount: 30,
             publicKey: wallet.publicKey,
+            localWallet: wallet,
             address: wallet.address,
           });
 
@@ -192,6 +195,7 @@ describe('Wallet', () => {
               recipient: 'Kado-after',
               amount: 60,
               publicKey: wallet.address,
+              localWallet: wallet,
               address: wallet.address,
             });
 
@@ -209,6 +213,7 @@ describe('Wallet', () => {
             nextBlockTransaction = senderWallet.createTransaction({
               recipient: wallet.address,
               amount: 75,
+              localWallet: wallet,
               publicKey: senderWallet.address,
               address: senderWallet.address,
             });
