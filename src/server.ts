@@ -79,7 +79,7 @@ leveldb.balancesDB.open(async (err: any) => {
         wellKnownPeers: hardCodedPeers,
       });
 
-      const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
+      const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
       setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
 

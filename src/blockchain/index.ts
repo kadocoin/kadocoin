@@ -75,8 +75,10 @@ class Blockchain {
 
     if (onSuccess) onSuccess();
 
+    // ADD NEWLY VALIDATED BLOCK TO THE BLOCKCHAIN
     this.chain.push(incomingObj.block);
 
+    // SAVE TO FILE
     appendToFile([incomingObj.block], blockchainStorageFile);
 
     logger.info(

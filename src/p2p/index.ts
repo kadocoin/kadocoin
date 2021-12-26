@@ -29,6 +29,7 @@ import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../config/constants';
+import LevelDB from '../db';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -39,21 +40,25 @@ class P2P {
   private has_connected_to_a_peer__txs: boolean;
   private loopCount: number;
   private ip_address: string;
+  private leveldb: LevelDB;
 
   constructor({
     blockchain,
     transactionPool,
     peer,
     ip_address,
+    leveldb,
   }: {
     blockchain: Blockchain;
     transactionPool: TransactionPool;
     peer: any;
     ip_address: string;
+    leveldb: LevelDB;
   }) {
     this.peer = peer;
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
+    this.leveldb = leveldb;
     this.hardCodedPeers = hardCodedPeers;
     this.has_connected_to_a_peer__blks = false;
     this.has_connected_to_a_peer__txs = false;
@@ -227,6 +232,9 @@ class P2P {
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
               });
+
+              // SAVE TRANSACTIONS FROM THE BLOCK TO DB
+              this.leveldb.addOrUpdateBal([payload.data.message.block]);
               return done(null, 'blk-200');
             }
           );
