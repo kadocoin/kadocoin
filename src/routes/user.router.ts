@@ -8,20 +8,23 @@
 import { Application } from 'express';
 import Blockchain from '../blockchain';
 import UserController from '../controllers/user.controller';
-import { blockchainMiddleWare } from '../middleware/cryptoMiddleWare';
+import { blockchainMiddleWare, leveldbMiddleWare } from '../middleware/cryptoMiddleWare';
 import { mustBeLoggedIn } from '../middleware/mustBeLoggedIn';
 import multer from 'multer';
 import { must_be_verified } from '../middleware/must_be_verified';
+import LevelDB from '../db';
 const upload = multer({ dest: 'app/dist/temp' });
 
 export default class UserRouter {
   private app: Application;
   private UserController: UserController;
   private blockchain: Blockchain;
+  private leveldb: LevelDB;
 
-  constructor(app: Application, blockchain: Blockchain) {
+  constructor(app: Application, blockchain: Blockchain, leveldb: LevelDB) {
     this.app = app;
     this.blockchain = blockchain;
+    this.leveldb = leveldb;
     this.UserController = new UserController();
     this.initRoute();
   }
@@ -37,7 +40,7 @@ export default class UserRouter {
       this.UserController.addressInfo
     );
 
-    this.app.post('/balance', blockchainMiddleWare(this.blockchain), this.UserController.balance);
+    this.app.post('/balance', leveldbMiddleWare(this.leveldb), this.UserController.balance);
 
     this.app.post('/login', this.UserController.login);
     this.app.put(

@@ -206,7 +206,7 @@ class P2P {
             })
             .run('handle/receiveTransactions', { data: message }, (forwarding_err: Error) => {
               if (forwarding_err) {
-                console.warn('Failed to send txn to', { peer });
+                logger.warn('Failed to send txn to', { peer });
               }
             });
         }
@@ -316,7 +316,7 @@ class P2P {
               port: peer.port,
             })
             .run('handle/receiveBlockFromPeers', { data: message }, (forwarding_blk_err: Error) => {
-              if (forwarding_blk_err) console.warn('Failed to send new blk to', { peer });
+              if (forwarding_blk_err) logger.warn('Failed to send new blk to', { peer });
             });
         }
       });
@@ -398,7 +398,7 @@ class P2P {
               });
             }
           } else {
-            logger.info(
+            logger.warn(
               `${peer.host}:${peer.port}/handle/sendPeersToRequesterAndRequesterInfoToSupplier- ${err}`
             );
           }
@@ -474,7 +474,7 @@ class P2P {
           if (!isEmptyObject(rootTransactionPoolMap))
             this.transactionPool.onSyncAddTransactions(rootTransactionPoolMap);
         } else {
-          logger.info(`${peer.host}:2000/transaction-pool - ${error}`);
+          logger.warn(`${peer.host}:2000/transaction-pool - ${error}`);
         }
       }
     );

@@ -250,11 +250,14 @@ export default class UserController {
           message: 'Invalid address.',
         });
 
-      return res.status(SUCCESS).json({
-        balance: Wallet.calculateBalance({
-          chain: req.blockchain.chain,
-          address: req.body.address,
-        }),
+      // GRAB NECESSARY MIDDLEWARE(S)
+      const { leveldb } = req;
+
+      leveldb.getBalance(req.body.address, (bal: string) => {
+        console.log('balance route', { bal });
+        return res.status(SUCCESS).json({
+          balance: bal,
+        });
       });
     } catch (error) {
       if (error instanceof Error) {

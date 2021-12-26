@@ -41,8 +41,11 @@ leveldb.balancesDB.open(async (err: any) => {
   if (err) return logger.fatal('Error opening balancesdb,', { err });
 
   logger.info('*****BalancesDB opened*****');
+  leveldb.getBalance('0x4Ff299F604391989b36d13D24Ce4247b0EC79648a', (bal: string) =>
+    console.log({ bal })
+  );
 
-  leveldb.getAllKeysAndValues();
+  setInterval(() => leveldb.getAllKeysAndValues(), 60 * 1000);
 
   /**  OPEN MONGODB CONNECTED AND START APP  */
   MongoClient.connect(MONGODB_URI, {
@@ -101,7 +104,7 @@ leveldb.balancesDB.open(async (err: any) => {
       });
 
       const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
-        new UserRouter(app, blockchain);
+        new UserRouter(app, blockchain, leveldb);
         new BlockRouter(app, blockchain);
         new P2PRouter(app, p2p);
         new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet, leveldb);
