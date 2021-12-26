@@ -79,73 +79,78 @@ export default class TransactionController {
 
     // GRAB NECESSARY MIDDLEWARES
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { transactionPool, blockchain, p2p } = req;
+    const { transactionPool, blockchain, p2p, leveldb } = req;
 
-    // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
-    const { keyPairHex } = req.app.locals.user;
+    leveldb.getBalance(address, ({ type, message }) => {
+      console.log('make route', { message });
+      if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
 
-    const localWallet = new Wallet(
-      Wallet.calculateBalance({ chain: blockchain.chain, address }),
-      Wallet.keyPairFromHex(keyPairHex),
-      publicKey,
-      address,
-      keyPairHex
-    );
+      // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
+      const { keyPairHex } = req.app.locals.user;
 
-    // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
-    if (recipient === address)
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Sender and receiver address cannot be the same.',
+      const localWallet = new Wallet(
+        message,
+        Wallet.keyPairFromHex(keyPairHex),
+        publicKey,
+        address,
+        keyPairHex
+      );
+
+      // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
+      if (recipient === address)
+        return res.status(INCORRECT_VALIDATION).json({
+          type: 'error',
+          message: 'Sender and receiver address cannot be the same.',
+        });
+
+      // CHECK FOR EXISTING TRANSACTION
+      let transaction = transactionPool.existingTransactionPool({
+        inputAddress: address,
       });
 
-    // CHECK FOR EXISTING TRANSACTION
-    let transaction = transactionPool.existingTransactionPool({
-      inputAddress: address,
+      try {
+        if (transaction) {
+          console.log('Update transaction');
+          console.log('instance of Transaction', transaction instanceof Transaction);
+
+          transaction.update({
+            publicKey,
+            address,
+            recipient,
+            amount: Number(amount),
+            balance: localWallet.balance,
+            localWallet,
+            message,
+            sendFee,
+          });
+        } else {
+          console.log('New transaction');
+          transaction = localWallet.createTransaction({
+            recipient,
+            amount: Number(amount),
+            chain: blockchain.chain,
+            publicKey,
+            address,
+            message,
+            sendFee,
+          });
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+        }
+      }
+
+      /** SAVE TRANSACTION TO MEMORY */
+      transactionPool.setTransaction(transaction);
+
+      /** SEND TRANSACTION TO OTHER PEERS */
+      p2p.sendTransactions(transaction);
+
+      // TODO: SAVE TRANSACTION TO DB
+
+      return res.status(CREATED).json({ type: 'success', transaction });
     });
-
-    try {
-      if (transaction) {
-        console.log('Update transaction');
-        console.log('instance of Transaction', transaction instanceof Transaction);
-
-        transaction.update({
-          publicKey,
-          address,
-          recipient,
-          amount: Number(amount),
-          balance: localWallet.balance,
-          localWallet,
-          message,
-          sendFee,
-        });
-      } else {
-        console.log('New transaction');
-        transaction = localWallet.createTransaction({
-          recipient,
-          amount: Number(amount),
-          chain: blockchain.chain,
-          publicKey,
-          address,
-          message,
-          sendFee,
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
-      }
-    }
-
-    /** SAVE TRANSACTION TO MEMORY */
-    transactionPool.setTransaction(transaction);
-
-    /** SEND TRANSACTION TO OTHER PEERS */
-    p2p.sendTransactions(transaction);
-
-    // TODO: SAVE TRANSACTION TO DB
-
-    return res.status(CREATED).json({ type: 'success', transaction });
   };
 
   /**

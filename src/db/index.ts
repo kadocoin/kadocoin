@@ -10,14 +10,16 @@ class LevelDB {
     this.balancesDB = level(balancesStorageFolder);
   }
 
-  public getBalance(address: string, done: (bal: string) => void): void {
+  public getBalance(address: string, done: ({}: { type: string; message: string }) => void): void {
     this.balancesDB.get(address, async (err: { notFound: any }, value: string) => {
-      if (err && err.notFound) {
-        done('Address has a balance of zero or invalid');
+      if (err) {
+        if (err.notFound) return done({ type: 'success', message: (0).toFixed(8) });
+
+        return done({ type: 'error', message: 'Error getting balance. Please try again.' });
       } else {
         const res = JSON.parse(value);
 
-        done(res.bal);
+        return done({ type: 'success', message: res.bal });
       }
     });
   }

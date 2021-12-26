@@ -253,10 +253,12 @@ export default class UserController {
       // GRAB NECESSARY MIDDLEWARE(S)
       const { leveldb } = req;
 
-      leveldb.getBalance(req.body.address, (bal: string) => {
-        console.log('balance route', { bal });
+      leveldb.getBalance(req.body.address, ({ type, message }) => {
+        console.log('balance route', { message });
+        if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
+
         return res.status(SUCCESS).json({
-          balance: bal,
+          balance: message,
         });
       });
     } catch (error) {

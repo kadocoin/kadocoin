@@ -41,9 +41,6 @@ leveldb.balancesDB.open(async (err: any) => {
   if (err) return logger.fatal('Error opening balancesdb,', { err });
 
   logger.info('*****BalancesDB opened*****');
-  leveldb.getBalance('0x4Ff299F604391989b36d13D24Ce4247b0EC79648a', (bal: string) =>
-    console.log({ bal })
-  );
 
   setInterval(() => leveldb.getAllKeysAndValues(), 60 * 1000);
 
