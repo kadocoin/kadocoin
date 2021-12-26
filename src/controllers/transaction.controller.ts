@@ -318,7 +318,7 @@ export default class TransactionController {
         }));
 
       // GRAB NECESSARY MIDDLEWARES
-      const { transactionPool, blockchain, p2p } = req;
+      const { transactionPool, blockchain, p2p, leveldb } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({
@@ -326,6 +326,7 @@ export default class TransactionController {
           transactionPool: transactionPool,
           address: address,
           p2p: p2p,
+          leveldb,
           message: message,
         });
 

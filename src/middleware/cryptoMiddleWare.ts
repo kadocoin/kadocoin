@@ -7,6 +7,7 @@
  */
 import { NextFunction, Request, Response } from 'express';
 import Blockchain from '../blockchain';
+import LevelDB from '../db';
 import P2P from '../p2p';
 import Wallet from '../wallet';
 import TransactionPool from '../wallet/transaction-pool';
@@ -38,6 +39,13 @@ export function p2pMiddleWare(p2p: P2P): TReturnType {
 export function walletMiddleWare(localWallet: Wallet): TReturnType {
   return function (req: Request, _: Response, next: NextFunction) {
     req.localWallet = localWallet;
+    next();
+  };
+}
+
+export function leveldbMiddleWare(leveldb: LevelDB): TReturnType {
+  return function (req: Request, _: Response, next: NextFunction) {
+    req.leveldb = leveldb;
     next();
   };
 }

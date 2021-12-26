@@ -104,7 +104,7 @@ leveldb.balancesDB.open(async (err: any) => {
         new UserRouter(app, blockchain);
         new BlockRouter(app, blockchain);
         new P2PRouter(app, p2p);
-        new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
+        new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet, leveldb);
         next();
       };
 

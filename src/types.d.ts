@@ -8,6 +8,7 @@
 import { Db, MongoClient } from 'mongodb';
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
+import LevelDB from './db';
 import P2P from './p2p';
 import Wallet from './wallet';
 import Transaction from './wallet/transaction';
@@ -37,6 +38,7 @@ export interface ITMinerConstructorParams {
   p2p: P2P;
   address: string;
   message: string;
+  leveldb: LevelDB;
 }
 
 /**
@@ -104,6 +106,7 @@ declare global {
       transactionPool: TransactionPool;
       p2p: P2P;
       localWallet: Wallet;
+      leveldb: LevelDB;
     }
   }
 }

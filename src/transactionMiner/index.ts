@@ -12,20 +12,30 @@ import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 import appendToFile from '../util/appendToFile';
 import { blockchainStorageFile } from '../config/constants';
+import LevelDB from '../db';
 
 class TransactionMiner {
   public blockchain: Blockchain;
   public transactionPool: TransactionPool;
   public p2p: any;
+  public leveldb: LevelDB;
   public address: string;
   public message?: string;
 
-  constructor({ blockchain, transactionPool, address, p2p, message }: ITMinerConstructorParams) {
+  constructor({
+    blockchain,
+    transactionPool,
+    address,
+    p2p,
+    message,
+    leveldb,
+  }: ITMinerConstructorParams) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
     this.p2p = p2p;
     this.address = address;
     this.message = message;
+    this.leveldb = leveldb;
   }
 
   async mineTransactions(): Promise<string> {
@@ -45,8 +55,11 @@ class TransactionMiner {
         })
       );
 
-      // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
+      // ADD THE BLOCK TO THE BLOCKCHAIN
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
+
+      // SAVE THE TRANSACTIONS' BALANCES IN DB
+      this.leveldb.addOrUpdateBal([newlyMinedBlock]);
 
       // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
       await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });

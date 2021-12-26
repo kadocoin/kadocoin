@@ -8,8 +8,10 @@
 import { Application } from 'express';
 import Blockchain from '../blockchain';
 import TransactionController from '../controllers/transaction.controller';
+import LevelDB from '../db';
 import {
   blockchainMiddleWare,
+  leveldbMiddleWare,
   p2pMiddleWare,
   transactionPoolMiddleWare,
   walletMiddleWare,
@@ -25,6 +27,7 @@ export default class TransactionRouter {
   private blockchain: Blockchain;
   private p2p: any;
   private localWallet: Wallet;
+  leveldb: LevelDB;
 
   constructor(
     app: Application,
@@ -32,7 +35,8 @@ export default class TransactionRouter {
     blockchain: Blockchain,
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     p2p: any,
-    localWallet: Wallet
+    localWallet: Wallet,
+    leveldb: LevelDB
   ) {
     this.app = app;
     this.transactionPool = transactionPool;
@@ -40,6 +44,7 @@ export default class TransactionRouter {
     this.p2p = p2p;
     this.transactionController = new TransactionController();
     this.localWallet = localWallet;
+    this.leveldb = leveldb;
     this.initRoute();
   }
 
@@ -80,6 +85,7 @@ export default class TransactionRouter {
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
       p2pMiddleWare(this.p2p),
+      leveldbMiddleWare(this.leveldb),
       this.transactionController.mine
     );
   }
