@@ -32,10 +32,17 @@ import logger from './util/logger';
 import address from './util/get-ip-address';
 import LevelDB from './db';
 
-new LevelDB().balancesDB.open(async (err: any) => {
+/**
+ * @var leveldb app wide variable
+ */
+const leveldb = new LevelDB();
+
+leveldb.balancesDB.open(async (err: any) => {
   if (err) return logger.fatal('Error opening balancesdb,', { err });
 
   logger.info('*****BalancesDB opened*****');
+
+  leveldb.getAllKeysAndValues();
 
   /**  OPEN MONGODB CONNECTED AND START APP  */
   MongoClient.connect(MONGODB_URI, {

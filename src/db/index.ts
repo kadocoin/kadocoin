@@ -1,6 +1,7 @@
 import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
 import { balancesStorageFolder } from '../config/constants';
+import logger from '../util/logger';
 
 class LevelDB {
   balancesDB: level.LevelDB<any, any>;
@@ -9,10 +10,10 @@ class LevelDB {
     this.balancesDB = level(balancesStorageFolder);
   }
 
-  public async getAllKeysAndValues(): Promise<void> {
+  public getAllKeysAndValues(): void {
     this.balancesDB
       .createReadStream()
-      .on('data', (data: { key: string; value: any }) => console.log(data.key, '=', data.value));
+      .on('data', (data: { key: string; value: any }) => logger.info('BalancesDB', { data }));
   }
 
   public addOrUpdateBal(blocks: Array<Block>): void {
