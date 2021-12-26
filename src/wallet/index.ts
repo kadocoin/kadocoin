@@ -14,6 +14,8 @@ import { IChain, ICOutput_R, ICreateTransactionParams, IWalletFormattedForStorag
 import fs from 'fs';
 import appendToFile from '../util/appendToFile';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
+import LevelDB from '../db';
+import logger from '../util/logger';
 
 class Wallet {
   public balance: string;
@@ -42,50 +44,40 @@ class Wallet {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
   }
 
-  async loadWalletsFromFileOrCreateNew({ chain }: { chain: IChain }): Promise<Wallet> {
-    // GET ALL THE WALLETS FROM STORAGE
-    const wallets = await this.formatWalletAfterRetrievingFromStorage({ chain });
-
-    // ONLY RETURN ONE OF THE WALLETS
-    if (wallets.length) return wallets[0];
-
-    // IF NO WALLETS EXIST, CREATE ONE
-    const newWallet = new Wallet();
-
-    // SAVE IT TO FILE
-    appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
-
-    // RETURN THE NEW WALLET
-    return newWallet;
-  }
-
-  async formatWalletAfterRetrievingFromStorage({
-    chain,
-  }: {
-    chain: IChain;
-  }): Promise<Array<Wallet>> {
-    const results: Array<Wallet> = [];
-
+  loadWalletsFromFileOrCreateNew(leveldb: LevelDB, done: (wallet: Wallet) => void): void {
     if (fs.existsSync(walletsStorageFile)) {
-      const wallets = await getFileContentLineByLine(walletsStorageFile);
+      getFileContentLineByLine(walletsStorageFile).then(wallets => {
+        if (wallets.length) {
+          wallets.forEach(wallet => {
+            leveldb.getBalance(wallet.address, async ({ type, message }) => {
+              if (type == 'error') return 'Cannot find local wallet address.';
 
-      if (wallets.length) {
-        for (let i = 0; i < wallets.length; i++) {
-          let wallet = wallets[i];
+              wallet = new Wallet(
+                message,
+                Wallet.keyPairFromHex(wallet.keyPairHex),
+                wallet.publicKey,
+                wallet.address,
+                wallet.keyPairHex
+              );
+              // FOUND A WALLET EXIT
 
-          wallet = new Wallet(
-            Wallet.calculateBalance({ chain, address: wallet.address }),
-            Wallet.keyPairFromHex(wallet.keyPairHex),
-            wallet.publicKey,
-            wallet.address,
-            wallet.keyPairHex
-          );
+              done(wallet);
+              logger.info('Found a wallet on file.');
+            });
+          });
+        } else {
+          // IF NO WALLETS EXIST, CREATE ONE
+          const newWallet = new Wallet();
 
-          results.push(wallet);
+          // SAVE IT TO FILE
+          appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
+
+          // RETURN THE NEW WALLET
+          done(newWallet);
+          logger.info('No wallet found on file. Created a new one.');
         }
-      }
+      });
     }
-    return results;
   }
 
   formatWalletInfoBeforeStoring(wallet: Wallet): IWalletFormattedForStorage {
