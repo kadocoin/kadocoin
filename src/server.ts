@@ -30,106 +30,116 @@ import { hardCodedPeers, P2P_PORT } from './config/constants';
 import restartServer from './util/restart-server';
 import logger from './util/logger';
 import address from './util/get-ip-address';
+import LevelDB from './db';
 
-/**  OPEN MONGODB CONNECTED AND START APP  */
-MongoClient.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(async client => {
-    logger.info('*****MongoDB is connected*****');
+new LevelDB().balancesDB.open(async (err: any) => {
+  if (err) return logger.fatal('Error opening balancesdb,', { err });
 
-    /**
-     * @var blockchain app wide variable
-     */
-    const blockchain = await new Blockchain().loadBlocksFromFileOrCreateNew();
+  logger.info('*****BalancesDB opened*****');
 
-    /**
-     * @var transactionPool app wide variable
-     */
-    const transactionPool = new TransactionPool();
-
-    /**
-     * @ip_address ip_address app wide variable
-     */
-    const ip_address = await address();
-
-    logger.info('This peer IP address', { ip_address });
-
-    /**
-     * @var node_P2P app wide variable
-     */
-    const peer = P2PModule.peer({
-      host: '127.0.0.1',
-      port: P2P_PORT,
-      metadata: { host: ip_address, port: P2P_PORT, type: 'full_node' },
-      wellKnownPeers: hardCodedPeers,
-    });
-
-    const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
-
-    setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
-
-    /** GET BLOCKCHAIN DATA FROM PEERS */
-    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain();
-
-    logger.info(`Node sync status`, {
-      has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
-    });
-
-    if (!has_downloaded_txs_and_blks) return restartServer();
-
-    /**
-     * @var localWallet - signs and verifies transactions on this node
-     */
-
-    const localWallet = await new Wallet().loadWalletsFromFileOrCreateNew({
-      chain: blockchain.chain,
-    });
-
-    const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
-      new UserRouter(app, blockchain);
-      new BlockRouter(app, blockchain);
-      new P2PRouter(app, p2p);
-      new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
-      next();
-    };
-
-    /** MIDDLEWARES */
-
-    app.use(function (_, res, next) {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-      next();
-    });
-    app.use(helmet());
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(initializeRoutes);
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-    /** END MIDDLEWARES */
-
-    app.locals.dbClient = client;
-    app.locals.db = client.db(DB_NAME);
-
-    /** CREATE INDEX */
-    const createIndexes = async (db: Db): Promise<void> => {
-      await Promise.all([
-        db
-          .collection('users')
-          .createIndex({ email: 1, _id: 1, address: 1, publicKey: 1 }, { unique: true }),
-      ]);
-    };
-
-    await createIndexes(app.locals.db);
-
-    app
-      .listen(PORT, async () => {
-        logger.info(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
-      })
-      .on('error', err => logger.error(`${err}`));
+  /**  OPEN MONGODB CONNECTED AND START APP  */
+  MongoClient.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
-  .catch(err => {
-    logger.error(err);
-  });
+    .then(async client => {
+      logger.info('*****MongoDB connected*****');
+
+      /**
+       * @var blockchain app wide variable
+       */
+      const blockchain = await new Blockchain().loadBlocksFromFileOrCreateNew();
+
+      /**
+       * @var transactionPool app wide variable
+       */
+      const transactionPool = new TransactionPool();
+
+      /**
+       * @ip_address ip_address app wide variable
+       */
+      const ip_address = await address();
+
+      logger.info('This peer IP address', { ip_address });
+
+      /**
+       * @var node_P2P app wide variable
+       */
+      const peer = P2PModule.peer({
+        host: '127.0.0.1',
+        port: P2P_PORT,
+        metadata: { host: ip_address, port: P2P_PORT, type: 'full_node' },
+        wellKnownPeers: hardCodedPeers,
+      });
+
+      const p2p = new P2P({ blockchain, transactionPool, peer, ip_address });
+
+      setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
+
+      /** GET BLOCKCHAIN DATA FROM PEERS */
+      const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain();
+
+      logger.info(`Node sync status`, {
+        has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
+      });
+
+      if (!has_downloaded_txs_and_blks) return restartServer();
+
+      /**
+       * @var localWallet - signs and verifies transactions on this node
+       */
+
+      const localWallet = await new Wallet().loadWalletsFromFileOrCreateNew({
+        chain: blockchain.chain,
+      });
+
+      const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
+        new UserRouter(app, blockchain);
+        new BlockRouter(app, blockchain);
+        new P2PRouter(app, p2p);
+        new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet);
+        next();
+      };
+
+      /** MIDDLEWARES */
+
+      app.use(function (_, res, next) {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header(
+          'Access-Control-Allow-Headers',
+          'Origin, X-Requested-With, Content-Type, Accept'
+        );
+        next();
+      });
+      app.use(helmet());
+      app.use(express.urlencoded({ extended: true }));
+      app.use(express.json());
+      app.use(initializeRoutes);
+      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+      /** END MIDDLEWARES */
+
+      app.locals.dbClient = client;
+      app.locals.db = client.db(DB_NAME);
+
+      /** CREATE INDEX */
+      const createIndexes = async (db: Db): Promise<void> => {
+        await Promise.all([
+          db
+            .collection('users')
+            .createIndex({ email: 1, _id: 1, address: 1, publicKey: 1 }, { unique: true }),
+        ]);
+      };
+
+      await createIndexes(app.locals.db);
+
+      app
+        .listen(PORT, async () => {
+          logger.info(`****Application is running on ${PORT} in ${ENVIRONMENT}*****`);
+        })
+        .on('error', err => logger.error(`${err}`));
+    })
+    .catch(err => {
+      logger.error(err);
+    });
+});
