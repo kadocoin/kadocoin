@@ -1,11 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
 import { balancesStorageFolder } from '../config/constants';
 
 class LevelDB {
-  balancesDB: any;
+  balancesDB: level.LevelDB<any, any>;
 
   constructor() {
     this.balancesDB = level(balancesStorageFolder);

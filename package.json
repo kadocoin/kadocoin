@@ -75,6 +75,7 @@
     "@types/jest": "^26.0.23",
     "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^8.5.1",
+    "@types/level": "^6.0.0",
     "@types/mongodb": "^3.6.17",
     "@types/multer": "^1.4.7",
     "@types/nanoid": "^3.0.0",
