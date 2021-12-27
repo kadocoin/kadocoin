@@ -14,6 +14,12 @@ import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
 
+export interface IValue {
+  bal: string;
+  height: number;
+  timestamp: number;
+}
+
 export interface IWalletParam {
   balance?: string;
   keyPair?: any;

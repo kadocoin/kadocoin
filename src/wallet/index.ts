@@ -52,7 +52,7 @@ class Wallet {
         const wallets: Wallet[] = await Promise.all(
           leanWallets.map(async (wallet: Wallet): Promise<Wallet> => {
             const { type, message } = await leveldb.getBal(wallet.address);
-            if (type == 'error') new Error('Error loading wallet.');
+            if (type == 'error') new Error(message);
 
             wallet = new Wallet(
               message,

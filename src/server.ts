@@ -48,8 +48,6 @@ leveldb.balancesDB.open(async (err: any) => {
    * @var localWallet - signs and verifies transactions on this node
    */
 
-  // const localWallet = new Wallet();
-
   const localWallet = await new Wallet().loadWalletsFromFileOrCreateNew(leveldb);
   console.error('wallets', { localWallet });
 
