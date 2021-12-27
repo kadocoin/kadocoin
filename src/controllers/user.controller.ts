@@ -235,7 +235,7 @@ export default class UserController {
     }
   };
 
-  balance = (req: Request, res: Response): Response => {
+  balance = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = addressValidation(req.body.address);
       if (error)
@@ -253,13 +253,14 @@ export default class UserController {
       // GRAB NECESSARY MIDDLEWARE(S)
       const { leveldb } = req;
 
-      leveldb.getBalance(req.body.address, ({ type, message }) => {
-        console.log('balance route', { message });
-        if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
+      const data = await leveldb.getBal(req.body.address);
 
-        return res.status(SUCCESS).json({
-          balance: message,
-        });
+      console.log('balance route', { message: data.message }); // REMOVE
+      if (data.type == 'error')
+        return res.status(NOT_FOUND).json({ type: 'error', message: data.message });
+
+      return res.status(SUCCESS).json({
+        balance: data.message,
       });
     } catch (error) {
       if (error instanceof Error) {

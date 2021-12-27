@@ -80,76 +80,77 @@ export default class TransactionController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { transactionPool, blockchain, p2p, leveldb } = req;
 
-    leveldb.getBalance(address, ({ type, message }) => {
-      console.log('make route', { message }); // REMOVE
-      if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
+    const data = await leveldb.getBal(address);
 
-      // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
-      const { keyPairHex } = req.app.locals.user;
+    console.log('make route', { message: data.message }); // REMOVE
+    if (data.type == 'error')
+      return res.status(NOT_FOUND).json({ type: 'error', message: data.message });
 
-      const localWallet = new Wallet(
-        message,
-        Wallet.keyPairFromHex(keyPairHex),
-        publicKey,
-        address,
-        keyPairHex
-      );
+    // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
+    const { keyPairHex } = req.app.locals.user;
 
-      // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
-      if (recipient === address)
-        return res.status(INCORRECT_VALIDATION).json({
-          type: 'error',
-          message: 'Sender and receiver address cannot be the same.',
-        });
+    const localWallet = new Wallet(
+      data.message,
+      Wallet.keyPairFromHex(keyPairHex),
+      publicKey,
+      address,
+      keyPairHex
+    );
 
-      // CHECK FOR EXISTING TRANSACTION
-      let transaction = transactionPool.existingTransactionPool({
-        inputAddress: address,
+    // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
+    if (recipient === address)
+      return res.status(INCORRECT_VALIDATION).json({
+        type: 'error',
+        message: 'Sender and receiver address cannot be the same.',
       });
 
-      try {
-        if (transaction) {
-          console.log('Update transaction'); // REMOVE
-
-          transaction.update({
-            address,
-            recipient,
-            amount: Number(amount),
-            balance: localWallet.balance,
-            localWallet,
-            message,
-            sendFee,
-          });
-        } else {
-          console.log('New transaction'); // REMOVE
-
-          transaction = localWallet.createTransaction({
-            recipient,
-            amount: Number(amount),
-            balance: message,
-            localWallet,
-            publicKey,
-            address,
-            message,
-            sendFee,
-          });
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
-        }
-      }
-
-      /** SAVE TRANSACTION TO MEMORY */
-      transactionPool.setTransaction(transaction);
-
-      /** SEND TRANSACTION TO OTHER PEERS */
-      p2p.sendTransactions(transaction);
-
-      // TODO: SAVE TRANSACTION TO DB
-
-      return res.status(CREATED).json({ type: 'success', transaction });
+    // CHECK FOR EXISTING TRANSACTION
+    let transaction = transactionPool.existingTransactionPool({
+      inputAddress: address,
     });
+
+    try {
+      if (transaction) {
+        console.log('Update transaction'); // REMOVE
+
+        transaction.update({
+          address,
+          recipient,
+          amount: Number(amount),
+          balance: data.message,
+          localWallet,
+          message,
+          sendFee,
+        });
+      } else {
+        console.log('New transaction'); // REMOVE
+
+        transaction = localWallet.createTransaction({
+          recipient,
+          amount: Number(amount),
+          balance: data.message,
+          localWallet,
+          publicKey,
+          address,
+          message,
+          sendFee,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+      }
+    }
+
+    /** SAVE TRANSACTION TO MEMORY */
+    transactionPool.setTransaction(transaction);
+
+    /** SEND TRANSACTION TO OTHER PEERS */
+    p2p.sendTransactions(transaction);
+
+    // TODO: SAVE TRANSACTION TO DB
+
+    return res.status(CREATED).json({ type: 'success', transaction });
   };
 
   /**
@@ -210,58 +211,59 @@ export default class TransactionController {
     // GRAB NECESSARY MIDDLEWARES
     const { transactionPool, p2p, localWallet, leveldb } = req;
 
-    leveldb.getBalance(address, ({ type, message }) => {
-      console.log('send route', { message }); // REMOVE
-      if (type == 'error') return res.status(NOT_FOUND).json({ type: 'error', message });
+    const data = await leveldb.getBal(address);
 
-      // CHECK FOR EXISTING TRANSACTION
-      let transaction = transactionPool.existingTransactionPool({
-        inputAddress: address,
-      });
+    console.log('send route', { message: data.message }); // REMOVE
+    if (data.type == 'error')
+      return res.status(NOT_FOUND).json({ type: 'error', message: data.message });
 
-      try {
-        if (transaction) {
-          console.log('Update transaction'); // REMOVE
-
-          transaction.update({
-            address,
-            recipient,
-            amount: Number(amount),
-            balance: message,
-            localWallet,
-            message,
-            sendFee,
-          });
-        } else {
-          console.log('New transaction'); // REMOVE
-
-          transaction = localWallet.createTransaction({
-            recipient,
-            amount: Number(amount),
-            balance: message,
-            localWallet,
-            publicKey: localWallet.publicKey,
-            address,
-            message,
-            sendFee,
-          });
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
-        }
-      }
-
-      /** SAVE TRANSACTION TO MEMORY */
-      transactionPool.setTransaction(transaction);
-
-      /** SEND TRANSACTION TO OTHER PEERS */
-      p2p.sendTransactions(transaction);
-
-      // TODO: SAVE TRANSACTION TO DB
-
-      return res.status(CREATED).json({ type: 'success', transaction });
+    // CHECK FOR EXISTING TRANSACTION
+    let transaction = transactionPool.existingTransactionPool({
+      inputAddress: address,
     });
+
+    try {
+      if (transaction) {
+        console.log('Update transaction'); // REMOVE
+
+        transaction.update({
+          address,
+          recipient,
+          amount: Number(amount),
+          balance: data.message,
+          localWallet,
+          message,
+          sendFee,
+        });
+      } else {
+        console.log('New transaction'); // REMOVE
+
+        transaction = localWallet.createTransaction({
+          recipient,
+          amount: Number(amount),
+          balance: data.message,
+          localWallet,
+          publicKey: localWallet.publicKey,
+          address,
+          message,
+          sendFee,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
+      }
+    }
+
+    /** SAVE TRANSACTION TO MEMORY */
+    transactionPool.setTransaction(transaction);
+
+    /** SEND TRANSACTION TO OTHER PEERS */
+    p2p.sendTransactions(transaction);
+
+    // TODO: SAVE TRANSACTION TO DB
+
+    return res.status(CREATED).json({ type: 'success', transaction });
   };
 
   transactionPool = (req: Request, res: Response): Response | undefined => {
