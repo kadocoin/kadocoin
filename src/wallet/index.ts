@@ -49,10 +49,10 @@ class Wallet {
       const leanWallets = await getFileContentLineByLine(walletsStorageFile);
 
       if (leanWallets.length) {
-        const wallets = await Promise.all(
+        const wallets: Wallet[] = await Promise.all(
           leanWallets.map(async (wallet: Wallet): Promise<Wallet> => {
             const { type, message } = await leveldb.getBal(wallet.address);
-            if (type == 'error') return;
+            if (type == 'error') new Error('Error loading wallet.');
 
             wallet = new Wallet(
               message,
@@ -64,8 +64,10 @@ class Wallet {
 
             return wallet;
           })
-        );
+        ).catch(error => error);
+
         // RETURN THE FIRST WALLET ON FILE
+        logger.info('Loaded wallet from file.');
         return wallets[0];
       } else {
         // IF NO WALLETS EXIST, CREATE ONE
