@@ -10,21 +10,6 @@ class LevelDB {
     this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' });
   }
 
-  public getBalance(address: string, done: ({}: { type: string; message: string }) => void): void {
-    this.balancesDB.get(
-      address.trim(),
-      async (err: { notFound: any }, value: { bal: string; height: number; timestamp: number }) => {
-        if (err) {
-          if (err.notFound) return done({ type: 'success', message: (0).toFixed(8) });
-
-          return done({ type: 'error', message: 'Error getting balance. Please try again.' });
-        } else {
-          return done({ type: 'success', message: value.bal });
-        }
-      }
-    );
-  }
-
   public getBal = (address: string): Promise<{ type: string; message: string }> =>
     new Promise(resolve => {
       this.balancesDB.get(
