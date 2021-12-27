@@ -42,7 +42,7 @@ leveldb.balancesDB.open(async (err: any) => {
 
   logger.info('*****BalancesDB opened*****');
 
-  setInterval(() => leveldb.getAllKeysAndValues(), 60 * 1000);
+  // setInterval(() => leveldb.getAllKeysAndValues(), 60 * 1000);
 
   /**
    * @var localWallet - signs and verifies transactions on this node
@@ -87,16 +87,19 @@ leveldb.balancesDB.open(async (err: any) => {
 
       const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
-      setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
+      // setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
 
       /** GET BLOCKCHAIN DATA FROM PEERS */
-      const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain();
+      const has_downloaded_txs_and_blks = await p2p.loopAndRunPeers(hardCodedPeers);
 
       logger.info(`Node sync status`, {
-        has_downloaded_txs_and_blks: has_downloaded_txs_and_blks ? true : false,
+        has_downloaded_txs_and_blks,
       });
-
-      if (!has_downloaded_txs_and_blks) return restartServer();
+      if (
+        has_downloaded_txs_and_blks[0] == 'txn-500' ||
+        has_downloaded_txs_and_blks[1] == 'blk-500'
+      )
+        return restartServer();
 
       const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
         new UserRouter(app, blockchain, leveldb);
