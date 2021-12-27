@@ -44,39 +44,40 @@ class Wallet {
     return newEc.keyFromPrivate(keyPairHexValue, 'hex');
   }
 
-  loadWalletsFromFileOrCreateNew(leveldb: LevelDB, done: (wallet: Wallet) => void): void {
+  async loadWalletsFromFileOrCreateNew(leveldb: LevelDB): Promise<Wallet> {
     if (fs.existsSync(walletsStorageFile)) {
-      getFileContentLineByLine(walletsStorageFile).then(wallets => {
-        if (wallets.length) {
-          wallets.forEach(wallet => {
-            leveldb.getBalance(wallet.address, async ({ type, message }) => {
-              if (type == 'error') return 'Cannot find local wallet address.';
+      const leanWallets = await getFileContentLineByLine(walletsStorageFile);
 
-              wallet = new Wallet(
-                message,
-                Wallet.keyPairFromHex(wallet.keyPairHex),
-                wallet.publicKey,
-                wallet.address,
-                wallet.keyPairHex
-              );
-              // FOUND A WALLET EXIT
+      if (leanWallets.length) {
+        const wallets = await Promise.all(
+          leanWallets.map(async (wallet: Wallet): Promise<Wallet> => {
+            const { type, message } = await leveldb.getBal(wallet.address);
+            if (type == 'error') return;
 
-              done(wallet);
-              logger.info('Found a wallet on file.');
-            });
-          });
-        } else {
-          // IF NO WALLETS EXIST, CREATE ONE
-          const newWallet = new Wallet();
+            wallet = new Wallet(
+              message,
+              Wallet.keyPairFromHex(wallet.keyPairHex),
+              wallet.publicKey,
+              wallet.address,
+              wallet.keyPairHex
+            );
 
-          // SAVE IT TO FILE
-          appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
+            return wallet;
+          })
+        );
+        // RETURN THE FIRST WALLET ON FILE
+        return wallets[0];
+      } else {
+        // IF NO WALLETS EXIST, CREATE ONE
+        const newWallet = new Wallet();
 
-          // RETURN THE NEW WALLET
-          done(newWallet);
-          logger.info('No wallet found on file. Created a new one.');
-        }
-      });
+        // SAVE IT TO FILE
+        appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
+
+        // RETURN THE NEW WALLET
+        logger.info('No wallet found on file. Created a new one.');
+        return newWallet;
+      }
     }
   }
 

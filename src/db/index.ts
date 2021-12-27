@@ -7,22 +7,39 @@ class LevelDB {
   balancesDB: level.LevelDB<any, any>;
 
   constructor() {
-    this.balancesDB = level(balancesStorageFolder);
+    this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' });
   }
 
   public getBalance(address: string, done: ({}: { type: string; message: string }) => void): void {
-    this.balancesDB.get(address.trim(), async (err: { notFound: any }, value: string) => {
-      if (err) {
-        if (err.notFound) return done({ type: 'success', message: (0).toFixed(8) });
+    this.balancesDB.get(
+      address.trim(),
+      async (err: { notFound: any }, value: { bal: string; height: number; timestamp: number }) => {
+        if (err) {
+          if (err.notFound) return done({ type: 'success', message: (0).toFixed(8) });
 
-        return done({ type: 'error', message: 'Error getting balance. Please try again.' });
-      } else {
-        const res = JSON.parse(value);
-
-        return done({ type: 'success', message: res.bal });
+          return done({ type: 'error', message: 'Error getting balance. Please try again.' });
+        } else {
+          return done({ type: 'success', message: value.bal });
+        }
       }
-    });
+    );
   }
+
+  public getBal = (address: string): Promise<{ type: string; message: string }> =>
+    new Promise(resolve => {
+      this.balancesDB.get(
+        address.trim(),
+        (err: { notFound: any }, value: { bal: string; height: number; timestamp: number }) => {
+          if (err) {
+            if (err.notFound) return resolve({ type: 'success', message: (0).toFixed(8) });
+
+            return resolve({ type: 'error', message: 'Error getting balance. Please try again.' });
+          } else {
+            return resolve({ type: 'success', message: value.bal });
+          }
+        }
+      );
+    });
 
   public getAllKeysAndValues(): void {
     this.balancesDB
@@ -85,24 +102,29 @@ class LevelDB {
     address: string;
     newly_received_coins: string;
   }): void {
-    this.balancesDB.get(address, async (err: { notFound: any }, value: any) => {
-      if (err && err.notFound) {
-        await this.balancesDB.put(address, this.valueToSave(block, newly_received_coins as string));
-      } else {
-        const res = JSON.parse(value);
-        const new_total_balance = Number(res.bal) + Number(newly_received_coins);
+    this.balancesDB.get(
+      address,
+      async (err: { notFound: any }, value: { bal: string; height: number; timestamp: number }) => {
+        if (err && err.notFound) {
+          await this.balancesDB.put(address, this.valueToSave(block, newly_received_coins));
+        } else {
+          const new_total_balance = Number(value.bal) + Number(newly_received_coins);
 
-        await this.balancesDB.put(address, this.valueToSave(block, new_total_balance.toFixed(8)));
+          await this.balancesDB.put(address, this.valueToSave(block, new_total_balance.toFixed(8)));
+        }
       }
-    });
+    );
   }
 
-  private valueToSave(block: Block, newly_received_coins: string): string {
-    return JSON.stringify({
+  private valueToSave(
+    block: Block,
+    newly_received_coins: string
+  ): { bal: string; height: number; timestamp: number } {
+    return {
       bal: newly_received_coins,
       height: block.blockchainHeight,
       timestamp: block.timestamp,
-    });
+    };
   }
 }
 
