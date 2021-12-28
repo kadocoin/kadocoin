@@ -47,6 +47,7 @@ class Wallet {
   async loadWalletsFromFileOrCreateNew(leveldb: LevelDB): Promise<Wallet> {
     if (fs.existsSync(walletsStorageFile)) {
       const leanWallets = await getFileContentLineByLine(walletsStorageFile);
+      logger.debug('lean wallets', { leanWallets });
 
       if (leanWallets.length) {
         const wallets: Wallet[] = await Promise.all(
@@ -70,17 +71,23 @@ class Wallet {
         logger.info('Loaded wallet from file.');
         return wallets[0];
       } else {
-        // IF NO WALLETS EXIST, CREATE ONE
-        const newWallet = new Wallet();
-
-        // SAVE IT TO FILE
-        appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
-
-        // RETURN THE NEW WALLET
-        logger.info('No wallet found on file. Created a new one.');
-        return newWallet;
+        return this.createNewWalletAndSaveToFile();
       }
     }
+
+    return this.createNewWalletAndSaveToFile();
+  }
+
+  createNewWalletAndSaveToFile(): Wallet {
+    // CREATE NEW WALLET
+    const newWallet = new Wallet();
+
+    // SAVE IT TO FILE
+    appendToFile([this.formatWalletInfoBeforeStoring(newWallet)], walletsStorageFile);
+
+    // RETURN THE NEW WALLET
+    logger.info('No wallets were found locally. Created new.');
+    return newWallet;
   }
 
   formatWalletInfoBeforeStoring(wallet: Wallet): IWalletFormattedForStorage {

@@ -42,14 +42,16 @@ leveldb.balancesDB.open(async (err: any) => {
 
   logger.info('*****BalancesDB opened*****');
 
-  // setInterval(() => leveldb.getAllKeysAndValues(), 60 * 1000);
-
   /**
    * @var localWallet - signs and verifies transactions on this node
    */
 
   const localWallet = await new Wallet().loadWalletsFromFileOrCreateNew(leveldb);
-  console.error('wallets', { localWallet });
+
+  if (!(localWallet instanceof Wallet)) {
+    logger.fatal('Wallet not properly loaded', { localWallet });
+    return restartServer();
+  }
 
   MongoClient.connect(MONGODB_URI, {
     useNewUrlParser: true,
