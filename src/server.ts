@@ -89,8 +89,6 @@ leveldb.balancesDB.open(async (err: any) => {
 
       const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
-      // setInterval(() => console.log(peer.wellKnownPeers.get()), 5 * 60 * 1000); // EVERY 5 MINS
-
       /** GET BLOCKCHAIN DATA FROM PEERS */
       const has_downloaded_txs_and_blks = await p2p.loopAndRunPeers(hardCodedPeers);
 

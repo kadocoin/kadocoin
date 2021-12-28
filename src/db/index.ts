@@ -8,7 +8,9 @@ class LevelDB {
   balancesDB: level.LevelDB<any, any>;
 
   constructor() {
-    this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' });
+    this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' }, err => {
+      if (err) throw err;
+    });
   }
 
   public getAllKeysAndValues(): void {

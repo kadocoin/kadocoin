@@ -402,11 +402,10 @@ class P2P {
             logger.info('No local peers were found');
           }
 
-          console.log('------------------------------------------');
           return Object.values(this.syncStatuses);
         }
       } else {
-        console.log('Found a peer with complete response. Exiting...');
+        logger.info('Found a peer with complete response. Exiting...');
         return Object.values(this.syncStatuses);
       }
     }
