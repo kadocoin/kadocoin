@@ -96,8 +96,12 @@ leveldb.balancesDB.open(async (err: any) => {
 
       logger.info('Node sync status', { has_downloaded_txs_and_blks });
 
-      if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1])
+      if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1]) {
+        logger.fatal(
+          'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
+        );
         return restartServer();
+      }
 
       const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
         new UserRouter(app, blockchain, leveldb);
