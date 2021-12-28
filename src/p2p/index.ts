@@ -41,7 +41,7 @@ class P2P {
   private loopCount: number;
   private ip_address: string;
   private leveldb: LevelDB;
-  private syncStatuses: { txn: boolean; blk: boolean };
+  private syncStatuses: { txn: boolean; blk: boolean; peers: boolean };
 
   constructor({
     blockchain,
@@ -67,6 +67,7 @@ class P2P {
     this.syncStatuses = {
       txn: false,
       blk: false,
+      peers: false,
     };
     this.ip_address = ip_address;
     this.receiveTransactions();
@@ -351,25 +352,6 @@ class P2P {
   //   // }
   // }
 
-  private async loopAndRunPeers2(peers: Array<IHost>): Promise<boolean> {
-    for (let i = 0; i < peers.length; i++) {
-      if (peers[i].host !== this.ip_address) {
-        this.loopCount++;
-
-        //  ATTEMPT TO CONNECT TO PEER
-        logger.info('Attempting to connect to', { host: peers[i].host, port: peers[i].port });
-
-        await this.getBlockchainDataFromPeer(peers[i]);
-
-        await new Promise(resolve => setTimeout(resolve, 5000));
-      }
-
-      if (this.has_connected_to_a_peer__blks && this.has_connected_to_a_peer__txs) {
-        logger.info('Found a peer. Exiting...');
-        return true;
-      }
-    }
-  }
   async loopAndRunPeers(peers: Array<IHost>): Promise<boolean[]> {
     for (const peer of peers) {
       if (peer.host !== this.ip_address) {
@@ -383,11 +365,12 @@ class P2P {
 
         this.syncStatuses.txn = this.syncStatuses.txn ? this.syncStatuses.txn : statuses[0];
         this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
+        this.syncStatuses.peers = this.syncStatuses.peers ? this.syncStatuses.peers : statuses[2];
 
         logger.info('syn-statuses', { sync_status: this.syncStatuses });
       }
 
-      if (!this.syncStatuses.txn || !this.syncStatuses.blk) {
+      if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {
         if (this.loopCount == this.hardCodedPeers.length - 1) {
           logger.warn('No response from hardcoded peers');
 
@@ -412,18 +395,10 @@ class P2P {
   }
 
   private async getBlockchainDataFromPeer(peer: IHost): Promise<boolean[]> {
-    /** GET THIS LIVE REMOTE PEER PEERS **/
-    // this.onSyncGetPeers(peer);
-
-    /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
-    // const get_txn_promise = [this.onSyncGetTransactions(peer)];
-
-    // GET BLOCKS DATA FROM OTHER PEERS
-    // const get_blk_promise = [this.onSyncGetBlocks(peer)];
-
     const sync_promises = [
-      ...(this.syncStatuses.txn ? [] : [this.onSyncGetTransactions(peer)]),
-      ...(this.syncStatuses.blk ? [] : [this.onSyncGetBlocks(peer)]),
+      ...(this.syncStatuses.txn ? [] : [this.onSyncGetTransactions(peer)]), // GET TXN FROM OTHER PEERS
+      ...(this.syncStatuses.blk ? [] : [this.onSyncGetBlocks(peer)]), // GET BLOCKS FROM OTHER PEERS
+      ...(this.syncStatuses.peers ? [] : [this.onSyncGetPeers(peer)]), // GET PEERS FROM OTHER PEERS
     ];
 
     console.error(sync_promises);
@@ -431,32 +406,38 @@ class P2P {
     return await Promise.all(sync_promises);
   }
 
-  private onSyncGetPeers(peer: IHost): void {
-    this.peer
-      .remote({
-        host: peer.host,
-        port: peer.port,
-      })
-      .run(
-        '/handle/sendPeersToRequesterAndRequesterInfoToSupplier',
-        { data: JSON.stringify([{ host: this.ip_address, port: P2P_PORT }]) },
-        async (err: Error, result: any) => {
-          if (!err && result) {
-            const incomingPeers = result;
-
-            if (incomingPeers.length) {
-              // SAVE PEERS TO FILE AND ADD TO WELLKNOWN PEERS IN MEMORY
-              await this.savePeersToFileAndAddToWellKnownPeers({
-                incomingPeers: JSON.stringify(incomingPeers),
-              });
+  private onSyncGetPeers(peer: IHost): Promise<boolean> {
+    return new Promise(resolve => {
+      try {
+        this.peer
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run(
+            '/handle/sendPeersToRequesterAndRequesterInfoToSupplier',
+            { data: JSON.stringify([{ host: this.ip_address, port: P2P_PORT }]) },
+            async (err: Error, incomingPeers: IHost[]) => {
+              if (!err && incomingPeers) {
+                if (incomingPeers.length) {
+                  // SAVE PEERS TO FILE AND ADD TO WELLKNOWN PEERS IN MEMORY
+                  await this.savePeersToFileAndAddToWellKnownPeers({
+                    incomingPeers: JSON.stringify(incomingPeers),
+                  });
+                }
+                resolve(true);
+              } else {
+                logger.warn(
+                  `${peer.host}:${peer.port}/handle/sendPeersToRequesterAndRequesterInfoToSupplier- ${err}`
+                );
+                resolve(false);
+              }
             }
-          } else {
-            logger.warn(
-              `${peer.host}:${peer.port}/handle/sendPeersToRequesterAndRequesterInfoToSupplier- ${err}`
-            );
-          }
-        }
-      );
+          );
+      } catch (error) {
+        resolve(false);
+      }
+    });
   }
 
   // WHEN A NODE STARTS, IT SENDS A REQUEST TO OTHER PEER(S).
