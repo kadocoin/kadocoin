@@ -16,7 +16,7 @@
 # Edit at https://www.topthuskyal.com/developers/gitignore?templates=react,node
 
 # DB
-balancesDB
+balancesdb
 ### Node ###
 data
 wallets
