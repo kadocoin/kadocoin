@@ -92,13 +92,9 @@ leveldb.balancesDB.open(async (err: any) => {
       /** GET BLOCKCHAIN DATA FROM PEERS */
       const has_downloaded_txs_and_blks = await p2p.loopAndRunPeers(hardCodedPeers);
 
-      logger.info(`Node sync status`, {
-        has_downloaded_txs_and_blks,
-      });
-      if (
-        has_downloaded_txs_and_blks[0] == 'txn-500' ||
-        has_downloaded_txs_and_blks[1] == 'blk-500'
-      )
+      logger.info('Node sync status', { has_downloaded_txs_and_blks });
+
+      if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1])
         return restartServer();
 
       const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {

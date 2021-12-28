@@ -30,7 +30,6 @@ import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../config/constants';
 import LevelDB from '../db';
-import { resolve } from 'path';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -42,6 +41,7 @@ class P2P {
   private loopCount: number;
   private ip_address: string;
   private leveldb: LevelDB;
+  private syncStatuses: { txn: boolean; blk: boolean };
 
   constructor({
     blockchain,
@@ -64,6 +64,10 @@ class P2P {
     this.has_connected_to_a_peer__blks = false;
     this.has_connected_to_a_peer__txs = false;
     this.loopCount = 0;
+    this.syncStatuses = {
+      txn: false,
+      blk: false,
+    };
     this.ip_address = ip_address;
     this.receiveTransactions();
     this.receiveBlock();
@@ -366,59 +370,65 @@ class P2P {
       }
     }
   }
-  async loopAndRunPeers(peers: Array<IHost>): Promise<string[]> {
+  async loopAndRunPeers(peers: Array<IHost>): Promise<boolean[]> {
     for (const peer of peers) {
       if (peer.host !== this.ip_address) {
-        this.loopCount++;
-
-        //  ATTEMPT TO CONNECT TO PEER
         logger.info('Attempting to connect to', { host: peer.host, port: peer.port });
 
-        const results = await new Promise(async (resolve: (value: string[]) => void) => {
-          const statuses = await this.getBlockchainDataFromPeer(peer);
-          resolve(statuses);
-        });
+        const statuses = await new Promise(async (resolve: (value: boolean[]) => void) =>
+          resolve(await this.getBlockchainDataFromPeer(peer))
+        );
 
-        if (results[0] == 'txn-500' || results[1] == 'blk-500') {
+        this.syncStatuses.txn = this.syncStatuses.txn ? this.syncStatuses.txn : statuses[0];
+        this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
+
+        logger.info('syn-statuses', { sync_status: this.syncStatuses });
+
+        if (!statuses[0] || !statuses[1]) {
           if (this.loopCount == this.hardCodedPeers.length - 1) {
-            logger.info('NONE OF THE HARDCODED ALIVE');
+            logger.warn('No response from hardcoded peers');
+            
             // GET LOCAL FILES
-            logger.info('RETRIEVING PEERS FROM LOCAL FILE');
-
+            logger.info('Retrieving local peers...');
             const peers = await this.getPeers();
 
             if (peers.length) {
               await this.loopAndRunPeers(peers);
-              logger.info('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
+              logger.warn('No response from local peers');
+            } else {
+              logger.info('No local peers were found');
             }
 
             console.log('------------------------------------------');
-            return results;
+            return Object.values(this.syncStatuses);
           }
         } else {
-          console.log('im done');
-          return results;
+          console.log('Found a peer with complete response. Exiting...');
+          return Object.values(this.syncStatuses);
         }
+        this.loopCount++;
       }
     }
   }
 
-  private async getBlockchainDataFromPeer(peer: IHost): Promise<string[]> {
+  private async getBlockchainDataFromPeer(peer: IHost): Promise<boolean[]> {
     /** GET THIS LIVE REMOTE PEER PEERS **/
     // this.onSyncGetPeers(peer);
 
     /** GET THIS LIVE REMOTE PEER UNCONFIRMED TRANSACTIONS **/
-    // const txn_sync_status = await this.onSyncGetTransactions(peer);
+    // const get_txn_promise = [this.onSyncGetTransactions(peer)];
 
     // GET BLOCKS DATA FROM OTHER PEERS
-    // const blks_sync_status = await this.onSyncGetBlocks(peer);
+    // const get_blk_promise = [this.onSyncGetBlocks(peer)];
 
-    const statuses = await Promise.all([
-      this.onSyncGetTransactions(peer),
-      this.onSyncGetBlocks(peer),
-    ]);
+    const sync_promises = [
+      ...(this.syncStatuses.txn ? [] : [this.onSyncGetTransactions(peer)]),
+      ...(this.syncStatuses.blk ? [] : [this.onSyncGetBlocks(peer)]),
+    ];
 
-    return statuses;
+    console.error(sync_promises );
+
+    return await Promise.all(sync_promises);
   }
 
   private onSyncGetPeers(peer: IHost): void {
@@ -501,29 +511,7 @@ class P2P {
     }
   }
 
-  private onSyncGetTransactions2(peer: IHost): void {
-    request(
-      { url: `http://${peer.host}:2000/transaction-pool`, timeout: REQUEST_TIMEOUT },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const rootTransactionPoolMap = JSON.parse(body).message;
-          this.has_connected_to_a_peer__txs = true;
-
-          // NO TRANSACTIONS TO ADD TO THIS PEER
-          if (isEmptyObject(rootTransactionPoolMap))
-            logger.info('No new transaction coming in from the network');
-
-          // YES TRANSACTIONS TO ADD TO THIS PEER
-          if (!isEmptyObject(rootTransactionPoolMap))
-            this.transactionPool.onSyncAddTransactions(rootTransactionPoolMap);
-        } else {
-          logger.warn(`${peer.host}:2000/transaction-pool - ${error}`);
-        }
-      }
-    );
-  }
-
-  private onSyncGetTransactions(peer: IHost): Promise<string> {
+  private onSyncGetTransactions(peer: IHost): Promise<boolean> {
     return new Promise(resolve => {
       request(
         { url: `http://${peer.host}:2000/transaction-pool`, timeout: REQUEST_TIMEOUT },
@@ -539,9 +527,9 @@ class P2P {
             if (!isEmptyObject(rootTransactionPoolMap))
               this.transactionPool.onSyncAddTransactions(rootTransactionPoolMap);
 
-            resolve('txn-200');
+            resolve(true);
           } else {
-            resolve('txn-500');
+            resolve(false);
             logger.warn(`${peer.host}:2000/transaction-pool - ${error}`);
           }
         }
@@ -549,7 +537,7 @@ class P2P {
     });
   }
 
-  private async onSyncGetBlocks(peer: IHost): Promise<string> {
+  private async onSyncGetBlocks(peer: IHost): Promise<boolean> {
     return new Promise(resolve => {
       request(
         { url: `http://${peer.host}:2000/blocks`, timeout: REQUEST_TIMEOUT },
@@ -611,10 +599,10 @@ class P2P {
               MINING_REWARD,
               SUPPLY,
             });
-            resolve('blk-200');
+            resolve(true);
           } else {
             logger.warn(`${peer.host}:2000/blocks - ${error}`);
-            resolve('blk-500');
+            resolve(false);
           }
         }
       );
