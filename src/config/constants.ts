@@ -71,7 +71,7 @@ export const hardCodedPeers = prod
       { host: '192.168.0.155', port: P2P_PORT }, // ABUJA
     ];
 
-/** CREATE LOG FOLDER */
+/** CREATE NECESSARY FOLDERS */
 createFolderOrFile('logs', 'folder');
 createFolderOrFile('data', 'folder');
 createFolderOrFile('wallets', 'folder');

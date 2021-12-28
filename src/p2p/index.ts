@@ -378,35 +378,36 @@ class P2P {
         const statuses = await new Promise(async (resolve: (value: boolean[]) => void) =>
           resolve(await this.getBlockchainDataFromPeer(peer))
         );
+        // INCREMENT LOOP COUNT
+        this.loopCount++;
 
         this.syncStatuses.txn = this.syncStatuses.txn ? this.syncStatuses.txn : statuses[0];
         this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
 
         logger.info('syn-statuses', { sync_status: this.syncStatuses });
+      }
 
-        if (!statuses[0] || !statuses[1]) {
-          if (this.loopCount == this.hardCodedPeers.length - 1) {
-            logger.warn('No response from hardcoded peers');
-            
-            // GET LOCAL FILES
-            logger.info('Retrieving local peers...');
-            const peers = await this.getPeers();
+      if (!this.syncStatuses.txn || !this.syncStatuses.blk) {
+        if (this.loopCount == this.hardCodedPeers.length - 1) {
+          logger.warn('No response from hardcoded peers');
 
-            if (peers.length) {
-              await this.loopAndRunPeers(peers);
-              logger.warn('No response from local peers');
-            } else {
-              logger.info('No local peers were found');
-            }
+          // GET LOCAL FILES
+          logger.info('Retrieving local peers...');
+          const peers = await this.getPeers();
 
-            console.log('------------------------------------------');
-            return Object.values(this.syncStatuses);
+          if (peers.length) {
+            await this.loopAndRunPeers(peers);
+            logger.warn('No response from local peers');
+          } else {
+            logger.info('No local peers were found');
           }
-        } else {
-          console.log('Found a peer with complete response. Exiting...');
+
+          console.log('------------------------------------------');
           return Object.values(this.syncStatuses);
         }
-        this.loopCount++;
+      } else {
+        console.log('Found a peer with complete response. Exiting...');
+        return Object.values(this.syncStatuses);
       }
     }
   }
@@ -426,7 +427,7 @@ class P2P {
       ...(this.syncStatuses.blk ? [] : [this.onSyncGetBlocks(peer)]),
     ];
 
-    console.error(sync_promises );
+    console.error(sync_promises);
 
     return await Promise.all(sync_promises);
   }
