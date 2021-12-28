@@ -3,13 +3,15 @@ import Block from '../blockchain/block';
 import { balancesStorageFolder } from '../config/constants';
 import { IValue } from '../types';
 import logger from '../util/logger';
+import restartServer from '../util/restart-server';
 
 class LevelDB {
   balancesDB: level.LevelDB<any, any>;
 
   constructor() {
     this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' }, err => {
-      if (err) throw err;
+      if (err) logger.fatal('DB error', { err });
+      return restartServer();
     });
   }
 
