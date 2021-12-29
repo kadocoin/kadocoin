@@ -98,7 +98,7 @@ leveldb.balancesDB.open(async (err: any) => {
         logger.fatal(
           'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
         );
-        // return restartServer();
+        return restartServer();
       }
 
       const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
