@@ -36,8 +36,6 @@ class P2P {
   private blockchain: Blockchain;
   private transactionPool: TransactionPool;
   private hardCodedPeers: IHost[];
-  private has_connected_to_a_peer__blks: boolean;
-  private has_connected_to_a_peer__txs: boolean;
   private loopCount: number;
   private ip_address: string;
   private leveldb: LevelDB;
@@ -61,8 +59,6 @@ class P2P {
     this.transactionPool = transactionPool;
     this.leveldb = leveldb;
     this.hardCodedPeers = hardCodedPeers;
-    this.has_connected_to_a_peer__blks = false;
-    this.has_connected_to_a_peer__txs = false;
     this.loopCount = 0;
     this.syncStatuses = {
       txn: false,
@@ -330,27 +326,6 @@ class P2P {
   }
 
   // public async syncPeerWithHistoricalBlockchain(): Promise<string[]> {
-  //   // LOOP THRU HARDCODED PEERS
-  //   const status = await this.loopAndRunPeers(this.hardCodedPeers);
-  //   return status;
-
-  //   // THE BELOW CODE WILL RUN IF NONE OF THE HARDCODED PEERS IS ALIVE
-  //   // if (
-  //   //   !this.has_connected_to_a_peer__blks ||
-  //   //   (!this.has_connected_to_a_peer__txs && this.loopCount == this.hardCodedPeers.length - 1)
-  //   // ) {
-  //   //   console.log('');
-  //   //   console.log('RETRIEVING PEERS FROM LOCAL FILE');
-  //   //   const peers = await this.getPeers();
-
-  //   //   if (peers.length) {
-  //   //     if (peers) {
-  //   //       await this.loopAndRunPeers(peers);
-  //   //       logger.info('NONE OF THE HARDCODED AND LOCAL PEERS ARE ALIVE');
-  //   //     }
-  //   //   }
-  //   // }
-  // }
 
   async loopAndRunPeers(peers: Array<IHost>): Promise<boolean[]> {
     for (const peer of peers) {
@@ -580,6 +555,7 @@ class P2P {
               MINING_REWARD,
               SUPPLY,
             });
+            this.leveldb.addOrUpdateBal(this.blockchain.chain);
             resolve(true);
           } else {
             logger.warn(`${peer.host}:2000/blocks - ${error}`);
