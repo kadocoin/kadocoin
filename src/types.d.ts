@@ -18,6 +18,9 @@ export interface IValue {
   bal: string;
   height: number;
   timestamp: number;
+  totalSent: string;
+  totalReceived: string;
+  txnCount: number;
 }
 
 export interface IWalletParam {

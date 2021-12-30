@@ -2,6 +2,7 @@ import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
 import { balancesStorageFolder } from '../config/constants';
 import { IValue } from '../types';
+import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';
 
 class LevelDB {
@@ -14,6 +15,7 @@ class LevelDB {
       err => err && logger.fatal('DB error', { err })
       // TODO TRIGGER AN EVENT TO RESTART SERVER
     );
+    this.getAllKeysAndValues();
   }
 
   public getAllKeysAndValues(): void {
@@ -37,54 +39,97 @@ class LevelDB {
              */
             for (const address in transaction['output']) {
               if (Object.prototype.hasOwnProperty.call(transaction['output'], address)) {
-                const newly_received_coins = transaction['output'][address] as string;
+                const newly_received_coins = transaction['output'][address];
 
-                // SAVE TO DB
-                await this.incrementBal({ block, address, newly_received_coins });
+                await this.updateValueOrCreateNew({
+                  block,
+                  address,
+                  newlyReceivedCoins: newly_received_coins,
+                  type: 'receiver',
+                });
               }
             }
           } else {
             /**
              * REGULAR TRANSACTION
              */
-            Object.entries(transaction['output']).forEach(async ([address, coins], index) => {
-              const newly_received_coins = coins as string;
-              if (index === 0) {
-                /*** THIS IS THE SENDER */
+            Object.entries(transaction['output']).forEach(
+              async ([address, newly_received_coins], index) => {
+                if (index === 0) {
+                  /*** THIS IS THE SENDER */
 
-                if (Number(newly_received_coins) === 0) {
-                  // REMOVE FROM DB IF THE SENDER HAS NO BALANCE LEFT
-                  await this.balancesDB.del(address);
+                  if (Number(newly_received_coins) === 0) {
+                    // REMOVE FROM DB IF THE SENDER HAS NO BALANCE LEFT
+                    await this.balancesDB.del(address);
+                  } else {
+                    // SENDER HAS BALANCE. OVERRIDE THE OLD BALANCE IT WITH THE NEW BALANCE
+                    await this.updateValueOrCreateNew({
+                      block,
+                      address,
+                      newlyReceivedCoins: newly_received_coins,
+                      type: 'sender',
+                    });
+                  }
                 } else {
-                  // SENDER HAS BALANCE. OVERRIDE THE OLD BALANCE IT WITH THE NEW BALANCE
-                  await this.balancesDB.put(address, this.valueToSave(block, newly_received_coins));
+                  /*** THIS IS THE RECEIVER */
+                  await this.updateValueOrCreateNew({
+                    block,
+                    address,
+                    newlyReceivedCoins: newly_received_coins,
+                    type: 'receiver',
+                  });
                 }
-              } else {
-                /*** THIS IS THE RECEIVER */
-                await this.incrementBal({ block, address, newly_received_coins });
               }
-            });
+            );
           }
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      logger.error('Error at method => addOrUpdateBal', { error });
+    }
   }
 
-  private async incrementBal({
+  private async updateValueOrCreateNew({
     block,
     address,
-    newly_received_coins,
+    newlyReceivedCoins,
+    type,
   }: {
     block: Block;
     address: string;
-    newly_received_coins: string;
+    newlyReceivedCoins: string;
+    type: string;
   }): Promise<void> {
     try {
-      const { message } = await this.getBal(address);
+      const { message } = await this.getValue(address);
 
-      const new_total_balance = Number(message) + Number(newly_received_coins);
+      // SAVE VALUE FOR ALREADY EXISTING ADDRESS
+      if (isEmptyObject(message)) {
+        let { bal, totalReceived, totalSent, txnCount } = message;
 
-      await this.putBal(address, this.valueToSave(block, new_total_balance.toFixed(8)));
+        if (type == 'sender') {
+          txnCount += 1;
+          bal = newlyReceivedCoins;
+          const newly_amount_sent = Number(bal) - Number(newlyReceivedCoins); // SENDER'S OUTPUT BAL IS `newlyReceivedCoins`
+          totalSent = (Number(totalSent) + newly_amount_sent).toString(8);
+        }
+
+        if (type == 'receiver') {
+          bal = (Number(bal) + Number(newlyReceivedCoins)).toString(8);
+          totalReceived = (Number(totalReceived) + Number(newlyReceivedCoins)).toString(8);
+        }
+
+        await this.putBal(address, {
+          bal,
+          height: block.blockchainHeight,
+          timestamp: block.timestamp,
+          totalSent,
+          totalReceived,
+          txnCount,
+        });
+      } else {
+        await this.saveValueForNewAddress({ address, block, newlyReceivedCoins, type });
+      }
     } catch (error) {
       logger.error(error);
     }
@@ -103,6 +148,22 @@ class LevelDB {
       });
     });
 
+  public getValue = (
+    address: string
+  ): Promise<{ type: string; message: IValue | Record<string, never> }> => {
+    return new Promise((resolve, reject) => {
+      this.balancesDB.get(address.trim(), (err: { notFound: any }, value: IValue) => {
+        if (err) {
+          if (err.notFound) return resolve({ type: 'success', message: {} });
+
+          reject({ type: 'error', message: 'Error getting value. Please try again.' });
+        } else {
+          return resolve({ type: 'success', message: value });
+        }
+      });
+    });
+  };
+
   public putBal = (key: string, value: IValue): Promise<{ type: string; message: string }> =>
     new Promise((resolve, reject) => {
       this.balancesDB.put(key, value, err => {
@@ -112,12 +173,25 @@ class LevelDB {
       });
     });
 
-  private valueToSave(block: Block, newly_received_coins: string): IValue {
-    return {
-      bal: newly_received_coins,
+  private async saveValueForNewAddress({
+    address,
+    block,
+    newlyReceivedCoins,
+    type,
+  }: {
+    address: string;
+    block: Block;
+    newlyReceivedCoins: string;
+    type: string;
+  }): Promise<void> {
+    await this.putBal(address, {
+      bal: newlyReceivedCoins,
       height: block.blockchainHeight,
       timestamp: block.timestamp,
-    };
+      totalSent: type == 'sender' ? newlyReceivedCoins : (0).toFixed(8),
+      totalReceived: type == 'receiver' ? newlyReceivedCoins : (0).toFixed(8),
+      txnCount: 0,
+    });
   }
 }
 
