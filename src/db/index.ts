@@ -4,6 +4,7 @@ import { balancesStorageFolder } from '../config/constants';
 import { IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';
+import { getTotalSent } from '../util/transaction-metrics';
 
 class LevelDB {
   balancesDB: level.LevelDB<any, any>;
@@ -117,8 +118,7 @@ class LevelDB {
 
                 await new Promise(resolve =>
                   this.getValue(address).then(async data => {
-                    // SAVE VALUE FOR ALREADY EXISTING ADDRESS
-
+                    // EXISTING ADDRESS
                     if (!isEmptyObject(data.message)) {
                       let { bal, totalReceived } = data.message;
 
@@ -138,6 +138,7 @@ class LevelDB {
 
                       resolve(res);
                     } else {
+                      // NON-EXISTING ADDRESS
                       const res = await this.putBal(address, {
                         bal: newly_received_coins,
                         height: block.blockchainHeight,
@@ -157,6 +158,8 @@ class LevelDB {
             /**
              * REGULAR TRANSACTION
              */
+            const newly_total_sent_coins = getTotalSent(transaction);
+
             Object.entries(transaction['output']).forEach(
               async ([address, newly_received_coins], index) => {
                 if (index === 0) {
@@ -167,34 +170,35 @@ class LevelDB {
                   } else {
                     await new Promise(resolve =>
                       this.getValue(address).then(async data => {
-                        // SAVE VALUE FOR ALREADY EXISTING ADDRESS
-
+                        // EXISTING ADDRESS
                         if (!isEmptyObject(data.message)) {
-                          let { bal, txnCount, totalSent } = data.message;
+                          let txnCount = data.message.txnCount;
+                          const old_total_Sent = data.message.totalSent;
 
                           txnCount += 1;
-                          bal = newly_received_coins;
-                          const newly_amount_sent = Number(bal) - Number(newly_received_coins); // SENDER'S OUTPUT BAL IS `newly_received_coins`
-                          totalSent = (Number(totalSent) + newly_amount_sent).toFixed(8);
+                          const new_total_sent = (
+                            Number(old_total_Sent) + Number(newly_total_sent_coins)
+                          ).toFixed(8);
 
                           const res = await this.putBal(address, {
-                            bal,
+                            bal: newly_received_coins,
                             height: block.blockchainHeight,
                             timestamp: block.timestamp,
-                            totalSent,
+                            totalSent: new_total_sent,
                             totalReceived: data.message.totalReceived,
                             txnCount,
                           });
 
                           resolve(res);
                         } else {
+                          // NON-EXISTING ADDRESS
                           const res = await this.putBal(address, {
                             bal: newly_received_coins,
                             height: block.blockchainHeight,
                             timestamp: block.timestamp,
-                            totalSent: (0).toFixed(8),
-                            totalReceived: newly_received_coins,
-                            txnCount: 0,
+                            totalSent: newly_total_sent_coins,
+                            totalReceived: (0).toFixed(8),
+                            txnCount: 1,
                           });
 
                           resolve(res);
@@ -206,11 +210,9 @@ class LevelDB {
                   /*** THIS IS THE RECEIVER */
                   await new Promise(resolve =>
                     this.getValue(address).then(async data => {
-                      // SAVE VALUE FOR ALREADY EXISTING ADDRESS
-
+                      //  EXISTING ADDRESS
                       if (!isEmptyObject(data.message)) {
                         let { bal, totalReceived } = data.message;
-                        const { totalSent, txnCount } = data.message;
 
                         bal = (Number(bal) + Number(newly_received_coins)).toFixed(8);
                         totalReceived = (
@@ -221,13 +223,14 @@ class LevelDB {
                           bal,
                           height: block.blockchainHeight,
                           timestamp: block.timestamp,
-                          totalSent,
+                          totalSent: data.message.totalSent,
                           totalReceived,
-                          txnCount,
+                          txnCount: data.message.txnCount,
                         });
 
                         resolve(res);
                       } else {
+                        // NON-EXISTING ADDRESS
                         const res = await this.putBal(address, {
                           bal: newly_received_coins,
                           height: block.blockchainHeight,
@@ -249,70 +252,6 @@ class LevelDB {
       }
     } catch (error) {
       logger.error('Error at method => addOrUpdateBal', { error });
-    }
-  }
-
-  private async updateValueOrCreateNew({
-    block,
-    address,
-    newlyReceivedCoins,
-    type,
-  }: {
-    block: Block;
-    address: string;
-    newlyReceivedCoins: string;
-    type: string;
-  }): Promise<{
-    type: string;
-    message: string;
-  }> {
-    try {
-      return await new Promise(async resolve => {
-        this.getValue(address).then(async data => {
-          // SAVE VALUE FOR ALREADY EXISTING ADDRESS
-          console.log({ address, message: data.message });
-
-          if (!isEmptyObject(data.message)) {
-            logger.warn('a');
-            let { bal, totalReceived, totalSent, txnCount } = data.message;
-
-            if (type == 'sender') {
-              txnCount += 1;
-              bal = newlyReceivedCoins;
-              const newly_amount_sent = Number(bal) - Number(newlyReceivedCoins); // SENDER'S OUTPUT BAL IS `newlyReceivedCoins`
-              totalSent = (Number(totalSent) + newly_amount_sent).toFixed(8);
-            }
-
-            if (type == 'receiver') {
-              bal = (Number(bal) + Number(newlyReceivedCoins)).toFixed(8);
-              totalReceived = (Number(totalReceived) + Number(newlyReceivedCoins)).toFixed(8);
-            }
-
-            resolve(
-              await this.putBal(address, {
-                bal,
-                height: block.blockchainHeight,
-                timestamp: block.timestamp,
-                totalSent,
-                totalReceived,
-                txnCount,
-              })
-            );
-          } else {
-            logger.warn('b');
-            const res = await new Promise(
-              async (resolve: (value: { type: string; message: string }) => void) =>
-                resolve(
-                  await this.saveValueForNewAddress({ address, block, newlyReceivedCoins, type })
-                )
-            );
-
-            return resolve(res);
-          }
-        });
-      });
-    } catch (error) {
-      logger.error(error);
     }
   }
 
