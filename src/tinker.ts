@@ -1,7 +1,7 @@
-import { rmSync } from 'fs';
-import { balancesStorageFolder } from './config/constants';
+// import { rmSync } from 'fs';
+// import { balancesStorageFolder } from './config/constants';
 
-const res = rmSync('test.js', { force: true });
+// const res = rmSync('test.js', { force: true });
 
 // import Block from './blockchain/block';
 // import LevelDB from './db';
