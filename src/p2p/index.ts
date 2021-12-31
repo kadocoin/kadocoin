@@ -9,12 +9,13 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import request from 'request';
-import fs, { unlinkSync } from 'fs';
+import fs, { rmSync } from 'fs';
 import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
 import {
+  balancesStorageFolder,
   blockchainStorageFile,
   hardCodedPeers,
   P2P_PORT,
@@ -235,7 +236,7 @@ class P2P {
                 chain: [payload.data.message.block],
               });
 
-              // SAVE TRANSACTIONS FROM THE BLOCK TO DB
+              // SAVE TRANSACTIONS BALANCES IN TO DB
               this.leveldb.addOrUpdateBal([payload.data.message.block]);
               return done(null, 'blk-200');
             }
@@ -499,7 +500,7 @@ class P2P {
         { url: `http://${peer.host}:2000/blocks`, timeout: REQUEST_TIMEOUT },
         async (error, response, body) => {
           if (!error && response.statusCode === 200) {
-            const rootChain = JSON.parse(body).message;
+            const rootChain: Array<Block> = JSON.parse(body).message;
 
             /** SAVING TO FILE STARTS */
             // FILE EXISTS
@@ -515,11 +516,21 @@ class P2P {
               if (blockchainHeightFromPeer < blockchainHeightFromFile) {
                 try {
                   logger.info('THIS PEER IS AHEAD');
+
                   // DELETE FILE
-                  unlinkSync(blockchainStorageFile);
-                  logger.info('FILE DELETED');
+                  // TODO - DO NOT DELETE?
+                  rmSync(blockchainStorageFile, { force: true }); // FORCE - DISABLES ANY ERRORS SUCH AS WHEN THE FILE DOES NOT EXISTS
+                  logger.info(`${blockchainStorageFile} FILE DELETED`);
+
+                  // DELETE FOLDER
+                  rmSync(balancesStorageFolder, { recursive: true, force: true }); // RECURSIVE - DELETES DIRECTORY
+                  logger.info(`${blockchainStorageFile} FOLDER DELETED`);
+
                   // REPLACE WITH BLOCKS FROM PEER
                   appendToFile(rootChain, blockchainStorageFile);
+
+                  // SAVE TRANSACTIONS BALANCES IN TO DB
+                  this.leveldb.addOrUpdateBal(rootChain);
                 } catch {
                   logger.info('ERROR DELETING FILE');
                 }
@@ -534,10 +545,16 @@ class P2P {
 
                 // NOW WRITE LINE BY LINE
                 appendToFile(diffBlockchain, blockchainStorageFile);
+
+                // SAVE TRANSACTIONS BALANCES IN TO DB
+                this.leveldb.addOrUpdateBal(diffBlockchain);
               }
             } else {
               logger.info('FILE DOES NOT EXISTS');
               appendToFile(rootChain, blockchainStorageFile);
+
+              // SAVE TRANSACTIONS BALANCES IN TO DB
+              this.leveldb.addOrUpdateBal(rootChain);
             }
             /** END SAVING TO FILE */
 
@@ -555,7 +572,7 @@ class P2P {
               MINING_REWARD,
               SUPPLY,
             });
-            this.leveldb.addOrUpdateBal(this.blockchain.chain);
+
             resolve(true);
           } else {
             logger.warn(`${peer.host}:2000/blocks - ${error}`);

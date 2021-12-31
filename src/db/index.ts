@@ -25,7 +25,7 @@ class LevelDB {
 
   public getAllKeysAndValues(): void {
     this.balancesDB
-      .createReadStream()
+      .createReadStream({ reverse: true })
       .on('data', (data: { key: string; value: any }) => logger.info('BalancesDB', { data }));
   }
 
