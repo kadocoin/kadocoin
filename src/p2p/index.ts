@@ -15,7 +15,6 @@ import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
 import {
-  balancesStorageFolder,
   blockchainStorageFile,
   hardCodedPeers,
   P2P_PORT,
@@ -515,22 +514,26 @@ class P2P {
               /** THIS PEER IS AHEAD */
               if (blockchainHeightFromPeer < blockchainHeightFromFile) {
                 try {
-                  logger.info('THIS PEER IS AHEAD');
+                  logger.warn('THIS PEER IS AHEAD');
 
                   // DELETE FILE
                   // TODO - DO NOT DELETE?
                   rmSync(blockchainStorageFile, { force: true }); // FORCE - DISABLES ANY ERRORS SUCH AS WHEN THE FILE DOES NOT EXISTS
-                  logger.info(`${blockchainStorageFile} FILE DELETED`);
+                  logger.warn(`${blockchainStorageFile} FILE DELETED`);
 
-                  // DELETE FOLDER
-                  rmSync(balancesStorageFolder, { recursive: true, force: true }); // RECURSIVE - DELETES DIRECTORY
-                  logger.info(`${blockchainStorageFile} FOLDER DELETED`);
+                  // CLEAR ALL DB ENTRIES
+                  this.leveldb.balancesDB.clear(err => {
+                    if (err)
+                      return logger.warn(`Error clearing ${blockchainStorageFile} FOLDER`, { err });
+                    logger.warn(`${blockchainStorageFile} ENTRIES CLEARED`);
+
+                    // SAVE TRANSACTIONS BALANCES IN TO DB
+                    this.leveldb.addOrUpdateBal(rootChain);
+                    logger.info(`DONE ADDING ENTRIES`);
+                  });
 
                   // REPLACE WITH BLOCKS FROM PEER
                   appendToFile(rootChain, blockchainStorageFile);
-
-                  // SAVE TRANSACTIONS BALANCES IN TO DB
-                  this.leveldb.addOrUpdateBal(rootChain);
                 } catch {
                   logger.info('ERROR DELETING FILE');
                 }
