@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
 import { balancesStorageFolder } from '../config/constants';
@@ -8,14 +9,18 @@ import { getTotalSent } from '../util/transaction-metrics';
 
 class LevelDB {
   balancesDB: level.LevelDB<any, any>;
+  eventEmitter: EventEmitter;
 
-  constructor() {
-    this.balancesDB = level(
-      balancesStorageFolder,
-      { valueEncoding: 'json' },
-      err => err && logger.fatal('DB error', { err })
-      // TODO TRIGGER AN EVENT TO RESTART SERVER
-    );
+  constructor(eventEmitter?: EventEmitter) {
+    this.eventEmitter = eventEmitter;
+    this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' }, err => {
+      if (err) {
+        logger.fatal('Balance DB cannot start', { err });
+
+        // RESTART SERVER
+        eventEmitter.emit('restart-kdc');
+      }
+    });
   }
 
   public getAllKeysAndValues(): void {

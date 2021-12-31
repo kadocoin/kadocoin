@@ -31,11 +31,16 @@ import restartServer from './util/restart-server';
 import logger from './util/logger';
 import address from './util/get-ip-address';
 import LevelDB from './db';
+import { EventEmitter } from 'events';
+
+const eventEmitter = new EventEmitter();
 
 /**
  * @var leveldb app wide variable
  */
-const leveldb = new LevelDB();
+const leveldb = new LevelDB(eventEmitter);
+
+eventEmitter.on('restart-kdc', () => restartServer());
 
 leveldb.balancesDB.open(async (err: any) => {
   if (err) return logger.fatal('Error opening balancesdb,', { err });
