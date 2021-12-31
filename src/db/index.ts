@@ -24,81 +24,6 @@ class LevelDB {
       .on('data', (data: { key: string; value: any }) => logger.info('BalancesDB', { data }));
   }
 
-  // public async addOrUpdateBal(blocks: Array<Block>): Promise<void> {
-  //   try {
-  //     for (let i = 0; i < blocks.length; i++) {
-  //       const block = blocks[i];
-  //       const transactions = blocks[i]['transactions'];
-
-  //       for (let j = 0; j < transactions.length; j++) {
-  //         const transaction = transactions[j];
-
-  //         if (Object.values(transaction['output']).length === 1) {
-  //           /**
-  //            * REWARD TRANSACTION
-  //            */
-  //           for (const address in transaction['output']) {
-  //             if (Object.prototype.hasOwnProperty.call(transaction['output'], address)) {
-  //               const newly_received_coins = transaction['output'][address];
-
-  //               await new Promise(async resolve =>
-  //                 resolve(
-  //                   await this.updateValueOrCreateNew({
-  //                     block,
-  //                     address,
-  //                     newlyReceivedCoins: newly_received_coins,
-  //                     type: 'receiver',
-  //                   })
-  //                 )
-  //               );
-  //             }
-  //           }
-  //         } else {
-  //           /**
-  //            * REGULAR TRANSACTION
-  //            */
-  //           Object.entries(transaction['output']).forEach(
-  //             async ([address, newly_received_coins], index) => {
-  //               if (index === 0) {
-  //                 /*** THIS IS THE SENDER */
-
-  //                 if (Number(newly_received_coins) === 0) {
-  //                   // REMOVE FROM DB IF THE SENDER HAS NO BALANCE LEFT
-  //                   await this.balancesDB.del(address);
-  //                 } else {
-  //                   await new Promise(async resolve =>
-  //                     resolve(
-  //                       await this.updateValueOrCreateNew({
-  //                         block,
-  //                         address,
-  //                         newlyReceivedCoins: newly_received_coins,
-  //                         type: 'sender',
-  //                       })
-  //                     )
-  //                   );
-  //                 }
-  //               } else {
-  //                 /*** THIS IS THE RECEIVER */
-  //                 await new Promise(async resolve =>
-  //                   resolve(
-  //                     await this.updateValueOrCreateNew({
-  //                       block,
-  //                       address,
-  //                       newlyReceivedCoins: newly_received_coins,
-  //                       type: 'receiver',
-  //                     })
-  //                   )
-  //                 );
-  //               }
-  //             }
-  //           );
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     logger.error('Error at method => addOrUpdateBal', { error });
-  //   }
-  // }
   public async addOrUpdateBal(blocks: Array<Block>): Promise<void> {
     try {
       for (let i = 0; i < blocks.length; i++) {
@@ -292,29 +217,6 @@ class LevelDB {
         resolve({ type: 'success', message: 'Success' });
       });
     });
-
-  private async saveValueForNewAddress({
-    address,
-    block,
-    newlyReceivedCoins,
-    type,
-  }: {
-    address: string;
-    block: Block;
-    newlyReceivedCoins: string;
-    type: string;
-  }): Promise<{ type: string; message: string }> {
-    return await new Promise((resolve: (value: { type: string; message: string }) => void) => {
-      this.putBal(address, {
-        bal: newlyReceivedCoins,
-        height: block.blockchainHeight,
-        timestamp: block.timestamp,
-        totalSent: type == 'sender' ? newlyReceivedCoins : (0).toFixed(8),
-        totalReceived: type == 'receiver' ? newlyReceivedCoins : (0).toFixed(8),
-        txnCount: 0,
-      }).then(data => resolve(data));
-    });
-  }
 }
 
 export default LevelDB;
