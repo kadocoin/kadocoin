@@ -59,7 +59,7 @@ class TransactionMiner {
       const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
 
       // SAVE THE TRANSACTIONS' BALANCES IN DB
-      this.leveldb.addOrUpdateBal([newlyMinedBlock]);
+      await this.leveldb.addOrUpdateBal([newlyMinedBlock]);
 
       // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
       await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });

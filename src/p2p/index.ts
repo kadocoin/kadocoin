@@ -229,14 +229,14 @@ class P2P {
             payload.data.message,
             true,
             this.blockchain.chain,
-            () => {
+            async () => {
               // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
               });
 
               // SAVE TRANSACTIONS BALANCES IN TO DB
-              this.leveldb.addOrUpdateBal([payload.data.message.block]);
+              await this.leveldb.addOrUpdateBal([payload.data.message.block]);
               return done(null, 'blk-200');
             }
           );
@@ -522,13 +522,13 @@ class P2P {
                   logger.warn(`${blockchainStorageFile} FILE DELETED`);
 
                   // CLEAR ALL DB ENTRIES
-                  this.leveldb.balancesDB.clear(err => {
+                  this.leveldb.balancesDB.clear(async err => {
                     if (err)
                       return logger.warn(`Error clearing ${blockchainStorageFile} FOLDER`, { err });
                     logger.warn(`${blockchainStorageFile} ENTRIES CLEARED`);
 
                     // SAVE TRANSACTIONS BALANCES IN TO DB
-                    this.leveldb.addOrUpdateBal(rootChain);
+                    await this.leveldb.addOrUpdateBal(rootChain);
                     logger.info(`DONE ADDING ENTRIES`);
                   });
 
@@ -550,14 +550,14 @@ class P2P {
                 appendToFile(diffBlockchain, blockchainStorageFile);
 
                 // SAVE TRANSACTIONS BALANCES IN TO DB
-                this.leveldb.addOrUpdateBal(diffBlockchain);
+                await this.leveldb.addOrUpdateBal(diffBlockchain);
               }
             } else {
               logger.info('FILE DOES NOT EXISTS');
               appendToFile(rootChain, blockchainStorageFile);
 
               // SAVE TRANSACTIONS BALANCES IN TO DB
-              this.leveldb.addOrUpdateBal(rootChain);
+              await this.leveldb.addOrUpdateBal(rootChain);
             }
             /** END SAVING TO FILE */
 
