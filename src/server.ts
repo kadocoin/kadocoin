@@ -40,8 +40,6 @@ const eventEmitter = new EventEmitter();
  */
 const leveldb = new LevelDB(eventEmitter);
 
-eventEmitter.on('restart-kdc', () => restartServer());
-
 leveldb.balancesDB.open(async (err: any) => {
   if (err) return logger.fatal('Error opening balancesdb,', { err });
 

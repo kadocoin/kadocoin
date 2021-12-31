@@ -16,10 +16,11 @@ class LevelDB {
     this.eventEmitter = eventEmitter;
     this.balancesDB = level(balancesStorageFolder, { valueEncoding: 'json' }, err => {
       if (err) {
+        logger;
         logger.fatal('Balance DB cannot start', { err });
 
-        // RESTART SERVER
-        eventEmitter.emit('restart-kdc');
+        // TODO: RESTART SERVER - NOT WORKING ON UBUNTU 20
+        // eventEmitter.emit('restart-kdc');
       }
     });
   }
