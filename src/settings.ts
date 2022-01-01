@@ -71,9 +71,9 @@ export const P2P_PORT = prod ? 5346 : 15346;
 export const hardCodedPeers = prod
   ? [{ host: '173.16.164.35', port: P2P_PORT }]
   : [
-      // { host: '192.168.0.155', port: P2P_PORT }, // ABUJA
+      { host: '192.168.0.155', port: P2P_PORT }, // ABUJA
       { host: '192.168.0.2', port: P2P_PORT }, // MAC
-      // { host: '192.168.0.147', port: P2P_PORT }, // ABUJA
+      { host: '192.168.0.147', port: P2P_PORT }, // ABUJA
     ];
 
 /**
