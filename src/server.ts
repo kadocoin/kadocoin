@@ -13,7 +13,7 @@ import P2PModule from 'p2p';
 import app from './app';
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
-import UserRouter from './routes/user.router';
+import MiscRouter from './routes/misc.router';
 import TransactionRouter from './routes/transaction.router';
 import Blockchain from './blockchain';
 import TransactionPool from './wallet/transaction-pool';
@@ -98,7 +98,7 @@ leveldb.balancesDB.open(async (err: any) => {
   }
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
-    new UserRouter(app, blockchain, leveldb);
+    new MiscRouter(app, blockchain, leveldb);
     new BlockRouter(app, blockchain);
     new P2PRouter(app, p2p);
     new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet, leveldb);

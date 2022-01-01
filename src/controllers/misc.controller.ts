@@ -7,7 +7,7 @@
  */
 
 import { Request, Response } from 'express';
-import { addressValidation } from '../validation/user.validation';
+import { addressValidation } from '../validation/misc.validation';
 import {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
@@ -17,7 +17,7 @@ import {
 import Wallet from '../wallet';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
 
-export default class UserController {
+export default class MiscController {
   tokenLasts: string;
 
   addressInfo = (req: Request, res: Response): Response => {
