@@ -39,7 +39,7 @@ const leveldb = new LevelDB(eventEmitter);
 leveldb.balancesDB.open(async (err: any) => {
   if (err) return logger.fatal('Error opening balancesdb,', { err });
 
-  setInterval(() => leveldb.getAllKeysAndValues(), 15000);
+  setInterval(() => leveldb.getAllKeysAndValues(), 10 * 60000);
 
   logger.info('*****BalancesDB opened*****');
 

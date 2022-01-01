@@ -328,7 +328,7 @@ class P2P {
   // public async syncPeerWithHistoricalBlockchain(): Promise<string[]> {
 
   async loopAndRunPeers(peers: Array<IHost>): Promise<boolean[]> {
-    for (const peer of peers) {
+    for await (const peer of peers) {
       if (peer.host !== this.ip_address) {
         logger.info('Attempting to connect to', { host: peer.host, port: peer.port });
 
@@ -341,30 +341,32 @@ class P2P {
         this.syncStatuses.txn = this.syncStatuses.txn ? this.syncStatuses.txn : statuses[0];
         this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
         this.syncStatuses.peers = this.syncStatuses.peers ? this.syncStatuses.peers : statuses[2];
-      }
 
-      if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {
-        if (this.loopCount == this.hardCodedPeers.length - 1) {
-          logger.warn('No response from hardcoded peers');
+        if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {
+          if (this.loopCount == this.hardCodedPeers.length - 1) {
+            logger.warn('No response from hardcoded peers');
 
-          // GET LOCAL FILES
-          logger.info('Retrieving local peers...');
-          const peers = await this.getPeers();
+            // GET LOCAL FILES
+            logger.info('Retrieving local peers...');
+            const peers = await this.getPeers();
 
-          if (peers.length) {
-            await this.loopAndRunPeers(peers);
-            logger.warn('No response from local peers');
-          } else {
-            logger.info('No local peers were found');
+            if (peers.length) {
+              await this.loopAndRunPeers(peers);
+              logger.warn('No response from local peers');
+            } else {
+              logger.info('No local peers were found');
+            }
+
+            return Object.values(this.syncStatuses);
           }
-
+        } else {
+          logger.info('Found a peer with complete response. Exiting...');
           return Object.values(this.syncStatuses);
         }
-      } else {
-        logger.info('Found a peer with complete response. Exiting...');
-        return Object.values(this.syncStatuses);
       }
     }
+    logger.warn('No hardcoded peers were found');
+    return Object.values(this.syncStatuses);
   }
 
   private async getBlockchainDataFromPeer(peer: IHost): Promise<boolean[]> {
