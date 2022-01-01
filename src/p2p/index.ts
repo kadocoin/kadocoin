@@ -341,8 +341,6 @@ class P2P {
         this.syncStatuses.txn = this.syncStatuses.txn ? this.syncStatuses.txn : statuses[0];
         this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
         this.syncStatuses.peers = this.syncStatuses.peers ? this.syncStatuses.peers : statuses[2];
-
-        logger.info('syn-statuses', { sync_status: this.syncStatuses });
       }
 
       if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {

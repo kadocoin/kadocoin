@@ -121,7 +121,6 @@ describe('Transaction', () => {
               recipient: 'Kado',
               amount: 999999,
               address: senderWallet.address,
-              publicKey: senderWallet.publicKey,
               balance: '300.00000000',
             });
           }
@@ -142,7 +141,6 @@ describe('Transaction', () => {
             recipient: nextRecipient,
             amount: nextAmount,
             address: senderWallet.address,
-            publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
           });
         }
@@ -178,7 +176,6 @@ describe('Transaction', () => {
               localWallet,
               recipient: nextRecipient,
               address: senderWallet.address,
-              publicKey: senderWallet.publicKey,
               balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
             });
