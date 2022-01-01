@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { sampleDataForTests } from '../settings';
+import { sampleDataForTests } from '../../settings';
 import cryptoHash from '../util/crypto-hash';
 import Block from './block';
 import Blockchain from '.';

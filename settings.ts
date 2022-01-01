@@ -5,11 +5,11 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { REWARD_INPUT } from './types';
-import cryptoHash from './util/crypto-hash';
-import size from './util/size';
-import Transaction from './wallet/transaction';
-import createFolderOrFile from './util/create-folder-or-file';
+import { REWARD_INPUT } from './src/types';
+import cryptoHash from './src/util/crypto-hash';
+import size from './src/util/size';
+import Transaction from './src/wallet/transaction';
+import createFolderOrFile from './src/util/create-folder-or-file';
 
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
 export const prod = ENVIRONMENT === 'production';

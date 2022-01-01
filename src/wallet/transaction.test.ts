@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../settings';
+import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../../settings';
 import verifySignature from '../util/verify-signature';
 import Wallet from '.';
 import Transaction from './transaction';

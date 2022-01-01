@@ -6,7 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import hexToBinary from 'hex-to-bin';
-import { GENESIS_DATA, MINE_RATE } from '../settings';
+import { GENESIS_DATA, MINE_RATE } from '../../settings';
 import { IChain, TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import { cleanUpTransaction } from '../util/clean-up-transaction';

@@ -11,7 +11,7 @@ import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
 import appendToFile from '../util/appendToFile';
-import { blockchainStorageFile } from '../settings';
+import { blockchainStorageFile } from '../../settings';
 import LevelDB from '../db';
 
 class TransactionMiner {

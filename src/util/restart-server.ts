@@ -1,4 +1,4 @@
-import { logFile } from '../settings';
+import { logFile } from '../../settings';
 import appendToFile from './appendToFile';
 import logger from './logger';
 

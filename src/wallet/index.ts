@@ -6,7 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Transaction from './transaction';
-import { NOT_ENOUGH, STARTING_BALANCE, walletsStorageFile } from '../settings';
+import { NOT_ENOUGH, STARTING_BALANCE, walletsStorageFile } from '../../settings';
 import newEc from '../util/secp256k1';
 import cryptoHash from '../util/crypto-hash';
 import { pubKeyToAddress } from '../util/pubkey-to-address';
