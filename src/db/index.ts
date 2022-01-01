@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
-import { balancesStorageFolder } from '../config/constants';
+import { balancesStorageFolder } from '../settings';
 import { IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';

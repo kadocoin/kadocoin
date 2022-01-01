@@ -7,14 +7,14 @@
  */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { blockchainStorageFile, MAX_WEIGHT_TXN, REWARD_INPUT } from '../config/constants';
+import { blockchainStorageFile, MAX_WEIGHT_TXN, REWARD_INPUT } from '../settings';
 import Transaction from '../wallet/transaction';
 import { IChain, incomingObj, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward } from '../util/transaction-metrics';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
-import { KADOCOIN_VERSION } from '../config/constants';
+import { KADOCOIN_VERSION } from '../settings';
 import appendToFile from '../util/appendToFile';
 import fs from 'fs';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';

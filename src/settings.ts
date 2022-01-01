@@ -5,11 +5,13 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { REWARD_INPUT } from '../types';
-import cryptoHash from '../util/crypto-hash';
-import size from '../util/size';
-import Transaction from '../wallet/transaction';
-import createFolderOrFile from '../util/create-folder-or-file';
+import { REWARD_INPUT } from './types';
+import cryptoHash from './util/crypto-hash';
+import size from './util/size';
+import Transaction from './wallet/transaction';
+import createFolderOrFile from './util/create-folder-or-file';
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
 const prod = ENVIRONMENT === 'production';
@@ -47,18 +49,17 @@ const REWARD_INPUT: REWARD_INPUT = {
   amount: '',
   address: '',
   publicKey: '',
-  recipient: '',
   signature: '',
 };
 
 export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
-export const blockchainStorageFile = 'data/blockchain.txt';
-export const balancesStorageFolder = 'balancesdb';
-export const logFile = 'logs/main.log';
-export const peersStorageFile = 'data/peers.txt';
-export const walletsStorageFile = 'wallets/wallets.txt';
+export const blockchainStorageFile = 'blocks/blockchain.dat';
+export const balancesStorageFolder = 'balances';
+export const logFile = 'debug.log';
+export const peersStorageFile = 'peers.dat';
+export const walletsStorageFile = 'myWallets/wallets.dat';
 export const REQUEST_TIMEOUT = 5000;
 export const KADOCOIN_VERSION = '1.0.0';
 export const MAX_WEIGHT_TXN = 1.5 * 1024 * 1024; // 1.5 MB
@@ -71,11 +72,31 @@ export const hardCodedPeers = prod
       { host: '192.168.0.155', port: P2P_PORT }, // ABUJA
     ];
 
+/**
+ * PORT
+ */
+export const DEFAULT_PORT = 2000;
+let DEV_PEER_PORT = 0;
+
+if (process.env.GENERATE_DEV_PEER_PORT === 'true')
+  DEV_PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
+
+export const PORT = DEV_PEER_PORT || DEFAULT_PORT;
+
+if (fs.existsSync('.env')) {
+  console.debug('Using .env file to supply config environment variables');
+  dotenv.config({ path: '.env' });
+} else {
+  console.debug('Using .env.production file to supply config environment variables');
+  dotenv.config({ path: '.env.production' }); // DELETE THIS AFTER YOU CREATE YOUR OWN .env FILE!
+}
+
 /** CREATE NECESSARY FOLDERS */
 createFolderOrFile('logs', 'folder');
 createFolderOrFile('data', 'folder');
-createFolderOrFile('wallets', 'folder');
+createFolderOrFile('myWallets', 'folder');
 
+// SAMPLE SEED DATA
 export const sampleDataForTests = {
   id: '2d5791f0-d9af-11eb-ac13-099d1d20fcfc',
   output: {

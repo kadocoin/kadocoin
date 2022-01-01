@@ -21,7 +21,7 @@ balancesdb
 data
 wallets
 # Logs
-logs
+debug.log
 logs.txt
 *.log
 npm-debug.log*

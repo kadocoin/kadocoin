@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
+import { NOT_ENOUGH, REWARD_INPUT } from '../settings';
 import verifySignature from '../util/verify-signature';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
 import { ICInput, ICInput_R, ICOutput, ICOutput_R, ITransaction, IUpdate } from '../types';
@@ -154,7 +154,7 @@ class Transaction {
     feeReward?: string;
     blockchainLen: number;
   }): Transaction {
-    REWARD_INPUT.recipient = minerPublicKey;
+    REWARD_INPUT.address = minerPublicKey;
     REWARD_INPUT.timestamp = Date.now();
     message && (REWARD_INPUT.message = message);
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });

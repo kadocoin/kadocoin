@@ -1,5 +1,5 @@
 import publicIp from 'public-ip';
-import { prod } from '../config/secret';
+import { prod } from '../secret';
 
 export default async function ip_address(): Promise<string> {
   // LOCAL DEV - IF PRESENT

@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { MAX_WEIGHT_TXN } from '../config/constants';
+import { MAX_WEIGHT_TXN } from '../settings';
 import { IChain } from '../types';
 import logger from '../util/logger';
 import size from '../util/size';

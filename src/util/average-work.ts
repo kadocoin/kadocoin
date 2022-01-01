@@ -7,8 +7,8 @@
  */
 import Blockchain from '../blockchain';
 import Block from '../blockchain/block';
-import { sampleDataForTests } from '../config/constants';
-import { MINE_RATE } from '../config/constants';
+import { sampleDataForTests } from '../settings';
+import { MINE_RATE } from '../settings';
 import Transaction from '../wallet/transaction';
 
 (function averageWork(): void {

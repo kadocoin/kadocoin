@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { ENVIRONMENT } from '../config/secret';
+import { ENVIRONMENT } from '../secret';
 
 let log_err_to_file: Console = null;
 

@@ -181,7 +181,6 @@ export interface REWARD_INPUT {
   amount: string;
   address: string;
   publicKey: string;
-  recipient: string;
   signature: string;
   message?: string;
 }

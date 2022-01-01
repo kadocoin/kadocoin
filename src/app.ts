@@ -6,7 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import express, { Application, Request, Response, Router } from 'express';
-import { DEFAULT_MESSAGE } from './config/constants';
+import { DEFAULT_MESSAGE } from './settings';
 class App {
   public app: Application;
   public router: Router;
