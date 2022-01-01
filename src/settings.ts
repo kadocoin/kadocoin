@@ -10,8 +10,6 @@ import cryptoHash from './util/crypto-hash';
 import size from './util/size';
 import Transaction from './wallet/transaction';
 import createFolderOrFile from './util/create-folder-or-file';
-import dotenv from 'dotenv';
-import fs from 'fs';
 
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
 export const prod = ENVIRONMENT === 'production';
@@ -55,11 +53,18 @@ const REWARD_INPUT: REWARD_INPUT = {
 export { REWARD_INPUT };
 export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
+
+// FILES
 export const blockchainStorageFile = 'blocks/blockchain.dat';
 export const balancesStorageFolder = 'balances';
 export const logFile = 'debug.log';
 export const peersStorageFile = 'peers.dat';
-export const walletsStorageFile = 'myWallets/wallets.dat';
+export const walletsStorageFile = 'wallets/wallets.dat';
+
+/** CREATE FOLDERS */
+createFolderOrFile('data', 'folder');
+createFolderOrFile('wallets', 'folder');
+
 export const REQUEST_TIMEOUT = 5000;
 export const KADOCOIN_VERSION = '1.0.0';
 export const MAX_WEIGHT_TXN = 1.5 * 1024 * 1024; // 1.5 MB
@@ -82,19 +87,6 @@ if (process.env.GENERATE_DEV_PEER_PORT === 'true')
   DEV_PEER_PORT = DEFAULT_PORT + Math.ceil(Math.random() * 1000);
 
 export const PORT = DEV_PEER_PORT || DEFAULT_PORT;
-
-if (fs.existsSync('.env')) {
-  console.debug('Using .env file to supply config environment variables');
-  dotenv.config({ path: '.env' });
-} else {
-  console.debug('Using .env.production file to supply config environment variables');
-  dotenv.config({ path: '.env.production' }); // DELETE THIS AFTER YOU CREATE YOUR OWN .env FILE!
-}
-
-/** CREATE NECESSARY FOLDERS */
-createFolderOrFile('logs', 'folder');
-createFolderOrFile('data', 'folder');
-createFolderOrFile('myWallets', 'folder');
 
 // SAMPLE SEED DATA
 export const sampleDataForTests = {
