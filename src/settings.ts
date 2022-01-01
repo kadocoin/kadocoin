@@ -14,7 +14,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
-const prod = ENVIRONMENT === 'production';
+export const prod = ENVIRONMENT === 'production';
 
 const INITIAL_DIFFICULTY = 10;
 export const MINE_RATE = 5000;
