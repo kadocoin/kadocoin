@@ -11,7 +11,6 @@
 // @ts-ignore
 import P2PModule from 'p2p';
 import app from './app';
-import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import MiscRouter from './routes/misc.router';
 import TransactionRouter from './routes/transaction.router';
@@ -106,7 +105,6 @@ leveldb.balancesDB.open(async (err: any) => {
   };
 
   /** MIDDLEWARES */
-
   app.use(function (_, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -116,7 +114,6 @@ leveldb.balancesDB.open(async (err: any) => {
   app.use(express.json());
   app.use(initializeRoutes);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
   /** END MIDDLEWARES */
 
   app

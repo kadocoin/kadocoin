@@ -49,24 +49,13 @@ export default class TransactionRouter {
 
   initRoute(): void {
     this.app.post(
-      '/transact',
+      '/create-transaction',
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
       p2pMiddleWare(this.p2p),
       leveldbMiddleWare(this.leveldb),
-      this.transactionController.make
-    );
-
-    // MULTI-WALLET ONLY
-    this.app.post(
-      '/send-without-account',
-      walletMiddleWare(this.localWallet),
-      transactionPoolMiddleWare(this.transactionPool),
-      blockchainMiddleWare(this.blockchain),
-      p2pMiddleWare(this.p2p),
-      leveldbMiddleWare(this.leveldb),
-      this.transactionController.send_without_account
+      this.transactionController.createTransaction
     );
 
     this.app.get(

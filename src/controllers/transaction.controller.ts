@@ -6,11 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { Request, Response } from 'express';
-import {
-  mineValidation,
-  sendValidation,
-  transactValidation,
-} from '../validation/transaction.validation';
+import { mineValidation, sendValidation } from '../validation/transaction.validation';
 import {
   INTERNAL_SERVER_ERROR,
   CREATED,
@@ -18,7 +14,6 @@ import {
   SUCCESS,
   INCORRECT_VALIDATION,
 } from '../statusCode/statusCode';
-import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
 import isEmptyObject from '../util/is-empty-object';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
@@ -28,130 +23,12 @@ export default class TransactionController {
   /**
    * Send Kadocoin
    *
-   * @method make
-   * @param {Request} req Express Request object
-   * @param {Response} res Express Response object
-   * @return a transaction object
-   */
-  make = async (req: Request, res: Response): Promise<Response> => {
-    // ENFORCE 8 DECIMAL PLACES
-    if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message:
-          'You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin',
-      });
-
-    // VALIDATE OTHER USER INPUTS
-    const { error } = transactValidation(req.body);
-    if (error)
-      return res
-        .status(INCORRECT_VALIDATION)
-        .json({ type: 'error', message: error.details[0].message });
-
-    // GRAB USER INPUTS
-    const { amount, recipient, publicKey, address, message, sendFee } = req.body;
-
-    // CHECK THE VALIDITY OF RECIPIENT ADDRESS
-    if (!isValidChecksumAddress(recipient.trim()))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Invalid recipient address.',
-      });
-
-    // CHECK THE VALIDITY OF SENDER ADDRESS
-    if (!isValidChecksumAddress(address.trim()))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Invalid sender address.',
-      });
-
-    // GRAB NECESSARY MIDDLEWARES
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { transactionPool, p2p, leveldb } = req;
-
-    const data = await leveldb.getBal(address);
-
-    console.log('make route', { message: data.message }); // REMOVE
-    if (data.type == 'error')
-      return res.status(NOT_FOUND).json({ type: 'error', message: data.message });
-
-    // RE-CREATE WALLET INSTANCE FROM KEYPAIRHEX
-    const { keyPairHex } = req.app.locals.user;
-
-    const localWallet = new Wallet(
-      data.message,
-      Wallet.keyPairFromHex(keyPairHex),
-      publicKey,
-      address,
-      keyPairHex
-    );
-
-    // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
-    if (recipient === address)
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Sender and receiver address cannot be the same.',
-      });
-
-    // CHECK FOR EXISTING TRANSACTION
-    let transaction = transactionPool.existingTransactionPool({
-      inputAddress: address,
-    });
-
-    try {
-      if (transaction) {
-        console.log('Update transaction'); // REMOVE
-
-        transaction.update({
-          address,
-          recipient,
-          amount: Number(amount),
-          balance: data.message,
-          localWallet,
-          message,
-          sendFee,
-        });
-      } else {
-        console.log('New transaction'); // REMOVE
-
-        transaction = localWallet.createTransaction({
-          recipient,
-          amount: Number(amount),
-          balance: data.message,
-          localWallet,
-          publicKey,
-          address,
-          message,
-          sendFee,
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
-      }
-    }
-
-    /** SAVE TRANSACTION TO MEMORY */
-    transactionPool.setTransaction(transaction);
-
-    /** SEND TRANSACTION TO OTHER PEERS */
-    p2p.sendTransactions(transaction);
-
-    // TODO: SAVE TRANSACTION TO DB
-
-    return res.status(CREATED).json({ type: 'success', transaction });
-  };
-
-  /**
-   * Send Kadocoin
-   *
    * @method send
    * @param {Request} req Express Request object
    * @param {Response} res Express Response object
    * @return a transaction object
    */
-  send_without_account = async (req: Request, res: Response): Promise<Response> => {
+  createTransaction = async (req: Request, res: Response): Promise<Response> => {
     // ENFORCE 8 DECIMAL PLACES
     if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -243,8 +120,6 @@ export default class TransactionController {
 
     /** SEND TRANSACTION TO OTHER PEERS */
     p2p.sendTransactions(transaction);
-
-    // TODO: SAVE TRANSACTION TO DB
 
     return res.status(CREATED).json({ type: 'success', transaction });
   };
