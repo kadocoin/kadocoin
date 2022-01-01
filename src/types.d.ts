@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { Db, MongoClient } from 'mongodb';
+
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
 import LevelDB from './db';
@@ -108,8 +108,6 @@ export interface IUserModel {
 declare global {
   namespace Express {
     interface Request {
-      dbClient: MongoClient;
-      db: Db;
       blockchain: Blockchain;
       wallet: Wallet;
       transactionPool: TransactionPool;

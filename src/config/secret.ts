@@ -19,20 +19,6 @@ if (fs.existsSync('.env')) {
 export const ENVIRONMENT = process.env.NODE_ENV || 'development';
 export const prod = ENVIRONMENT === 'production';
 
-export const MONGODB_URI = prod ? process.env['MONGODB_URI'] : process.env['MONGODB_URI_DEV'];
-export const DB_NAME = process.env['DB_NAME'];
-
-/**
- * STOP STARTING SERVER UNLESS MONGODB URI IS PROVIDED
- */
-if (!MONGODB_URI) {
-  if (prod) {
-    console.error('No mongo connection string. Set MONGODB_URI environment variable.');
-  } else {
-    console.error('No mongo connection string. Set MONGODB_URI_LOCAL environment variable.');
-  }
-}
-
 /**
  * PORT
  */
