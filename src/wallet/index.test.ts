@@ -6,7 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Blockchain from '../blockchain';
-import { sampleDataForTests, STARTING_BALANCE } from '../../settings';
+import { sampleDataForTests, STARTING_BALANCE } from '../settings';
 import verifySignature from '../util/verify-signature';
 import Wallet from './index';
 import Transaction from './transaction';

@@ -22,7 +22,7 @@ import swaggerUi from 'swagger-ui-express';
 import * as swaggerDocument from './swagger.json';
 import P2P from './p2p';
 import P2PRouter from './routes/p2p.router';
-import { ENVIRONMENT, hardCodedPeers, P2P_PORT, PORT } from '../settings';
+import { ENVIRONMENT, hardCodedPeers, P2P_PORT, PORT } from './settings';
 import restartServer from './util/restart-server';
 import logger from './util/logger';
 import address from './util/get-ip-address';

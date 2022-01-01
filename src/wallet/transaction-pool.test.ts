@@ -9,7 +9,7 @@ import Blockchain from '../blockchain';
 import Wallet from '.';
 import Transaction from './transaction';
 import TransactionPool from './transaction-pool';
-import { sampleDataForTests } from '../../settings';
+import { sampleDataForTests } from '../settings';
 
 describe('TransactionPool', () => {
   let transactionPool: TransactionPool,

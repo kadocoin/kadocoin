@@ -20,7 +20,7 @@ import {
   P2P_PORT,
   peersStorageFile,
   REQUEST_TIMEOUT,
-} from '../../settings';
+} from '../settings';
 import Block from '../blockchain/block';
 import getLastLine from '../util/get-last-line';
 import appendToFile from '../util/appendToFile';
@@ -28,7 +28,7 @@ import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
-import { KADOCOIN_VERSION } from '../../settings';
+import { KADOCOIN_VERSION } from '../settings';
 import LevelDB from '../db';
 
 class P2P {

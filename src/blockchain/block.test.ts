@@ -7,7 +7,7 @@
  */
 import hexToBinary from 'hex-to-bin';
 import Block from './block';
-import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../../settings';
+import { GENESIS_DATA, MINE_RATE, sampleDataForTests } from '../settings';
 import cryptoHash from '../util/crypto-hash';
 import Transaction from '../wallet/transaction';
 import { cleanUpTransaction } from '../util/clean-up-transaction';

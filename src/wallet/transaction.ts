@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import { NOT_ENOUGH, REWARD_INPUT } from '../../settings';
+import { NOT_ENOUGH, REWARD_INPUT } from '../settings';
 import verifySignature from '../util/verify-signature';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
 import { ICInput, ICInput_R, ICOutput, ICOutput_R, ITransaction, IUpdate } from '../types';

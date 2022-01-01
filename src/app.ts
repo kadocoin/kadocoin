@@ -6,7 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import express, { Application, Request, Response, Router } from 'express';
-import { DEFAULT_MESSAGE } from '../settings';
+
 class App {
   public app: Application;
   public router: Router;
@@ -19,7 +19,7 @@ class App {
 
   bootstrap() {
     this.app.get('/', (_: Request, res: Response) => {
-      res.send(DEFAULT_MESSAGE);
+      res.send('Welcome to Kadocoin API. Visit https://kadocoin.org');
     });
   }
 }
