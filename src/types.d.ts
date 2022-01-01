@@ -87,24 +87,6 @@ export type TTransactionChild = {
 
 export type IChain = Array<Block>;
 
-export interface IUserModel {
-  _id?: string;
-  emailVerified?: boolean;
-  profilePicture?: string;
-  userCreationDate?: string;
-  email?: string;
-  password?: string;
-  name?: string;
-  bio?: string;
-  scope?: string[];
-  registrationMethod?: string;
-  hashedPassword?: string;
-  publicKey?: string;
-  address?: string;
-  token?: string;
-  keyPairHex?: string;
-}
-
 declare global {
   namespace Express {
     interface Request {

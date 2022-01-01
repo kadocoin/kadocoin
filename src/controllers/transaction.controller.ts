@@ -22,9 +22,7 @@ import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
 import isEmptyObject from '../util/is-empty-object';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
-import sanitizeHTML from 'sanitize-html';
 import Mining_Reward from '../util/supply_reward';
-import sanitize_html from '../util/sanitize-html';
 
 export default class TransactionController {
   /**
@@ -52,15 +50,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    let { amount, recipient, publicKey, address, message, sendFee } = req.body;
-
-    // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-    amount = sanitize_html(amount);
-    recipient = sanitize_html(recipient);
-    publicKey = sanitize_html(publicKey);
-    address = sanitize_html(address);
-    message && (message = sanitize_html(message)); // OPTIONAL
-    sendFee && (sendFee = sanitize_html(sendFee)); // OPTIONAL
+    const { amount, recipient, publicKey, address, message, sendFee } = req.body;
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -78,7 +68,7 @@ export default class TransactionController {
 
     // GRAB NECESSARY MIDDLEWARES
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { transactionPool, blockchain, p2p, leveldb } = req;
+    const { transactionPool, p2p, leveldb } = req;
 
     const data = await leveldb.getBal(address);
 
@@ -178,14 +168,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    let { amount, recipient, address, message, sendFee } = req.body;
-
-    // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-    amount = sanitize_html(amount);
-    recipient = sanitize_html(recipient);
-    address = sanitize_html(address);
-    message && (message = sanitize_html(message)); // OPTIONAL
-    sendFee && (sendFee = sanitize_html(sendFee)); // OPTIONAL
+    const { amount, recipient, address, message, sendFee } = req.body;
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -309,18 +292,7 @@ export default class TransactionController {
        * @param address miner address
        * @param message miner message
        */
-      let { address, message } = req.body;
-
-      // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-      address = sanitizeHTML(address, {
-        allowedTags: [],
-        allowedAttributes: {},
-      });
-      message &&
-        (message = sanitizeHTML(message, {
-          allowedTags: [],
-          allowedAttributes: {},
-        }));
+      const { address, message } = req.body;
 
       // GRAB NECESSARY MIDDLEWARES
       const { transactionPool, blockchain, p2p, leveldb } = req;
