@@ -155,7 +155,7 @@ export default class TransactionController {
     }
   };
 
-  mine = async (req: Request, res: Response): Promise<Response> => {
+  mineTransactions = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = mineValidation(req.body);
       if (error)

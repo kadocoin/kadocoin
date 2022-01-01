@@ -76,7 +76,7 @@ export default class TransactionRouter {
       blockchainMiddleWare(this.blockchain),
       p2pMiddleWare(this.p2p),
       leveldbMiddleWare(this.leveldb),
-      this.transactionController.mine
+      this.transactionController.mineTransactions
     );
   }
 }
