@@ -497,7 +497,7 @@ class P2P {
               /** SAVING TO DB STARTS */
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
               console.log('trying1', blockchainHeightFromPeer);
-              const blockchainHeightFromFile = 1; //await this.leveldb.getLocalHighestBlockchainHeight();
+              const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
               console.log('trying2', blockchainHeightFromFile);
 
               logger.info('Incoming vs Local Blocks Status', {
@@ -513,32 +513,34 @@ class P2P {
                 const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
                 // SAVE BLOCKS TO DB
-                this.leveldb
-                  .addBlocksToDB({ blocks: diffBlockchain })
-                  .then(status => status.type == 'success' && logger.info('Done'));
+                this.leveldb.addBlocksToDB({ blocks: diffBlockchain }).then(status => {
+                  if (status.type == 'success') {
+                    logger.info('Blocks added');
 
-                // SAVE TRANSACTIONS BALANCES TO DB
-                logger.info('Adding balances to db...');
-                this.leveldb
-                  .addOrUpdateBal(diffBlockchain)
-                  .then(status => status.type == 'success' && logger.info('Done'));
+                    // SAVE TRANSACTIONS BALANCES TO DB
+                    logger.info('Adding balances to db...');
+                    this.leveldb.addOrUpdateBal(diffBlockchain).then(status => {
+                      status.type == 'success' && logger.info('Balances updated');
 
-                // TODO: SYNC FROM DISK ?
-                // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
+                      // TODO: SYNC FROM DISK ?
+                      // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
 
-                this.blockchain.replaceChain(rootChain);
+                      this.blockchain.replaceChain(rootChain);
 
-                /**  UPDATE MINING_REWARD */
-                const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-                  chainLength: this.blockchain.chain.length,
+                      /**  UPDATE MINING_REWARD */
+                      const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+                        chainLength: this.blockchain.chain.length,
+                      });
+
+                      logger.info(`Mining reward and supply`, {
+                        MINING_REWARD,
+                        SUPPLY,
+                      });
+
+                      return resolve(true);
+                    });
+                  }
                 });
-
-                logger.info(`Mining reward and supply`, {
-                  MINING_REWARD,
-                  SUPPLY,
-                });
-
-                resolve(true);
               }
 
               resolve(false);

@@ -56,10 +56,6 @@ class LevelDB {
       .on('data', (data: { key: string; value: any }) => logger.info('Blocks data', { data }));
   }
 
-  // public getBlocks(): Promise<void>{
-
-  // }
-
   public async addBlocksToDB({
     blocks,
   }: {
@@ -85,11 +81,14 @@ class LevelDB {
       this.blocksDB
         .createKeyStream({ reverse: true, limit: 1 })
         .on('data', value => {
-          resolve(this.binToDec(value));
+          return resolve(this.binToDec(value));
         })
         .on('error', err => {
-          console.log({ err });
           reject(err);
+        })
+        .on('end', function () {
+          // IF NO DATA PRESENT IN THE DB, 0 IS RETURNED
+          resolve(0);
         });
     });
   }
