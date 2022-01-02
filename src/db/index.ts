@@ -5,7 +5,6 @@ import { balancesStorageFolder, blockchainStorageFolder } from '../settings';
 import { IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';
-import restartServer from '../util/restart-server';
 import { getTotalSent } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 
@@ -31,11 +30,23 @@ class LevelDB {
     });
   }
 
+  public openDBs(): Promise<boolean> {
+    return new Promise(resolve => {
+      this.balancesDB.on('open', () => this.blocksDB.on('open', () => resolve(true)));
+
+      resolve(false);
+    });
+  }
+
   public getAllKeysAndValues(): void {
     this.blocksDB
       .createReadStream({ reverse: true })
       .on('data', (data: { key: string; value: any }) => logger.info('Blocks data', { data }));
   }
+
+  // public getBlocks(): Promise<void>{
+
+  // }
 
   public async addBlocksToDB({
     blocks,
@@ -54,9 +65,6 @@ class LevelDB {
       logger.info('Clearing the db...');
 
       this.clear(this.blocksDB).then(status => status.type == 'success' && logger.info('Done'));
-
-      // RESTART SERVER
-      restartServer();
     }
   }
 

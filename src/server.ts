@@ -36,8 +36,8 @@ const eventEmitter = new EventEmitter();
  */
 const leveldb = new LevelDB(eventEmitter);
 
-leveldb.balancesDB.open(async (err: any) => {
-  if (err) return logger.fatal('Error opening balancesdb,', { err });
+leveldb.openDBs().then(async open => {
+  if (!open) return logger.fatal('Error opening balancesdb');
 
   setInterval(() => leveldb.getAllKeysAndValues(), 10 * 60000);
 
@@ -84,7 +84,7 @@ leveldb.balancesDB.open(async (err: any) => {
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
   /** GET BLOCKCHAIN DATA FROM PEERS */
-  const has_downloaded_txs_and_blks = await p2p.loopAndRunPeers(hardCodedPeers);
+  const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(hardCodedPeers);
 
   logger.info('Node sync status', { has_downloaded_txs_and_blks });
 

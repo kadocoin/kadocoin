@@ -9,20 +9,13 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import request from 'request';
-import fs, { rmSync } from 'fs';
+import fs from 'fs';
 import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
-import {
-  blockchainStorageFile,
-  hardCodedPeers,
-  P2P_PORT,
-  peersStorageFile,
-  REQUEST_TIMEOUT,
-} from '../settings';
+import { hardCodedPeers, P2P_PORT, peersStorageFile, REQUEST_TIMEOUT } from '../settings';
 import Block from '../blockchain/block';
-import getLastLine from '../util/get-last-line';
 import appendToFile from '../util/appendToFile';
 import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/is-empty-object';
@@ -30,7 +23,6 @@ import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../settings';
 import LevelDB from '../db';
-import restartServer from '../util/restart-server';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -326,9 +318,7 @@ class P2P {
     }
   }
 
-  // public async syncPeerWithHistoricalBlockchain(): Promise<string[]> {
-
-  async loopAndRunPeers(peers: Array<IHost>): Promise<boolean[]> {
+  async syncPeerWithHistoricalBlockchain(peers: Array<IHost>): Promise<boolean[]> {
     for await (const peer of peers) {
       if (peer.host !== this.ip_address) {
         logger.info('Attempting to connect to', { host: peer.host, port: peer.port });
@@ -352,7 +342,7 @@ class P2P {
             const peers = await this.getPeers();
 
             if (peers.length) {
-              await this.loopAndRunPeers(peers);
+              await this.syncPeerWithHistoricalBlockchain(peers);
               logger.warn('No response from local peers');
             } else {
               logger.info('No local peers were found');
@@ -501,9 +491,7 @@ class P2P {
             const rootChain: Array<Block> = JSON.parse(body).message;
 
             try {
-              /** SAVING TO FILE STARTS */
-              // FILE EXISTS
-
+              /** SAVING TO DB STARTS */
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
               const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
 
@@ -511,47 +499,6 @@ class P2P {
                 blockchainHeightFromPeer,
                 blockchainHeightFromFile,
               });
-
-              /** THIS PEER IS AHEAD */
-              if (blockchainHeightFromPeer < blockchainHeightFromFile) {
-                logger.warn('THIS PEER IS AHEAD');
-
-                // DELETE FILE
-                // TODO - DO NOT DELETE?
-                rmSync(blockchainStorageFile, { force: true }); // FORCE - DISABLES ANY ERRORS SUCH AS WHEN THE FILE DOES NOT EXISTS
-                logger.warn(`${blockchainStorageFile} FILE DELETED`);
-
-                // CLEAR ALL DB ENTRIES AND RE-CONSTRUCT THE BALANCES DB
-                logger.info('Clearing balances db...');
-                this.leveldb.clear(this.leveldb.balancesDB).then(status => {
-                  if (status.type == 'error') {
-                    logger.warn(`Error clearing Balances DB`, { err: status.message });
-                    return restartServer();
-                  }
-
-                  logger.info('Done');
-
-                  logger.info('Adding balances to db...');
-                  this.leveldb
-                    .addOrUpdateBal(rootChain)
-                    .then(status => status.type == 'success' && logger.info('Done'));
-                });
-
-                // CLEAR ALL DB ENTRIES AND REPLACE WITH BLOCKS FROM PEER
-                logger.info('Clearing blocks db...');
-                this.leveldb.clear(this.leveldb.blocksDB).then(status => {
-                  if (status.type == 'error') {
-                    logger.warn(`Error clearing blocksDB`, { err: status.message });
-                    return restartServer();
-                  }
-                  logger.info('Done');
-
-                  logger.info('Adding blocks to blocks db...');
-                  this.leveldb
-                    .addBlocksToDB({ blocks: rootChain })
-                    .then(status => status.type == 'success' && logger.info('Done'));
-                });
-              }
 
               /** THIS PEER NEEDS TO CATCH UP */
               if (blockchainHeightFromPeer > blockchainHeightFromFile) {
@@ -570,27 +517,32 @@ class P2P {
                 this.leveldb
                   .addOrUpdateBal(diffBlockchain)
                   .then(status => status.type == 'success' && logger.info('Done'));
+
+                // TODO: SYNC FROM DISK ?
+                // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
+
+                this.blockchain.replaceChain(rootChain);
+
+                /**  UPDATE MINING_REWARD */
+                const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
+                  chainLength: this.blockchain.chain.length,
+                });
+
+                logger.info(`Mining reward and supply`, {
+                  MINING_REWARD,
+                  SUPPLY,
+                });
+
+                resolve(true);
               }
 
-              /** END SAVING TO FILE */
-            } catch (error) {}
+              resolve(false);
 
-            // TODO: SYNC FROM DISK ?
-            // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
-
-            this.blockchain.replaceChain(rootChain);
-
-            /**  UPDATE MINING_REWARD */
-            const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-              chainLength: this.blockchain.chain.length,
-            });
-
-            logger.info(`Mining reward and supply`, {
-              MINING_REWARD,
-              SUPPLY,
-            });
-
-            resolve(true);
+              /** END SAVING TO DB */
+            } catch (err) {
+              logger.error('Error at onSyncGetBlocks', err);
+              resolve(false);
+            }
           } else {
             logger.warn(`${peer.host}:2000/blocks - ${error}`);
             resolve(false);
