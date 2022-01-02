@@ -1,16 +1,18 @@
 import EventEmitter from 'events';
 import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
-import { balancesStorageFolder } from '../settings';
+import { balancesStorageFolder, blockchainStorageFolder } from '../settings';
 import { IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';
+import restartServer from '../util/restart-server';
 import { getTotalSent } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 
 class LevelDB {
   balancesDB: level.LevelDB<any, any>;
   eventEmitter: EventEmitter;
+  blocksDB: level.LevelDB<any, any>;
 
   constructor(eventEmitter?: EventEmitter) {
     this.eventEmitter = eventEmitter;
@@ -22,15 +24,62 @@ class LevelDB {
         // eventEmitter.emit('restart-kdc');
       }
     });
+    this.blocksDB = level(blockchainStorageFolder, { valueEncoding: 'json' }, err => {
+      if (err) {
+        logger.fatal('Blocks DB cannot start', { err });
+      }
+    });
   }
 
   public getAllKeysAndValues(): void {
-    this.balancesDB
+    this.blocksDB
       .createReadStream({ reverse: true })
-      .on('data', (data: { key: string; value: any }) => logger.info('BalancesDB', { data }));
+      .on('data', (data: { key: string; value: any }) => logger.info('Blocks data', { data }));
   }
 
-  public async addOrUpdateBal(blocks: Array<Block>): Promise<void> {
+  public async addBlocksToDB({
+    blocks,
+  }: {
+    blocks: Block[];
+  }): Promise<{ type: string; message: string }> {
+    try {
+      for await (const block of blocks) {
+        await this.createOrUpdate(`${block.blockchainHeight}`, block, this.blocksDB);
+      }
+
+      return { type: 'success', message: 'success' };
+    } catch (err) {
+      logger.error('Error at addBlockToDB', err);
+
+      logger.info('Clearing the db...');
+
+      this.clear(this.blocksDB).then(status => status.type == 'success' && logger.info('Done'));
+
+      // RESTART SERVER
+      restartServer();
+    }
+  }
+
+  public async getLocalHighestBlockchainHeight(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.blocksDB
+        .createValueStream({ reverse: true, limit: 1 })
+        .on('data', value => resolve(value.blockchainHeight))
+        .on('error', err => reject(err));
+    });
+  }
+
+  public async clear(db: level.LevelDB<any, any>): Promise<{ type: string; message: string }> {
+    return new Promise((resolve, reject) => {
+      db.clear(err => {
+        if (err) return reject({ type: 'error', message: err });
+
+        resolve({ type: 'success', message: 'success' });
+      });
+    });
+  }
+
+  public async addOrUpdateBal(blocks: Array<Block>): Promise<{ type: string; message: string }> {
     try {
       for await (const block of blocks) {
         const transactions = block['transactions'];
@@ -41,6 +90,8 @@ class LevelDB {
           );
         }
       }
+
+      return { type: 'success', message: 'success' };
     } catch (error) {
       logger.error('Error at method => addOrUpdateBal', { error });
     }
@@ -71,26 +122,34 @@ class LevelDB {
                       8
                     );
 
-                    const res = await this.putBal(address, {
-                      bal,
-                      height: block.blockchainHeight,
-                      timestamp: block.timestamp,
-                      totalSent: data.message.totalSent,
-                      totalReceived,
-                      txnCount: data.message.txnCount,
-                    });
+                    const res = await this.createOrUpdate(
+                      address,
+                      {
+                        bal,
+                        height: block.blockchainHeight,
+                        timestamp: block.timestamp,
+                        totalSent: data.message.totalSent,
+                        totalReceived,
+                        txnCount: data.message.txnCount,
+                      },
+                      this.balancesDB
+                    );
 
                     resolve(res);
                   } else {
                     // NON-EXISTING ADDRESS
-                    const res = await this.putBal(address, {
-                      bal: newly_received_coins,
-                      height: block.blockchainHeight,
-                      timestamp: block.timestamp,
-                      totalSent: (0).toFixed(8),
-                      totalReceived: newly_received_coins,
-                      txnCount: 0,
-                    });
+                    const res = await this.createOrUpdate(
+                      address,
+                      {
+                        bal: newly_received_coins,
+                        height: block.blockchainHeight,
+                        timestamp: block.timestamp,
+                        totalSent: (0).toFixed(8),
+                        totalReceived: newly_received_coins,
+                        txnCount: 0,
+                      },
+                      this.balancesDB
+                    );
 
                     resolve(res);
                   }
@@ -144,26 +203,34 @@ class LevelDB {
                           Number(old_total_Sent) + Number(newly_total_sent_coins)
                         ).toFixed(8);
 
-                        const res = await this.putBal(address, {
-                          bal: newly_received_coins,
-                          height: block.blockchainHeight,
-                          timestamp: block.timestamp,
-                          totalSent: new_total_sent,
-                          totalReceived: data.message.totalReceived,
-                          txnCount,
-                        });
+                        const res = await this.createOrUpdate(
+                          address,
+                          {
+                            bal: newly_received_coins,
+                            height: block.blockchainHeight,
+                            timestamp: block.timestamp,
+                            totalSent: new_total_sent,
+                            totalReceived: data.message.totalReceived,
+                            txnCount,
+                          },
+                          this.balancesDB
+                        );
 
                         resolve(res);
                       } else {
                         // NON-EXISTING ADDRESS
-                        const res = await this.putBal(address, {
-                          bal: newly_received_coins,
-                          height: block.blockchainHeight,
-                          timestamp: block.timestamp,
-                          totalSent: newly_total_sent_coins,
-                          totalReceived: (0).toFixed(8),
-                          txnCount: 1,
-                        });
+                        const res = await this.createOrUpdate(
+                          address,
+                          {
+                            bal: newly_received_coins,
+                            height: block.blockchainHeight,
+                            timestamp: block.timestamp,
+                            totalSent: newly_total_sent_coins,
+                            totalReceived: (0).toFixed(8),
+                            txnCount: 1,
+                          },
+                          this.balancesDB
+                        );
 
                         resolve(res);
                       }
@@ -186,26 +253,34 @@ class LevelDB {
                         Number(totalReceived) + Number(newly_received_coins)
                       ).toFixed(8);
 
-                      const res = await this.putBal(address, {
-                        bal,
-                        height: block.blockchainHeight,
-                        timestamp: block.timestamp,
-                        totalSent: data.message.totalSent,
-                        totalReceived,
-                        txnCount: data.message.txnCount,
-                      });
+                      const res = await this.createOrUpdate(
+                        address,
+                        {
+                          bal,
+                          height: block.blockchainHeight,
+                          timestamp: block.timestamp,
+                          totalSent: data.message.totalSent,
+                          totalReceived,
+                          txnCount: data.message.txnCount,
+                        },
+                        this.balancesDB
+                      );
 
                       resolve(res);
                     } else {
                       // NON-EXISTING ADDRESS
-                      const res = await this.putBal(address, {
-                        bal: newly_received_coins,
-                        height: block.blockchainHeight,
-                        timestamp: block.timestamp,
-                        totalSent: (0).toFixed(8),
-                        totalReceived: newly_received_coins,
-                        txnCount: 0,
-                      });
+                      const res = await this.createOrUpdate(
+                        address,
+                        {
+                          bal: newly_received_coins,
+                          height: block.blockchainHeight,
+                          timestamp: block.timestamp,
+                          totalSent: (0).toFixed(8),
+                          totalReceived: newly_received_coins,
+                          txnCount: 0,
+                        },
+                        this.balancesDB
+                      );
 
                       resolve(res);
                     }
@@ -249,9 +324,13 @@ class LevelDB {
     });
   };
 
-  public putBal = async (key: string, value: IValue): Promise<{ type: string; message: string }> =>
+  public createOrUpdate = async (
+    key: string,
+    value: Record<any, any>,
+    db: level.LevelDB<any, any>
+  ): Promise<{ type: string; message: string }> =>
     await new Promise((resolve, reject) => {
-      this.balancesDB.put(key, value, err => {
+      db.put(key, value, err => {
         if (err) reject({ type: 'error', message: 'Error saving balance. Please try again.' });
 
         resolve({ type: 'success', message: 'Success' });

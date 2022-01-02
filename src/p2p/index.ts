@@ -30,6 +30,7 @@ import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../settings';
 import LevelDB from '../db';
+import restartServer from '../util/restart-server';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -376,8 +377,6 @@ class P2P {
       ...(this.syncStatuses.peers ? [] : [this.onSyncGetPeers(peer)]), // GET PEERS FROM OTHER PEERS
     ];
 
-    console.error(sync_promises);
-
     return await Promise.all(sync_promises);
   }
 
@@ -501,11 +500,13 @@ class P2P {
           if (!error && response.statusCode === 200) {
             const rootChain: Array<Block> = JSON.parse(body).message;
 
-            /** SAVING TO FILE STARTS */
-            // FILE EXISTS
-            if (fs.existsSync(blockchainStorageFile)) {
+            try {
+              /** SAVING TO FILE STARTS */
+              // FILE EXISTS
+
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-              const blockchainHeightFromFile = await getLastLine(blockchainStorageFile);
+              const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
+
               logger.info('Incoming vs Local Blocks Status', {
                 blockchainHeightFromPeer,
                 blockchainHeightFromFile,
@@ -513,53 +514,66 @@ class P2P {
 
               /** THIS PEER IS AHEAD */
               if (blockchainHeightFromPeer < blockchainHeightFromFile) {
-                try {
-                  logger.warn('THIS PEER IS AHEAD');
+                logger.warn('THIS PEER IS AHEAD');
 
-                  // DELETE FILE
-                  // TODO - DO NOT DELETE?
-                  rmSync(blockchainStorageFile, { force: true }); // FORCE - DISABLES ANY ERRORS SUCH AS WHEN THE FILE DOES NOT EXISTS
-                  logger.warn(`${blockchainStorageFile} FILE DELETED`);
+                // DELETE FILE
+                // TODO - DO NOT DELETE?
+                rmSync(blockchainStorageFile, { force: true }); // FORCE - DISABLES ANY ERRORS SUCH AS WHEN THE FILE DOES NOT EXISTS
+                logger.warn(`${blockchainStorageFile} FILE DELETED`);
 
-                  // CLEAR ALL DB ENTRIES
-                  this.leveldb.balancesDB.clear(async err => {
-                    if (err)
-                      return logger.warn(`Error clearing ${blockchainStorageFile} FOLDER`, { err });
-                    logger.warn(`${blockchainStorageFile} ENTRIES CLEARED`);
+                // CLEAR ALL DB ENTRIES AND RE-CONSTRUCT THE BALANCES DB
+                logger.info('Clearing balances db...');
+                this.leveldb.clear(this.leveldb.balancesDB).then(status => {
+                  if (status.type == 'error') {
+                    logger.warn(`Error clearing Balances DB`, { err: status.message });
+                    return restartServer();
+                  }
 
-                    // SAVE TRANSACTIONS BALANCES IN TO DB
-                    await this.leveldb.addOrUpdateBal(rootChain);
-                    logger.info(`DONE ADDING ENTRIES`);
-                  });
+                  logger.info('Done');
 
-                  // REPLACE WITH BLOCKS FROM PEER
-                  appendToFile(rootChain, blockchainStorageFile);
-                } catch {
-                  logger.info('ERROR DELETING FILE');
-                }
+                  logger.info('Adding balances to db...');
+                  this.leveldb
+                    .addOrUpdateBal(rootChain)
+                    .then(status => status.type == 'success' && logger.info('Done'));
+                });
+
+                // CLEAR ALL DB ENTRIES AND REPLACE WITH BLOCKS FROM PEER
+                logger.info('Clearing blocks db...');
+                this.leveldb.clear(this.leveldb.blocksDB).then(status => {
+                  if (status.type == 'error') {
+                    logger.warn(`Error clearing blocksDB`, { err: status.message });
+                    return restartServer();
+                  }
+                  logger.info('Done');
+
+                  logger.info('Adding blocks to blocks db...');
+                  this.leveldb
+                    .addBlocksToDB({ blocks: rootChain })
+                    .then(status => status.type == 'success' && logger.info('Done'));
+                });
               }
 
               /** THIS PEER NEEDS TO CATCH UP */
               if (blockchainHeightFromPeer > blockchainHeightFromFile) {
                 /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-                logger.info('ADD THE MISSING BLOCKS TO LOCAL FILE');
+                logger.info('Adding missing blocks to db...');
                 // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
                 const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
 
-                // NOW WRITE LINE BY LINE
-                appendToFile(diffBlockchain, blockchainStorageFile);
+                // SAVE BLOCKS TO DB
+                this.leveldb
+                  .addBlocksToDB({ blocks: diffBlockchain })
+                  .then(status => status.type == 'success' && logger.info('Done'));
 
-                // SAVE TRANSACTIONS BALANCES IN TO DB
-                await this.leveldb.addOrUpdateBal(diffBlockchain);
+                // SAVE TRANSACTIONS BALANCES TO DB
+                logger.info('Adding balances to db...');
+                this.leveldb
+                  .addOrUpdateBal(diffBlockchain)
+                  .then(status => status.type == 'success' && logger.info('Done'));
               }
-            } else {
-              logger.info('FILE DOES NOT EXISTS');
-              appendToFile(rootChain, blockchainStorageFile);
 
-              // SAVE TRANSACTIONS BALANCES IN TO DB
-              await this.leveldb.addOrUpdateBal(rootChain);
-            }
-            /** END SAVING TO FILE */
+              /** END SAVING TO FILE */
+            } catch (error) {}
 
             // TODO: SYNC FROM DISK ?
             // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?

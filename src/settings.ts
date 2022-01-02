@@ -54,7 +54,8 @@ export const COINS_IN_CIRCULATION = 0;
 export const NOT_ENOUGH = 'Insufficient balance';
 
 // FILES
-export const blockchainStorageFile = 'blocks/blockchain.dat';
+export const blockchainStorageFile = 'blocks/blockchain.dat'; // REMOVE
+export const blockchainStorageFolder = 'blocks';
 export const balancesStorageFolder = 'balances';
 export const logFile = 'debug.log';
 export const peersStorageFile = 'peers.dat';
