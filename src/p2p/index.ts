@@ -333,6 +333,8 @@ class P2P {
         this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
         this.syncStatuses.peers = this.syncStatuses.peers ? this.syncStatuses.peers : statuses[2];
 
+        console.log(this.syncStatuses);
+
         if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {
           if (this.loopCount == this.hardCodedPeers.length - 1) {
             logger.warn('No response from hardcoded peers');
@@ -491,9 +493,12 @@ class P2P {
             const rootChain: Array<Block> = JSON.parse(body).message;
 
             try {
+              console.log('trying');
               /** SAVING TO DB STARTS */
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-              const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
+              console.log('trying1', blockchainHeightFromPeer);
+              const blockchainHeightFromFile = 1; //await this.leveldb.getLocalHighestBlockchainHeight();
+              console.log('trying2', blockchainHeightFromFile);
 
               logger.info('Incoming vs Local Blocks Status', {
                 blockchainHeightFromPeer,

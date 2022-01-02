@@ -32,9 +32,21 @@ class LevelDB {
 
   public openDBs(): Promise<boolean> {
     return new Promise(resolve => {
-      this.balancesDB.on('open', () => this.blocksDB.on('open', () => resolve(true)));
+      try {
+        this.balancesDB.open(err => {
+          if (!err) {
+            return this.blocksDB.open(err => {
+              if (!err) return resolve(true);
 
-      resolve(false);
+              resolve(false);
+            });
+          }
+
+          resolve(false);
+        });
+      } catch (error) {
+        resolve(false);
+      }
     });
   }
 
@@ -55,7 +67,7 @@ class LevelDB {
   }): Promise<{ type: string; message: string }> {
     try {
       for await (const block of blocks) {
-        await this.createOrUpdate(`${block.blockchainHeight}`, block, this.blocksDB);
+        await this.createOrUpdate(this.decToBin(block.blockchainHeight), block, this.blocksDB);
       }
 
       return { type: 'success', message: 'success' };
@@ -71,9 +83,14 @@ class LevelDB {
   public async getLocalHighestBlockchainHeight(): Promise<number> {
     return new Promise((resolve, reject) => {
       this.blocksDB
-        .createValueStream({ reverse: true, limit: 1 })
-        .on('data', value => resolve(value.blockchainHeight))
-        .on('error', err => reject(err));
+        .createKeyStream({ reverse: true, limit: 1 })
+        .on('data', value => {
+          resolve(this.binToDec(value));
+        })
+        .on('error', err => {
+          console.log({ err });
+          reject(err);
+        });
     });
   }
 
@@ -344,6 +361,13 @@ class LevelDB {
         resolve({ type: 'success', message: 'Success' });
       });
     });
+
+  private decToBin(dec: number): string {
+    return (dec >>> 0).toString(2);
+  }
+  private binToDec(stringedBin: string): number {
+    return parseInt(stringedBin, 2);
+  }
 }
 
 export default LevelDB;
