@@ -5,6 +5,7 @@
 
 import Block from './blockchain/block';
 import LevelDB from './db';
+import isEmptyObject from './util/is-empty-object';
 const leveldb = new LevelDB();
 
 const sampleBlocks = [
@@ -106,17 +107,17 @@ const sampleBlocks = [
   },
 ];
 
-// (async function () {
-//   leveldb.addBlocksToDB({ blocks: sampleBlocks }).then(() => {
-//     leveldb.getAllKeysAndValues();
-//   });
-// })();
+(async function () {
+  const res = await leveldb.getValue('latest', leveldb.blocksDB);
+  console.log({ res });
+})();
 
-try {
-  leveldb.getLocalHighestBlockchainHeight().then(data => console.log({ data }));
-} catch (error) {
-  console.log({ error });
-}
+// try {
+//   leveldb.getLocalHighestBlockchainHeight().then(data => console.log({ data }));
+// } catch (error) {
+//   console.log({ error });
+// }
+
 // leveldb.getAllKeysAndValues();
 // function dec2bin(dec: number) {
 //   return (dec >>> 0).toString(2);

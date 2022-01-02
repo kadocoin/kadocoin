@@ -63,9 +63,11 @@ class LevelDB {
   }): Promise<{ type: string; message: string }> {
     try {
       for await (const block of blocks) {
-        await this.createOrUpdate(this.decToBin(block.blockchainHeight), block, this.blocksDB);
+        await this.createOrUpdate(block.blockchainHeight, block, this.blocksDB);
       }
 
+      // STORE HIGHEST BLOCK HEIGHT
+      this.blocksDB.put('latest', { height: blocks[blocks.length - 1].blockchainHeight });
       return { type: 'success', message: 'success' };
     } catch (err) {
       logger.error('Error at addBlockToDB', err);
@@ -81,7 +83,7 @@ class LevelDB {
       this.blocksDB
         .createKeyStream({ reverse: true, limit: 1 })
         .on('data', value => {
-          return resolve(this.binToDec(value));
+          return resolve(value);
         })
         .on('error', err => {
           reject(err);
@@ -136,7 +138,7 @@ class LevelDB {
 
             const result = await new Promise(
               (resolve: (value: { type: string; message: string }) => void) =>
-                this.getValue(address).then(async data => {
+                this.getValue(address, this.balancesDB).then(async data => {
                   // EXISTING ADDRESS
                   if (!isEmptyObject(data.message)) {
                     let { bal, totalReceived } = data.message;
@@ -216,7 +218,7 @@ class LevelDB {
               } else {
                 const result = await new Promise(
                   (resolve: (value: { type: string; message: string }) => void) =>
-                    this.getValue(address).then(async data => {
+                    this.getValue(address, this.balancesDB).then(async data => {
                       // EXISTING ADDRESS
                       if (!isEmptyObject(data.message)) {
                         let txnCount = data.message.txnCount;
@@ -267,7 +269,7 @@ class LevelDB {
               /*** THIS IS THE RECEIVER */
               const result = await new Promise(
                 (resolve: (value: { type: string; message: string }) => void) =>
-                  this.getValue(address).then(async data => {
+                  this.getValue(address, this.balancesDB).then(async data => {
                     //  EXISTING ADDRESS
                     if (!isEmptyObject(data.message)) {
                       let { bal, totalReceived } = data.message;
@@ -333,10 +335,11 @@ class LevelDB {
     });
 
   public getValue = async (
-    address: string
-  ): Promise<{ type: string; message: IValue | Record<string, never> }> => {
+    key: string,
+    db: level.LevelDB<any, any>
+  ): Promise<{ type: string; message: any }> => {
     return await new Promise((resolve, reject) => {
-      this.balancesDB.get(address.trim(), (err: { notFound: any }, value: IValue) => {
+      db.get(key.trim(), (err: { notFound: any }, value: IValue) => {
         if (err) {
           if (err.notFound) return resolve({ type: 'success', message: {} });
 
@@ -349,7 +352,7 @@ class LevelDB {
   };
 
   public createOrUpdate = async (
-    key: string,
+    key: string | number,
     value: Record<any, any>,
     db: level.LevelDB<any, any>
   ): Promise<{ type: string; message: string }> =>
@@ -360,13 +363,6 @@ class LevelDB {
         resolve({ type: 'success', message: 'Success' });
       });
     });
-
-  private decToBin(dec: number): string {
-    return (dec >>> 0).toString(2);
-  }
-  private binToDec(stringedBin: string): number {
-    return parseInt(stringedBin, 2);
-  }
 }
 
 export default LevelDB;

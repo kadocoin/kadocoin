@@ -493,12 +493,12 @@ class P2P {
             const rootChain: Array<Block> = JSON.parse(body).message;
 
             try {
-              console.log('trying');
               /** SAVING TO DB STARTS */
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-              console.log('trying1', blockchainHeightFromPeer);
-              const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
-              console.log('trying2', blockchainHeightFromFile);
+              const data = await this.leveldb.getValue('latest', this.leveldb.blocksDB);
+              const blockchainHeightFromFile = isEmptyObject(data.message)
+                ? 0
+                : data.message.height;
 
               logger.info('Incoming vs Local Blocks Status', {
                 blockchainHeightFromPeer,
@@ -541,9 +541,13 @@ class P2P {
                     });
                   }
                 });
+              } else if (blockchainHeightFromPeer == blockchainHeightFromFile) {
+                logger.info('Peer is already up to date with blocks');
+                return resolve(true);
+              } else {
+                logger.error('Peer may have received blocks that are less.');
+                return resolve(false);
               }
-
-              resolve(false);
 
               /** END SAVING TO DB */
             } catch (err) {
