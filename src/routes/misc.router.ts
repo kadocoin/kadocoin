@@ -8,7 +8,7 @@
 import { Application } from 'express';
 import Blockchain from '../blockchain';
 import MiscController from '../controllers/misc.controller';
-import { blockchainMiddleWare, leveldbMiddleWare } from '../middleware/cryptoMiddleWare';
+import { leveldbMiddleWare } from '../middleware/cryptoMiddleWare';
 import LevelDB from '../db';
 
 export default class MiscRouter {
@@ -28,7 +28,7 @@ export default class MiscRouter {
   initRoute(): void {
     this.app.get(
       '/address/:address',
-      blockchainMiddleWare(this.blockchain),
+      leveldbMiddleWare(this.leveldb),
       this.MiscController.addressInfo
     );
 

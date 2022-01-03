@@ -14,13 +14,12 @@ import {
   SUCCESS,
   INCORRECT_VALIDATION,
 } from '../statusCode/statusCode';
-import Wallet from '../wallet';
 import { isValidChecksumAddress } from '../util/pubkey-to-address';
 
 export default class MiscController {
   tokenLasts: string;
 
-  addressInfo = (req: Request, res: Response): Response => {
+  addressInfo = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = addressValidation(req.params.address);
       if (error)
@@ -35,12 +34,11 @@ export default class MiscController {
           message: 'Invalid address.',
         });
 
+      const address_bal = await req.leveldb.getValue(req.params.address, req.leveldb.balancesDB);
+
       return res.status(SUCCESS).json({
         type: 'success',
-        message: Wallet.calculateTotalSentAndReceived({
-          chain: req.blockchain.chain,
-          address: req.params.address,
-        }),
+        message: address_bal,
       });
     } catch (error) {
       if (error instanceof Error) {
