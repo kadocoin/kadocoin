@@ -495,7 +495,10 @@ class P2P {
             try {
               /** SAVING TO DB STARTS */
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-              const data = await this.leveldb.getValue('latest', this.leveldb.blocksDB);
+              const data = await this.leveldb.getValue(
+                'latest-blk-height',
+                this.leveldb.latestBlockDB
+              );
               const blockchainHeightFromFile = isEmptyObject(data.message)
                 ? 0
                 : data.message.height;

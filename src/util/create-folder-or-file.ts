@@ -7,13 +7,12 @@ export default function createFolderOrFile(name_of_file_or_folder: string, type:
     if (fs.existsSync(`./${name_of_file_or_folder}`)) {
       logger.info(`${name_of_file_or_folder} ${type} exists.`);
     } else {
-      logger.info(`${name_of_file_or_folder} ${type} does not exist.`);
       const command = type == 'file' ? 'touch' : 'mkdir';
 
-      exec(
-        `${command} ${name_of_file_or_folder}`,
-        error => error && logger.error(`exec error: ${error}`)
-      );
+      exec(`${command} ${name_of_file_or_folder}`, err => {
+        if (err) return logger.error(`exec error: ${err}`);
+        logger.info(`Created ${name_of_file_or_folder} ${type}.`);
+      });
     }
   } catch (e) {
     logger.error(`An error occurred creating: ${e}`);

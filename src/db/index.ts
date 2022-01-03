@@ -1,7 +1,11 @@
 import EventEmitter from 'events';
 import level from 'level'; // SOURCE => https://github.com/Level/level
 import Block from '../blockchain/block';
-import { balancesStorageFolder, blockchainStorageFolder } from '../settings';
+import {
+  balancesStorageFolder,
+  blockchainStorageFolder,
+  lastBlockStorageFolder,
+} from '../settings';
 import { IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';
@@ -12,6 +16,7 @@ class LevelDB {
   balancesDB: level.LevelDB<any, any>;
   eventEmitter: EventEmitter;
   blocksDB: level.LevelDB<any, any>;
+  latestBlockDB: level.LevelDB<any, any>;
 
   constructor(eventEmitter?: EventEmitter) {
     this.eventEmitter = eventEmitter;
@@ -28,6 +33,11 @@ class LevelDB {
         logger.fatal('Blocks DB cannot start', { err });
       }
     });
+    this.latestBlockDB = level(lastBlockStorageFolder, { valueEncoding: 'json' }, err => {
+      if (err) {
+        logger.fatal('Latest block DB cannot start', { err });
+      }
+    });
   }
 
   public openDBs(): Promise<boolean> {
@@ -36,7 +46,13 @@ class LevelDB {
         this.balancesDB.open(err => {
           if (!err) {
             return this.blocksDB.open(err => {
-              if (!err) return resolve(true);
+              if (!err) {
+                return this.latestBlockDB.open(err => {
+                  if (!err) return resolve(true);
+
+                  resolve(false);
+                });
+              }
 
               resolve(false);
             });
@@ -50,10 +66,10 @@ class LevelDB {
     });
   }
 
-  public getAllKeysAndValues(): void {
-    this.blocksDB
-      .createReadStream({ reverse: true })
-      .on('data', (data: { key: string; value: any }) => logger.info('Blocks data', { data }));
+  public getAllKeysAndValues(db: level.LevelDB<any, any>): void {
+    db.createReadStream({ reverse: true }).on('data', (data: { key: string; value: any }) =>
+      logger.info('Blocks data', { data })
+    );
   }
 
   public async addBlocksToDB({
@@ -67,7 +83,8 @@ class LevelDB {
       }
 
       // STORE HIGHEST BLOCK HEIGHT
-      this.blocksDB.put('latest', { height: blocks[blocks.length - 1].blockchainHeight });
+      await this.updateLatestBlockHeight(blocks);
+
       return { type: 'success', message: 'success' };
     } catch (err) {
       logger.error('Error at addBlockToDB', err);
@@ -76,6 +93,19 @@ class LevelDB {
 
       this.clear(this.blocksDB).then(status => status.type == 'success' && logger.info('Done'));
     }
+  }
+
+  public updateLatestBlockHeight(blocks: Block[]): Promise<{ type: string; message: string }> {
+    return new Promise((resolve, reject) => {
+      this.latestBlockDB.put(
+        'latest-blk-height',
+        { height: blocks[blocks.length - 1].blockchainHeight },
+        err => {
+          if (err) return reject({ type: 'error', message: err });
+          resolve({ type: 'success', message: 'success' });
+        }
+      );
+    });
   }
 
   public async getLocalHighestBlockchainHeight(): Promise<number> {
@@ -116,6 +146,9 @@ class LevelDB {
           );
         }
       }
+
+      // UPDATE LATEST BLOCK HEIGHT
+      await this.updateLatestBlockHeight(blocks);
 
       return { type: 'success', message: 'success' };
     } catch (error) {
