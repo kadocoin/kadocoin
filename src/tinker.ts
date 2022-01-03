@@ -3,10 +3,13 @@
 
 // const res = rmSync('test.js', { force: true });
 
-// import Block from './blockchain/block';
-// import LevelDB from './db';
-// import isEmptyObject from './util/is-empty-object';
-// const leveldb = new LevelDB();
+import LevelDB from './db';
+const leveldb = new LevelDB();
+
+(async function () {
+  const res = await leveldb.getPreviousBlock();
+  console.log({ res });
+})();
 
 // const sampleBlocks = [
 //   {
@@ -106,11 +109,6 @@
 //     hashOfAllHashes: 'c8013ff364db13877c33be317e437c31d07841bc52be28dc5a7a256d54cb0359',
 //   },
 // ];
-
-// (async function () {
-//   const res = await leveldb.getValue('latest', leveldb.blocksDB);
-//   console.log({ res });
-// })();
 
 // try {
 //   leveldb.getLocalHighestBlockchainHeight().then(data => console.log({ data }));

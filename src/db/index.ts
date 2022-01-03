@@ -95,6 +95,32 @@ class LevelDB {
     }
   }
 
+  public async getLocalHighestBlockchainHeight(): Promise<number> {
+    try {
+      const data = await this.getValue('latest-blk-height', this.latestBlockDB);
+      return isEmptyObject(data.message) ? 1 : data.message.height;
+    } catch (err) {
+      logger.error('Error at  getLocalHighestBlockchainHeight', err);
+    }
+  }
+
+  public async getPreviousBlock(): Promise<Block> {
+    try {
+      // GET LATEST BLOCK BLOCK HEIGHT
+      const data_latest_height = await this.getValue('latest-blk-height', this.latestBlockDB);
+      const latest_height = isEmptyObject(data_latest_height.message)
+        ? 1
+        : data_latest_height.message.height;
+
+      // GET THE BLOCK
+      const data_prev_block = await this.getValue(`${latest_height - 1}`, this.blocksDB);
+
+      return data_prev_block.message;
+    } catch (err) {
+      logger.error('Error at  getPreviousBlock', err);
+    }
+  }
+
   public updateLatestBlockHeight(blocks: Block[]): Promise<{ type: string; message: string }> {
     return new Promise((resolve, reject) => {
       this.latestBlockDB.put(
@@ -105,23 +131,6 @@ class LevelDB {
           resolve({ type: 'success', message: 'success' });
         }
       );
-    });
-  }
-
-  public async getLocalHighestBlockchainHeight(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      this.blocksDB
-        .createKeyStream({ reverse: true, limit: 1 })
-        .on('data', value => {
-          return resolve(value);
-        })
-        .on('error', err => {
-          reject(err);
-        })
-        .on('end', function () {
-          // IF NO DATA PRESENT IN THE DB, 0 IS RETURNED
-          resolve(0);
-        });
     });
   }
 

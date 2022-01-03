@@ -19,12 +19,15 @@ import appendToFile from '../util/appendToFile';
 import fs from 'fs';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
+import LevelDB from '../db';
 
 class Blockchain {
   public chain: IChain;
+  public leveldb: LevelDB;
 
-  constructor({ chain }: { chain?: IChain } = {}) {
+  constructor({ chain, leveldb }: { chain?: IChain; leveldb?: LevelDB } = {}) {
     this.chain = chain && chain.length ? chain : [Block.genesis()];
+    this.leveldb = leveldb;
   }
 
   async loadBlocksFromFileOrCreateNew(): Promise<Blockchain> {
@@ -47,18 +50,20 @@ class Blockchain {
     return newlyMinedBlock;
   }
 
-  addBlockFromPeerToLocal(
+  async addBlockFromPeerToLocal(
     incomingObj: incomingObj,
     validateTransactions?: boolean,
-    localBlockchain?: IChain,
     onSuccess?: () => void
-  ): void {
-    if (incomingObj.info.height < localBlockchain.length) {
+  ): Promise<void> {
+    const localHighestBlockchainHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+    if (incomingObj.info.height < localHighestBlockchainHeight) {
       console.error('The incoming chain must be longer.');
       return;
     }
 
-    if (!Blockchain.isValidBlock(incomingObj, localBlockchain)) {
+    const previousBlock = await this.leveldb.getPreviousBlock();
+
+    if (!Blockchain.isValidBlock(incomingObj, previousBlock)) {
       console.error('The incoming block is not valid.');
       return;
     }
@@ -135,11 +140,10 @@ class Blockchain {
     return true;
   }
 
-  static isValidBlock(incomingObj: incomingObj, localBlockchain?: IChain): boolean {
+  static isValidBlock(incomingObj: incomingObj, previousBlock?: Block): boolean {
     const { timestamp, lastHash, hash, transactions, nonce, difficulty, hashOfAllHashes } =
       incomingObj.block;
     const cleanedTransactions = cleanUpTransaction({ transactions });
-    const previousBlock = localBlockchain[localBlockchain.length - 1];
     const previousHash = previousBlock.hash;
     const lastDifficulty = previousBlock.difficulty;
     const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);

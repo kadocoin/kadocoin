@@ -57,7 +57,7 @@ leveldb.openDBs().then(async is_open => {
   /**
    * @var blockchain app wide variable
    */
-  const blockchain = await new Blockchain().loadBlocksFromFileOrCreateNew();
+  const blockchain = new Blockchain({ leveldb });
 
   /**
    * @var transactionPool app wide variable

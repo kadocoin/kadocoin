@@ -6,6 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 
+import level from 'level';
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
 import LevelDB from './db';
@@ -13,6 +14,10 @@ import P2P from './p2p';
 import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
+
+export interface ILevelDB {
+  leveldb: level.LevelDB<any, any>;
+}
 
 export interface IValue {
   bal: string;

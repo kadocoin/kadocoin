@@ -22,8 +22,8 @@ class Wallet {
   public keyPair: any;
   public publicKey: string;
   public address: string;
-  privateHex: string;
-  keyPairHex: string;
+  public privateHex: string;
+  public keyPairHex: string;
 
   constructor(
     balance?: string,

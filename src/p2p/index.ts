@@ -26,13 +26,13 @@ import LevelDB from '../db';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
-  private blockchain: Blockchain;
   private transactionPool: TransactionPool;
   private hardCodedPeers: IHost[];
   private loopCount: number;
   private ip_address: string;
   private leveldb: LevelDB;
   private syncStatuses: { txn: boolean; blk: boolean; peers: boolean };
+  private blockchain: Blockchain;
 
   constructor({
     blockchain,
@@ -48,8 +48,8 @@ class P2P {
     leveldb: LevelDB;
   }) {
     this.peer = peer;
-    this.blockchain = blockchain;
     this.transactionPool = transactionPool;
+    this.blockchain = blockchain;
     this.leveldb = leveldb;
     this.hardCodedPeers = hardCodedPeers;
     this.loopCount = 0;
@@ -210,19 +210,20 @@ class P2P {
   }
 
   private receiveBlock(): void {
-    this.peer.handle.receiveBlockFromPeers = (payload: any, done: any) => {
+    this.peer.handle.receiveBlockFromPeers = async (payload: any, done: any) => {
       if (payload.data.message.block) {
-        logger.info('INCOMING BLOCK', payload.data.message);
+        try {
+          logger.info('INCOMING BLOCK', payload.data.message);
 
-        // CHECK FOR EXISTING BLOCK
-        const isExistingBlock = this.isExistingBlock({ incomingBlock: payload.data.message.block });
+          // CHECK FOR EXISTING BLOCK
+          const data = await this.leveldb.getValue(
+            payload.data.message.block.blockchainHeight,
+            this.leveldb.blocksDB
+          );
+          const isExistingBlock = isEmptyObject(data.message) ? false : true;
 
-        if (!isExistingBlock) {
-          this.blockchain.addBlockFromPeerToLocal(
-            payload.data.message,
-            true,
-            this.blockchain.chain,
-            async () => {
+          if (!isExistingBlock) {
+            await this.blockchain.addBlockFromPeerToLocal(payload.data.message, true, async () => {
               // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
               this.transactionPool.clearBlockchainTransactions({
                 chain: [payload.data.message.block],
@@ -231,17 +232,19 @@ class P2P {
               // SAVE TRANSACTIONS BALANCES IN TO DB
               await this.leveldb.addOrUpdateBal([payload.data.message.block]);
               return done(null, 'blk-200');
-            }
-          );
+            });
 
-          /**
-           * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
-           */
-          this.forwardBlockToPeers(payload.data.message);
+            /**
+             * NO DUPLICATES - FORWARD TRANSACTION TO PEERS
+             */
+            this.forwardBlockToPeers(payload.data.message);
+          }
+
+          if (isExistingBlock) logger.info("I have this BLOCK. I'M NOT FORWARDING IT.");
+          return;
+        } catch (error) {
+          return done(new Error('blk-500'));
         }
-
-        if (isExistingBlock) logger.info("I have this BLOCK. I'M NOT FORWARDING IT.");
-        return;
       }
       return done(new Error('blk-500'));
     };
@@ -251,13 +254,14 @@ class P2P {
     const aboutThisPeer = this.peerInfo();
     const localPeers = await this.getPeers();
     const combinedPeers = hardCodedPeers.concat(localPeers);
+    const localHighestBlockchainHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
     /** FOR EACH PEER */
     combinedPeers.forEach(peer => {
       if (peer.host !== this.ip_address) {
         const info = {
           KADOCOIN_VERSION,
-          height: this.blockchain.chain.length,
+          height: localHighestBlockchainHeight,
           sender: {
             host: aboutThisPeer.host,
             port: aboutThisPeer.port,
@@ -495,13 +499,7 @@ class P2P {
             try {
               /** SAVING TO DB STARTS */
               const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-              const data = await this.leveldb.getValue(
-                'latest-blk-height',
-                this.leveldb.latestBlockDB
-              );
-              const blockchainHeightFromFile = isEmptyObject(data.message)
-                ? 0
-                : data.message.height;
+              const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
 
               logger.info('Incoming vs Local Blocks Status', {
                 blockchainHeightFromPeer,
@@ -525,14 +523,9 @@ class P2P {
                     this.leveldb.addOrUpdateBal(diffBlockchain).then(status => {
                       status.type == 'success' && logger.info('Balances updated');
 
-                      // TODO: SYNC FROM DISK ?
-                      // IF HEIGHT IS THE SAME, MAYBE DO A SHALLOW CHECK LIKE CHECKING ALL HASHES?
-
-                      this.blockchain.replaceChain(rootChain);
-
                       /**  UPDATE MINING_REWARD */
                       const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-                        chainLength: this.blockchain.chain.length,
+                        chainLength: blockchainHeightFromFile,
                       });
 
                       logger.info(`Mining reward and supply`, {
@@ -603,21 +596,6 @@ class P2P {
       return getFileContentLineByLine(peersStorageFile);
     }
     return [];
-  }
-
-  public isExistingBlock({ incomingBlock }: { incomingBlock: Block }): boolean {
-    let is_duplicate = false;
-    for (let i = 0; i < this.blockchain.chain.length; i++) {
-      const block = this.blockchain.chain[i];
-
-      if (incomingBlock.hashOfAllHashes === block.hashOfAllHashes) {
-        is_duplicate = true;
-      }
-
-      if (is_duplicate) break;
-    }
-
-    return is_duplicate;
   }
 
   private addToWellKnownPeers(peersToAdd: IHost[]): void {
