@@ -525,7 +525,7 @@ class P2P {
 
                       /**  UPDATE MINING_REWARD */
                       const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-                        chainLength: blockchainHeightFromFile,
+                        chainLength: blockchainHeightFromPeer,
                       });
 
                       logger.info(`Mining reward and supply`, {

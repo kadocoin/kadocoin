@@ -61,6 +61,7 @@ export const logFile = 'debug.log';
 export const peersStorageFile = 'peers.dat';
 export const walletsStorageFile = 'wallets/wallets.dat';
 export const lastBlockStorageFolder = 'blocks/latestBlock';
+export const blocksIndexFolder = 'blocks/index';
 
 /** CREATE FOLDERS */
 createFolderOrFile('blocks', 'folder');

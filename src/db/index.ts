@@ -4,6 +4,8 @@ import Block from '../blockchain/block';
 import {
   balancesStorageFolder,
   blockchainStorageFolder,
+  blocksIndexFolder,
+  KADOCOIN_VERSION,
   lastBlockStorageFolder,
 } from '../settings';
 import { IValue } from '../types';
@@ -17,6 +19,7 @@ class LevelDB {
   eventEmitter: EventEmitter;
   blocksDB: level.LevelDB<any, any>;
   latestBlockDB: level.LevelDB<any, any>;
+  blocksIndexDB: level.LevelDB<any, any>;
 
   constructor(eventEmitter?: EventEmitter) {
     this.eventEmitter = eventEmitter;
@@ -38,6 +41,11 @@ class LevelDB {
         logger.fatal('Latest block DB cannot start', { err });
       }
     });
+    this.blocksIndexDB = level(blocksIndexFolder, { valueEncoding: 'json' }, err => {
+      if (err) {
+        logger.fatal('Blocks index DB cannot start', { err });
+      }
+    });
   }
 
   public openDBs(): Promise<boolean> {
@@ -48,7 +56,13 @@ class LevelDB {
             return this.blocksDB.open(err => {
               if (!err) {
                 return this.latestBlockDB.open(err => {
-                  if (!err) return resolve(true);
+                  if (!err) {
+                    return this.blocksIndexDB.open(err => {
+                      if (!err) return resolve(true);
+
+                      resolve(false);
+                    });
+                  }
 
                   resolve(false);
                 });
@@ -80,9 +94,14 @@ class LevelDB {
     try {
       for await (const block of blocks) {
         await this.createOrUpdate(block.blockchainHeight, block, this.blocksDB);
+        await this.createOrUpdate(
+          block.hash,
+          this.extractHeadersFromBlock(block),
+          this.blocksIndexDB
+        );
       }
 
-      // STORE HIGHEST BLOCK HEIGHT
+      // STORES HIGHEST BLOCK HEIGHT
       await this.updateLatestBlockHeight(blocks);
 
       return { type: 'success', message: 'success' };
@@ -95,6 +114,17 @@ class LevelDB {
     }
   }
 
+  private extractHeadersFromBlock(block: Block) {
+    return {
+      blockchainHeight: block.blockchainHeight,
+      hashOfAllHashes: block.hashOfAllHashes,
+      lastHash: block.lastHash,
+      nonce: block.nonce,
+      timestamp: block.timestamp,
+      version: KADOCOIN_VERSION,
+    };
+  }
+
   public async getLocalHighestBlockchainHeight(): Promise<number> {
     try {
       const data = await this.getValue('latest-blk-height', this.latestBlockDB);
@@ -104,7 +134,7 @@ class LevelDB {
     }
   }
 
-  public async getPreviousBlock(): Promise<Block> {
+  public async getPreviousBlockByHeight(): Promise<Block> {
     try {
       // GET LATEST BLOCK BLOCK HEIGHT
       const data_latest_height = await this.getValue('latest-blk-height', this.latestBlockDB);
@@ -117,7 +147,7 @@ class LevelDB {
 
       return data_prev_block.message;
     } catch (err) {
-      logger.error('Error at  getPreviousBlock', err);
+      logger.error('Error at  getPreviousBlockByHeight', err);
     }
   }
 
