@@ -4,9 +4,7 @@ import logger from './logger';
 
 export default function createFolderOrFile(name_of_file_or_folder: string, type: string): void {
   try {
-    if (fs.existsSync(`./${name_of_file_or_folder}`)) {
-      logger.info(`${name_of_file_or_folder} ${type} exists.`);
-    } else {
+    if (!fs.existsSync(`./${name_of_file_or_folder}`)) {
       const command = type == 'file' ? 'touch' : 'mkdir';
 
       exec(`${command} ${name_of_file_or_folder}`, err => {
