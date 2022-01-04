@@ -523,7 +523,10 @@ class P2P {
   private onSyncReceiveBlockHeight(): void {
     this.peer.handle.sendBestBlockHeight = async (
       payload: { data: { version: string } },
-      done: (err: Error, result: string) => void
+      done: (
+        err: Error,
+        result: { height: number; status: 'compatible' | 'not-compatible' }
+      ) => void
     ) => {
       console.log({ payload });
       // CHECK VERSION
@@ -531,10 +534,10 @@ class P2P {
 
       if (this.compareVersion(payload.data.version)) {
         // SEND THE REQUESTING PEER MY LOCAL PEERS
-        return done(null, JSON.stringify({ height: bestHeight, status: 'compatible' }));
+        return done(null, { height: bestHeight, status: 'compatible' });
       }
 
-      return done(null, JSON.stringify({ height: bestHeight, status: 'not-compatible' }));
+      return done(null, { height: bestHeight, status: 'not-compatible' });
     };
   }
 
@@ -552,7 +555,7 @@ class P2P {
           })
           .run(
             '/handle/sendBestBlockHeight',
-            { data: JSON.stringify({ version: KADOCOIN_VERSION }) },
+            { data: { version: KADOCOIN_VERSION } },
             async (err: Error, data: { height: number; status: string }) => {
               if (!err) {
                 console.log({ data });
