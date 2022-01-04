@@ -28,6 +28,7 @@ import logger from './util/logger';
 import address from './util/get-ip-address';
 import LevelDB from './db';
 import { EventEmitter } from 'events';
+import isEmptyObject from './util/is-empty-object';
 
 const eventEmitter = new EventEmitter();
 
@@ -84,17 +85,30 @@ leveldb.openDBs().then(async is_open => {
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
   /** GET BLOCKCHAIN DATA FROM PEERS */
-  // const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(hardCodedPeers);
+  const remoteHeightsAndPeers = await p2p.onSynGetBestHeightsFromPeers();
 
-  // logger.info('Node sync status', { has_downloaded_txs_and_blks });
+  console.log({ remoteHeightsAndPeers });
+  if (isEmptyObject(remoteHeightsAndPeers)) return restartServer();
 
-  // if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1]) {
-  //   logger.fatal(
-  //     'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
-  //   );
-  //   return restartServer();
-  // }
-  await p2p.getBestHeightsFromPeers();
+  const separatedHeightsAndPeers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
+  console.log({ separatedHeightsAndPeers });
+
+  if (separatedHeightsAndPeers.blockHeights.lenth) {
+    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(
+      separatedHeightsAndPeers.peers
+    );
+
+    logger.info('Node sync status', { has_downloaded_txs_and_blks });
+
+    if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1]) {
+      logger.fatal(
+        'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
+      );
+      return restartServer();
+    }
+  } else {
+    logger.info('This blocks are up to date');
+  }
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new MiscRouter(app, blockchain, leveldb);
