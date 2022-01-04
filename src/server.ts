@@ -87,13 +87,14 @@ leveldb.openDBs().then(async is_open => {
   /** GET BLOCKCHAIN DATA FROM PEERS */
   const remoteHeightsAndPeers = await p2p.onSynGetBestHeightsFromPeers();
 
-  console.log({ remoteHeightsAndPeers });
-  if (isEmptyObject(remoteHeightsAndPeers)) return restartServer();
+  if (isEmptyObject(remoteHeightsAndPeers)) {
+    logger.warn('No peers responded during height discovery');
+    return restartServer();
+  }
 
   const separatedHeightsAndPeers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
-  console.log({ separatedHeightsAndPeers });
 
-  if (separatedHeightsAndPeers.blockHeights.lenth) {
+  if (!isEmptyObject(separatedHeightsAndPeers)) {
     const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(
       separatedHeightsAndPeers.peers
     );
@@ -107,7 +108,7 @@ leveldb.openDBs().then(async is_open => {
       return restartServer();
     }
   } else {
-    logger.info('This blocks are up to date');
+    logger.info('This peer is up to date with blocks');
   }
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {

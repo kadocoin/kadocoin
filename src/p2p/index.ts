@@ -532,17 +532,21 @@ class P2P {
       )[0];
       const localBestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
-      const blockHeights = [];
+      if (localBestHeight > 1) {
+        const blockHeights = [];
 
-      // CREATE AN ARRAY OF NUMBERS STARTING AFTER THIS PEER'S BEST HEIGHT AND THE REMOTES' HIGHEST BEST HEIGHT
-      for (let i = localBestHeight + 1; i <= Number(remotesBestHeight); i++) {
-        blockHeights.push(i);
+        // CREATE AN ARRAY OF NUMBERS STARTING AFTER THIS PEER'S BEST HEIGHT AND THE REMOTES' HIGHEST BEST HEIGHT
+        for (let i = localBestHeight + 1; i <= Number(remotesBestHeight); i++) {
+          blockHeights.push(i);
+        }
+
+        return {
+          blockHeights,
+          peers: Object.values(heightsAndPeers),
+        };
       }
 
-      return {
-        blockHeights,
-        peers: Object.values(heightsAndPeers),
-      };
+      return {};
     } catch (err) {
       logger.error('Error at onSyncConstructHeadersAndPeers ', err);
       return {};
