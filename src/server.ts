@@ -39,7 +39,7 @@ const leveldb = new LevelDB(eventEmitter);
 leveldb.openDBs().then(async is_open => {
   if (!is_open) return logger.fatal('Error opening balancesdb');
 
-  setInterval(() => leveldb.getAllKeysAndValues(leveldb.balancesDB), 15000);
+  // setInterval(() => leveldb.getAllKeysAndValues(leveldb.balancesDB), 15000);
 
   logger.info('*****BalancesDB opened*****');
 
@@ -84,16 +84,17 @@ leveldb.openDBs().then(async is_open => {
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
   /** GET BLOCKCHAIN DATA FROM PEERS */
-  const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(hardCodedPeers);
+  // const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(hardCodedPeers);
 
-  logger.info('Node sync status', { has_downloaded_txs_and_blks });
+  // logger.info('Node sync status', { has_downloaded_txs_and_blks });
 
-  if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1]) {
-    logger.fatal(
-      'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
-    );
-    return restartServer();
-  }
+  // if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1]) {
+  //   logger.fatal(
+  //     'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
+  //   );
+  //   return restartServer();
+  // }
+  await p2p.getBestHeightsFromPeers();
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new MiscRouter(app, blockchain, leveldb);

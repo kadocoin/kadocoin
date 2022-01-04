@@ -10,7 +10,7 @@
 // @ts-ignore
 import request from 'request';
 import fs from 'fs';
-import { IHost, incomingObj } from '../types';
+import { IHost, incomingObj, ISyncStatuses } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
@@ -23,6 +23,7 @@ import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../settings';
 import LevelDB from '../db';
+import restartServer from '../util/restart-server';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -31,8 +32,9 @@ class P2P {
   private loopCount: number;
   private ip_address: string;
   private leveldb: LevelDB;
-  private syncStatuses: { txn: boolean; blk: boolean; peers: boolean };
+  private syncStatuses: ISyncStatuses;
   private blockchain: Blockchain;
+  private remoteBestHeights: number[];
 
   constructor({
     blockchain,
@@ -58,10 +60,12 @@ class P2P {
       blk: false,
       peers: false,
     };
+    this.remoteBestHeights = [];
     this.ip_address = ip_address;
     this.receiveTransactions();
     this.receiveBlock();
     this.onSyncReceiveRequestingPeerInfo();
+    this.onSyncReceiveBlockHeight();
     this.onStartAddPeersFromFileToWellKnownPeers();
   }
 
@@ -330,6 +334,7 @@ class P2P {
         const statuses = await new Promise(async (resolve: (value: boolean[]) => void) =>
           resolve(await this.getBlockchainDataFromPeer(peer))
         );
+        console.log({ statuses });
         // INCREMENT LOOP COUNT
         this.loopCount++;
 
@@ -337,7 +342,7 @@ class P2P {
         this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
         this.syncStatuses.peers = this.syncStatuses.peers ? this.syncStatuses.peers : statuses[2];
 
-        console.log(this.syncStatuses);
+        console.log(this.syncStatuses); // todo
 
         if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {
           if (this.loopCount == this.hardCodedPeers.length - 1) {
@@ -364,6 +369,33 @@ class P2P {
     }
     logger.warn('No hardcoded peers were found');
     return Object.values(this.syncStatuses);
+  }
+
+  async getBestHeightsFromPeers(): Promise<void> {
+    try {
+      const combinedPeers = await this.localAndHardcodedPeers();
+
+      for await (const peer of combinedPeers) {
+        if (peer.host !== this.ip_address) {
+          logger.info('Attempting to connect to', { host: peer.host, port: peer.port });
+          await this.onSyncGetBestHeight(peer);
+        }
+      }
+    } catch (err) {
+      logger.error('Error at getBestHeightsFromPeers', err);
+      restartServer();
+    }
+  }
+
+  private async localAndHardcodedPeers(): Promise<IHost[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.getPeers().then(localPeers => resolve(hardCodedPeers.concat(localPeers)));
+      } catch (err) {
+        logger.error('Error at localAndHardcodedPeers', err);
+        reject(err);
+      }
+    });
   }
 
   private async getBlockchainDataFromPeer(peer: IHost): Promise<boolean[]> {
@@ -488,12 +520,65 @@ class P2P {
     });
   }
 
+  private onSyncReceiveBlockHeight(): void {
+    this.peer.handle.sendBestBlockHeight = async (
+      payload: { data: { version: string } },
+      done: (err: Error, result: string) => void
+    ) => {
+      console.log({ payload });
+      // CHECK VERSION
+      const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+
+      if (this.compareVersion(payload.data.version)) {
+        // SEND THE REQUESTING PEER MY LOCAL PEERS
+        return done(null, JSON.stringify({ height: bestHeight, status: 'compatible' }));
+      }
+
+      return done(null, JSON.stringify({ height: bestHeight, status: 'not-compatible' }));
+    };
+  }
+
+  public compareVersion(incomingVersion: string): boolean {
+    return incomingVersion == KADOCOIN_VERSION;
+  }
+
+  private onSyncGetBestHeight(peer: IHost): Promise<boolean> {
+    return new Promise((_resolve, reject) => {
+      try {
+        this.peer
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run(
+            '/handle/sendBestBlockHeight',
+            { data: JSON.stringify({ version: KADOCOIN_VERSION }) },
+            async (err: Error, data: { height: number; status: string }) => {
+              if (!err) {
+                console.log({ data });
+                // ADD HEIGHT TO ARRAY
+                if (data.status === 'compatible') {
+                  this.remoteBestHeights.push(Number(data.height));
+                }
+              } else {
+                logger.warn(`${peer.host}:${peer.port}/handle/sendBestBlockHeight - ${err}`);
+                reject(err);
+              }
+            }
+          );
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
   private async onSyncGetBlocks(peer: IHost): Promise<boolean> {
     return new Promise(resolve => {
       request(
         { url: `http://${peer.host}:2000/blocks`, timeout: REQUEST_TIMEOUT },
         async (error, response, body) => {
           if (!error && response.statusCode === 200) {
+            console.log('0000000303030303');
             const rootChain: Array<Block> = JSON.parse(body).message;
 
             try {
@@ -552,7 +637,8 @@ class P2P {
             }
           } else {
             logger.warn(`${peer.host}:2000/blocks - ${error}`);
-            resolve(false);
+            console.log('____________');
+            return resolve(false);
           }
         }
       );
