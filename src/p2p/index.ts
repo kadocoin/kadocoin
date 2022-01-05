@@ -388,8 +388,10 @@ class P2P {
       if (peer.host !== this.ip_address) {
         logger.info(`Attempting to get block #${height} from ${peer.host}`);
 
-        const status = await this.getBlock({ peer, height });
-
+        const status = await new Promise(async resolve =>
+          resolve(await this.getBlock({ peer, height }))
+        );
+        console.log({ status });
         if (status) return true;
 
         logger.info(`${peer.host} didn't respond`);
