@@ -210,14 +210,13 @@ class P2P {
 
   private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = async (payload: any, done: any) => {
-      console.log('214', { payload: payload.data.message });
       if (payload.data.message.block) {
         try {
           logger.info('INCOMING BLOCK', payload.data.message);
 
           // CHECK FOR EXISTING BLOCK
           const data = await this.leveldb.getValue(
-            payload.data.message.block.blockchainHeight,
+            `${payload.data.message.block.blockchainHeight}`,
             this.leveldb.blocksDB
           );
 
@@ -248,6 +247,7 @@ class P2P {
           if (isExistingBlock) logger.info("I have this BLOCK. I'M NOT FORWARDING IT.");
           return;
         } catch (error) {
+          console.log('250', { error });
           return done(new Error('blk-500'));
         }
       }
