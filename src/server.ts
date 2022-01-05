@@ -79,7 +79,7 @@ leveldb.openDBs().then(async is_open => {
     host: '127.0.0.1',
     port: P2P_PORT,
     metadata: { host: ip_address, port: P2P_PORT, type: 'full_node' },
-    wellKnownPeers: hardCodedPeers,
+    // wellKnownPeers: hardCodedPeers,
   });
 
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
@@ -92,12 +92,10 @@ leveldb.openDBs().then(async is_open => {
     return restartServer();
   }
 
-  const separatedHeightsAndPeers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
+  const peers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
 
-  if (!isEmptyObject(separatedHeightsAndPeers)) {
-    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(
-      separatedHeightsAndPeers.peers
-    );
+  if (!isEmptyObject(peers)) {
+    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(peers.peers);
 
     logger.info('Node sync status', { has_downloaded_txs_and_blks });
 
@@ -107,9 +105,14 @@ leveldb.openDBs().then(async is_open => {
       );
       return restartServer();
     }
+
+    // REPLACE WELLKNOWN PEERS WITH REMOTE PEERS THAT RESPONDED
+    p2p.onSyncPopulateWellKnownPeers(peers.peers);
   } else {
     logger.info('This peer is up to date with blocks');
   }
+
+  console.log({ wellKnownPeers: peer.wellKnownPeers });
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new MiscRouter(app, blockchain, leveldb);

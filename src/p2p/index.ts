@@ -49,6 +49,7 @@ class P2P {
     leveldb: LevelDB;
   }) {
     this.peer = peer;
+    console.log(this.peer.wellKnownPeers.peers);
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.leveldb = leveldb;
@@ -729,6 +730,12 @@ class P2P {
 
     for (let i = 0; i < dupsPeersRemoved.length; i++) {
       this.peer.wellKnownPeers.add(dupsPeersRemoved[i]);
+    }
+  }
+
+  public onSyncPopulateWellKnownPeers(peersToAdd: IHost[]): void {
+    for (let i = 0; i < peersToAdd.length; i++) {
+      this.peer.wellKnownPeers.add(peersToAdd[i]);
     }
   }
 }
