@@ -65,6 +65,8 @@ class Blockchain {
 
     const previousBlock = await this.leveldb.getPreviousBlockByHeight();
 
+    console.log({ previousBlock });
+
     if (!Blockchain.isValidBlock(incomingObj, previousBlock)) {
       console.error('The incoming block is not valid.');
       return;
