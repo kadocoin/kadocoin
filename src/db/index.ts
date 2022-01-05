@@ -164,7 +164,7 @@ class LevelDB {
         : data_latest_height.message.height;
 
       // GET THE BLOCK
-      const data_prev_block = await this.getValue(`${latest_height - 1}`, this.blocksDB);
+      const data_prev_block = await this.getValue(`${latest_height}`, this.blocksDB);
 
       return data_prev_block.message;
     } catch (err) {
