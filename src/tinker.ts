@@ -3,12 +3,12 @@
 
 // const res = rmSync('test.js', { force: true });
 
-// import LevelDB from './db';
-// const leveldb = new LevelDB();
+import LevelDB from './db';
+const leveldb = new LevelDB();
 
-// (async function () {
-//   leveldb.getAllKeysAndValues(leveldb.blocksIndexDB);
-// })();
+(async function () {
+  leveldb.getAllKeysAndValues(leveldb.blocksIndexDB);
+})();
 
 // const sampleBlocks = [
 //   {

@@ -8,7 +8,7 @@ import {
   KADOCOIN_VERSION,
   lastBlockStorageFolder,
 } from '../settings';
-import { IValue } from '../types';
+import { IChain, IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
 import logger from '../util/logger';
 import { getTotalSent } from '../util/transaction-metrics';
@@ -80,6 +80,22 @@ class LevelDB {
     });
   }
 
+  public async onStartSaveGenesisBlockToDB(chain: IChain): Promise<boolean> {
+    return await new Promise(async resolve =>
+      this.getLocalHighestBlockchainHeight().then(localBestHeight => {
+        if (localBestHeight > 1) return true;
+
+        // SAVE BLOCKS TO DB
+        this.addBlocksToDB({ blocks: chain }).then(status => {
+          if (status.type == 'error') return resolve(false);
+
+          logger.info('Genesis block saved');
+          resolve(true);
+        });
+      })
+    );
+  }
+
   public getAllKeysAndValues(db: level.LevelDB<any, any>): void {
     db.createReadStream({ reverse: true }).on('data', (data: { key: string; value: any }) =>
       logger.info('Blocks data', { data })
@@ -93,7 +109,10 @@ class LevelDB {
   }): Promise<{ type: string; message: string }> {
     try {
       for await (const block of blocks) {
+        // SAVE BLOCK AS A `HEIGHT => BLOCK` KEY-VALUE
         await this.createOrUpdate(block.blockchainHeight, block, this.blocksDB);
+
+        // SAVE BLOCK AS `HASH => HEADERS` KEY-VALUE
         await this.createOrUpdate(
           block.hash,
           this.extractHeadersFromBlock(block),

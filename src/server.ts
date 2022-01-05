@@ -84,17 +84,32 @@ leveldb.openDBs().then(async is_open => {
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
   /** GET BLOCKCHAIN DATA FROM PEERS */
+
+  // SAVE GENESIS BLOCK TO DB
+  const savedGenesisToDB = await leveldb.onStartSaveGenesisBlockToDB(blockchain.chain);
+
+  // IF SAVING THE GENESIS BLOCK FAILED, RESTART
+  if (!savedGenesisToDB) {
+    logger.warn('Saving the Genesis block failed');
+    return restartServer();
+  }
+
+  // GET BEST HEIGHT OF EACH REMOTE PEER
   const remoteHeightsAndPeers = await p2p.onSynGetBestHeightsFromPeers();
 
+  // IF NO PEER RESPONDS, RESTART
   if (isEmptyObject(remoteHeightsAndPeers)) {
     logger.warn('No peers responded during height discovery');
     return restartServer();
   }
 
-  const peers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
+  // THERE IS AT LEAST A PEER THAT RESPONDED AND HAS MORE DATA THAN THIS PEER TO SHARE
+  const peersAndHeights = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
 
-  if (!isEmptyObject(peers)) {
-    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(peers.peers);
+  if (!isEmptyObject(peersAndHeights)) {
+    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(
+      peersAndHeights.peers
+    );
 
     logger.info('Node sync status', { has_downloaded_txs_and_blks });
 
@@ -102,11 +117,12 @@ leveldb.openDBs().then(async is_open => {
       logger.fatal(
         'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
       );
+
       return restartServer();
     }
 
     // REPLACE WELLKNOWN PEERS WITH REMOTE PEERS THAT RESPONDED
-    p2p.onSyncPopulateWellKnownPeers(peers.peers);
+    p2p.onSyncPopulateWellKnownPeers(peersAndHeights.peers);
   } else {
     logger.info('This peer is up to date with blocks');
   }

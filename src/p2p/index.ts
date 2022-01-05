@@ -609,7 +609,6 @@ class P2P {
         { url: `http://${peer.host}:2000/blocks`, timeout: REQUEST_TIMEOUT },
         async (error, response, body) => {
           if (!error && response.statusCode === 200) {
-            console.log('0000000303030303');
             const rootChain: Array<Block> = JSON.parse(body).message;
 
             try {
