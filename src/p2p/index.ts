@@ -210,7 +210,7 @@ class P2P {
 
   private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = async (payload: any, done: any) => {
-      console.log('214', { payload });
+      console.log('214', { payload: payload.data.message });
       if (payload.data.message.block) {
         try {
           logger.info('INCOMING BLOCK', payload.data.message);
