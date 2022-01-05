@@ -661,10 +661,6 @@ class P2P {
     ) => {
       // CHECK VERSION
       const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
-      console.log('645 (send my local to requester) - onSyncReceiveBlockHeight', {
-        payload,
-        bestHeight,
-      });
 
       if (this.compareVersion(payload.data.version)) {
         // SEND THE REQUESTING PEER MY LOCAL PEERS
@@ -687,12 +683,10 @@ class P2P {
             { data: { version: KADOCOIN_VERSION } },
             async (err: Error, data: { height: number; status: string }) => {
               if (!err) {
-                console.log('678 - onSyncGetBestHeight', { data });
                 // ADD HEIGHT TO ARRAY
                 if (data.status === 'compatible') {
-                  console.log('681 - onSyncGetBestHeight', this.remoteBestHeights);
                   this.remoteBestHeights[data.height] = peer;
-                  console.log('683 - onSyncGetBestHeight', this.remoteBestHeights);
+
                   resolve(true);
                 }
               } else {
