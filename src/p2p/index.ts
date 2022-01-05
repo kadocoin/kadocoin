@@ -678,7 +678,9 @@ class P2P {
                 console.log('678 - onSyncGetBestHeight', { data });
                 // ADD HEIGHT TO ARRAY
                 if (data.status === 'compatible') {
+                  console.log('681 - onSyncGetBestHeight', this.remoteBestHeights);
                   this.remoteBestHeights[data.height] = peer;
+                  console.log('683 - onSyncGetBestHeight', this.remoteBestHeights);
                   resolve(true);
                 }
               } else {
