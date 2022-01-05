@@ -108,7 +108,7 @@ leveldb.openDBs().then(async is_open => {
 
   // THERE IS AT LEAST A PEER THAT RESPONDED...
   const peersAndHeights = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
-
+  console.log({ remoteHeightsAndPeers, peersAndHeights });
   if (!isEmptyObject(peersAndHeights)) {
     // ...AND HAS MORE DATA THAN THIS PEER
     const has_downloaded_blks = await p2p.syncPeerWithHistoricalBlockchain(peersAndHeights);

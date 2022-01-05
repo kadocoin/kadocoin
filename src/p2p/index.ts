@@ -622,7 +622,7 @@ class P2P {
       )[0];
       const localBestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
-      if (localBestHeight > 1) {
+      if (Number(remotesBestHeight) > 1) {
         const blockHeights = [];
 
         // CREATE AN ARRAY OF NUMBERS STARTING AFTER THIS PEER'S BEST HEIGHT AND THE REMOTES' HIGHEST BEST HEIGHT
