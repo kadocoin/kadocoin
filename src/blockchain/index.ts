@@ -15,7 +15,6 @@ import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward } from '../util/transaction-metrics';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
 import { KADOCOIN_VERSION } from '../settings';
-import appendToFile from '../util/appendToFile';
 import fs from 'fs';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';

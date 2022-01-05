@@ -23,7 +23,6 @@ import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../settings';
 import LevelDB from '../db';
-import { Console } from 'console';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -630,7 +629,7 @@ class P2P {
         (a, b) => Number(b) - Number(a)
       )[0];
       const localBestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
-      console.log({ remotesBestHeight, localBestHeight });
+
       if (Number(remotesBestHeight) > 1) {
         const blockHeights = [];
 
@@ -638,7 +637,7 @@ class P2P {
         for (let i = localBestHeight; i <= Number(remotesBestHeight); i++) {
           blockHeights.push(i);
         }
-        console.log({ remotesBestHeight, localBestHeight, blockHeights });
+
         return {
           blockHeights,
           peers: Object.values(heightsAndPeers),
