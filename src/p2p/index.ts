@@ -65,6 +65,7 @@ class P2P {
     this.receiveBlock();
     this.onSyncReceiveRequestingPeerInfo();
     this.onSyncReceiveBlockHeight();
+    this.respondToGetBlock();
   }
 
   private receiveTransactions(): void {
@@ -320,7 +321,7 @@ class P2P {
     }
   }
 
-  async syncPeerWithHistoricalBlockchain(peers: Array<IHost>): Promise<boolean[]> {
+  public async loopThroughPeers(peers: Array<IHost>): Promise<boolean[]> {
     for await (const peer of peers) {
       if (peer.host !== this.ip_address) {
         logger.info('Attempting to connect to', { host: peer.host, port: peer.port });
@@ -347,7 +348,7 @@ class P2P {
             const peers = await this.getPeers();
 
             if (peers.length) {
-              await this.syncPeerWithHistoricalBlockchain(peers);
+              await this.loopThroughPeers(peers);
               logger.warn('No response from local peers');
             } else {
               logger.info('No local peers were found');
@@ -363,6 +364,99 @@ class P2P {
     }
     logger.warn('No hardcoded peers were found');
     return Object.values(this.syncStatuses);
+  }
+
+  // FALSE -> I DID NOT GET THE BLOCK
+  public async syncPeerWithHistoricalBlockchain(
+    peersAndHeights: Record<string, number[] | IHost[]>
+  ): Promise<boolean> {
+    for (let i = 0; i < peersAndHeights.blockHeights.length; i++) {
+      const height = peersAndHeights.blockHeights[i] as number;
+
+      const status = await this.loopThroughPeersNew(peersAndHeights.peers as IHost[], height);
+
+      if (!status) return false; //exit and restart - block height not found in all peers
+    }
+
+    return true;
+  }
+
+  // TRUE -> I GOT THE BLOCK
+  public async loopThroughPeersNew(peers: Array<IHost>, height: number): Promise<boolean> {
+    for await (const peer of peers) {
+      if (peer.host !== this.ip_address) {
+        logger.info(`Attempting to get block #${height} from ${peer.host}`);
+
+        const status = await this.getBlock({ peer, height });
+
+        if (status) return true;
+
+        logger.info(`${peer.host} didn't respond`);
+      }
+    }
+
+    // END OF LOOP NO PEER RESPONDED
+    return false;
+  }
+
+  private async getBlock({ peer, height }: { peer: IHost; height: number }): Promise<boolean> {
+    return await new Promise(resolve => {
+      try {
+        this.peer
+          .remote({
+            host: peer.host,
+            port: peer.port,
+          })
+          .run(
+            '/handle/getBlock',
+            { data: { height } },
+            async (err: Error, data: { type: string; message: Block }) => {
+              if (!err) {
+                console.log({ '/handle/getBlock': data });
+
+                if (data.type === 'success') {
+                  // MESSAGE PARAM CARRYING BLOCK IS EMPTY...
+                  if (isEmptyObject(data.message)) return resolve(false);
+
+                  //...NOT EMPTY - ADD TO DB
+                  this.leveldb.addBlocksToDB({ blocks: [data.message] }).then(status => {
+                    if (status.type == 'error') return resolve(false);
+
+                    return resolve(true);
+                  });
+                }
+
+                resolve(false);
+              } else {
+                logger.warn(`${peer.host}:${peer.port}/handle/getBlock - ${err}`);
+                resolve(false);
+              }
+            }
+          );
+      } catch (err) {
+        resolve(false);
+      }
+    });
+  }
+  private respondToGetBlock(): void {
+    this.peer.handle.getBlock = async (
+      payload: { data: { height: number } },
+      done: (err: Error, result: { type: string; message: Block }) => void
+    ) => {
+      try {
+        console.log({ respondToGetBlock: payload });
+
+        // GET THE REQUESTED BLOCK USING THE SENT HEIGHT
+        const response = await this.leveldb.getValue(
+          `${payload.data.height}`,
+          this.leveldb.blocksDB
+        );
+
+        return done(null, response);
+      } catch (err) {
+        return done(null, err);
+      }
+    };
   }
 
   private async localAndHardcodedPeers(): Promise<IHost[]> {
@@ -519,7 +613,7 @@ class P2P {
 
   public async onSyncConstructHeadersAndPeers(
     heightsAndPeers: Record<string, IHost>
-  ): Promise<Record<any, any>> {
+  ): Promise<Record<string, number[] | IHost[]>> {
     try {
       // GET THE BEST HEIGHT FROM REMOTES HEIGHTS
       const remotesBestHeight = Object.keys(heightsAndPeers).sort(

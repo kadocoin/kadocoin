@@ -29,6 +29,7 @@ import address from './util/get-ip-address';
 import LevelDB from './db';
 import { EventEmitter } from 'events';
 import isEmptyObject from './util/is-empty-object';
+import { IHost } from './types';
 
 const eventEmitter = new EventEmitter();
 
@@ -83,7 +84,9 @@ leveldb.openDBs().then(async is_open => {
 
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
 
-  /** GET BLOCKCHAIN DATA FROM PEERS */
+  /************************************
+   * GET BLOCKCHAIN DATA FROM PEERS   *
+   ************************************/
 
   // SAVE GENESIS BLOCK TO DB
   const savedGenesisToDB = await leveldb.onStartSaveGenesisBlockToDB(blockchain.chain);
@@ -103,17 +106,16 @@ leveldb.openDBs().then(async is_open => {
     return restartServer();
   }
 
-  // THERE IS AT LEAST A PEER THAT RESPONDED AND HAS MORE DATA THAN THIS PEER TO SHARE
+  // THERE IS AT LEAST A PEER THAT RESPONDED...
   const peersAndHeights = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
 
   if (!isEmptyObject(peersAndHeights)) {
-    const has_downloaded_txs_and_blks = await p2p.syncPeerWithHistoricalBlockchain(
-      peersAndHeights.peers
-    );
+    // ...AND HAS MORE DATA THAN THIS PEER
+    const has_downloaded_blks = await p2p.syncPeerWithHistoricalBlockchain(peersAndHeights);
 
-    logger.info('Node sync status', { has_downloaded_txs_and_blks });
+    logger.info('Node sync status', { has_downloaded_blks });
 
-    if (!has_downloaded_txs_and_blks[0] || !has_downloaded_txs_and_blks[1]) {
+    if (!has_downloaded_blks) {
       logger.fatal(
         'Kadocoin did not connect with other peers OR none of the peers have blockchain info to send.'
       );
@@ -122,8 +124,9 @@ leveldb.openDBs().then(async is_open => {
     }
 
     // REPLACE WELLKNOWN PEERS WITH REMOTE PEERS THAT RESPONDED
-    p2p.onSyncPopulateWellKnownPeers(peersAndHeights.peers);
+    p2p.onSyncPopulateWellKnownPeers(peersAndHeights.peers as IHost[]);
   } else {
+    // ...AND HAS SAME DATA WITH THIS PEER
     logger.info('This peer is up to date with blocks');
   }
 
