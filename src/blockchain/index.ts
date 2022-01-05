@@ -38,9 +38,11 @@ class Blockchain {
     return new Blockchain();
   }
 
-  addBlock({ transactions }: { transactions: TTransactions }): Block {
+  public async addBlock({ transactions }: { transactions: TTransactions }): Promise<Block> {
+    const previousBlock = await this.leveldb.getPreviousBlockByHeight();
+
     const newlyMinedBlock = Block.mineBlock({
-      lastBlock: this.chain[this.chain.length - 1],
+      lastBlock: previousBlock,
       transactions,
       chain: this.chain,
     });

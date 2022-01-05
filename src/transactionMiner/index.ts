@@ -54,7 +54,7 @@ class TransactionMiner {
       );
 
       // ADD THE BLOCK TO THE BLOCKCHAIN
-      const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
+      const newlyMinedBlock = await this.blockchain.addBlock({ transactions: validTransactions });
 
       // SAVE THE TRANSACTIONS' BALANCES IN DB
       await this.leveldb.addOrUpdateBal([newlyMinedBlock]);
