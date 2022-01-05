@@ -40,14 +40,16 @@ class Blockchain {
 
   public async addBlock({ transactions }: { transactions: TTransactions }): Promise<Block> {
     const previousBlock = await this.leveldb.getPreviousBlockByHeight();
+    const height = await this.leveldb.getLocalHighestBlockchainHeight();
+
+    console.log('44', { previousBlock, height });
 
     const newlyMinedBlock = Block.mineBlock({
       lastBlock: previousBlock,
       transactions,
-      chain: this.chain,
+      height,
     });
 
-    this.chain.push(newlyMinedBlock);
     return newlyMinedBlock;
   }
 

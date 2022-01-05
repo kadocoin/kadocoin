@@ -7,7 +7,7 @@
  */
 import hexToBinary from 'hex-to-bin';
 import { GENESIS_DATA, MINE_RATE } from '../settings';
-import { IChain, TTransactions } from '../types';
+import { TTransactions } from '../types';
 import cryptoHash from '../util/crypto-hash';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
 import size from '../util/size';
@@ -61,21 +61,21 @@ class Block {
     return new Block(GENESIS_DATA);
   }
 
-  static mineBlock({
+  static async mineBlock({
     lastBlock,
     transactions,
-    chain,
+    height,
   }: {
     lastBlock: Block;
     transactions: TTransactions;
-    chain: IChain;
-  }): Block {
+    height: number;
+  }): Promise<Block> {
     let hash: string,
       timestamp: number,
       nonce = 0,
       { difficulty } = lastBlock;
     const lastHash = lastBlock.hash;
-    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: chain.length });
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: height });
     const feeReward = totalFeeReward({ transactions });
     const cleanedTransactions = cleanUpTransaction({ transactions });
 
@@ -103,7 +103,7 @@ class Block {
       transactionVolume: transactionVolume({ transactions }),
       blockReward: MINING_REWARD,
       feeReward,
-      blockchainHeight: chain.length + 1 /** 1 is the GENESIS BLOCK*/,
+      blockchainHeight: height,
       hashOfAllHashes,
     });
   }
