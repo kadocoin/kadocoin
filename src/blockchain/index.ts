@@ -56,6 +56,7 @@ class Blockchain {
     onSuccess?: () => void
   ): Promise<void> {
     const localHighestBlockchainHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+    console.log('addBlockFromPeerToLocal', incomingObj.info.height, localHighestBlockchainHeight);
     if (incomingObj.info.height < localHighestBlockchainHeight) {
       console.error('The incoming chain must be longer.');
       return;
