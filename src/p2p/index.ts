@@ -219,6 +219,7 @@ class P2P {
             payload.data.message.block.blockchainHeight,
             this.leveldb.blocksDB
           );
+
           const isExistingBlock = isEmptyObject(data.message) ? false : true;
 
           if (!isExistingBlock) {
@@ -391,7 +392,7 @@ class P2P {
         const status = await new Promise(async resolve =>
           resolve(await this.getBlock({ peer, height }))
         );
-        console.log({ status });
+
         if (status) return true;
 
         logger.info(`${peer.host} didn't respond`);
@@ -415,8 +416,6 @@ class P2P {
             { data: { height } },
             async (err: Error, data: { type: string; message: Block }) => {
               if (!err) {
-                console.log({ '/handle/getBlock': data });
-
                 if (data.type === 'success') {
                   // MESSAGE PARAM CARRYING BLOCK IS EMPTY...
 
@@ -427,7 +426,6 @@ class P2P {
                     async (resolve: (value: { type: string; message: string }) => void) =>
                       resolve(await this.leveldb.addBlocksToDB({ blocks: [data.message] }))
                   );
-                  console.log('430', { response });
 
                   if (response.type == 'error') return resolve(false);
 
@@ -452,15 +450,11 @@ class P2P {
       done: (err: Error, result: { type: string; message: Block }) => void
     ) => {
       try {
-        console.log({ respondToGetBlock: payload });
-
         // GET THE REQUESTED BLOCK USING THE SENT HEIGHT
         const response = await this.leveldb.getValue(
           `${payload.data.height}`,
           this.leveldb.blocksDB
         );
-
-        console.log('463', { response });
 
         return done(null, response);
       } catch (err) {
