@@ -152,7 +152,8 @@ class LevelDB {
         data.message,
         isEmptyObject(data.message)
       );
-      return isEmptyObject(data.message) ? 1 : data.message.height;
+      const res = isEmptyObject(data.message) ? 1 : data.message.height;
+      return res;
     } catch (err) {
       logger.error('Error at  getLocalHighestBlockchainHeight', err);
     }
