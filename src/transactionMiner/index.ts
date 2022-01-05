@@ -10,8 +10,6 @@ import { ITMinerConstructorParams } from '../types';
 import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
-import appendToFile from '../util/appendToFile';
-import { blockchainStorageFile } from '../settings';
 import LevelDB from '../db';
 
 class TransactionMiner {
@@ -65,7 +63,9 @@ class TransactionMiner {
       await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
 
       // ADD BLOCK TO FILE
-      appendToFile([newlyMinedBlock], blockchainStorageFile);
+      await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
+        resolve(await this.leveldb.addBlocksToDB({ blocks: [newlyMinedBlock] }))
+      );
 
       // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
       this.transactionPool.clearBlockchainTransactions({

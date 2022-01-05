@@ -460,6 +460,8 @@ class P2P {
           this.leveldb.blocksDB
         );
 
+        console.log('463', { response });
+
         return done(null, response);
       } catch (err) {
         return done(null, err);
