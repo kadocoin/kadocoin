@@ -423,12 +423,15 @@ class P2P {
                   if (isEmptyObject(data.message)) return resolve(false);
 
                   //...NOT EMPTY - ADD TO DB
-                  this.leveldb.addBlocksToDB({ blocks: [data.message] }).then(status => {
-                    console.log('427', status);
-                    if (status.type == 'error') return resolve(false);
+                  const response = await new Promise(
+                    async (resolve: (value: { type: string; message: string }) => void) =>
+                      resolve(await this.leveldb.addBlocksToDB({ blocks: [data.message] }))
+                  );
+                  console.log('430', { response });
 
-                    return resolve(true);
-                  });
+                  if (response.type == 'error') return resolve(false);
+
+                  return resolve(true);
                 }
 
                 resolve(false);
