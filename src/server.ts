@@ -79,7 +79,6 @@ leveldb.openDBs().then(async is_open => {
     host: '127.0.0.1',
     port: P2P_PORT,
     metadata: { host: ip_address, port: P2P_PORT, type: 'full_node' },
-    // wellKnownPeers: hardCodedPeers,
   });
 
   const p2p = new P2P({ blockchain, transactionPool, peer, ip_address, leveldb });
@@ -87,10 +86,10 @@ leveldb.openDBs().then(async is_open => {
   /** GET BLOCKCHAIN DATA FROM PEERS */
   const remoteHeightsAndPeers = await p2p.onSynGetBestHeightsFromPeers();
 
-  // if (isEmptyObject(remoteHeightsAndPeers)) {
-  //   logger.warn('No peers responded during height discovery');
-  //   return restartServer();
-  // }
+  if (isEmptyObject(remoteHeightsAndPeers)) {
+    logger.warn('No peers responded during height discovery');
+    return restartServer();
+  }
 
   const peers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
 
