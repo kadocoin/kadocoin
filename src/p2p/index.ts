@@ -419,6 +419,7 @@ class P2P {
 
                 if (data.type === 'success') {
                   // MESSAGE PARAM CARRYING BLOCK IS EMPTY...
+                  console.log('422', isEmptyObject(data.message));
                   if (isEmptyObject(data.message)) return resolve(false);
 
                   //...NOT EMPTY - ADD TO DB
