@@ -147,6 +147,11 @@ class LevelDB {
   public async getLocalHighestBlockchainHeight(): Promise<number> {
     try {
       const data = await this.getValue('latest-blk-height', this.latestBlockDB);
+      console.log(
+        '150 - getLocalHighestBlockchainHeight',
+        data.message,
+        isEmptyObject(data.message)
+      );
       return isEmptyObject(data.message) ? 1 : data.message.height;
     } catch (err) {
       logger.error('Error at  getLocalHighestBlockchainHeight', err);
