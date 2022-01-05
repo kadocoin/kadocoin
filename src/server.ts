@@ -87,10 +87,10 @@ leveldb.openDBs().then(async is_open => {
   /** GET BLOCKCHAIN DATA FROM PEERS */
   const remoteHeightsAndPeers = await p2p.onSynGetBestHeightsFromPeers();
 
-  if (isEmptyObject(remoteHeightsAndPeers)) {
-    logger.warn('No peers responded during height discovery');
-    return restartServer();
-  }
+  // if (isEmptyObject(remoteHeightsAndPeers)) {
+  //   logger.warn('No peers responded during height discovery');
+  //   return restartServer();
+  // }
 
   const peers = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
 
@@ -112,7 +112,7 @@ leveldb.openDBs().then(async is_open => {
     logger.info('This peer is up to date with blocks');
   }
 
-  console.log({ wellKnownPeers: peer.wellKnownPeers });
+  console.log({ wellKnownPeers: peer.wellKnownPeers.peers });
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new MiscRouter(app, blockchain, leveldb);
