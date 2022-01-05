@@ -283,6 +283,7 @@ class P2P {
             port: peer.port,
           })
           .run('handle/receiveBlockFromPeers', { data: message }, (err: any, result: any) => {
+            console.log('sendBlockToPeers', { err, result });
             if (result == 'blk-200') logger.info('Success sending block to:', { peer });
 
             if (err) logger.warn('Error sending block to:', { peer });
@@ -650,9 +651,12 @@ class P2P {
         result: { height: number; status: 'compatible' | 'not-compatible' }
       ) => void
     ) => {
-      console.log('onSyncReceiveBlockHeight', { payload });
       // CHECK VERSION
       const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+      console.log('645 (send my local to requester) - onSyncReceiveBlockHeight', {
+        payload,
+        bestHeight,
+      });
 
       if (this.compareVersion(payload.data.version)) {
         // SEND THE REQUESTING PEER MY LOCAL PEERS
