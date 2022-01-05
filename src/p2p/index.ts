@@ -49,7 +49,6 @@ class P2P {
     leveldb: LevelDB;
   }) {
     this.peer = peer;
-    console.log(this.peer.wellKnownPeers.peers);
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.leveldb = leveldb;
@@ -66,11 +65,6 @@ class P2P {
     this.receiveBlock();
     this.onSyncReceiveRequestingPeerInfo();
     this.onSyncReceiveBlockHeight();
-    this.onStartAddPeersFromFileToWellKnownPeers();
-  }
-
-  private onStartAddPeersFromFileToWellKnownPeers(): void {
-    this.getPeers().then(localPeers => this.addToWellKnownPeers(localPeers));
   }
 
   private receiveTransactions(): void {
