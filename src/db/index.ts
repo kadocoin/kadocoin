@@ -83,7 +83,7 @@ class LevelDB {
   public async onStartSaveGenesisBlockToDB(chain: IChain): Promise<boolean> {
     return await new Promise(async resolve =>
       this.getLocalHighestBlockchainHeight().then(localBestHeight => {
-        if (localBestHeight > 1) return true;
+        if (localBestHeight >= 1) return resolve(true);
 
         // SAVE BLOCKS TO DB
         this.addBlocksToDB({ blocks: chain }).then(status => {
