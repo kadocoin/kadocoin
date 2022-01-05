@@ -86,8 +86,10 @@ class Blockchain {
     // ADD NEWLY VALIDATED BLOCK TO THE BLOCKCHAIN
     this.chain.push(incomingObj.block);
 
-    // SAVE TO FILE
-    appendToFile([incomingObj.block], blockchainStorageFile);
+    // SAVE TO DB
+    await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
+      resolve(await this.leveldb.addBlocksToDB({ blocks: [incomingObj.block] }))
+    );
 
     logger.info(
       `New block successfully added. Your local blockchain now weighs ${size(this.chain)} bytes`

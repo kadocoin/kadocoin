@@ -23,6 +23,7 @@ import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import { KADOCOIN_VERSION } from '../settings';
 import LevelDB from '../db';
+import { Console } from 'console';
 
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
@@ -210,6 +211,7 @@ class P2P {
 
   private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = async (payload: any, done: any) => {
+      console.log('214', { payload });
       if (payload.data.message.block) {
         try {
           logger.info('INCOMING BLOCK', payload.data.message);
@@ -220,7 +222,11 @@ class P2P {
             this.leveldb.blocksDB
           );
 
+          console.log('223', { data });
+
           const isExistingBlock = isEmptyObject(data.message) ? false : true;
+
+          console.log('227', { isExistingBlock });
 
           if (!isExistingBlock) {
             await this.blockchain.addBlockFromPeerToLocal(payload.data.message, true, async () => {
