@@ -56,11 +56,9 @@ class Blockchain {
     validateTransactions?: boolean,
     onSuccess?: () => void
   ): Promise<void> {
-    const localHighestBlockchainHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+    const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
-    console.log('addBlockFromPeerToLocal', incomingObj.info.height, localHighestBlockchainHeight);
-
-    if (incomingObj.info.height < localHighestBlockchainHeight) {
+    if (incomingObj.info.height < bestHeight) {
       console.error('The incoming chain must be longer.');
       return;
     }
@@ -72,7 +70,10 @@ class Blockchain {
       return;
     }
 
-    if (validateTransactions && !this.isValidTransactionData({ block: incomingObj.block })) {
+    if (
+      validateTransactions &&
+      !this.isValidTransactionData({ block: incomingObj.block, bestHeight })
+    ) {
       console.error('The incoming block has an invalid transaction');
       return;
     }
@@ -94,11 +95,11 @@ class Blockchain {
     );
   }
 
-  isValidTransactionData({ block }: { block: Block }): boolean {
+  isValidTransactionData({ block, bestHeight }: { block: Block; bestHeight: number }): boolean {
     let rewardTransactionCount = 0;
     const transactionSet = new Set();
     const feeReward = totalFeeReward({ transactions: block.transactions });
-    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: this.chain.length });
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: bestHeight });
     const totalReward = (Number(MINING_REWARD) + Number(feeReward)).toFixed(8);
     let weight = 0;
 
@@ -144,6 +145,7 @@ class Blockchain {
   }
 
   static isValidBlock(incomingObj: incomingObj, previousBlock?: Block): boolean {
+    console.log('147', { previousBlock });
     const { timestamp, lastHash, hash, transactions, nonce, difficulty, hashOfAllHashes } =
       incomingObj.block;
     const cleanedTransactions = cleanUpTransaction({ transactions });

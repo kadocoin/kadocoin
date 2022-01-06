@@ -117,7 +117,7 @@ class Transaction {
       output,
     } = transaction;
 
-    console.log(Number(amount), Number(calcOutputTotal(output)));
+    console.log({ amount: Number(amount), calcTotal: Number(calcOutputTotal(output)) });
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
     if (Number(amount) !== Number(calcOutputTotal(output))) {
