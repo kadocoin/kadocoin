@@ -7,6 +7,7 @@ import {
   blocksIndexFolder,
   KADOCOIN_VERSION,
   lastBlockStorageFolder,
+  sampleBlocks2,
 } from '../settings';
 import { IChain, IValue } from '../types';
 import isEmptyObject from '../util/is-empty-object';
@@ -78,6 +79,18 @@ class LevelDB {
         resolve(false);
       }
     });
+  }
+
+  public async onStartSeedFakeBlocks(): Promise<void> {
+    // BLOCKS
+    await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
+      resolve(await this.addBlocksToDB({ blocks: sampleBlocks2 }))
+    );
+
+    // BALANCES
+    await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
+      resolve(await this.addOrUpdateBal(sampleBlocks2))
+    );
   }
 
   public async onStartSaveGenesisBlockToDB(chain: IChain): Promise<boolean> {

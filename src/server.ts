@@ -88,6 +88,9 @@ leveldb.openDBs().then(async is_open => {
    * GET BLOCKCHAIN DATA FROM PEERS   *
    ************************************/
 
+  // FAKE DATA
+  // await leveldb.onStartSeedFakeBlocks();
+
   // SAVE GENESIS BLOCK TO DB
   const savedGenesisToDB = await leveldb.onStartSaveGenesisBlockToDB(blockchain.chain);
 

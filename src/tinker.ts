@@ -7,7 +7,7 @@ import LevelDB from './db';
 const leveldb = new LevelDB();
 
 (async function () {
-  leveldb.getAllKeysAndValues(leveldb.blocksIndexDB);
+  leveldb.getAllKeysAndValues(leveldb.balancesDB);
 })();
 
 // const sampleBlocks = [

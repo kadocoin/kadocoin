@@ -683,7 +683,7 @@ class P2P {
             { data: { version: KADOCOIN_VERSION } },
             async (err: Error, data: { height: number; status: string }) => {
               if (!err) {
-                // ADD HEIGHT TO ARRAY
+                // KEEP TRACK OF HEIGHT IN THE FORM HEIGHT => PEER
                 if (data.status === 'compatible') {
                   this.remoteBestHeights[data.height] = peer;
 
