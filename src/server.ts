@@ -92,10 +92,10 @@ leveldb.openDBs().then(async is_open => {
   // await leveldb.onStartSeedFakeBlocks();
 
   // SAVE GENESIS BLOCK TO DB
-  const savedGenesisToDB = await leveldb.onStartSaveGenesisBlockToDB(blockchain.chain);
+  const has_saved_genesis = await leveldb.onStartSaveGenesisBlockToDB(blockchain.chain);
 
   // IF SAVING THE GENESIS BLOCK FAILED, RESTART
-  if (!savedGenesisToDB) {
+  if (!has_saved_genesis) {
     logger.warn('Saving the Genesis block failed');
     return restartServer();
   }

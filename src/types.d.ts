@@ -15,12 +15,6 @@ import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
 
-export interface ISyncStatuses {
-  txn: boolean;
-  blk: boolean;
-  peers: boolean;
-}
-
 export interface ILevelDB {
   leveldb: level.LevelDB<any, any>;
 }

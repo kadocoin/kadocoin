@@ -10,14 +10,13 @@
 // @ts-ignore
 import request from 'request';
 import fs from 'fs';
-import { IHost, incomingObj, ISyncStatuses } from '../types';
+import { IHost, incomingObj } from '../types';
 import Transaction from '../wallet/transaction';
 import Blockchain from '../blockchain';
 import TransactionPool from '../wallet/transaction-pool';
 import { hardCodedPeers, P2P_PORT, peersStorageFile, REQUEST_TIMEOUT } from '../settings';
 import Block from '../blockchain/block';
 import appendToFile from '../util/appendToFile';
-import Mining_Reward from '../util/supply_reward';
 import isEmptyObject from '../util/is-empty-object';
 import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
@@ -27,11 +26,8 @@ import LevelDB from '../db';
 class P2P {
   private peer: any; // PEER LIBRARY IS NOT TYPED THAT IS WHY IT IS `any`
   private transactionPool: TransactionPool;
-  private hardCodedPeers: IHost[];
-  private loopCount: number;
   private ip_address: string;
   private leveldb: LevelDB;
-  private syncStatuses: ISyncStatuses;
   private blockchain: Blockchain;
   private remoteBestHeights: Record<string, IHost>;
 
@@ -52,13 +48,6 @@ class P2P {
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.leveldb = leveldb;
-    this.hardCodedPeers = hardCodedPeers;
-    this.loopCount = 0;
-    this.syncStatuses = {
-      txn: false,
-      blk: false,
-      peers: false,
-    };
     this.remoteBestHeights = {};
     this.ip_address = ip_address;
     this.receiveTransactions();
@@ -67,6 +56,9 @@ class P2P {
     this.onSyncReceiveBlockHeight();
     this.respondToGetBlock();
   }
+  /************************************
+   *          TRANSACTIONS            *
+   ************************************/
 
   private receiveTransactions(): void {
     this.peer.handle.receiveTransactions = async (payload: any, done: any) => {
@@ -208,6 +200,10 @@ class P2P {
     }
   }
 
+  /************************************
+   *          BLOCKS                  *
+   ************************************/
+
   private receiveBlock(): void {
     this.peer.handle.receiveBlockFromPeers = async (payload: any, done: any) => {
       if (payload.data.message.block) {
@@ -330,59 +326,24 @@ class P2P {
     }
   }
 
-  public async loopThroughPeers(peers: Array<IHost>): Promise<boolean[]> {
-    for await (const peer of peers) {
-      if (peer.host !== this.ip_address) {
-        logger.info('Attempting to connect to', { host: peer.host, port: peer.port });
+  /************************************
+   *          ON SYNC BLOCKS    *
+   ************************************/
 
-        const statuses = await new Promise(async (resolve: (value: boolean[]) => void) =>
-          resolve(await this.getBlockchainDataFromPeer(peer))
-        );
-        console.log({ statuses });
-        // INCREMENT LOOP COUNT
-        this.loopCount++;
-
-        this.syncStatuses.txn = this.syncStatuses.txn ? this.syncStatuses.txn : statuses[0];
-        this.syncStatuses.blk = this.syncStatuses.blk ? this.syncStatuses.blk : statuses[1];
-        this.syncStatuses.peers = this.syncStatuses.peers ? this.syncStatuses.peers : statuses[2];
-
-        console.log(this.syncStatuses); // todo
-
-        if (!this.syncStatuses.txn || !this.syncStatuses.blk || !this.syncStatuses.peers) {
-          if (this.loopCount == this.hardCodedPeers.length - 1) {
-            logger.warn('No response from hardcoded peers');
-
-            // GET LOCAL FILES
-            logger.info('Retrieving local peers...');
-            const peers = await this.getPeers();
-
-            if (peers.length) {
-              await this.loopThroughPeers(peers);
-              logger.warn('No response from local peers');
-            } else {
-              logger.info('No local peers were found');
-            }
-
-            return Object.values(this.syncStatuses);
-          }
-        } else {
-          logger.info('Found a peer with complete response. Exiting...');
-          return Object.values(this.syncStatuses);
-        }
-      }
-    }
-    logger.warn('No hardcoded peers were found');
-    return Object.values(this.syncStatuses);
-  }
-
-  // FALSE -> I DID NOT GET THE BLOCK
+  /**
+   * SENDS A REQUEST TO REMOTE PEERS TO FIND A BLOCK.
+   *
+   * @param peersAndHeights  blockHeights: number[], peers: IHost[]
+   * @return FALSE -> I DID NOT GET THE BLOCK
+   * @return TRUE -> I GOT THE BLOCK
+   */
   public async syncPeerWithHistoricalBlockchain(
     peersAndHeights: Record<string, number[] | IHost[]>
   ): Promise<boolean> {
     for (let i = 0; i < peersAndHeights.blockHeights.length; i++) {
       const height = peersAndHeights.blockHeights[i] as number;
 
-      const status = await this.loopThroughPeersNew(peersAndHeights.peers as IHost[], height);
+      const status = await this.loopThroughPeers(peersAndHeights.peers as IHost[], height);
 
       if (!status) return false; //exit and restart - block height not found in all peers
     }
@@ -390,8 +351,7 @@ class P2P {
     return true;
   }
 
-  // TRUE -> I GOT THE BLOCK
-  public async loopThroughPeersNew(peers: Array<IHost>, height: number): Promise<boolean> {
+  public async loopThroughPeers(peers: Array<IHost>, height: number): Promise<boolean> {
     for await (const peer of peers) {
       if (peer.host !== this.ip_address) {
         logger.info(`Attempting to get block #${height} from ${peer.host}`);
@@ -451,6 +411,7 @@ class P2P {
       }
     });
   }
+
   private respondToGetBlock(): void {
     this.peer.handle.getBlock = async (
       payload: { data: { height: number } },
@@ -470,26 +431,9 @@ class P2P {
     };
   }
 
-  private async localAndHardcodedPeers(): Promise<IHost[]> {
-    return new Promise((resolve, reject) => {
-      try {
-        this.getPeers().then(localPeers => resolve(hardCodedPeers.concat(localPeers)));
-      } catch (err) {
-        logger.error('Error at localAndHardcodedPeers', err);
-        reject(err);
-      }
-    });
-  }
-
-  private async getBlockchainDataFromPeer(peer: IHost): Promise<boolean[]> {
-    const sync_promises = [
-      ...(this.syncStatuses.txn ? [] : [this.onSyncGetTransactions(peer)]), // GET TXN FROM OTHER PEERS
-      ...(this.syncStatuses.blk ? [] : [this.onSyncGetBlocks(peer)]), // GET BLOCKS FROM OTHER PEERS
-      ...(this.syncStatuses.peers ? [] : [this.onSyncGetPeers(peer)]), // GET PEERS FROM OTHER PEERS
-    ];
-
-    return await Promise.all(sync_promises);
-  }
+  /************************************
+   *          ON SYNC - PEERS                 *
+   ************************************/
 
   private onSyncGetPeers(peer: IHost): Promise<boolean> {
     return new Promise(resolve => {
@@ -525,10 +469,6 @@ class P2P {
     });
   }
 
-  // WHEN A NODE STARTS, IT SENDS A REQUEST TO OTHER PEER(S).
-  // THE OTHER PEER(S) RECEIVE THE REQUESTING PEER'S IP ADDRESS AND PORT NUMBER
-  // THEY ADD THE IP AND PORT TO THEIR LIST OF KNOWN PEERS USING THE
-  // METHOD BELOW
   private onSyncReceiveRequestingPeerInfo(): void {
     this.peer.handle.sendPeersToRequesterAndRequesterInfoToSupplier = async (
       payload: { data: any },
@@ -577,6 +517,10 @@ class P2P {
     }
   }
 
+  /************************************
+   *          ON SYNC - TRANSACTIONS    *
+   ************************************/
+
   private onSyncGetTransactions(peer: IHost): Promise<boolean> {
     return new Promise(resolve => {
       request(
@@ -602,6 +546,10 @@ class P2P {
       );
     });
   }
+
+  /************************************
+   *          ON SYNC - BEST HEIGHTS    *
+   ************************************/
 
   async onSynGetBestHeightsFromPeers(): Promise<Record<string, IHost>> {
     try {
@@ -630,6 +578,7 @@ class P2P {
       const remotesBestHeight = Object.keys(heightsAndPeers).sort(
         (a, b) => Number(b) - Number(a)
       )[0];
+
       const localBestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
       if (Number(remotesBestHeight) > localBestHeight) {
@@ -672,6 +621,7 @@ class P2P {
       return done(null, { height: bestHeight, status: 'not-compatible' });
     };
   }
+
   private async onSyncGetBestHeight(peer: IHost): Promise<boolean> {
     return await new Promise(resolve => {
       try {
@@ -703,80 +653,12 @@ class P2P {
     });
   }
 
+  /************************************
+   *          HELPERS    *
+   ************************************/
+
   public compareVersion(incomingVersion: string): boolean {
     return incomingVersion == KADOCOIN_VERSION;
-  }
-
-  private async onSyncGetBlocks(peer: IHost): Promise<boolean> {
-    return new Promise(resolve => {
-      request(
-        { url: `http://${peer.host}:2000/blocks`, timeout: REQUEST_TIMEOUT },
-        async (error, response, body) => {
-          if (!error && response.statusCode === 200) {
-            const rootChain: Array<Block> = JSON.parse(body).message;
-
-            try {
-              /** SAVING TO DB STARTS */
-              const blockchainHeightFromPeer = rootChain[rootChain.length - 1].blockchainHeight;
-              const blockchainHeightFromFile = await this.leveldb.getLocalHighestBlockchainHeight();
-
-              logger.info('Incoming vs Local Blocks Status', {
-                blockchainHeightFromPeer,
-                blockchainHeightFromFile,
-              });
-
-              /** THIS PEER NEEDS TO CATCH UP */
-              if (blockchainHeightFromPeer > blockchainHeightFromFile) {
-                /** ADD THE MISSING BLOCKS TO LOCAL FILE */
-                logger.info('Adding missing blocks to db...');
-                // WRITE TO FILE: ADD THE DIFFERENCE STARTING FROM THE LAST BLOCK IN THE FILE
-                const diffBlockchain = rootChain.slice(blockchainHeightFromFile);
-
-                // SAVE BLOCKS TO DB
-                this.leveldb.addBlocksToDB({ blocks: diffBlockchain }).then(status => {
-                  if (status.type == 'success') {
-                    logger.info('Blocks added');
-
-                    // SAVE TRANSACTIONS BALANCES TO DB
-                    logger.info('Adding balances to db...');
-                    this.leveldb.addOrUpdateBal(diffBlockchain).then(status => {
-                      status.type == 'success' && logger.info('Balances updated');
-
-                      /**  UPDATE MINING_REWARD */
-                      const { MINING_REWARD, SUPPLY } = new Mining_Reward().calc({
-                        chainLength: blockchainHeightFromPeer,
-                      });
-
-                      logger.info(`Mining reward and supply`, {
-                        MINING_REWARD,
-                        SUPPLY,
-                      });
-
-                      return resolve(true);
-                    });
-                  }
-                });
-              } else if (blockchainHeightFromPeer == blockchainHeightFromFile) {
-                logger.info('Peer is already up to date with blocks');
-                return resolve(true);
-              } else {
-                logger.error('Peer may have received blocks that are less.');
-                return resolve(false);
-              }
-
-              /** END SAVING TO DB */
-            } catch (err) {
-              logger.error('Error at onSyncGetBlocks', err);
-              resolve(false);
-            }
-          } else {
-            logger.warn(`${peer.host}:2000/blocks - ${error}`);
-            console.log('____________');
-            return resolve(false);
-          }
-        }
-      );
-    });
   }
 
   private removeDuplicatePeers({
@@ -834,6 +716,17 @@ class P2P {
     for (let i = 0; i < peersToAdd.length; i++) {
       this.peer.wellKnownPeers.add(peersToAdd[i]);
     }
+  }
+
+  private async localAndHardcodedPeers(): Promise<IHost[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.getPeers().then(localPeers => resolve(hardCodedPeers.concat(localPeers)));
+      } catch (err) {
+        logger.error('Error at localAndHardcodedPeers', err);
+        reject(err);
+      }
+    });
   }
 }
 

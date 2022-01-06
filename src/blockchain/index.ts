@@ -39,7 +39,7 @@ class Blockchain {
   }
 
   public async addBlock({ transactions }: { transactions: TTransactions }): Promise<Block> {
-    const previousBlock = await this.leveldb.getPreviousBlockByHeight();
+    const previousBlock = await this.leveldb.getLastValidatedBlock();
     const height = await this.leveldb.getLocalHighestBlockchainHeight();
 
     const newlyMinedBlock = Block.mineBlock({
@@ -65,7 +65,7 @@ class Blockchain {
       return;
     }
 
-    const previousBlock = await this.leveldb.getPreviousBlockByHeight();
+    const previousBlock = await this.leveldb.getLastValidatedBlock();
 
     if (!Blockchain.isValidBlock(incomingObj, previousBlock)) {
       console.error('The incoming block is not valid.');

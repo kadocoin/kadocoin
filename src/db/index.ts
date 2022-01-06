@@ -95,8 +95,8 @@ class LevelDB {
 
   public async onStartSaveGenesisBlockToDB(chain: IChain): Promise<boolean> {
     return await new Promise(async resolve =>
-      this.getLocalHighestBlockchainHeight().then(localBestHeight => {
-        if (localBestHeight > 0) return resolve(true);
+      this.getLocalHighestBlockchainHeight().then(bestHeight => {
+        if (bestHeight > 0) return resolve(true);
 
         // SAVE BLOCKS TO DB
         this.addBlocksToDB({ blocks: chain }).then(status => {
@@ -115,7 +115,9 @@ class LevelDB {
     );
   }
 
-  // SAVES EACH BLOCK TO TWO DBs => BLOCKS AND INDEX
+  // SAVES EACH BLOCK TO BLOCKS DB
+  // SAVES EACH BLOCK TO BLOCKS INDEX DB
+  // UPDATES BEST HEIGHT
   public async addBlocksToDB({
     blocks,
   }: {
@@ -168,20 +170,18 @@ class LevelDB {
     }
   }
 
-  public async getPreviousBlockByHeight(): Promise<Block> {
+  public async getLastValidatedBlock(): Promise<Block> {
     try {
       // GET LATEST BLOCK BLOCK HEIGHT
-      const data_latest_height = await this.getValue('latest-blk-height', this.latestBlockDB);
-      const latest_height = isEmptyObject(data_latest_height.message)
-        ? 1
-        : data_latest_height.message.height;
+      const response = await this.getValue('latest-blk-height', this.latestBlockDB);
+      console.log('175', { response });
 
       // GET THE BLOCK
-      const data_prev_block = await this.getValue(`${latest_height}`, this.blocksDB);
+      const data_prev_block = await this.getValue(`${response.message.height}`, this.blocksDB);
 
       return data_prev_block.message;
     } catch (err) {
-      logger.error('Error at  getPreviousBlockByHeight', err);
+      logger.error('Error at  getLastValidatedBlock', err);
     }
   }
 
