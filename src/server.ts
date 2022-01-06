@@ -111,7 +111,7 @@ leveldb.openDBs().then(async is_open => {
 
   // THERE IS AT LEAST A PEER THAT RESPONDED...
   const peersAndHeights = await p2p.onSyncConstructHeadersAndPeers(remoteHeightsAndPeers);
-  console.log({ remoteHeightsAndPeers, peersAndHeights });
+
   if (!isEmptyObject(peersAndHeights)) {
     // ...AND HAS MORE DATA THAN THIS PEER
     const has_downloaded_blks = await p2p.syncPeerWithHistoricalBlockchain(peersAndHeights);
@@ -132,8 +132,6 @@ leveldb.openDBs().then(async is_open => {
     // ...AND HAS SAME DATA WITH THIS PEER
     logger.info('This peer is up to date with blocks');
   }
-
-  console.log({ wellKnownPeers: peer.wellKnownPeers.peers });
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
     new MiscRouter(app, blockchain, leveldb);
