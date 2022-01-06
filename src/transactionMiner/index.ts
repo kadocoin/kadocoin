@@ -53,16 +53,16 @@ class TransactionMiner {
         })
       );
 
-      // ADD THE BLOCK TO THE BLOCKCHAIN
+      // MINE BLOCK - ADD THE BLOCK TO THE BLOCKCHAIN
       const newlyMinedBlock = await this.blockchain.addBlock({ transactions: validTransactions });
 
       // SAVE THE TRANSACTIONS' BALANCES IN DB
       await this.leveldb.addOrUpdateBal([newlyMinedBlock]);
 
-      // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
+      // BROADCAST THE NEWLY MINED BLOCK AND PEER INFO NEEDED TO ACCOMPANY IT
       await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
 
-      // ADD BLOCK TO FILE
+      // ADD BLOCK TO DB
       await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
         resolve(await this.leveldb.addBlocksToDB({ blocks: [newlyMinedBlock] }))
       );

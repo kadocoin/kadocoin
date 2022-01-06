@@ -42,8 +42,6 @@ class Blockchain {
     const previousBlock = await this.leveldb.getPreviousBlockByHeight();
     const height = await this.leveldb.getLocalHighestBlockchainHeight();
 
-    console.log('44', { previousBlock, height });
-
     const newlyMinedBlock = Block.mineBlock({
       lastBlock: previousBlock,
       transactions,
@@ -69,8 +67,6 @@ class Blockchain {
 
     const previousBlock = await this.leveldb.getPreviousBlockByHeight();
 
-    console.log({ previousBlock });
-
     if (!Blockchain.isValidBlock(incomingObj, previousBlock)) {
       console.error('The incoming block is not valid.');
       return;
@@ -87,9 +83,6 @@ class Blockchain {
     }
 
     if (onSuccess) onSuccess();
-
-    // ADD NEWLY VALIDATED BLOCK TO THE BLOCKCHAIN
-    this.chain.push(incomingObj.block);
 
     // SAVE TO DB
     await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
@@ -172,6 +165,7 @@ class Blockchain {
     return true;
   }
 
+  // TODO - REMOVE?
   replaceChain(incomingChain: IChain, onSuccess?: () => void): void {
     if (
       incomingChain.length > 1 &&
@@ -197,48 +191,7 @@ class Blockchain {
     );
   }
 
-  validTransactionData({ chain }: { chain: IChain }): boolean {
-    for (let i = 1; i < chain.length; i++) {
-      let rewardTransactionCount = 0;
-      const block = chain[i];
-      const transactionSet = new Set();
-      const feeReward = totalFeeReward({ transactions: block.transactions });
-      const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: this.chain.length });
-      const totalReward = (Number(MINING_REWARD) + Number(feeReward)).toFixed(8);
-
-      for (const transaction of block.transactions) {
-        if (transaction.input.address === REWARD_INPUT.address) {
-          rewardTransactionCount += 1;
-
-          if (rewardTransactionCount > 1) {
-            console.error('Miner rewards exceed limit');
-            return false;
-          }
-
-          if (Object.values(transaction.output)[0] !== totalReward) {
-            console.error('Miner reward amount is invalid');
-            return false;
-          }
-        } else {
-          if (!Transaction.validTransaction(transaction)) {
-            console.error('Invalid transaction');
-            return false;
-          }
-
-          if (transactionSet.has(transaction)) {
-            console.error('An identical transaction appears more than once in the block');
-            return false;
-          } else {
-            transactionSet.add(transaction);
-          }
-        }
-      }
-      // END FOR LOOP
-    }
-
-    return true;
-  }
-
+  // TODO - REMOVE?
   static isValidChain(chain: IChain): boolean {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
 

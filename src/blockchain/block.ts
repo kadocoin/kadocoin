@@ -103,7 +103,7 @@ class Block {
       transactionVolume: transactionVolume({ transactions }),
       blockReward: MINING_REWARD,
       feeReward,
-      blockchainHeight: height,
+      blockchainHeight: height + 1,
       hashOfAllHashes,
     });
   }
