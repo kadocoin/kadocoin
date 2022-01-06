@@ -235,6 +235,8 @@ class P2P {
 
               // SAVE TRANSACTIONS BALANCES IN TO DB
               await this.leveldb.addOrUpdateBal([payload.data.message.block]);
+
+              // TODO - UPDATE INDEX
               return done(null, 'blk-200');
             });
 

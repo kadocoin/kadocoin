@@ -115,6 +115,7 @@ class LevelDB {
     );
   }
 
+  // SAVES EACH BLOCK TO TWO DBs => BLOCKS AND INDEX
   public async addBlocksToDB({
     blocks,
   }: {
