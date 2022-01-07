@@ -134,8 +134,8 @@ leveldb.openDBs().then(async is_open => {
   }
 
   const initializeRoutes = (_: Request, __: Response, next: NextFunction) => {
-    new MiscRouter(app, blockchain, leveldb);
-    new BlockRouter(app, blockchain);
+    new MiscRouter(app, leveldb);
+    new BlockRouter(app, leveldb);
     new P2PRouter(app, p2p);
     new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet, leveldb);
     next();

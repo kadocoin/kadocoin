@@ -73,7 +73,6 @@ export default class TransactionController {
 
     const data = await leveldb.getBal(address);
 
-    console.log('send route', { message: data.message }); // REMOVE
     if (data.type == 'error')
       return res.status(NOT_FOUND).json({ type: 'error', message: data.message });
 

@@ -109,10 +109,42 @@ class LevelDB {
     );
   }
 
-  public getAllKeysAndValues(db: level.LevelDB<any, any>): void {
-    db.createReadStream({ reverse: true }).on('data', (data: { key: string; value: any }) =>
-      logger.info('Blocks data', { data })
-    );
+  public async getBlocks(start = 1, end?: number): Promise<IChain> {
+    return await new Promise(async (resolve, reject) => {
+      try {
+        const map = new Map();
+
+        // CONFIGURE END
+        const e = end ? end : await this.getBestBlockchainHeight();
+
+        // GET ARRAY FROM `START` TO `END`
+        const heightsArr = this.generateArray(start, e);
+
+        // USE ARRAY OF HEIGHTS FROM ABOVE TO GET BLOCKS CORRESPONDING TO EACH HEIGHT
+        for await (const height of heightsArr) {
+          const response = await this.getValue(`${height}`, this.blocksDB);
+
+          if (response.type == 'success') {
+            map.set(height, response.message);
+          }
+        }
+
+        // SORT THE BLOCKS IN ASCENDING ORDER
+        const blocksAsc = new Map([...map.entries()].sort((a, b) => a[0] - b[0]));
+
+        resolve(Array.from(blocksAsc.values()));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  generateArray(start: number, end: number): number[] {
+    const arr = [];
+    for (let i = start; i <= end; i++) {
+      arr.push(i);
+    }
+    return arr;
   }
 
   // SAVES EACH BLOCK TO BLOCKS DB

@@ -10,9 +10,11 @@ import { INTERNAL_SERVER_ERROR, NOT_FOUND, SUCCESS } from '../statusCode/statusC
 import Block from '../blockchain/block';
 
 export default class BlockController {
-  getBlocks = (req: Request, res: Response): Response => {
+  getBlocks = async (req: Request, res: Response): Promise<Response> => {
     try {
-      return res.status(SUCCESS).json({ type: 'success', message: req.blockchain.chain });
+      const chain = await new Promise(async resolve => resolve(await req.leveldb.getBlocks(50)));
+
+      return res.status(SUCCESS).json({ type: 'success', message: chain });
     } catch (error) {
       if (error instanceof Error) {
         return res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: error.message });
