@@ -104,6 +104,7 @@ class Blockchain {
     let weight = 0;
 
     for (const transaction of block.transactions) {
+      console.log({ inputAddr: transaction.input.address, rewardAddr: REWARD_INPUT.address });
       if (transaction.input.address === REWARD_INPUT.address) {
         rewardTransactionCount += 1;
 
