@@ -85,14 +85,14 @@ class Blockchain {
 
     if (onSuccess) onSuccess();
 
-    // SAVE TO DB
+    // SAVES BLOCK TO BLOCKS DB
+    // SAVES BLOCK TO BLOCKS INDEX DB
+    // UPDATES BEST HEIGHT
     await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
       resolve(await this.leveldb.addBlocksToDB({ blocks: [incomingObj.block] }))
     );
 
-    logger.info(
-      `New block successfully added. Your local blockchain now weighs ${size(this.chain)} bytes`
-    );
+    logger.info(`New block successfully added.`);
   }
 
   isValidTransactionData({ block, bestHeight }: { block: Block; bestHeight: number }): boolean {

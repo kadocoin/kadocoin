@@ -216,11 +216,7 @@ class P2P {
             this.leveldb.blocksDB
           );
 
-          console.log('223', { data });
-
           const isExistingBlock = isEmptyObject(data.message) ? false : true;
-
-          console.log('227', { isExistingBlock });
 
           if (!isExistingBlock) {
             await this.blockchain.addBlockFromPeerToLocal(payload.data.message, true, async () => {
@@ -232,7 +228,6 @@ class P2P {
               // SAVE TRANSACTIONS BALANCES IN TO DB
               await this.leveldb.addOrUpdateBal([payload.data.message.block]);
 
-              // TODO - UPDATE INDEX
               return done(null, 'blk-200');
             });
 
