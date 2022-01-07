@@ -43,7 +43,7 @@ class TransactionMiner {
     if (validTransactions.length) {
       const feeReward = totalFeeReward({ transactions: validTransactions });
 
-      // GENERATE MINER'S REWARD
+      // GENERATE MINER'S REWARD AND ADD TO OTHER TRANSACTIONS
       validTransactions.push(
         Transaction.rewardTransaction({
           minerAddress: this.address,
