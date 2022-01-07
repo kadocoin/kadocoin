@@ -146,18 +146,18 @@ class Transaction {
   static rewardTransaction({
     minerPublicKey,
     message,
-    blockchainLen,
+    height,
     feeReward,
   }: {
     minerPublicKey: string;
     message?: string;
     feeReward?: string;
-    blockchainLen: number;
+    height: number;
   }): Transaction {
     REWARD_INPUT.address = minerPublicKey;
     REWARD_INPUT.timestamp = Date.now();
     message && (REWARD_INPUT.message = message);
-    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: height });
     const rewardTotal = Number(MINING_REWARD) + Number(feeReward);
 
     return new Transaction({

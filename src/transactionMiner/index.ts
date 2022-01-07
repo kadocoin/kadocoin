@@ -42,13 +42,14 @@ class TransactionMiner {
 
     if (validTransactions.length) {
       const feeReward = totalFeeReward({ transactions: validTransactions });
+      const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
       // GENERATE MINER'S REWARD
       validTransactions.push(
         Transaction.rewardTransaction({
           minerPublicKey: this.address,
           ...(this.message && { message: this.message }),
-          blockchainLen: this.blockchain.chain.length,
+          height: bestHeight,
           feeReward,
         })
       );

@@ -7,7 +7,7 @@
  */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { blockchainStorageFile, MAX_WEIGHT_TXN, REWARD_INPUT } from '../settings';
+import { blockchainStorageFile, MAX_WEIGHT_TXN } from '../settings';
 import Transaction from '../wallet/transaction';
 import { IChain, incomingObj, TTransactions } from '../types';
 import size from '../util/size';
@@ -104,8 +104,10 @@ class Blockchain {
     let weight = 0;
 
     for (const transaction of block.transactions) {
-      console.log({ inputAddr: transaction.input.address, rewardAddr: REWARD_INPUT.address });
-      if (transaction.input.address === REWARD_INPUT.address) {
+      if (Object.values(transaction.output).length === 1) {
+        /**
+         * REWARD TRANSACTION
+         */
         rewardTransactionCount += 1;
 
         if (rewardTransactionCount > 1) {
