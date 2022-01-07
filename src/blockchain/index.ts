@@ -7,7 +7,7 @@
  */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { blockchainStorageFile, MAX_WEIGHT_TXN } from '../settings';
+import { MAX_WEIGHT_TXN } from '../settings';
 import Transaction from '../wallet/transaction';
 import { IChain, incomingObj, TTransactions } from '../types';
 import size from '../util/size';
@@ -15,8 +15,6 @@ import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward } from '../util/transaction-metrics';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
 import { KADOCOIN_VERSION } from '../settings';
-import fs from 'fs';
-import getFileContentLineByLine from '../util/get-file-content-line-by-line';
 import logger from '../util/logger';
 import LevelDB from '../db';
 
@@ -29,18 +27,9 @@ class Blockchain {
     this.leveldb = leveldb;
   }
 
-  async loadBlocksFromFileOrCreateNew(): Promise<Blockchain> {
-    if (fs.existsSync(blockchainStorageFile)) {
-      const chain = await getFileContentLineByLine(blockchainStorageFile);
-      return new Blockchain({ chain });
-    }
-
-    return new Blockchain();
-  }
-
   public async addBlock({ transactions }: { transactions: TTransactions }): Promise<Block> {
     const previousBlock = await this.leveldb.getLastValidatedBlock();
-    const height = await this.leveldb.getLocalHighestBlockchainHeight();
+    const height = await this.leveldb.getBestBlockchainHeight();
 
     const newlyMinedBlock = Block.mineBlock({
       lastBlock: previousBlock,
@@ -56,7 +45,7 @@ class Blockchain {
     validateTransactions?: boolean,
     onSuccess?: () => void
   ): Promise<void> {
-    const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+    const bestHeight = await this.leveldb.getBestBlockchainHeight();
 
     if (incomingObj.info.height < bestHeight) {
       console.error('The incoming chain must be longer.');
@@ -163,53 +152,6 @@ class Blockchain {
     if (hash !== validatedHash) return false;
 
     if (Math.abs(lastDifficulty - difficulty) > 1) return false; // PREVENTS DIFFICULTY JUMPS GOING TOO LOW
-
-    return true;
-  }
-
-  // TODO - REMOVE?
-  replaceChain(incomingChain: IChain, onSuccess?: () => void): void {
-    if (
-      incomingChain.length > 1 &&
-      this.chain.length > 1 &&
-      incomingChain.length < this.chain.length
-    ) {
-      console.error('The incoming chain must be longer.');
-      return;
-    }
-
-    if (!Blockchain.isValidChain(incomingChain)) {
-      console.error('The incoming chain must be valid.');
-      return;
-    }
-
-    if (onSuccess) onSuccess();
-
-    this.chain = incomingChain;
-    logger.info(
-      `Replaced your LOCAL blockchain with the incoming consensus blockchain: ${size(
-        this.chain
-      )} bytes`
-    );
-  }
-
-  // TODO - REMOVE?
-  static isValidChain(chain: IChain): boolean {
-    if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
-
-    for (let i = 1; i < chain.length; i++) {
-      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
-      const cleanedTransactions = cleanUpTransaction({ transactions });
-      const previousHash = chain[i - 1].hash;
-      const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
-      const lastDifficulty = chain[i - 1].difficulty;
-
-      if (previousHash !== lastHash) return false;
-
-      if (hash !== validatedHash) return false;
-
-      if (Math.abs(lastDifficulty - difficulty) > 1) return false; // PREVENTS DIFFICULTY JUMPS GOING TOO LOW
-    }
 
     return true;
   }

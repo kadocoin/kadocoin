@@ -46,7 +46,7 @@ class TransactionMiner {
       // GENERATE MINER'S REWARD
       validTransactions.push(
         Transaction.rewardTransaction({
-          minerPublicKey: this.address,
+          minerAddress: this.address,
           ...(this.message && { message: this.message }),
           height,
           feeReward,
@@ -59,13 +59,13 @@ class TransactionMiner {
       // SAVE THE TRANSACTIONS' BALANCES IN DB
       await this.leveldb.addOrUpdateBal([newlyMinedBlock]);
 
-      // BROADCAST THE NEWLY MINED BLOCK AND PEER INFO NEEDED TO ACCOMPANY IT
-      await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
-
       // ADD BLOCK TO DB
       await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
         resolve(await this.leveldb.addBlocksToDB({ blocks: [newlyMinedBlock] }))
       );
+
+      // BROADCAST THE NEWLY MINED BLOCK AND PEER INFO NEEDED TO ACCOMPANY IT
+      await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
 
       // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
       this.transactionPool.clearBlockchainTransactions({

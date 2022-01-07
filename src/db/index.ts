@@ -95,7 +95,7 @@ class LevelDB {
 
   public async onStartSaveGenesisBlockToDB(chain: IChain): Promise<boolean> {
     return await new Promise(async resolve =>
-      this.getLocalHighestBlockchainHeight().then(bestHeight => {
+      this.getBestBlockchainHeight().then(bestHeight => {
         if (bestHeight > 0) return resolve(true);
 
         // SAVE BLOCKS TO DB
@@ -160,13 +160,13 @@ class LevelDB {
     };
   }
 
-  public async getLocalHighestBlockchainHeight(): Promise<number> {
+  public async getBestBlockchainHeight(): Promise<number> {
     try {
       const data = await this.getValue('latest-blk-height', this.latestBlockDB);
 
       return isEmptyObject(data.message) ? 0 : data.message.height;
     } catch (err) {
-      logger.error('Error at  getLocalHighestBlockchainHeight', err);
+      logger.error('Error at  getBestBlockchainHeight', err);
     }
   }
 

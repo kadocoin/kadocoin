@@ -200,7 +200,7 @@ describe('Wallet', () => {
             });
 
             sampleBlockTransaction = Transaction.rewardTransaction({
-              minerPublicKey: wallet.address,
+              minerAddress: wallet.address,
               message: '',
               blockchainLen: 0,
               feeReward: '0',

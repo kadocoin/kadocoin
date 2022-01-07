@@ -202,7 +202,7 @@ describe('Transaction', () => {
       minerWallet = new Wallet();
       chainLength = 10;
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: minerWallet.address,
+        minerAddress: minerWallet.address,
         message: '',
         blockchainLen: chainLength,
         feeReward: '0',

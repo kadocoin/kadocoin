@@ -182,7 +182,7 @@ export default class TransactionController {
           message,
         });
 
-        const height = await leveldb.getLocalHighestBlockchainHeight();
+        const height = await leveldb.getBestBlockchainHeight();
         const status = await transactionMiner.mineTransactions(height);
 
         // POOL CONTAINS INVALID TRANSACTIONS

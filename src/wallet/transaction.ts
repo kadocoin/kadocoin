@@ -144,17 +144,17 @@ class Transaction {
   }
 
   static rewardTransaction({
-    minerPublicKey,
+    minerAddress,
     message,
     height,
     feeReward,
   }: {
-    minerPublicKey: string;
+    minerAddress: string;
     message?: string;
     feeReward?: string;
     height: number;
   }): Transaction {
-    REWARD_INPUT.address = minerPublicKey;
+    REWARD_INPUT.address = minerAddress;
     REWARD_INPUT.timestamp = Date.now();
     message && (REWARD_INPUT.message = message);
     const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: height });
@@ -162,7 +162,7 @@ class Transaction {
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: rewardTotal.toFixed(8) },
+      output: { [minerAddress]: rewardTotal.toFixed(8) },
     });
   }
 

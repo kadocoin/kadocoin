@@ -110,7 +110,7 @@ const leveldb = new LevelDB();
 // ];
 
 // try {
-//   leveldb.getLocalHighestBlockchainHeight().then(data => console.log({ data }));
+//   leveldb.getBestBlockchainHeight().then(data => console.log({ data }));
 // } catch (error) {
 //   console.log({ error });
 // }

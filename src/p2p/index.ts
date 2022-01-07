@@ -252,7 +252,7 @@ class P2P {
     const aboutThisPeer = this.peerInfo();
     const localPeers = await this.getPeers();
     const combinedPeers = hardCodedPeers.concat(localPeers);
-    const localHighestBlockchainHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+    const localHighestBlockchainHeight = await this.leveldb.getBestBlockchainHeight();
 
     /** FOR EACH PEER */
     combinedPeers.forEach(peer => {
@@ -574,13 +574,13 @@ class P2P {
         (a, b) => Number(b) - Number(a)
       )[0];
 
-      const localBestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+      const localBestHeight = await this.leveldb.getBestBlockchainHeight();
 
       if (Number(remotesBestHeight) > localBestHeight) {
         const blockHeights = [];
 
         // CREATE AN ARRAY OF NUMBERS STARTING AFTER THIS PEER'S BEST HEIGHT AND THE REMOTES' HIGHEST BEST HEIGHT
-        for (let i = localBestHeight; i <= Number(remotesBestHeight); i++) {
+        for (let i = localBestHeight + 1; i <= Number(remotesBestHeight); i++) {
           blockHeights.push(i);
         }
 
@@ -606,7 +606,7 @@ class P2P {
       ) => void
     ) => {
       // CHECK VERSION
-      const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
+      const bestHeight = await this.leveldb.getBestBlockchainHeight();
 
       if (this.compareVersion(payload.data.version)) {
         // SEND THE REQUESTING PEER MY LOCAL PEERS

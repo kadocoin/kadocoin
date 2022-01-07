@@ -223,7 +223,7 @@ describe('Blockchain', () => {
       });
 
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: wallet.address,
+        minerAddress: wallet.address,
         message: '',
         blockchainLen: 10,
         feeReward: '0',
