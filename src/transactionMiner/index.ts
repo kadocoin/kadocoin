@@ -36,20 +36,19 @@ class TransactionMiner {
     this.leveldb = leveldb;
   }
 
-  async mineTransactions(): Promise<string> {
+  async mineTransactions(height: number): Promise<string> {
     // GET THE TRANSACTION POOL'S VALID TRANSACTIONS
     const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
       const feeReward = totalFeeReward({ transactions: validTransactions });
-      const bestHeight = await this.leveldb.getLocalHighestBlockchainHeight();
 
       // GENERATE MINER'S REWARD
       validTransactions.push(
         Transaction.rewardTransaction({
           minerPublicKey: this.address,
           ...(this.message && { message: this.message }),
-          height: bestHeight,
+          height,
           feeReward,
         })
       );

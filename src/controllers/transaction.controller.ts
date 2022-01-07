@@ -174,15 +174,16 @@ export default class TransactionController {
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({
-          blockchain: blockchain,
-          transactionPool: transactionPool,
-          address: address,
+          blockchain,
+          transactionPool,
+          address,
           p2p: p2p,
           leveldb,
-          message: message,
+          message,
         });
 
-        const status = await transactionMiner.mineTransactions();
+        const height = await leveldb.getLocalHighestBlockchainHeight();
+        const status = await transactionMiner.mineTransactions(height);
 
         // POOL CONTAINS INVALID TRANSACTIONS
         if (status !== 'success')
@@ -190,7 +191,7 @@ export default class TransactionController {
 
         // UPDATE MINING_REWARD
         new Mining_Reward().calc({
-          chainLength: blockchain.chain.length,
+          chainLength: height,
         });
 
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });

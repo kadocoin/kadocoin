@@ -148,7 +148,6 @@ class Blockchain {
   }
 
   static isValidBlock(incomingObj: incomingObj, previousBlock?: Block): boolean {
-    console.log('147', { previousBlock });
     const { timestamp, lastHash, hash, transactions, nonce, difficulty, hashOfAllHashes } =
       incomingObj.block;
     const cleanedTransactions = cleanUpTransaction({ transactions });
@@ -156,8 +155,6 @@ class Blockchain {
     const lastDifficulty = previousBlock.difficulty;
     const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
     const hashes = cryptoHash(previousBlock.hashOfAllHashes, hash);
-
-    console.log({ hashes, hashOfAllHashes });
 
     if (hashes !== hashOfAllHashes) return false;
 
