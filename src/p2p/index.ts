@@ -548,7 +548,7 @@ class P2P {
 
   async onSynGetBestHeightsFromPeers(): Promise<Record<string, IHost>> {
     try {
-      const combinedPeers = await this.localAndHardcodedPeers();
+      const combinedPeers = await this.getLocalAndHardcodedPeers();
 
       for await (const peer of combinedPeers) {
         if (peer.host !== this.ip_address) {
@@ -713,12 +713,12 @@ class P2P {
     }
   }
 
-  private async localAndHardcodedPeers(): Promise<IHost[]> {
+  private async getLocalAndHardcodedPeers(): Promise<IHost[]> {
     return new Promise((resolve, reject) => {
       try {
         this.getPeers().then(localPeers => resolve(hardCodedPeers.concat(localPeers)));
       } catch (err) {
-        logger.error('Error at localAndHardcodedPeers', err);
+        logger.error('Error at getLocalAndHardcodedPeers', err);
         reject(err);
       }
     });

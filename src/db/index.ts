@@ -109,12 +109,12 @@ class LevelDB {
     );
   }
 
-  public async getBlocks(start = 1, end?: number): Promise<IChain> {
+  public async getBlocksByRange(start = 1, end?: number): Promise<IChain> {
     return await new Promise(async (resolve, reject) => {
       try {
         const map = new Map();
 
-        // GET DEFAULT VALUE
+        // GET DEFAULT VALUE OF END IF NOT SET
         end = end ? end : await this.getBestBlockchainHeight();
 
         // GET ARRAY FROM `START` TO `END`
@@ -473,7 +473,7 @@ class LevelDB {
         if (err) {
           if (err.notFound) return resolve({ type: 'success', message: {} });
 
-          reject({ type: 'error', message: 'Error getting value. Please try again.' });
+          reject({ type: 'error', message: err });
         } else {
           return resolve({ type: 'success', message: value });
         }

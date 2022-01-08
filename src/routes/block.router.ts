@@ -23,12 +23,12 @@ export class BlockRouter {
   }
 
   initRoute(): void {
-    this.app.get('/blocks', leveldbMiddleWare(this.leveldb), this.blockController.getBlocks);
+    this.app.get('/blocks', leveldbMiddleWare(this.leveldb), this.blockController.getBlocksByRange);
 
     this.app.get(
       '/block/:blockHash',
       leveldbMiddleWare(this.leveldb),
-      this.blockController.getABlock
+      this.blockController.getBlockByHash
     );
   }
 }
