@@ -109,16 +109,16 @@ class LevelDB {
     );
   }
 
-  public async getBlocks(start = 1, end?: number): Promise<IChain> {
+  public async getBlocks(start = '1', end?: string): Promise<IChain> {
     return await new Promise(async (resolve, reject) => {
       try {
         const map = new Map();
 
         // CONFIGURE END
-        const e = end ? end : await this.getBestBlockchainHeight();
+        end = end ? end : ((await this.getBestBlockchainHeight()) as unknown as string);
 
         // GET ARRAY FROM `START` TO `END`
-        const heightsArr = this.generateArray(start, e);
+        const heightsArr = this.generateArray(start, end);
 
         // USE ARRAY OF HEIGHTS FROM ABOVE TO GET BLOCKS CORRESPONDING TO EACH HEIGHT
         for await (const height of heightsArr) {
@@ -139,10 +139,12 @@ class LevelDB {
     });
   }
 
-  generateArray(start: number, end: number): number[] {
+  generateArray(start: string, end: string): number[] {
     const arr = [];
-    for (let i = start; i <= end; i++) {
-      arr.push(i);
+    if (!isNaN(Number(start)) && !isNaN(Number(end))) {
+      for (let i = Number(start); i <= Number(end); i++) {
+        arr.push(i);
+      }
     }
     return arr;
   }

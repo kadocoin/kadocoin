@@ -6,13 +6,33 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { Request, Response } from 'express';
-import { INTERNAL_SERVER_ERROR, NOT_FOUND, SUCCESS } from '../statusCode/statusCode';
+import {
+  INCORRECT_VALIDATION,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  SUCCESS,
+} from '../statusCode/statusCode';
 import Block from '../blockchain/block';
+import { blocksRouteValidation } from '../validation/block.validation';
 
 export default class BlockController {
   getBlocks = async (req: Request, res: Response): Promise<Response> => {
     try {
-      const chain = await new Promise(async resolve => resolve(await req.leveldb.getBlocks(50)));
+      const { error } = blocksRouteValidation(req.query);
+      if (error)
+        return res
+          .status(INCORRECT_VALIDATION)
+          .json({ type: 'error', message: error.details[0].message });
+      console.log(
+        Number(req.query.start),
+        Number(req.query.end),
+        !isNaN(8),
+        isNaN(Number(req.query.start))
+      );
+
+      const chain = await new Promise(async resolve =>
+        resolve(await req.leveldb.getBlocks(req.query.start as string, req.query.end as string))
+      );
 
       return res.status(SUCCESS).json({ type: 'success', message: chain });
     } catch (error) {
