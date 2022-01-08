@@ -138,8 +138,10 @@ leveldb.openDBs().then(async is_open => {
     new BlockRouter(app, leveldb);
     new P2PRouter(app, p2p);
     new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet, leveldb);
+
+    // THIS IS THE LAST ROUTE. CATCHES ANY NON-EXISTING ROUTES
     app.get('*', (_: Request, res: Response) => {
-      res.send('Not Found');
+      res.send({ type: 'error', message: '404: Route does not exist. Please check and try again' });
     });
     next();
   };
