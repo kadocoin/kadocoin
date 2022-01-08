@@ -23,15 +23,13 @@ export default class BlockController {
         return res
           .status(INCORRECT_VALIDATION)
           .json({ type: 'error', message: error.details[0].message });
-      console.log(
-        Number(req.query.start),
-        Number(req.query.end),
-        !isNaN(8),
-        isNaN(Number(req.query.start))
-      );
+
+      // NO VALIDATIONS ERROR - QUERY PARAMS ARE EITHER EMPTY STRINGS OR NUMBER IN STRING FORM
+      const start = req.query.start ? Number(req.query.start) : undefined;
+      const end = req.query.end ? Number(req.query.end) : undefined;
 
       const chain = await new Promise(async resolve =>
-        resolve(await req.leveldb.getBlocks(req.query.start as string, req.query.end as string))
+        resolve(await req.leveldb.getBlocks(start, end))
       );
 
       return res.status(SUCCESS).json({ type: 'success', message: chain });

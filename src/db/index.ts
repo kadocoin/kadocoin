@@ -109,16 +109,16 @@ class LevelDB {
     );
   }
 
-  public async getBlocks(start = '1', end?: string): Promise<IChain> {
+  public async getBlocks(start = 1, end?: number): Promise<IChain> {
     return await new Promise(async (resolve, reject) => {
       try {
         const map = new Map();
 
-        // CONFIGURE END
-        end = end ? end : ((await this.getBestBlockchainHeight()) as unknown as string);
+        // GET DEFAULT VALUE
+        end = end ? end : await this.getBestBlockchainHeight();
 
         // GET ARRAY FROM `START` TO `END`
-        const heightsArr = this.generateArray(start, end);
+        const heightsArr = this.generateArrayRange(start, end);
 
         // USE ARRAY OF HEIGHTS FROM ABOVE TO GET BLOCKS CORRESPONDING TO EACH HEIGHT
         for await (const height of heightsArr) {
@@ -137,16 +137,6 @@ class LevelDB {
         reject(err);
       }
     });
-  }
-
-  generateArray(start: string, end: string): number[] {
-    const arr = [];
-    if (!isNaN(Number(start)) && !isNaN(Number(end))) {
-      for (let i = Number(start); i <= Number(end); i++) {
-        arr.push(i);
-      }
-    }
-    return arr;
   }
 
   // SAVES EACH BLOCK TO BLOCKS DB
@@ -503,6 +493,15 @@ class LevelDB {
         resolve({ type: 'success', message: 'Success' });
       });
     });
+
+  generateArrayRange(start: number, end: number): number[] {
+    const arr = [];
+
+    for (let i = start; i <= end; i++) {
+      arr.push(i);
+    }
+    return arr;
+  }
 }
 
 export default LevelDB;
