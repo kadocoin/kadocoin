@@ -341,6 +341,9 @@ class P2P {
       const status = await this.loopThroughPeers(peersAndHeights.peers as IHost[], height);
 
       if (!status) return false; //exit and restart - block height not found in all peers
+
+      // IT HAS FOUND BLOCK NUMBER `i` FROM ONE OF THE PEERS
+      if (status) logger.info(`Done`);
     }
 
     return true;
