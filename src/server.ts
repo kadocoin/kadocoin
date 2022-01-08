@@ -138,6 +138,9 @@ leveldb.openDBs().then(async is_open => {
     new BlockRouter(app, leveldb);
     new P2PRouter(app, p2p);
     new TransactionRouter(app, transactionPool, blockchain, p2p, localWallet, leveldb);
+    app.get('*', (_: Request, res: Response) => {
+      res.send('Not Found');
+    });
     next();
   };
 
@@ -151,6 +154,7 @@ leveldb.openDBs().then(async is_open => {
   app.use(express.json());
   app.use(initializeRoutes);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
   /** END MIDDLEWARES */
 
   app

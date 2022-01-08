@@ -12,8 +12,11 @@ import {
   NOT_FOUND,
   SUCCESS,
 } from '../statusCode/statusCode';
-import Block from '../blockchain/block';
-import { blocksRouteValidation } from '../validation/block.validation';
+import {
+  blocksRouteValidation,
+  getBlockByHashValidation,
+  getBlockByHeightValidation,
+} from '../validation/block.validation';
 import isEmptyObject from '../util/is-empty-object';
 
 export default class BlockController {
@@ -44,8 +47,14 @@ export default class BlockController {
 
   getBlockByHash = async (req: Request, res: Response): Promise<Response> => {
     try {
+      const { error } = getBlockByHashValidation(req.params.hash);
+      if (error)
+        return res
+          .status(INCORRECT_VALIDATION)
+          .json({ type: 'error', message: error.details[0].message });
+
       // USE THE HASH TO FIND THE BLOCK IN THE BLOCKS INDEX DB
-      const response = await req.leveldb.getValue(req.params.blockHash, req.leveldb.blocksIndexDB);
+      const response = await req.leveldb.getValue(req.params.hash, req.leveldb.blocksIndexDB);
 
       // IF THE BLOCK IS NOT FOUND, RETURN NOT FOUND
       if (isEmptyObject(response.message))
@@ -58,7 +67,29 @@ export default class BlockController {
       );
 
       // IF THE BLOCK IS NOT FOUND, RETURN NOT FOUND
-      if (!block) return res.status(NOT_FOUND).json({ type: 'error', message: 'Block not found' });
+      if (isEmptyObject(block.message))
+        return res.status(NOT_FOUND).json({ type: 'error', message: 'Block not found' });
+
+      return res.status(SUCCESS).json(block);
+    } catch (err) {
+      res.status(INTERNAL_SERVER_ERROR).json({ type: 'error', message: err.message });
+    }
+  };
+
+  getBlockByHeight = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { error } = getBlockByHeightValidation(req.params.height);
+      if (error)
+        return res
+          .status(INCORRECT_VALIDATION)
+          .json({ type: 'error', message: error.details[0].message });
+
+      // IF THE BLOCK INDEX IS FOUND USE IT TO FIND THE BLOCK IN THE BLOCKS DB
+      const block = await req.leveldb.getValue(req.params.height, req.leveldb.blocksDB);
+
+      // IF THE BLOCK IS NOT FOUND, RETURN NOT FOUND
+      if (isEmptyObject(block.message))
+        return res.status(NOT_FOUND).json({ type: 'error', message: 'Block not found' });
 
       return res.status(SUCCESS).json(block);
     } catch (err) {

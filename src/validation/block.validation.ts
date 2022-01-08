@@ -16,3 +16,11 @@ export const blocksRouteValidation = (query: ParsedQs): ValidationResult => {
 
   return blocksRouteSchema.validate(query);
 };
+
+export const getBlockByHashValidation = (hash: string): ValidationResult => {
+  return Joi.string().required().label('hash').validate(hash);
+};
+
+export const getBlockByHeightValidation = (height: string): ValidationResult => {
+  return Joi.number().required().label('height').validate(height);
+};
