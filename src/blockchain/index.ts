@@ -7,58 +7,62 @@
  */
 import Block from './block';
 import cryptoHash from '../util/crypto-hash';
-import { REWARD_INPUT } from '../config/constants';
+import { MAX_WEIGHT_TXN } from '../settings';
 import Transaction from '../wallet/transaction';
 import { IChain, incomingObj, TTransactions } from '../types';
 import size from '../util/size';
 import Mining_Reward from '../util/supply_reward';
 import { totalFeeReward } from '../util/transaction-metrics';
 import { cleanUpTransaction } from '../util/clean-up-transaction';
-import { KADOCOIN_VERSION } from '../config/secret';
+import { KADOCOIN_VERSION } from '../settings';
+import logger from '../util/logger';
+import LevelDB from '../db';
 
 class Blockchain {
   public chain: IChain;
+  public leveldb: LevelDB;
 
-  constructor() {
-    this.chain = [Block.genesis()];
+  constructor({ chain, leveldb }: { chain?: IChain; leveldb?: LevelDB } = {}) {
+    this.chain = chain && chain.length ? chain : [Block.genesis()];
+    this.leveldb = leveldb;
   }
 
-  addBlock({ transactions }: { transactions: TTransactions }): Block {
+  public async addBlock({ transactions }: { transactions: TTransactions }): Promise<Block> {
+    const previousBlock = await this.leveldb.getLastValidatedBlock();
+    const height = await this.leveldb.getBestBlockchainHeight();
+
     const newlyMinedBlock = Block.mineBlock({
-      lastBlock: this.chain[this.chain.length - 1],
+      lastBlock: previousBlock,
       transactions,
-      chain: this.chain,
+      height,
     });
 
-    this.chain.push(newlyMinedBlock);
     return newlyMinedBlock;
   }
 
-  sort({ chain }: { chain: IChain }): IChain {
-    return chain.sort((a, b) => {
-      if (a.timestamp > b.timestamp) return 1;
-      if (a.timestamp < b.timestamp) return -1;
-      return 0;
-    });
-  }
-
-  addBlockFromPeerToLocal(
+  async addBlockFromPeerToLocal(
     incomingObj: incomingObj,
     validateTransactions?: boolean,
-    localBlockchain?: IChain,
     onSuccess?: () => void
-  ): void {
-    if (incomingObj.info.height < localBlockchain.length) {
+  ): Promise<void> {
+    const bestHeight = await this.leveldb.getBestBlockchainHeight();
+
+    if (incomingObj.info.height < bestHeight) {
       console.error('The incoming chain must be longer.');
       return;
     }
 
-    if (!Blockchain.isValidBlock(incomingObj, localBlockchain)) {
+    const previousBlock = await this.leveldb.getLastValidatedBlock();
+
+    if (!Blockchain.isValidBlock(incomingObj, previousBlock)) {
       console.error('The incoming block is not valid.');
       return;
     }
 
-    if (validateTransactions && !this.isValidTransactionData({ block: incomingObj.block })) {
+    if (
+      validateTransactions &&
+      !this.isValidTransactionData({ block: incomingObj.block, bestHeight })
+    ) {
       console.error('The incoming block has an invalid transaction');
       return;
     }
@@ -70,24 +74,29 @@ class Blockchain {
 
     if (onSuccess) onSuccess();
 
-    this.chain.push(incomingObj.block);
-
-    console.log(
-      `The new block that was sent by a peer was added to your LOCAL blockchain: Your local blockchain now weighs ${size(
-        this.chain
-      )} bytes`
+    // SAVES BLOCK TO BLOCKS DB
+    // SAVES BLOCK TO BLOCKS INDEX DB
+    // UPDATES BEST HEIGHT
+    await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
+      resolve(await this.leveldb.addBlocksToDB({ blocks: [incomingObj.block] }))
     );
+
+    logger.info(`New block successfully added.`);
   }
 
-  isValidTransactionData({ block }: { block: Block }): boolean {
+  isValidTransactionData({ block, bestHeight }: { block: Block; bestHeight: number }): boolean {
     let rewardTransactionCount = 0;
     const transactionSet = new Set();
     const feeReward = totalFeeReward({ transactions: block.transactions });
-    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: this.chain.length });
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: bestHeight });
     const totalReward = (Number(MINING_REWARD) + Number(feeReward)).toFixed(8);
+    let weight = 0;
 
     for (const transaction of block.transactions) {
-      if (transaction.input.address === REWARD_INPUT.address) {
+      if (Object.values(transaction.output).length === 1) {
+        /**
+         * REWARD TRANSACTION
+         */
         rewardTransactionCount += 1;
 
         if (rewardTransactionCount > 1) {
@@ -112,23 +121,29 @@ class Blockchain {
           transactionSet.add(transaction);
         }
       }
+
+      weight += Number(size(transaction));
     }
-    // END FOR LOOP
+
+    // CHECK FOR TRANSACTIONS LIMIT
+    if (weight > MAX_WEIGHT_TXN) {
+      console.error('Transactions exceeds limit.');
+      return false;
+    }
+
+    logger.info('Block Transactions weight', { weight });
 
     return true;
   }
 
-  static isValidBlock(incomingObj: incomingObj, localBlockchain?: IChain): boolean {
+  static isValidBlock(incomingObj: incomingObj, previousBlock?: Block): boolean {
     const { timestamp, lastHash, hash, transactions, nonce, difficulty, hashOfAllHashes } =
       incomingObj.block;
     const cleanedTransactions = cleanUpTransaction({ transactions });
-    const previousBlock = localBlockchain[localBlockchain.length - 1];
     const previousHash = previousBlock.hash;
     const lastDifficulty = previousBlock.difficulty;
     const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
     const hashes = cryptoHash(previousBlock.hashOfAllHashes, hash);
-
-    console.log({ hashes, hashOfAllHashes });
 
     if (hashes !== hashOfAllHashes) return false;
 
@@ -137,94 +152,6 @@ class Blockchain {
     if (hash !== validatedHash) return false;
 
     if (Math.abs(lastDifficulty - difficulty) > 1) return false; // PREVENTS DIFFICULTY JUMPS GOING TOO LOW
-
-    return true;
-  }
-
-  // OLD
-  replaceChain(incomingChain: IChain, onSuccess?: () => void): void {
-    if (
-      incomingChain.length > 1 &&
-      this.chain.length > 1 &&
-      incomingChain.length <= this.chain.length
-    ) {
-      console.error('The incoming chain must be longer.');
-      return;
-    }
-
-    if (!Blockchain.isValidChain(incomingChain)) {
-      console.error('The incoming chain must be valid.');
-      return;
-    }
-
-    if (onSuccess) onSuccess();
-
-    this.chain = incomingChain;
-    console.log(
-      `Replaced your LOCAL blockchain with the incoming consensus blockchain: ${size(
-        this.chain
-      )} bytes`
-    );
-  }
-
-  validTransactionData({ chain }: { chain: IChain }): boolean {
-    for (let i = 1; i < chain.length; i++) {
-      let rewardTransactionCount = 0;
-      const block = chain[i];
-      const transactionSet = new Set();
-      const feeReward = totalFeeReward({ transactions: block.transactions });
-      const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: this.chain.length });
-      const totalReward = (Number(MINING_REWARD) + Number(feeReward)).toFixed(8);
-
-      for (const transaction of block.transactions) {
-        if (transaction.input.address === REWARD_INPUT.address) {
-          rewardTransactionCount += 1;
-
-          if (rewardTransactionCount > 1) {
-            console.error('Miner rewards exceed limit');
-            return false;
-          }
-
-          if (Object.values(transaction.output)[0] !== totalReward) {
-            console.error('Miner reward amount is invalid');
-            return false;
-          }
-        } else {
-          if (!Transaction.validTransaction(transaction)) {
-            console.error('Invalid transaction');
-            return false;
-          }
-
-          if (transactionSet.has(transaction)) {
-            console.error('An identical transaction appears more than once in the block');
-            return false;
-          } else {
-            transactionSet.add(transaction);
-          }
-        }
-      }
-      // END FOR LOOP
-    }
-
-    return true;
-  }
-
-  static isValidChain(chain: IChain): boolean {
-    if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) return false;
-
-    for (let i = 1; i < chain.length; i++) {
-      const { timestamp, lastHash, hash, transactions, nonce, difficulty } = chain[i];
-      const cleanedTransactions = cleanUpTransaction({ transactions });
-      const previousHash = chain[i - 1].hash;
-      const validatedHash = cryptoHash(timestamp, lastHash, cleanedTransactions, nonce, difficulty);
-      const lastDifficulty = chain[i - 1].difficulty;
-
-      if (previousHash !== lastHash) return false;
-
-      if (hash !== validatedHash) return false;
-
-      if (Math.abs(lastDifficulty - difficulty) > 1) return false; // PREVENTS DIFFICULTY JUMPS GOING TOO LOW
-    }
 
     return true;
   }

@@ -8,14 +8,14 @@
 import { Application } from 'express';
 import Blockchain from '../blockchain';
 import TransactionController from '../controllers/transaction.controller';
+import LevelDB from '../db';
 import {
   blockchainMiddleWare,
-  pubSubMiddleWare,
+  leveldbMiddleWare,
+  p2pMiddleWare,
   transactionPoolMiddleWare,
   walletMiddleWare,
 } from '../middleware/cryptoMiddleWare';
-import { must_be_verified } from '../middleware/must_be_verified';
-import PubSub from '../pubSub';
 import Wallet from '../wallet';
 import TransactionPool from '../wallet/transaction-pool';
 
@@ -24,43 +24,38 @@ export default class TransactionRouter {
   private transactionController: TransactionController;
   private transactionPool: TransactionPool;
   private blockchain: Blockchain;
-  private pubSub: PubSub;
+  private p2p: any;
   private localWallet: Wallet;
+  leveldb: LevelDB;
 
   constructor(
     app: Application,
     transactionPool: TransactionPool,
     blockchain: Blockchain,
-    pubSub: PubSub,
-    localWallet: Wallet
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    p2p: any,
+    localWallet: Wallet,
+    leveldb: LevelDB
   ) {
     this.app = app;
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
-    this.pubSub = pubSub;
+    this.p2p = p2p;
     this.transactionController = new TransactionController();
     this.localWallet = localWallet;
+    this.leveldb = leveldb;
     this.initRoute();
   }
 
   initRoute(): void {
     this.app.post(
-      '/transact',
-      must_be_verified,
+      '/create-transaction',
       walletMiddleWare(this.localWallet),
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
-      this.transactionController.make
-    );
-
-    this.app.post(
-      '/send',
-      walletMiddleWare(this.localWallet),
-      transactionPoolMiddleWare(this.transactionPool),
-      blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
-      this.transactionController.send
+      p2pMiddleWare(this.p2p),
+      leveldbMiddleWare(this.leveldb),
+      this.transactionController.createTransaction
     );
 
     this.app.get(
@@ -79,8 +74,9 @@ export default class TransactionRouter {
       '/mine-transactions',
       transactionPoolMiddleWare(this.transactionPool),
       blockchainMiddleWare(this.blockchain),
-      pubSubMiddleWare(this.pubSub),
-      this.transactionController.mine
+      p2pMiddleWare(this.p2p),
+      leveldbMiddleWare(this.leveldb),
+      this.transactionController.mineTransactions
     );
   }
 }

@@ -5,7 +5,7 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { sampleDataForTests } from '../config/constants';
+import { sampleDataForTests } from '../settings';
 import cryptoHash from '../util/crypto-hash';
 import Block from './block';
 import Blockchain from '.';
@@ -197,9 +197,8 @@ describe('Blockchain', () => {
           blockchain.replaceChain(newChain.chain);
         });
         it('replaces the chain', () => {
-          expect(blockchain.sort({ chain: blockchain.chain })).toEqual(newChain.chain);
+          expect(blockchain.chain).toEqual(newChain.chain);
         });
-
         it('logs about the chain replacement', () => {
           expect(logMock).toHaveBeenCalled();
         });
@@ -207,7 +206,7 @@ describe('Blockchain', () => {
     });
   });
 
-  describe('validTransactionData()', () => {
+  describe('isValidTransactionData()', () => {
     let transaction: Transaction, rewardTransaction: Transaction, wallet: Wallet, message: string;
 
     beforeEach(() => {
@@ -219,11 +218,12 @@ describe('Blockchain', () => {
         amount: 65,
         address: wallet.address,
         publicKey: wallet.publicKey,
+        localWallet: wallet,
         message,
       });
 
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: wallet.address,
+        minerAddress: wallet.address,
         message: '',
         blockchainLen: 10,
         feeReward: '0',
@@ -231,55 +231,61 @@ describe('Blockchain', () => {
     });
 
     describe('and transaction transactions is valid', () => {
-      it('returns true', () => {
-        newChain.addBlock({ transactions: [transaction, rewardTransaction] });
+      it('returns true', async () => {
+        const newlyMinedBlock = await newChain.addBlock({
+          transactions: [transaction, rewardTransaction],
+        });
 
-        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(true);
+        expect(blockchain.isValidTransactionData({ block: newlyMinedBlock })).toBe(true);
         expect(errorMock).not.toHaveBeenCalled();
       });
     });
 
     describe('and the transaction transactions has multiple rewards', () => {
-      it('returns false and logs and error', () => {
-        newChain.addBlock({
+      it('returns false and logs and error', async () => {
+        const newlyMinedBlock = await newChain.addBlock({
           transactions: [transaction, rewardTransaction, rewardTransaction],
         });
-        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+        expect(blockchain.isValidTransactionData({ block: newlyMinedBlock })).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });
 
     describe('and the transaction transactions has at least one malformed output', () => {
       describe('and the transaction is not a reward transaction', () => {
-        it('returns false and logs and error', () => {
+        it('returns false and logs and error', async () => {
           transaction.output[wallet.address] = (999999).toFixed(8);
 
-          newChain.addBlock({ transactions: [transaction, rewardTransaction] });
+          const newlyMinedBlock = await newChain.addBlock({
+            transactions: [transaction, rewardTransaction],
+          });
 
-          expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+          expect(blockchain.isValidTransactionData({ block: newlyMinedBlock })).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
       });
 
       describe('and the transaction is a reward transaction', () => {
-        it('returns false and logs and error', () => {
+        it('returns false and logs and error', async () => {
           rewardTransaction.output[wallet.address] = '999999';
 
-          newChain.addBlock({ transactions: [transaction, rewardTransaction] });
+          const newlyMinedBlock = await newChain.addBlock({
+            transactions: [transaction, rewardTransaction],
+          });
 
-          expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+          expect(blockchain.isValidTransactionData({ block: newlyMinedBlock })).toBe(false);
           expect(errorMock).toHaveBeenCalled();
         });
       });
     });
 
     describe('and a block contains multiple identical transaction', () => {
-      it('returns false and logs an error', () => {
-        newChain.addBlock({
+      it('returns false and logs an error', async () => {
+        const newlyMinedBlock = await newChain.addBlock({
           transactions: [transaction, transaction, transaction],
         });
 
-        expect(blockchain.validTransactionData({ chain: newChain.chain })).toBe(false);
+        expect(blockchain.isValidTransactionData({ block: newlyMinedBlock })).toBe(false);
         expect(errorMock).toHaveBeenCalled();
       });
     });

@@ -6,6 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { TTransactions } from '../types';
+import Transaction from '../wallet/transaction';
 
 export function transactionVolume({ transactions }: { transactions: TTransactions }): string {
   let totalTransactionsAmount = 0;
@@ -66,4 +67,21 @@ export function calcOutputTotal(output: { [key: string]: string }): string {
   }
 
   return total.toFixed(8);
+}
+
+export function getTotalSent(transaction: Transaction): string {
+  let totalSent = 0;
+
+  // GET RID OF REWARD TRANSACTION
+  if (Object.values(transaction['output']).length !== 1) {
+    Object.entries(transaction['output']).forEach(([, newly_received_coins], index) => {
+      // GET RID OF SENDER
+      if (index !== 0) {
+        // ALL RECEIVERS
+        totalSent += Number(newly_received_coins);
+      }
+    });
+  }
+
+  return totalSent.toFixed(8);
 }

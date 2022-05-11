@@ -1,45 +1,145 @@
-function cleanUpTransaction(transactions: any) {
-  const items = [];
-  for (let i = 0; i < transactions.length; i++) {
-    const transaction = transactions[i];
-    // ADD ID
-    items.push(transaction.id);
-    // ADD AMOUNT
-    Object.values(transaction['output']).map(o => items.push(o));
+// import { rmSync } from 'fs';
+// import { balancesStorageFolder } from './config/constants';
 
-    // ADD INPUT VALUES
-    for (const key in transaction['input']) {
-      if (Object.prototype.hasOwnProperty.call(transaction['input'], key)) {
-        if (key == 'timestamp') items.push(transaction['input'][key]);
-        if (key == 'amount') items.push(transaction['input'][key]);
-        if (key == 'address') items.push(transaction['input'][key]);
-        if (key == 'publicKey') items.push(transaction['input'][key]);
-        if (key == 'localPublicKey') items.push(transaction['input'][key]);
-      }
-    }
-  }
+// const res = rmSync('test.js', { force: true });
 
-  return items;
-}
+import LevelDB from './db';
+const leveldb = new LevelDB();
 
-const data = [
-  {
-    id: '73694f20-e7cf-11eb-96e5-61eb83113e1c',
-    output: {
-      '0x86045b56bfeb1A35C6818081130BA0F789dc27c9': '1420.00000000',
-      '0xf13C09968D48271991018A956C49940c41eCb1c3': '30.00000000',
-    },
-    input: {
-      timestamp: 1626616378314,
-      amount: '1450.00000000',
-      address: '0x86045b56bfeb1A35C6818081130BA0F789dc27c9',
-      publicKey:
-        '04a5bdca39766c537b433e266e4903f7638b33eee5d75002870f420a897655cf1ac22ef42c59b52c81f918dd12f1061ca98f70ad3897c1a97d036251ca0a0008ac',
-      localPublicKey:
-        '040e9d64d4ee0fa90efb8bd6c1a0b8509fe20be9371dddef1fa2acaf922c23a775dd191dc32f59f712bd1ea17ab9dd4378cd98bfd31355bf4b504f7c36857db2c3',
-      signature: { r: '', s: '' },
-    },
-  },
-];
+(async function () {
+  const res = await leveldb.getBlocks(50);
+  console.log(res);
+})();
 
-console.log(cleanUpTransaction(data));
+// const sampleBlocks = [
+//   {
+//     timestamp: 1630978190500,
+//     lastHash: '*None*',
+//     hash: '006184d4751c4880ef0d732b76f8d46a17d395fbc9f0488a41f64f48b1468918',
+//     transactions: [
+//       {
+//         id: '1784b590-0f7b-11ec-968e-09008debbed9',
+//         output: {
+//           '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db-2': '0.00000000',
+//           '0x86045b56bfeb1A35C6818081130BA0F789dc27c9-2': '40.00000000',
+//         },
+//         input: {
+//           timestamp: 1630978189162,
+//           amount: '1000.00000000',
+//           address: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
+//           publicKey:
+//             '04903a1dfd7d49ebb3d6f69968da1da9a267dea75a303eada48985cddd4197547ae706e45dd389be0f3a22fbf962a7420a902cc97877e52d84e73c18aa23990e05',
+//           signature: {
+//             r: 'da0f4b658758032fa567e753d5202491caaacc285af17c83c3d2bb4407ac02a9',
+//             s: '187c538ddcd3fb647fc065e7d95cc0653bcecaa6862f28d6ce77d714078b67ec',
+//             recoveryParam: 1,
+//           },
+//         },
+//       },
+//       {
+//         id: '184e4720-0f7b-11ec-968e-09008debbed9',
+//         output: {
+//           '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db-2-3': '50.00000000',
+//         },
+//         input: {
+//           timestamp: 1630978215295,
+//           amount: '',
+//           address: '',
+//           publicKey: '',
+//           recipient: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
+//           signature: '',
+//         },
+//       },
+//     ],
+//     nonce: 775,
+//     difficulty: 9,
+//     blockSize: '1,078',
+//     transactionVolume: '90.00000000',
+//     blockReward: '50.00000000',
+//     feeReward: '0.00000000',
+//     blockchainHeight: 6,
+//     hashOfAllHashes: 'c8013ff364db13877c33be317e437c31d07841bc52be28dc5a7a256d54cb0359',
+//   },
+//   {
+//     timestamp: 1630978190500,
+//     lastHash: '*None*',
+//     hash: '006184d4751c4880ef0d732b76f8d46a17d395fbc9f0488a41f64f48b1468918',
+//     transactions: [
+//       {
+//         id: '1784b590-0f7b-11ec-968e-09008debbed9',
+//         output: {
+//           '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db-2': '0.00000000',
+//           '0x86045b56bfeb1A35C6818081130BA0F789dc27c9-2': '40.00000000',
+//         },
+//         input: {
+//           timestamp: 1630978189162,
+//           amount: '1000.00000000',
+//           address: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
+//           publicKey:
+//             '04903a1dfd7d49ebb3d6f69968da1da9a267dea75a303eada48985cddd4197547ae706e45dd389be0f3a22fbf962a7420a902cc97877e52d84e73c18aa23990e05',
+//           signature: {
+//             r: 'da0f4b658758032fa567e753d5202491caaacc285af17c83c3d2bb4407ac02a9',
+//             s: '187c538ddcd3fb647fc065e7d95cc0653bcecaa6862f28d6ce77d714078b67ec',
+//             recoveryParam: 1,
+//           },
+//         },
+//       },
+//       {
+//         id: '184e4720-0f7b-11ec-968e-09008debbed9',
+//         output: {
+//           '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db-2-3': '50.00000000',
+//         },
+//         input: {
+//           timestamp: 1630978215295,
+//           amount: '',
+//           address: '',
+//           publicKey: '',
+//           recipient: '0x1dcc99E8Da20FF2455461B6b4Afd7283E554A2Db',
+//           signature: '',
+//         },
+//       },
+//     ],
+//     nonce: 775,
+//     difficulty: 9,
+//     blockSize: '1,078',
+//     transactionVolume: '90.00000000',
+//     blockReward: '50.00000000',
+//     feeReward: '0.00000000',
+//     blockchainHeight: 2,
+//     hashOfAllHashes: 'c8013ff364db13877c33be317e437c31d07841bc52be28dc5a7a256d54cb0359',
+//   },
+// ];
+
+// try {
+//   leveldb.getBestBlockchainHeight().then(data => console.log({ data }));
+// } catch (error) {
+//   console.log({ error });
+// }
+
+// leveldb.getAllKeysAndValues();
+// function dec2bin(dec: number) {
+//   return (dec >>> 0).toString(2);
+// }
+
+// console.log(dec2bin(2))
+
+// (async function () {
+//   await leveldb.addOrUpdateBal(sampleBlocks as unknown[] as Block[]);
+// })();
+
+// const ops = [
+//   { key: 'a', value: 'Yuri Irsenovich Kim' },
+//   { key: 'b', value: '16 February 1941' },
+//   { key: 'c', value: 'Kim Young-sook' },
+//   { key: 'd', value: 'Clown' },
+// ];
+
+// ops.forEach(data => leveldb.balancesDB.put(data.key, data.value, err => console.log(err)));
+
+// leveldb.balancesDB.put('d', 'Hello from Kado Village!!!', err => console.log(err));
+
+// leveldb.balancesDB
+//   .createReadStream({ reverse: true, keys: true, values: true })
+//   .on('data', (data: { key: string; value: any }) => console.log({ data }));
+
+// setTimeout(() => leveldb.getAllKeysAndValues(), 10000);

@@ -9,7 +9,7 @@ import Blockchain from '../blockchain';
 import Wallet from '.';
 import Transaction from './transaction';
 import TransactionPool from './transaction-pool';
-import { sampleDataForTests } from '../config/constants';
+import { sampleDataForTests } from '../settings';
 
 describe('TransactionPool', () => {
   let transactionPool: TransactionPool,
@@ -105,6 +105,7 @@ describe('TransactionPool', () => {
         const transaction = new Wallet().createTransaction({
           recipient: 'Kado',
           amount: 20,
+          localWallet: senderWallet,
         });
         transactionPool.setTransaction(transaction);
 

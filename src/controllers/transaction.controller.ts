@@ -6,11 +6,7 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { Request, Response } from 'express';
-import {
-  mineValidation,
-  sendValidation,
-  transactValidation,
-} from '../validation/transaction.validation';
+import { mineValidation, sendValidation } from '../validation/transaction.validation';
 import {
   INTERNAL_SERVER_ERROR,
   CREATED,
@@ -18,128 +14,12 @@ import {
   SUCCESS,
   INCORRECT_VALIDATION,
 } from '../statusCode/statusCode';
-import Wallet from '../wallet';
 import TransactionMiner from '../transactionMiner';
-import isEmptyObject from '../util/isEmptyObject';
-import { isValidChecksumAddress } from '../util/pubKeyToAddress';
-import Transaction from '../wallet/transaction';
-import sanitizeHTML from 'sanitize-html';
+import isEmptyObject from '../util/is-empty-object';
+import { isValidChecksumAddress } from '../util/pubkey-to-address';
 import Mining_Reward from '../util/supply_reward';
-import sanitize_html from '../util/sanitize_html';
 
 export default class TransactionController {
-  /**
-   * Send Kadocoin
-   *
-   * @method make
-   * @param {Request} req Express Request object
-   * @param {Response} res Express Response object
-   * @return a transaction object
-   */
-  make = async (req: Request, res: Response): Promise<Response> => {
-    // ENFORCE 8 DECIMAL PLACES
-    if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message:
-          'You can only send up to eight(8) decimal places or 100 millionths of one Kadocoin',
-      });
-
-    // VALIDATE OTHER USER INPUTS
-    const { error } = transactValidation(req.body);
-    if (error)
-      return res
-        .status(INCORRECT_VALIDATION)
-        .json({ type: 'error', message: error.details[0].message });
-
-    // GRAB USER INPUTS
-    let { amount, recipient, publicKey, address, message, sendFee } = req.body;
-
-    // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-    amount = sanitize_html(amount);
-    recipient = sanitize_html(recipient);
-    publicKey = sanitize_html(publicKey);
-    address = sanitize_html(address);
-    message && (message = sanitize_html(message)); // OPTIONAL
-    sendFee && (sendFee = sanitize_html(sendFee)); // OPTIONAL
-
-    // CHECK THE VALIDITY OF RECIPIENT ADDRESS
-    if (!isValidChecksumAddress(recipient.trim()))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Invalid recipient address.',
-      });
-
-    // CHECK THE VALIDITY OF SENDER ADDRESS
-    if (!isValidChecksumAddress(address.trim()))
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Invalid sender address.',
-      });
-
-    // GRAB NECESSARY MIDDLEWARES
-    const { transactionPool, blockchain, pubSub, localWallet } = req;
-
-    // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
-    if (recipient === address)
-      return res.status(INCORRECT_VALIDATION).json({
-        type: 'error',
-        message: 'Sender and receiver address cannot be the same.',
-      });
-
-    // CHECK FOR EXISTING TRANSACTION
-    let transaction = transactionPool.existingTransactionPool({
-      inputAddress: address,
-    });
-
-    try {
-      if (transaction) {
-        console.log('Update transaction');
-        // GET UP TO DATE USER BALANCE
-        const balance = Wallet.calculateBalance({
-          address: address,
-          chain: blockchain.chain,
-        });
-
-        console.log('instance of Transaction', transaction instanceof Transaction);
-
-        transaction.update({
-          publicKey,
-          address,
-          recipient,
-          amount: Number(amount),
-          balance,
-          localWallet,
-          message,
-          sendFee,
-        });
-      } else {
-        console.log('New transaction');
-        transaction = localWallet.createTransaction({
-          recipient,
-          amount: Number(amount),
-          chain: blockchain.chain,
-          publicKey,
-          address,
-          message,
-          sendFee,
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        return res.status(NOT_FOUND).json({ type: 'error', message: error.message });
-      }
-    }
-
-    transactionPool.setTransaction(transaction);
-
-    pubSub.broadcastTransaction(transaction);
-
-    // TODO: SAVE TRANSACTION TO DB
-
-    return res.status(CREATED).json({ type: 'success', transaction });
-  };
-
   /**
    * Send Kadocoin
    *
@@ -148,7 +28,7 @@ export default class TransactionController {
    * @param {Response} res Express Response object
    * @return a transaction object
    */
-  send = async (req: Request, res: Response): Promise<Response> => {
+  createTransaction = async (req: Request, res: Response): Promise<Response> => {
     // ENFORCE 8 DECIMAL PLACES
     if (req.body.amount && !/^\d*\.?\d{1,8}$/.test(req.body.amount))
       return res.status(INCORRECT_VALIDATION).json({
@@ -165,14 +45,7 @@ export default class TransactionController {
         .json({ type: 'error', message: error.details[0].message });
 
     // GRAB USER INPUTS
-    let { amount, recipient, address, message, sendFee } = req.body;
-
-    // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-    amount = sanitize_html(amount);
-    recipient = sanitize_html(recipient);
-    address = sanitize_html(address);
-    message && (message = sanitize_html(message)); // OPTIONAL
-    sendFee && (sendFee = sanitize_html(sendFee)); // OPTIONAL
+    const { amount, recipient, address, message, sendFee } = req.body;
 
     // CHECK THE VALIDITY OF RECIPIENT ADDRESS
     if (!isValidChecksumAddress(recipient.trim()))
@@ -188,15 +61,20 @@ export default class TransactionController {
         message: 'Invalid sender address.',
       });
 
-    // GRAB NECESSARY MIDDLEWARES
-    const { transactionPool, blockchain, pubSub, localWallet } = req;
-
     // ENFORCE SO THAT A USER CANNOT SEND KADOCOIN TO THEMSELVES
     if (recipient === address)
       return res.status(INCORRECT_VALIDATION).json({
         type: 'error',
         message: 'Sender and receiver address cannot be the same.',
       });
+
+    // GRAB NECESSARY MIDDLEWARES
+    const { transactionPool, p2p, localWallet, leveldb } = req;
+
+    const data = await leveldb.getBal(address);
+
+    if (data.type == 'error')
+      return res.status(NOT_FOUND).json({ type: 'error', message: data.message });
 
     // CHECK FOR EXISTING TRANSACTION
     let transaction = transactionPool.existingTransactionPool({
@@ -205,31 +83,25 @@ export default class TransactionController {
 
     try {
       if (transaction) {
-        console.log('Update transaction');
-        // GET UP TO DATE USER BALANCE
-        const balance = Wallet.calculateBalance({
-          address: address,
-          chain: blockchain.chain,
-        });
-
-        console.log('instance of Transaction', transaction instanceof Transaction);
+        console.log('Update transaction'); // REMOVE
 
         transaction.update({
-          publicKey: transaction.input.localPublicKey,
           address,
           recipient,
           amount: Number(amount),
-          balance,
+          balance: data.message,
           localWallet,
           message,
           sendFee,
         });
       } else {
-        console.log('New transaction');
+        console.log('New transaction'); // REMOVE
+
         transaction = localWallet.createTransaction({
           recipient,
           amount: Number(amount),
-          chain: blockchain.chain,
+          balance: data.message,
+          localWallet,
           publicKey: localWallet.publicKey,
           address,
           message,
@@ -242,11 +114,11 @@ export default class TransactionController {
       }
     }
 
+    /** SAVE TRANSACTION TO MEMORY */
     transactionPool.setTransaction(transaction);
 
-    pubSub.broadcastTransaction(transaction);
-
-    // TODO: SAVE TRANSACTION TO DB
+    /** SEND TRANSACTION TO OTHER PEERS */
+    p2p.sendTransactions(transaction);
 
     return res.status(CREATED).json({ type: 'success', transaction });
   };
@@ -282,7 +154,7 @@ export default class TransactionController {
     }
   };
 
-  mine = async (req: Request, res: Response): Promise<Response> => {
+  mineTransactions = async (req: Request, res: Response): Promise<Response> => {
     try {
       const { error } = mineValidation(req.body);
       if (error)
@@ -294,32 +166,23 @@ export default class TransactionController {
        * @param address miner address
        * @param message miner message
        */
-      let { address, message } = req.body;
-
-      // SANITIZE - REMOVE SCRIPTS/HTML TAGS
-      address = sanitizeHTML(address, {
-        allowedTags: [],
-        allowedAttributes: {},
-      });
-      message &&
-        (message = sanitizeHTML(message, {
-          allowedTags: [],
-          allowedAttributes: {},
-        }));
+      const { address, message } = req.body;
 
       // GRAB NECESSARY MIDDLEWARES
-      const { transactionPool, blockchain, pubSub } = req;
+      const { transactionPool, blockchain, p2p, leveldb } = req;
 
       if (!isEmptyObject(transactionPool.transactionMap)) {
         const transactionMiner = new TransactionMiner({
-          blockchain: blockchain,
-          transactionPool: transactionPool,
-          address: address,
-          pubSub: pubSub,
-          message: message,
+          blockchain,
+          transactionPool,
+          address,
+          p2p: p2p,
+          leveldb,
+          message,
         });
 
-        const status = transactionMiner.mineTransactions();
+        const height = await leveldb.getBestBlockchainHeight();
+        const status = await transactionMiner.mineTransactions(height);
 
         // POOL CONTAINS INVALID TRANSACTIONS
         if (status !== 'success')
@@ -327,7 +190,7 @@ export default class TransactionController {
 
         // UPDATE MINING_REWARD
         new Mining_Reward().calc({
-          chainLength: blockchain.chain.length,
+          chainLength: height,
         });
 
         return res.status(SUCCESS).json({ type: 'success', message: 'Success' });

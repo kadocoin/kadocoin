@@ -6,61 +6,71 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Blockchain from '../blockchain';
-import PubSub from '../pubSub';
 import { ITMinerConstructorParams } from '../types';
 import { totalFeeReward } from '../util/transaction-metrics';
 import Transaction from '../wallet/transaction';
 import TransactionPool from '../wallet/transaction-pool';
-import { KADOCOIN_VERSION, LOCAL_IP } from '../config/secret';
-import appendToFile from '../util/appendToFile';
-import { blockchainStorageFile } from '../config/constants';
+import LevelDB from '../db';
 
 class TransactionMiner {
   public blockchain: Blockchain;
   public transactionPool: TransactionPool;
-  public pubSub: PubSub;
+  public p2p: any;
+  public leveldb: LevelDB;
   public address: string;
   public message?: string;
 
-  constructor({ blockchain, transactionPool, address, pubSub, message }: ITMinerConstructorParams) {
+  constructor({
+    blockchain,
+    transactionPool,
+    address,
+    p2p,
+    message,
+    leveldb,
+  }: ITMinerConstructorParams) {
     this.blockchain = blockchain;
     this.transactionPool = transactionPool;
-    this.pubSub = pubSub;
+    this.p2p = p2p;
     this.address = address;
     this.message = message;
+    this.leveldb = leveldb;
   }
 
-  mineTransactions(): string {
+  async mineTransactions(height: number): Promise<string> {
     // GET THE TRANSACTION POOL'S VALID TRANSACTIONS
     const validTransactions = this.transactionPool.validTransactions();
 
     if (validTransactions.length) {
       const feeReward = totalFeeReward({ transactions: validTransactions });
 
-      // GENERATE MINER'S REWARD
+      // GENERATE MINER'S REWARD AND ADD TO OTHER TRANSACTIONS
       validTransactions.push(
         Transaction.rewardTransaction({
-          minerPublicKey: this.address,
+          minerAddress: this.address,
           ...(this.message && { message: this.message }),
-          blockchainLen: this.blockchain.chain.length,
+          height,
           feeReward,
         })
       );
 
-      // ADD A BLOCK CONSISTING OF THESE TRANSACTION TO THE BLOCK
-      const newlyMinedBlock = this.blockchain.addBlock({ transactions: validTransactions });
+      // MINE BLOCK - ADD THE BLOCK TO THE BLOCKCHAIN
+      const newlyMinedBlock = await this.blockchain.addBlock({ transactions: validTransactions });
 
-      // BROADCAST THE NEWLY MINED BLOCK AND ANY INFO NEEDED TO ACCOMPANY IT
-      this.pubSub.broadcastNewlyMinedBlock({
-        block: newlyMinedBlock,
-        info: { KADOCOIN_VERSION, LOCAL_IP, height: this.blockchain.chain.length },
+      // SAVE THE TRANSACTIONS' BALANCES IN DB
+      await this.leveldb.addOrUpdateBal([newlyMinedBlock]);
+
+      // ADD BLOCK TO DB
+      await new Promise(async (resolve: (value: { type: string; message: string }) => void) =>
+        resolve(await this.leveldb.addBlocksToDB({ blocks: [newlyMinedBlock] }))
+      );
+
+      // BROADCAST THE NEWLY MINED BLOCK AND PEER INFO NEEDED TO ACCOMPANY IT
+      await this.p2p.sendBlockToPeers({ block: newlyMinedBlock });
+
+      // REMOVE ALL THE TRANSACTIONS ON THIS PEER THAT ARE CONTAINED IN THE NEW SENT BLOCK
+      this.transactionPool.clearBlockchainTransactions({
+        chain: [newlyMinedBlock],
       });
-
-      // ADD BLOCK TO FILE
-      appendToFile([newlyMinedBlock], blockchainStorageFile);
-
-      // TODO: CLEAR THE POOL?
-      this.transactionPool.clear();
 
       return 'success';
     }

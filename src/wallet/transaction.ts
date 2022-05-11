@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid';
-import { NOT_ENOUGH, REWARD_INPUT } from '../config/constants';
-import verifySignature from '../util/verifySignature';
-import { isValidChecksumAddress } from '../util/pubKeyToAddress';
+import { NOT_ENOUGH, REWARD_INPUT } from '../settings';
+import verifySignature from '../util/verify-signature';
+import { isValidChecksumAddress } from '../util/pubkey-to-address';
 import { ICInput, ICInput_R, ICOutput, ICOutput_R, ITransaction, IUpdate } from '../types';
 import { calcOutputTotal } from '../util/transaction-metrics';
 import Mining_Reward from '../util/supply_reward';
@@ -12,7 +12,6 @@ class Transaction {
   public output: ICOutput_R;
 
   constructor({
-    publicKey,
     address,
     recipient,
     amount,
@@ -29,7 +28,6 @@ class Transaction {
     this.input =
       input ||
       this.createInput({
-        publicKey,
         address,
         balance,
         localWallet,
@@ -39,15 +37,7 @@ class Transaction {
       });
   }
 
-  createInput({
-    publicKey,
-    balance,
-    address,
-    localWallet,
-    output,
-    message,
-    sendFee,
-  }: ICInput): ICInput_R {
+  createInput({ balance, address, localWallet, output, message, sendFee }: ICInput): ICInput_R {
     const send_fee = sendFee ? Number(sendFee) : 0;
 
     return {
@@ -55,8 +45,7 @@ class Transaction {
       amount: (Number(balance) - send_fee).toFixed(8),
       ...(sendFee && { sendFee: Number(sendFee).toFixed(8) }),
       address,
-      publicKey,
-      localPublicKey: localWallet.publicKey,
+      publicKey: localWallet.publicKey,
       signature: localWallet.sign(output),
       ...(message && { message }),
     };
@@ -72,16 +61,7 @@ class Transaction {
     return output;
   }
 
-  update({
-    publicKey,
-    recipient,
-    amount,
-    balance,
-    address,
-    localWallet,
-    message,
-    sendFee,
-  }: IUpdate): void {
+  update({ recipient, amount, balance, address, localWallet, message, sendFee }: IUpdate): void {
     const send_fee = sendFee ? Number(sendFee) : 0;
     const totalAmount = amount + send_fee;
 
@@ -122,7 +102,6 @@ class Transaction {
     }
 
     this.input = this.createInput({
-      publicKey,
       address,
       balance,
       localWallet,
@@ -134,11 +113,11 @@ class Transaction {
 
   static validTransaction(transaction: Transaction): boolean {
     const {
-      input: { address, amount, signature, localPublicKey },
+      input: { address, amount, signature, publicKey },
       output,
     } = transaction;
 
-    console.log(Number(amount), Number(calcOutputTotal(output)));
+    console.log({ amount: Number(amount), calcTotal: Number(calcOutputTotal(output)) });
 
     // CHECK THAT THE SENDER STARTING BALANCE IS EQUAL TO THE TOTAL SENT AND REMAINING
     if (Number(amount) !== Number(calcOutputTotal(output))) {
@@ -155,8 +134,8 @@ class Transaction {
     });
 
     // VERIFY THAT THE SENDER CORRECTLY SIGNED THE TRANSACTION
-    if (!verifySignature({ publicKey: localPublicKey, output, signature })) {
-      console.error(`Invalid signature from ${localPublicKey}`);
+    if (!verifySignature({ publicKey: publicKey, output, signature })) {
+      console.error(`Invalid signature from ${publicKey}`);
 
       return false;
     }
@@ -165,25 +144,25 @@ class Transaction {
   }
 
   static rewardTransaction({
-    minerPublicKey,
+    minerAddress,
     message,
-    blockchainLen,
+    height,
     feeReward,
   }: {
-    minerPublicKey: string;
+    minerAddress: string;
     message?: string;
     feeReward?: string;
-    blockchainLen: number;
+    height: number;
   }): Transaction {
-    REWARD_INPUT.recipient = minerPublicKey;
+    REWARD_INPUT.address = minerAddress;
     REWARD_INPUT.timestamp = Date.now();
     message && (REWARD_INPUT.message = message);
-    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: blockchainLen });
+    const { MINING_REWARD } = new Mining_Reward().calc({ chainLength: height });
     const rewardTotal = Number(MINING_REWARD) + Number(feeReward);
 
     return new Transaction({
       input: REWARD_INPUT,
-      output: { [minerPublicKey]: rewardTotal.toFixed(8) },
+      output: { [minerAddress]: rewardTotal.toFixed(8) },
     });
   }
 

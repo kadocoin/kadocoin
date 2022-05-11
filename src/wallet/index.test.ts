@@ -6,8 +6,8 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import Blockchain from '../blockchain';
-import { sampleDataForTests, STARTING_BALANCE } from '../config/constants';
-import verifySignature from '../util/verifySignature';
+import { sampleDataForTests, STARTING_BALANCE } from '../settings';
+import verifySignature from '../util/verify-signature';
 import Wallet from './index';
 import Transaction from './transaction';
 
@@ -62,9 +62,9 @@ describe('Wallet', () => {
   describe('createTransaction()', () => {
     describe('and the amount exceeds the balance', () => {
       it('throws an error', () =>
-        expect(() => wallet.createTransaction({ amount: 1001, recipient: 'anyone' })).toThrow(
-          'Insufficient balance'
-        ));
+        expect(() =>
+          wallet.createTransaction({ amount: 1001, recipient: 'anyone', localWallet: wallet })
+        ).toThrow('Insufficient balance'));
     });
 
     describe('and the amount is valid', () => {
@@ -73,15 +73,15 @@ describe('Wallet', () => {
       beforeEach(() => {
         amount = 50;
         recipient = 'kadocoin user address';
-        transaction = wallet.createTransaction({ amount, recipient });
+        transaction = wallet.createTransaction({ amount, recipient, localWallet: wallet });
       });
 
       it('creates an instance of `Transaction`', () => {
         expect(transaction instanceof Transaction).toBe(true);
       });
 
-      it('matches the transaction input `localPublicKey` with the wallet publicKey', () => {
-        expect(transaction.input.localPublicKey).toEqual(wallet.publicKey);
+      it('matches the transaction input `publicKey` with the wallet publicKey', () => {
+        expect(transaction.input.publicKey).toEqual(wallet.publicKey);
       });
 
       it('outputs the amount to the recipient', () => {
@@ -99,7 +99,7 @@ describe('Wallet', () => {
         wallet.createTransaction({
           recipient: 'kadocoin user address',
           amount: 10,
-          chain: new Blockchain().chain,
+          localWallet: wallet,
         });
 
         expect(calculateBalanceMock).toHaveBeenCalled();
@@ -134,11 +134,13 @@ describe('Wallet', () => {
       beforeEach(() => {
         transactionOne = new Wallet().createTransaction({
           recipient: wallet.address,
+          localWallet: wallet,
           amount: 50,
         });
 
         transactionTwo = new Wallet().createTransaction({
           recipient: wallet.address,
+          localWallet: wallet,
           amount: 60,
         });
 
@@ -168,6 +170,7 @@ describe('Wallet', () => {
             recipient: 'Kado',
             amount: 30,
             publicKey: wallet.publicKey,
+            localWallet: wallet,
             address: wallet.address,
           });
 
@@ -192,11 +195,12 @@ describe('Wallet', () => {
               recipient: 'Kado-after',
               amount: 60,
               publicKey: wallet.address,
+              localWallet: wallet,
               address: wallet.address,
             });
 
             sampleBlockTransaction = Transaction.rewardTransaction({
-              minerPublicKey: wallet.address,
+              minerAddress: wallet.address,
               message: '',
               blockchainLen: 0,
               feeReward: '0',
@@ -209,6 +213,7 @@ describe('Wallet', () => {
             nextBlockTransaction = senderWallet.createTransaction({
               recipient: wallet.address,
               amount: 75,
+              localWallet: wallet,
               publicKey: senderWallet.address,
               address: senderWallet.address,
             });

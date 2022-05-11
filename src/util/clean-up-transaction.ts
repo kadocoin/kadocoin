@@ -22,7 +22,6 @@ export function cleanUpTransaction({
         if (key == 'amount') items.push(transaction['input'][key]);
         if (key == 'address') items.push(transaction['input'][key]);
         if (key == 'publicKey') items.push(transaction['input'][key]);
-        if (key == 'localPublicKey') items.push(transaction['input'][key]);
       }
     }
   }

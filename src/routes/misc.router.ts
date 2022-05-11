@@ -6,39 +6,29 @@
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
 import { Application } from 'express';
-import LevelDB from '../db';
-import BlockController from '../controllers/block.controller';
+import MiscController from '../controllers/misc.controller';
 import { leveldbMiddleWare } from '../middleware/cryptoMiddleWare';
+import LevelDB from '../db';
 
-export class BlockRouter {
+export default class MiscRouter {
   private app: Application;
-  private blockController: BlockController;
+  private MiscController: MiscController;
   private leveldb: LevelDB;
 
   constructor(app: Application, leveldb: LevelDB) {
     this.app = app;
     this.leveldb = leveldb;
-    this.blockController = new BlockController();
+    this.MiscController = new MiscController();
     this.initRoute();
   }
 
   initRoute(): void {
     this.app.get(
-      '/get-blocks',
+      '/address/:address',
       leveldbMiddleWare(this.leveldb),
-      this.blockController.getBlocksByRange
+      this.MiscController.addressInfo
     );
 
-    this.app.get(
-      '/get-block-by-hash/:hash',
-      leveldbMiddleWare(this.leveldb),
-      this.blockController.getBlockByHash
-    );
-
-    this.app.get(
-      '/get-block-by-height/:height',
-      leveldbMiddleWare(this.leveldb),
-      this.blockController.getBlockByHeight
-    );
+    this.app.post('/balance', leveldbMiddleWare(this.leveldb), this.MiscController.balance);
   }
 }

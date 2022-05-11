@@ -5,20 +5,54 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { Db, MongoClient } from 'mongodb';
+
+import level from 'level';
 import Blockchain from './blockchain';
 import Block from './blockchain/block';
-import PubSub from './pubSub';
+import LevelDB from './db';
+import P2P from './p2p';
 import Wallet from './wallet';
 import Transaction from './wallet/transaction';
 import TransactionPool from './wallet/transaction-pool';
 
+export interface ILevelDB {
+  leveldb: level.LevelDB<any, any>;
+}
+
+export interface IValue {
+  bal: string;
+  height: number;
+  timestamp: number;
+  totalSent: string;
+  totalReceived: string;
+  txnCount: number;
+}
+
+export interface IWalletParam {
+  balance?: string;
+  keyPair?: any;
+  publicKey?: string;
+  address?: string;
+  keyPairHex?: string;
+}
+
+export interface IWalletFormattedForStorage {
+  publicKey: string;
+  address: string;
+  keyPairHex: string;
+}
+export interface IHost {
+  host: string;
+  port: number;
+}
+
 export interface ITMinerConstructorParams {
   blockchain: Blockchain;
   transactionPool: TransactionPool;
-  pubSub: PubSub;
+  p2p: P2P;
   address: string;
   message: string;
+  leveldb: LevelDB;
 }
 
 /**
@@ -32,7 +66,6 @@ export interface IInput {
   timestamp: number;
   amount: string;
   sendFee?: string;
-  localPublicKey: string;
   signature: string;
 }
 
@@ -59,33 +92,15 @@ export type TTransactionChild = {
 
 export type IChain = Array<Block>;
 
-export interface IUserModel {
-  _id?: string;
-  emailVerified?: boolean;
-  profilePicture?: string;
-  userCreationDate?: string;
-  email?: string;
-  password?: string;
-  name?: string;
-  bio?: string;
-  scope?: string[];
-  registrationMethod?: string;
-  hashedPassword?: string;
-  publicKey?: string;
-  address?: string;
-  token?: string;
-}
-
 declare global {
   namespace Express {
     interface Request {
-      dbClient: MongoClient;
-      db: Db;
       blockchain: Blockchain;
       wallet: Wallet;
       transactionPool: TransactionPool;
-      pubSub: PubSub;
+      p2p: P2P;
       localWallet: Wallet;
+      leveldb: LevelDB;
     }
   }
 }
@@ -110,7 +125,7 @@ export interface ITransaction {
 /** COMMON TYPES createInput() */
 interface ICommon_Address_PublicKey {
   address: string;
-  publicKey: string;
+  // publicKey: string;
 }
 /** createInput() PARAM type */
 export interface ICInput extends ICommon_Address_PublicKey {
@@ -124,7 +139,7 @@ export interface ICInput extends ICommon_Address_PublicKey {
 export interface ICInput_R extends ICommon_Address_PublicKey {
   timestamp: number;
   amount: string;
-  localPublicKey: string;
+  publicKey: string;
   signature: string;
   sendFee?: string;
   recipient?: string;
@@ -145,7 +160,6 @@ export interface ICOutput_R {
 
 /** update() PARAMS type  */
 export interface IUpdate {
-  publicKey: string;
   address: string;
   recipient: string;
   amount: number;
@@ -158,11 +172,13 @@ export interface IUpdate {
 export interface ICreateTransactionParams {
   recipient: string;
   amount: number;
-  chain?: IChain;
+  localWallet: Wallet;
+  balance?: string;
   publicKey?: string;
   address?: string;
   message?: string;
   sendFee?: string;
+  callback?: any;
 }
 
 export interface REWARD_INPUT {
@@ -170,13 +186,21 @@ export interface REWARD_INPUT {
   amount: string;
   address: string;
   publicKey: string;
-  localPublicKey: string;
-  recipient: string;
   signature: string;
   message?: string;
 }
 
 export interface incomingObj {
   block: Block;
-  info: { KADOCOIN_VERSION: string; LOCAL_IP: string; height: number };
+  info: {
+    KADOCOIN_VERSION: string;
+    LOCAL_IP: string;
+    height: number;
+    sender: {
+      host: string;
+      port: number;
+      id: string;
+      timestamp: number;
+    };
+  };
 }

@@ -5,8 +5,8 @@
  * Distributed under the MIT software license, see the accompanying
  * file LICENSE or <http://www.opensource.org/licenses/mit-license.php>
  */
-import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../config/constants';
-import verifySignature from '../util/verifySignature';
+import { REWARD_INPUT, sampleDataForTests, STARTING_BALANCE } from '../settings';
+import verifySignature from '../util/verify-signature';
 import Wallet from '.';
 import Transaction from './transaction';
 import { calcOutputTotal } from '../util/transaction-metrics';
@@ -121,7 +121,6 @@ describe('Transaction', () => {
               recipient: 'Kado',
               amount: 999999,
               address: senderWallet.address,
-              publicKey: senderWallet.publicKey,
               balance: '300.00000000',
             });
           }
@@ -142,7 +141,6 @@ describe('Transaction', () => {
             recipient: nextRecipient,
             amount: nextAmount,
             address: senderWallet.address,
-            publicKey: senderWallet.publicKey,
             balance: STARTING_BALANCE.toFixed(8),
           });
         }
@@ -178,7 +176,6 @@ describe('Transaction', () => {
               localWallet,
               recipient: nextRecipient,
               address: senderWallet.address,
-              publicKey: senderWallet.publicKey,
               balance: STARTING_BALANCE.toFixed(8),
               amount: addedAmount,
             });
@@ -205,7 +202,7 @@ describe('Transaction', () => {
       minerWallet = new Wallet();
       chainLength = 10;
       rewardTransaction = Transaction.rewardTransaction({
-        minerPublicKey: minerWallet.address,
+        minerAddress: minerWallet.address,
         message: '',
         blockchainLen: chainLength,
         feeReward: '0',
