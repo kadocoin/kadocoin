@@ -1,5 +1,8 @@
-Kadocoin Multi-Wallet API
+Kadocoin
 =====================================
+
+I'm currently not developming this project to concentrate on other projects. <br /><br />
+If you want to develop it let me know or fork it to make your changes.
 
 <https://kadocoin.org>
 
